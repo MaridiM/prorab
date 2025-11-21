@@ -1,7 +1,70 @@
 import type { NextConfig } from "next";
 
+import { name, version } from "./package.json";
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  experimental: {
+    serverSourceMaps: false,
+  },
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false,
+  env: {
+    NEXT_PUBLIC_APP_NAME: name,
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+            },
+          },
+        ],
+        as: "*.js",
+      },
+    },
+  },
+  // If you want to ensure Next.js does not switch to Turbopack instead of Webpack:
+  // update the package.json script to:
+  //   "dev": "next dev --no-turbo"
+  // or simply avoid passing `--experimental-turbopack`.
+
+  webpack(config) {
+    // config.watchOptions = {
+    //     poll: 1000, // Check for changes every 1000ms
+    //     aggregateTimeout: 300, // Delay before rebuilding
+
+    // };
+    // Grab the existing rule that handles SVG imports
+    const fileLoaderRule = config.module.rules.find((rule: any) =>
+      rule.test?.test?.(".svg")
+    );
+
+    config.module.rules.push(
+      // Reapply the existing rule, but only for svg imports ending in ?url
+      {
+        ...fileLoaderRule,
+        test: /\.svg$/i,
+        resourceQuery: /url/, // *.svg?url
+      },
+      // Convert all other *.svg imports to React components
+      {
+        test: /\.svg$/i,
+        issuer: fileLoaderRule.issuer,
+        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
+        use: ["@svgr/webpack"],
+      }
+    );
+
+    // Modify the file loader rule to ignore *.svg, since we have it handled now.
+    fileLoaderRule.exclude = /\.svg$/i;
+
+    return config;
+  },
 };
 
 export default nextConfig;

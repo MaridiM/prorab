@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateProjectInput } from './dto/create-project.input';
+import { Injectable } from '@nestjs/common'
+
+import { PrismaService } from '../core/prisma/prisma.service'
+
+import { CreateProjectInput } from './dto/create-project.input'
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {}
 
-  create(data: CreateProjectInput) {
-    return this.prisma.project.create({ data });
-  }
+	create(data: CreateProjectInput) {
+		return this.prisma.project.create({ data })
+	}
 
-  findAll() {
-    return this.prisma.project.findMany({ orderBy: { createdAt: 'desc' } });
-  }
+	findAll() {
+		return this.prisma.project.findMany({ orderBy: { createdAt: 'desc' } })
+	}
 }
