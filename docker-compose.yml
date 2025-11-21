@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: prorab-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: prorab
+      POSTGRES_PASSWORD: prorab
+      POSTGRES_DB: prorab
+    ports:
+      - "5433:5432"   # хост:контейнер
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
