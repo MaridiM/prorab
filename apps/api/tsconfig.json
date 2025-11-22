@@ -1,44 +1,53 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"declaration": true,
-		"removeComments": true,
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "ES2023",
-		"sourceMap": true,
-		"outDir": "dist",
-		"baseUrl": "./",
-		"paths": {
-			"@/*": ["src/*"],
-			"@prisma/__generated__": ["prisma/__generated__"],
-			"@prisma/__generated__/*": ["prisma/__generated__/*"]
-		},
-		"incremental": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"strictNullChecks": false,
-		"noImplicitAny": true,
-		"strictBindCallApply": false,
-		"forceConsistentCasingInFileNames": false,
-		"noFallthroughCasesInSwitch": false,
-		"resolveJsonModule": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@prisma/generated": ["prisma/generated"],
+      "@prisma/generated/*": ["prisma/generated/*"]
+    },
+    "incremental": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
 
-		"jsx": "react-jsx",
-		"types": ["node", "jest"],
-		"typeRoots": ["./types", "./node_modules/@types"]
-	},
-	"allowDefaultProject": true,
-	"watchOptions": {
-		// Use a dynamic polling instead of system's native for file changes.image.png
-		"watchFile": "dynamicprioritypolling",
-		"watchDirectory": "dynamicprioritypolling",
-		"excludeDirectories": ["**/node_modules", "dist"]
-	},
-	"include": ["src/**/*", "src", "prisma", "graphql.schema.ts", "types", "jest.config.mjs", "test/**/*"],
-	"exclude": ["node_modules", "prisma/__generated__"],
-	"ts-node": {
-		"files": true
-	}
+    "jsx": "react-jsx",
+    "types": ["node", "jest"],
+    "typeRoots": ["./types", "./node_modules/@types"]
+  },
+  "allowDefaultProject": true,
+  "watchOptions": {
+    // Use a dynamic polling instead of system's native for file changes.image.png
+    "watchFile": "dynamicprioritypolling",
+    "watchDirectory": "dynamicprioritypolling",
+    "excludeDirectories": ["**/node_modules", "dist"]
+  },
+  "include": [
+    "src/**/*",
+    "src",
+    "prisma",
+    "graphql.schema.ts",
+    "types",
+    "jest.config.mjs",
+    "test/**/*",
+    "prisma.config.ts"
+  ],
+  "exclude": ["node_modules", "prisma/generated"],
+  "ts-node": {
+    "files": true
+  }
 }

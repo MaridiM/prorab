@@ -381,3 +381,40 @@
 - `turbo.json`
 
 ---
+
+### Step 14: Prisma v7 Finalization (adapter, schema, config)
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Prisma v7 packages (`@prisma/client`, `prisma`, `@prisma/adapter-pg`) and Postgres typings.
+- ✅ `prisma.config.ts` with dotenv loading and centralized datasource/migrations config.
+
+**Changed**
+
+- ✅ Prisma schema uses `provider = "prisma-client"` outputting to `prisma/generated`; datasource URL handled in config.
+- ✅ PrismaService uses PrismaPg adapter with shared pg Pool and imports from `@prisma/generated/client`.
+- ✅ API version bumped to `0.0.4`; tsconfig paths updated to new generated location.
+
+**Fixed**
+
+- ✅ Removed schema-embedded URL per v7 requirements and cleaned old `prisma/__generated__` artifacts.
+
+**Removed**
+
+- ❌ Old Prisma v6 generated client directory `prisma/__generated__`.
+
+**Files Modified**
+
+- `apps/api/package.json`
+- `apps/api/prisma/schema.prisma`
+- `apps/api/src/core/prisma/prisma.service.ts`
+- `apps/api/tsconfig.json`
+
+**Files Created**
+
+- `prisma.config.ts`
+- `apps/api/prisma/generated/*` (new client)
+
+---
