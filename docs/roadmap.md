@@ -1,4 +1,4 @@
-# Roadmap ProRab.app (MVP)
+# Roadmap ProRab.space (MVP)
 
 Цели: собрать монорепо (Turborepo) с Next.js 16 (App Router) и NestJS 11 (GraphQL), Postgres + Prisma, далее развивать функциональность команд, проектов и отчётов.
 
