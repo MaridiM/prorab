@@ -43,7 +43,8 @@
 - Глобальные уведомления через `sonner` (`packages/components/shared/ui/sonner.tsx` + включение в layout/некоторые layouts protected зон).
 
 ## Состояние и формы
-- Zustand: общий стор `packages/libs/store/app` (например, состояние сайдбара) и модульные сторы (`auth/shared/libs/store` с срезом 2FA/статусов). Паттерн — `slices` + `types` + хук `use*Store`.
+- Zustand: базовый slice `packages/libs/store/app` (глобальные UI-состояния), при росте — новые slices в `shared/libs/store` доменов; используйте `use*Store` хелперы.
+- Формы: `react-hook-form` + `zod` (`@hookform/resolvers`) для валидации; auth формы располагаются в `modules/auth/features/forms`.
 - Формы: `react-hook-form` + `zod` (`@hookform/resolvers`). Хук `useAutoValidateForm` даёт автотриггер валидации по изменению полей. Формы auth разбиты на отдельные компоненты в `modules/auth/features/forms`.
 
 ## Роутинг и навигация
@@ -66,3 +67,4 @@
 - Проверить `configs/graphql/graphql.config.ts` и `packages/libs/apollo` под свой эндпоинт, запустить `bun run codegen`.
 - Добавить собственные переводы и зарегистрировать их в `packages/libs/i18n/request.ts` и `types/typed.ts`.
 - При необходимости подключить реальную авторизацию/guard (middleware или server actions), опираясь на разделение `(root)/(protected)`.
+

@@ -18,6 +18,7 @@
 - [x] Apollo Server в NestJS (code-first).
 - [x] Codegen для фронта.
 - [x] Apollo Client интегрирован на вебе (используется вместо TanStack Query).
+- [x] Базовые страницы login/register с email/password (демо, готово подключить реальный API).
 
 ## Этап 2. Аутентификация, пользователи, команды (недели 3–5)
 - [ ] Auth (SuperTokens) на backend.

@@ -357,6 +357,68 @@
 
 ---
 
+### Step 13: GraphQL Client Test Script
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Node fetch script (`scripts/test-gql.js`) to hit GraphQL health endpoint using `NEXT_PUBLIC_SERVER_URL`.
+- ✅ npm script `test:gql` to run the client-side check.
+
+**Changed**
+
+- ✅ N/A.
+
+**Fixed**
+
+- ✅ Verified health query from client side returns data.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `apps/web/package.json`
+
+**Files Created**
+
+- `apps/web/scripts/test-gql.js`
+
+---
+
+### Step 14: Auth Pages (Email/Password)
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Login and Register pages with email/password inputs and client-side validation (demo stub handlers).
+
+**Changed**
+
+- ✅ Roadmap updated to reflect delivered auth pages and Apollo client as primary.
+
+**Fixed**
+
+- ✅ N/A.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `docs/roadmap.md`
+
+**Files Created**
+
+- `apps/web/src/app/(auth)/login/page.tsx`
+- `apps/web/src/app/(auth)/register/page.tsx`
+
+---
+
 ### Step 3: Turborepo Schema Update
 
 :calendar: `2025-11-21`

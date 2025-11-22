@@ -5,7 +5,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { createClient as createWsClient } from 'graphql-ws';
 
-import { SERVER_URL, WEBSOCKET_URL } from '@/constants/url';
+import { SERVER_URL, WEBSOCKET_URL } from '@/packages/constants/url';
 import { CombinedGraphQLErrors } from '@apollo/client';
 import { CombinedProtocolErrors } from '@apollo/client';
 

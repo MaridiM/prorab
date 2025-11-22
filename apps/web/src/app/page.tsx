@@ -1,5 +1,5 @@
 import { ArrowRight, Database, Layers, Palette, Server } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/packages/components";
 
 const features = [
   {
