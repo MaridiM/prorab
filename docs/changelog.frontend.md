@@ -532,6 +532,7 @@
 
 - ✅ Маппинг цветов в `@theme inline` для утилит Tailwind/shadcn, контрастные foreground для primary/accent/success/destructive.
 - ✅ Базовые стили body/бордеров обновлены под новую схему.
+- ✅ Добавлена зависимость `tailwindcss-animate` под стандарт shadcn.
 
 **Fixed**
 
