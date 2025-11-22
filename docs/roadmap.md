@@ -7,6 +7,7 @@
 - [x] Web: Next.js 16 + Tailwind + shadcn/ui.
 - [x] API: NestJS + GraphQL.
 - [ ] Пакеты `packages/ui` и `packages/db` (библиотеки общих компонентов/утилит).
+- [x] Базовый Zustand-store для общих UI-состояний.
 
 ### Данные и ORM
 - [x] Postgres (Docker, порт 5433).
@@ -16,7 +17,7 @@
 ### GraphQL
 - [x] Apollo Server в NestJS (code-first).
 - [x] Codegen для фронта.
-- [ ] Внедрение `TanStack Query`/GraphQL client на вебе.
+- [x] Apollo Client интегрирован на вебе (используется вместо TanStack Query).
 
 ## Этап 2. Аутентификация, пользователи, команды (недели 3–5)
 - [ ] Auth (SuperTokens) на backend.

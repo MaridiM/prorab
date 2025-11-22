@@ -326,6 +326,37 @@
 
 ---
 
+### Step 12: Apollo-First Client & Zustand Store
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Integrated Zustand base store slice (`useAppStore`) under `src/packages/libs/store`.
+
+**Changed**
+
+- ✅ Apollo Client confirmed as primary data client (replacing TanStack Query in roadmap); web version set to `0.0.4`.
+
+**Fixed**
+
+- ✅ N/A.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `apps/web/package.json`
+- `docs/roadmap.md`
+
+**Files Created**
+
+- `apps/web/src/packages/libs/store/app.ts`
+
+---
+
 ### Step 3: Turborepo Schema Update
 
 :calendar: `2025-11-21`

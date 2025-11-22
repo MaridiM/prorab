@@ -13,7 +13,7 @@
     "prisma:push": "pnpm --filter api exec prisma db push",
     "peisma:studio": "pnpm --filter api exec prisma studio",
     "prisma:migrate": "pnpm --filter api exec prisma migrate dev --name",
-    "codegen": "pnpm --filter web codegen",
+    "codegen": "pnpm --filter web codegen"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
