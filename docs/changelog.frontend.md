@@ -516,3 +516,37 @@
 - `apps/web/middleware.ts`
 
 ---
+
+## Module: Frontend Monorepo Setup
+
+### Step 16: Tailwind v4 Construction Theme
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Новая глобальная палитра для строительной темы (light/dark) в `globals.css` с HSL-переменными shadcn.
+- ✅ Tailwind v4 синтаксис (`@import "tailwindcss"`, `@plugin "tailwindcss-animate"`) и шрифтовые переменные Geist.
+
+**Changed**
+
+- ✅ Маппинг цветов в `@theme inline` для утилит Tailwind/shadcn, контрастные foreground для primary/accent/success/destructive.
+- ✅ Базовые стили body/бордеров обновлены под новую схему.
+
+**Fixed**
+
+- ✅ Цветовые утилиты теперь корректно работают с прозрачностью (`bg-primary/20` и т.п.) и обеими темами.
+
+**Removed**
+
+- ❌ Удалён старый tw-animate-css импорт и дефолтные shadcn переменные.
+
+**Files Modified**
+
+- `apps/web/src/app/styles/globals.css`
+
+**Files Created**
+
+- N/A
+
+---
