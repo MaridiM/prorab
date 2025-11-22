@@ -480,3 +480,39 @@
 - `turbo.json`
 
 ---
+
+## Module: Frontend Monorepo Setup
+
+### Step 15: next-intl Config & Locale Middleware
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Добавлен `next-intl.config.ts` с загрузкой RU/EN сообщений и дефолтным языком.
+- ✅ Middleware для детекции локали и префиксов (`apps/web/middleware.ts`).
+
+**Changed**
+
+- ✅ Плагин next-intl в `next.config.ts` теперь указывает на новый config-файл и устраняет ошибку "Couldn't find next-intl config file".
+- ✅ Корневой layout остаётся обёрнутым в `NextIntlClientProvider` (куки `language`).
+
+**Fixed**
+
+- ✅ Исправлен runtime 500 при заходе на `/ru/login` из-за отсутствия next-intl config.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `apps/web/next.config.ts`
+- `apps/web/src/app/layout.tsx`
+
+**Files Created**
+
+- `apps/web/next-intl.config.ts`
+- `apps/web/middleware.ts`
+
+---

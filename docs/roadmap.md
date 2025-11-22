@@ -8,6 +8,9 @@
 - [x] API: NestJS + GraphQL.
 - [ ] Пакеты `packages/ui` и `packages/db` (библиотеки общих компонентов/утилит).
 - [x] Базовый Zustand-store для общих UI-состояний.
+- [x] Настроен next-intl с поддержкой RU/EN (config + middleware в apps/web).
+- [x] Layout обёрнут в NextIntlClientProvider, язык хранится в cookie language.
+
 
 ### Данные и ORM
 - [x] Postgres (Docker, порт 5433).
@@ -74,3 +77,6 @@
 - Postgres в Docker, Prisma v7 с pg adapter; миграции init + sync-v7, db push.
 - Apollo сервер на backend, Apollo клиент на frontend; lint/сборка стабилизированы после Tailwind 4 и upload-link.
 - Prisma client генерируется в `apps/api/prisma/generated`, prisma.config.ts подключен.
+
+## Дополнительно выполнено
+
