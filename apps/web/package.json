@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "codegen": "graphql-codegen --config ./configs/graphql/graphql.config.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
@@ -24,6 +25,10 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/typed-document-node": "^5.0.5",
+    "@graphql-codegen/typescript": "^5.0.5",
+    "@graphql-codegen/typescript-operations": "^5.0.5",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/apollo-upload-client": "^19.0.0",
     "@types/node": "^24",

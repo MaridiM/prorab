@@ -293,6 +293,39 @@
 
 ---
 
+### Step 11: GraphQL Codegen Setup
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Codegen config (`configs/graphql/graphql.config.ts`) aligned with docs.
+- ✅ Codegen script in web package and dev deps for codegen plugins.
+- ✅ Output path scaffolded under `src/packages/api/graphql/__generated__/`.
+
+**Changed**
+
+- ✅ Web roadmap GraphQL section marked with completed codegen task.
+
+**Fixed**
+
+- ✅ N/A.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `apps/web/package.json`
+
+**Files Created**
+
+- `apps/web/configs/graphql/graphql.config.ts`
+- `apps/web/src/packages/api/graphql/__generated__/output.ts` (generated)
+
+---
+
 ### Step 3: Turborepo Schema Update
 
 :calendar: `2025-11-21`

@@ -418,3 +418,67 @@
 - `apps/api/prisma/generated/*` (new client)
 
 ---
+
+### Step 15: Prisma DB Sync & Regeneration
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Ran `prisma migrate reset`, `migrate dev --name sync-v7`, `db push`, and regenerated client.
+
+**Changed**
+
+- ✅ Ensured database state matches v7 schema; cleaned old generated artifacts.
+
+**Fixed**
+
+- ✅ Resolved lingering Prisma TS errors by removing legacy outputs and re-emitting client.
+
+**Removed**
+
+- ❌ Stale Prisma generate outputs in `prisma/__generated__`.
+
+**Files Modified**
+
+- `apps/api/prisma/schema.prisma`
+- `apps/api/src/core/prisma/prisma.service.ts`
+- `apps/api/tsconfig.json`
+- `apps/api/tsconfig.build.json`
+
+**Files Created**
+
+- `apps/api/prisma/generated/*`
+- `apps/api/prisma/__migrations__/20251122000241_sync_v7/migration.sql`
+
+---
+
+### Step 16: Roadmap Refresh
+
+:calendar: `2025-11-22`
+
+**Added**
+
+- ✅ Roadmap rewritten with clear phases, statuses, and completed ORM/Prisma tasks.
+
+**Changed**
+
+- ✅ Document now reflects completed Prisma v7 setup and pending feature tracks.
+
+**Fixed**
+
+- ✅ Removed unreadable text; clarified deliverables and timeline.
+
+**Removed**
+
+- ❌ N/A.
+
+**Files Modified**
+
+- `docs/roadmap.md`
+
+**Files Created**
+
+- N/A
+
+---
