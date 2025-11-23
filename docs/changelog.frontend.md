@@ -1,10 +1,27 @@
 # Changelog (frontend)
 
-## 2025-11-21
-- Scaffolded Next.js 16 app in `apps/web` with pnpm workspace wiring.
-- Added Tailwind 3 + shadcn/ui setup (theme tokens, animate plugin, utility helpers).
-- Built landing page highlighting stack and quick links to GraphQL playground/shadcn docs.
-- Added base UI button component and utility `cn` helper.
+## Module: Landing & Motion Polish
+
+### Step 1: AOS‑style reveal + плавные hover
+
+:calendar: `2025-11-23`
+
+**Added**
+
+- ✅ AOS‑style анимации секций через IntersectionObserver (`data-animate` + `animate-fade/zoom` утилиты).
+- ✅ Телефонный мокап с float/pulse и интерактивными карточками/CTA на лендинге.
+
+**Changed**
+
+- ✅ Глобальные hover/transition эффекты для ссылок, кнопок и карточек (0.3s cubic-bezier).
+- ✅ Лендинг обновлён в `apps/web/src/app/page.tsx` с hover подчёркиваниями меню, скейлами и тенями.
+- ✅ Итоговая верстка хранится в `apps/web/src/app/page.tsx` (Next.js App Router).
+
+**Files Modified**
+
+- `apps/web/src/app/page.tsx`
+- `apps/web/src/app/styles/globals.css`
+
 # Changelog (frontend)
 
 ## Module: Frontend Monorepo Setup
