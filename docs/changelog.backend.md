@@ -482,5 +482,121 @@
 - N/A
 
 ---
+
+## Module: Authentication System
+
+### Step 20: Custom Auth with Redis Sessions
+
+:calendar: `2025-12-01`
+
+**Added**
+
+- ✅ Полная система аутентификации с Redis сессиями
+- ✅ **Redis модуль** (`apps/api/src/core/redis/`) — подключение и управление сессиями
+- ✅ **Auth модуль** (`apps/api/src/auth/`) — регистрация, логин, сессии, сброс пароля
+- ✅ **Users модуль** (`apps/api/src/users/`) — управление пользователями
+- ✅ **Mail модуль** (`apps/api/src/mail/`) — интеграция Brevo для отправки писем
+- ✅ **Prisma схема** — модели `User`, `VerificationToken`, `PasswordResetToken`
+- ✅ **Guards** — `AuthGuard` для защиты GraphQL resolvers
+- ✅ **Decorators** — `@Public()`, `@CurrentUser()`, `@SessionToken()`, `@ClientIp()`, `@UserAgent()`
+- ✅ **Rate Limiting** — 5 попыток / 15 минут на login, register, forgot_password
+- ✅ **Docker** — добавлен Redis 8 сервис в `docker-compose.yml`
+
+**GraphQL API:**
+
+- `register(input)` — регистрация с нормализацией email и хешированием Argon2
+- `login(input)` — вход с созданием сессии в Redis
+- `logout` — удаление сессии и cookies
+- `verifyEmail(token)` — подтверждение email
+- `resendVerificationEmail` — повторная отправка письма
+- `forgotPassword(email)` — запрос сброса пароля
+- `resetPassword(input)` — установка нового пароля + инвалидация всех сессий
+- `changePassword(input)` — смена пароля + инвалидация всех сессий кроме текущей
+- `sessions` — список всех сессий пользователя
+- `revokeSession(sessionId)` — удаление конкретной сессии
+- `revokeAllSessions` — удаление всех сессий кроме текущей
+- `me` — текущий пользователь
+
+**Session Configuration:**
+
+| Параметр | Значение |
+|----------|----------|
+| Access Token (Session) | 7 дней |
+| Refresh Token | 30 дней |
+| Email Verification Token | 24 часа |
+| Password Reset Token | 1 час |
+| Rate Limit | 5 попыток / 15 мин |
+
+**Changed**
+
+- ✅ `main.ts` — полная переработка bootstrap:
+  - Helmet с настройками безопасности (CSP в prod)
+  - Cookie parser с секретом из конфига
+  - GraphQL upload middleware (10MB / 10 files)
+  - ValidationPipe с whitelist, transform, forbidNonWhitelisted
+  - CORS с credentials, exposedHeaders, allowedHeaders
+  - Graceful shutdown hooks
+  - Подробное логирование при запуске (port, GraphQL path, env, CORS)
+- ✅ `app.module.ts` — подключены AuthModule, UsersModule, MailModule, глобальный AuthGuard
+- ✅ `core.module.ts` — подключён RedisModule
+- ✅ `app.config.ts` — добавлены конфигурации Redis, Auth, Mail
+
+**Files Created**
+
+- `apps/api/src/auth/auth.module.ts`
+- `apps/api/src/auth/auth.service.ts`
+- `apps/api/src/auth/auth.resolver.ts`
+- `apps/api/src/auth/guards/auth.guard.ts`
+- `apps/api/src/auth/decorators/public.decorator.ts`
+- `apps/api/src/auth/decorators/current-user.decorator.ts`
+- `apps/api/src/auth/dto/register.input.ts`
+- `apps/api/src/auth/dto/login.input.ts`
+- `apps/api/src/auth/dto/reset-password.input.ts`
+- `apps/api/src/auth/dto/change-password.input.ts`
+- `apps/api/src/auth/models/auth.model.ts`
+- `apps/api/src/users/users.module.ts`
+- `apps/api/src/users/users.service.ts`
+- `apps/api/src/users/users.resolver.ts`
+- `apps/api/src/users/models/user.model.ts`
+- `apps/api/src/mail/mail.module.ts`
+- `apps/api/src/mail/mail.service.ts`
+- `apps/api/src/core/redis/redis.module.ts`
+- `apps/api/src/core/redis/redis.service.ts`
+
+**Files Modified**
+
+- `apps/api/prisma/schema.prisma`
+- `apps/api/src/main.ts`
+- `apps/api/src/app.module.ts`
+- `apps/api/src/app.resolver.ts`
+- `apps/api/src/core/core.module.ts`
+- `apps/api/src/core/config/app.config.ts`
+- `docker-compose.yml`
+
+**Dependencies Added**
+
+- `argon2` — хеширование паролей
+- `redis` — клиент Redis
+- `nanoid` — генерация токенов
+- `@getbrevo/brevo` — отправка email
+- `cookie-parser` — работа с cookies
+- `dotenv` — загрузка переменных окружения
+- `helmet` — HTTP security headers
+- `graphql-upload-minimal` — загрузка файлов через GraphQL
+- `@types/express` — типы Express (dev)
+
+**Migrations**
+
+- ✅ `20251201220249_add_auth_models` — создание таблиц users, verification_tokens, password_reset_tokens
+- ✅ `prisma db push` — синхронизация схемы с БД
+- ✅ `prisma generate` — генерация Prisma Client
+
+**Fixed**
+
+- ✅ `redis.service.ts` — исправлены типы для `get()` и `sIsMember()` (Redis v5 typing issues)
+- ✅ `main.ts` — исправлен import cookie-parser (namespace → default import)
+
+---
+
 ## 2025-11-23
 - Нет изменений в backend-коде в этой итерации; обновлены только документация и фронтенд-лендинг.

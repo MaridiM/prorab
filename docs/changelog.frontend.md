@@ -1,5 +1,40 @@
 # Changelog (frontend)
 
+## Module: Auth Integration
+
+### Step 20: Auth API Integration
+
+:calendar: `2025-12-01`
+
+**Added**
+
+- ✅ Интеграция страниц авторизации с реальным GraphQL API
+- ✅ Страница `/auth/login` — подключена к `login` mutation
+- ✅ Страница `/auth/register` — подключена к `register` mutation
+- ✅ `AuthProvider` context для управления состоянием авторизации
+- ✅ GraphQL операции в `auth.graphql` — mutations и queries для авторизации
+- ✅ Обработка ошибок с toast уведомлениями (success/error)
+- ✅ Валидация паролей на клиенте (совпадение, минимум 8 символов)
+
+**Changed**
+
+- ✅ Формы логина и регистрации используют controlled inputs с useState
+- ✅ Toast компонент поддерживает типы success и error с разными иконками
+- ✅ Добавлена иконка `AlertCircle` для ошибок
+
+**Files Created**
+
+- `apps/web/src/packages/api/graphql/auth.graphql`
+- `apps/web/src/packages/libs/auth/auth.context.tsx`
+- `apps/web/src/packages/libs/auth/index.ts`
+
+**Files Modified**
+
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/register/page.tsx`
+
+---
+
 ## Module: Auth Pages
 
 ### Step 19: Toast Notifications Repositioning

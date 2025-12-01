@@ -1,6 +1,8 @@
+name: prorab
+
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17-alpine
     container_name: prorab-postgres
     restart: unless-stopped
     environment:
@@ -8,6 +10,28 @@ services:
       POSTGRES_PASSWORD: prorab
       POSTGRES_DB: prorab
     ports:
-      - "5433:5432"   # хост:контейнер
+      - "5433:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - prorab
+
+  redis:
+    image: redis:8-alpine
+    container_name: prorab-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - prorab
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  prorab:
+    driver: bridge

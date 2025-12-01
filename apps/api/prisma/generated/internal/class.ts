@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.0.0",
   "engineVersion": "0c19ccc313cf9911a90d99d2ac2eb0280c76c513",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client\"\n  output        = \"./generated\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\", \"windows\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Project {\n  id          Int      @id @default(autoincrement())\n  name        String\n  description String?\n  createdAt   DateTime @default(now()) @map(\"created_at\")\n  updatedAt   DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"projects\")\n}\n",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client\"\n  output        = \"./generated\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\", \"windows\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\n// ==================== AUTH ====================\n\nmodel User {\n  id              String   @id @default(uuid())\n  email           String   @unique\n  emailNormalized String   @unique @map(\"email_normalized\")\n  emailVerified   Boolean  @default(false) @map(\"email_verified\")\n  passwordHash    String   @map(\"password_hash\")\n  name            String?\n  phone           String?\n  createdAt       DateTime @default(now()) @map(\"created_at\")\n  updatedAt       DateTime @updatedAt @map(\"updated_at\")\n\n  verificationTokens  VerificationToken[]\n  passwordResetTokens PasswordResetToken[]\n\n  @@map(\"users\")\n}\n\nmodel VerificationToken {\n  id        String   @id @default(uuid())\n  userId    String   @map(\"user_id\")\n  token     String   @unique\n  expiresAt DateTime @map(\"expires_at\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"verification_tokens\")\n}\n\nmodel PasswordResetToken {\n  id        String   @id @default(uuid())\n  userId    String   @map(\"user_id\")\n  token     String   @unique\n  expiresAt DateTime @map(\"expires_at\")\n  used      Boolean  @default(false)\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"password_reset_tokens\")\n}\n\n// ==================== BUSINESS ====================\n\nmodel Project {\n  id          Int      @id @default(autoincrement())\n  name        String\n  description String?\n  createdAt   DateTime @default(now()) @map(\"created_at\")\n  updatedAt   DateTime @updatedAt @map(\"updated_at\")\n\n  @@map(\"projects\")\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -28,7 +28,7 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Project\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"projects\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailNormalized\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"email_normalized\"},{\"name\":\"emailVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"email_verified\"},{\"name\":\"passwordHash\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"password_hash\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"verificationTokens\",\"kind\":\"object\",\"type\":\"VerificationToken\",\"relationName\":\"UserToVerificationToken\"},{\"name\":\"passwordResetTokens\",\"kind\":\"object\",\"type\":\"PasswordResetToken\",\"relationName\":\"PasswordResetTokenToUser\"}],\"dbName\":\"users\"},\"VerificationToken\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToVerificationToken\"}],\"dbName\":\"verification_tokens\"},\"PasswordResetToken\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"used\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"PasswordResetTokenToUser\"}],\"dbName\":\"password_reset_tokens\"},\"Project\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":\"projects\"}},\"enums\":{},\"types\":{}}")
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
   const { Buffer } = await import('node:buffer')
@@ -58,8 +58,8 @@ export interface PrismaClientConstructor {
    * @example
    * ```
    * const prisma = new PrismaClient()
-   * // Fetch zero or more Projects
-   * const projects = await prisma.project.findMany()
+   * // Fetch zero or more Users
+   * const users = await prisma.user.findMany()
    * ```
    * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -80,8 +80,8 @@ export interface PrismaClientConstructor {
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Projects
- * const projects = await prisma.project.findMany()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -175,6 +175,36 @@ export interface PrismaClient<
   }>>
 
       /**
+   * `prisma.user`: Exposes CRUD operations for the **User** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Users
+    * const users = await prisma.user.findMany()
+    * ```
+    */
+  get user(): Prisma.UserDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.verificationToken`: Exposes CRUD operations for the **VerificationToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VerificationTokens
+    * const verificationTokens = await prisma.verificationToken.findMany()
+    * ```
+    */
+  get verificationToken(): Prisma.VerificationTokenDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.passwordResetToken`: Exposes CRUD operations for the **PasswordResetToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PasswordResetTokens
+    * const passwordResetTokens = await prisma.passwordResetToken.findMany()
+    * ```
+    */
+  get passwordResetToken(): Prisma.PasswordResetTokenDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
    * `prisma.project`: Exposes CRUD operations for the **Project** model.
     * Example usage:
     * ```ts

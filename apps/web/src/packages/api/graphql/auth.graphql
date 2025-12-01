@@ -1,0 +1,97 @@
+# ==================== Auth Mutations ====================
+
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    user {
+      id
+      email
+      name
+      emailVerified
+    }
+    message
+  }
+}
+
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    user {
+      id
+      email
+      name
+      emailVerified
+    }
+  }
+}
+
+mutation Logout {
+  logout
+}
+
+mutation RefreshSession {
+  refreshSession {
+    user {
+      id
+      email
+      name
+      emailVerified
+    }
+  }
+}
+
+mutation VerifyEmail($token: String!) {
+  verifyEmail(token: $token)
+}
+
+mutation ResendVerificationEmail {
+  resendVerificationEmail
+}
+
+mutation ForgotPassword($email: String!) {
+  forgotPassword(email: $email)
+}
+
+mutation ResetPassword($input: ResetPasswordInput!) {
+  resetPassword(input: $input)
+}
+
+mutation ChangePassword($input: ChangePasswordInput!) {
+  changePassword(input: $input)
+}
+
+# ==================== Session Mutations ====================
+
+mutation RevokeSession($sessionId: String!) {
+  revokeSession(sessionId: $sessionId)
+}
+
+mutation RevokeAllSessions {
+  revokeAllSessions
+}
+
+mutation RevokeAllSessionsIncludingCurrent {
+  revokeAllSessionsIncludingCurrent
+}
+
+# ==================== Queries ====================
+
+query Me {
+  me {
+    id
+    email
+    name
+    phone
+    emailVerified
+    createdAt
+  }
+}
+
+query Sessions {
+  sessions {
+    id
+    userAgent
+    ip
+    createdAt
+    current
+  }
+}
+

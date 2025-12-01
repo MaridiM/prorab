@@ -14,8 +14,11 @@
 
 ### Данные и ORM
 - [x] Postgres (Docker, порт 5433).
+- [x] Redis (Docker, порт 6379) — для сессий авторизации.
 - [x] Prisma в `apps/api` (v7, pg adapter, prisma.config.ts).
 - [x] Базовые миграции/схема синхронизированы (init + sync-v7, db push).
+- [x] Модели User, VerificationToken, PasswordResetToken для авторизации.
+- [x] Миграция `add_auth_models` + `db push` + `prisma generate` выполнены.
 
 ### GraphQL
 - [x] Apollo Server в NestJS (code-first).
@@ -24,14 +27,20 @@
 - [x] Базовые страницы login/register с email/password (демо, готово подключить реальный API).
 
 ## Этап 2. Аутентификация, пользователи, команды (недели 3–5)
-- [ ] Auth (SuperTokens) на backend.
-- [ ] Auth (SuperTokens) на frontend.
-- [ ] Email/Password вход.
-- [ ] Telegram как провайдер.
-- [ ] Сущности `User`, `Team`, `TeamMember`.
-- [ ] API для управления командами; гварды по ролям/доступам.
-- [x] Frontend: страницы логина/регистрации/восстановления пароля (демо UI).
-- [ ] Frontend: wizard создания команды (шаги: данные команды → участники).
+- [x] ~~Auth (SuperTokens)~~ → Реализована кастомная авторизация с Redis сессиями
+- [x] Email/Password вход (Argon2 хеширование, Redis сессии, HTTP-only cookies)
+- [x] Регистрация с нормализацией email и верификацией через Brevo
+- [x] Сброс пароля (токен 1 час, инвалидация всех сессий)
+- [x] Управление сессиями (список, удаление, массовая инвалидация)
+- [x] Rate Limiting (5 попыток / 15 минут)
+- [x] GraphQL Guards и Decorators для защиты resolvers
+- [x] Сущность `User` с верификацией email
+- [ ] Telegram как провайдер (запланировано)
+- [ ] Сущности `Team`, `TeamMember`
+- [ ] API для управления командами; гварды по ролям/доступам
+- [x] Frontend: страницы логина/регистрации/восстановления пароля
+- [x] Frontend: интеграция с Auth API
+- [ ] Frontend: wizard создания команды (шаги: данные команды → участники)
 
 ## Этап 3. Проекты (недели 6–7)
 - [ ] Entity `Project` (название, описание, бюджет, статус, сроки).
@@ -87,3 +96,16 @@
 - [x] Auth UI: отдельные страницы `/auth/login`, `/auth/register`, `/auth/forgot-password` с полями имя/email/телефон/пароль и кнопкой входа через Telegram.
 - [x] Landing Page: современный анимированный лендинг с Framer Motion, мокапами приложения, секциями проблем/возможностей/тарифов/отзывов.
 - [x] Toast уведомления на страницах авторизации перемещены в нижнюю часть экрана с AnimatePresence анимацией.
+
+### Аутентификация (2025-12-01)
+- [x] **Backend Auth** — кастомная система авторизации без SuperTokens
+- [x] **Redis сессии** — хранение сессий в Redis с TTL (7 дней session, 30 дней refresh)
+- [x] **Argon2** — безопасное хеширование паролей
+- [x] **Brevo интеграция** — отправка писем верификации и сброса пароля
+- [x] **HTTP-only Cookies** — безопасное хранение токенов
+- [x] **Rate Limiting** — защита от брутфорса (5 попыток / 15 минут)
+- [x] **GraphQL API** — register, login, logout, verifyEmail, forgotPassword, resetPassword, changePassword, sessions, revokeSession
+- [x] **Frontend интеграция** — формы авторизации подключены к API
+- [x] **Docker** — добавлен Redis 8 в docker-compose.yml
+- [x] **Security** — Helmet с CSP, cookie secrets, CORS credentials
+- [x] **GraphQL Upload** — загрузка файлов через GraphQL (10MB / 10 files)

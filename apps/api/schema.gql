@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthPayload {
+  message: String
+  user: User!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
 input CreateProjectInput {
   description: String
   name: String!
@@ -12,8 +22,25 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
+  changePassword(input: ChangePasswordInput!): Boolean!
   createProject(input: CreateProjectInput!): Project!
+  forgotPassword(email: String!): Boolean!
+  login(input: LoginInput!): AuthPayload!
+  logout: Boolean!
+  refreshSession: AuthPayload
+  register(input: RegisterInput!): AuthPayload!
+  resendVerificationEmail: Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  revokeAllSessions: Boolean!
+  revokeAllSessionsIncludingCurrent: Boolean!
+  revokeSession(sessionId: String!): Boolean!
+  verifyEmail(token: String!): Boolean!
 }
 
 type Project {
@@ -27,5 +54,37 @@ type Project {
 type Query {
   """Simple health check"""
   health: String!
+  me: User
   projects: [Project!]!
+  sessions: [Session!]!
+}
+
+input RegisterInput {
+  email: String!
+  name: String
+  password: String!
+  phone: String
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
+}
+
+type Session {
+  createdAt: DateTime!
+  current: Boolean!
+  id: String!
+  ip: String
+  userAgent: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  id: ID!
+  name: String
+  phone: String
+  updatedAt: DateTime!
 }

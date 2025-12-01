@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Check, Loader2, Mail, Lock, User, Phone } from "lucide-react"
+import { ArrowRight, Check, Loader2, Mail, Lock, User, Phone, AlertCircle } from "lucide-react"
 import { Button, Card, Input } from "@/packages/components"
 
 const fadeIn = {
@@ -12,26 +12,79 @@ const fadeIn = {
     visible: { opacity: 1, y: 0 }
 }
 
+const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001'
+
 export default function RegisterPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
     const [toastMessage, setToastMessage] = useState<string | null>(null)
+    const [toastType, setToastType] = useState<"success" | "error">("success")
 
-    const showToast = (msg: string) => {
+    const showToast = (msg: string, type: "success" | "error" = "success") => {
         setToastMessage(msg)
-        setTimeout(() => setToastMessage(null), 3000)
+        setToastType(type)
+        setTimeout(() => setToastMessage(null), 4000)
     }
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        
+        if (password !== confirmPassword) {
+            showToast("Пароли не совпадают", "error")
+            return
+        }
+
+        if (password.length < 8) {
+            showToast("Пароль должен содержать минимум 8 символов", "error")
+            return
+        }
+
         setIsLoading(true)
         
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        showToast("Аккаунт создан!")
-        setTimeout(() => {
-            router.push("/dashboard")
-        }, 1000)
+        try {
+            const response = await fetch(`${API_URL}/graphql`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    query: `mutation Register($input: RegisterInput!) { 
+                        register(input: $input) { 
+                            user { id email name emailVerified }
+                            message
+                        } 
+                    }`,
+                    variables: { 
+                        input: { 
+                            email, 
+                            password, 
+                            name: name || undefined, 
+                            phone: phone || undefined 
+                        } 
+                    },
+                }),
+            })
+
+            const { data, errors } = await response.json()
+
+            if (errors) {
+                showToast(errors[0]?.message || 'Ошибка регистрации', 'error')
+                return
+            }
+
+            showToast(data.register.message || "Аккаунт создан!")
+            setTimeout(() => {
+                router.push("/dashboard")
+            }, 1000)
+        } catch (error) {
+            showToast('Ошибка подключения к серверу', 'error')
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -77,8 +130,9 @@ export default function RegisterPage() {
                     <Input
                         type="text"
                         placeholder="Иван Петров"
-                        required
                         disabled={isLoading}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                     />
                 </div>
@@ -93,6 +147,8 @@ export default function RegisterPage() {
                         placeholder="name@example.com"
                         required
                         disabled={isLoading}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                     />
                 </div>
@@ -104,8 +160,9 @@ export default function RegisterPage() {
                     </label>
                     <Input
                         type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="+7 (999) 123-45-67"
-                        required
                         disabled={isLoading}
                         className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                     />
@@ -123,6 +180,8 @@ export default function RegisterPage() {
                             required
                             disabled={isLoading}
                             minLength={8}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                         />
                     </div>
@@ -137,6 +196,8 @@ export default function RegisterPage() {
                             required
                             disabled={isLoading}
                             minLength={8}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                         />
                     </div>
@@ -182,23 +243,31 @@ export default function RegisterPage() {
             </motion.div>
 
         </Card>
-        <Toast message={toastMessage} />
+        <Toast message={toastMessage} type={toastType} />
         </>
     )
 }
 
-function Toast({ message }: { message: string | null }) {
+function Toast({ message, type = "success" }: { message: string | null; type?: "success" | "error" }) {
     return (
         <AnimatePresence>
             {message && (
                 <motion.div
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl shadow-success/25 flex items-center gap-3 bg-success text-success-foreground"
+                    className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
+                        type === "success" 
+                            ? "bg-success text-success-foreground shadow-success/25" 
+                            : "bg-destructive text-destructive-foreground shadow-destructive/25"
+                    }`}
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                    <Check className="w-4 h-4" />
+                    {type === "success" ? (
+                        <Check className="w-4 h-4" />
+                    ) : (
+                        <AlertCircle className="w-4 h-4" />
+                    )}
                     <span className="text-sm font-medium whitespace-nowrap">{message}</span>
                 </motion.div>
             )}
