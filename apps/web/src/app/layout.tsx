@@ -5,6 +5,7 @@ import { ApolloClientProvider } from "@/packages/libs";
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { sanitizeForRSC } from "@/packages/utils";
+import { Providers } from "@/packages/components";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,15 +31,17 @@ export default async function RootLayout({
   const rawMessages = await getMessages()
   const messages = sanitizeForRSC(rawMessages)
   return (
-    <html lang={locale} >
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ApolloClientProvider>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-          </NextIntlClientProvider>
-        </ApolloClientProvider>
+        <Providers>
+          <ApolloClientProvider>
+            <NextIntlClientProvider messages={messages}>
+              {children}
+            </NextIntlClientProvider>
+          </ApolloClientProvider>
+        </Providers>
       </body>
     </html>
   );

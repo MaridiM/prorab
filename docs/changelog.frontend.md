@@ -1,5 +1,78 @@
 # Changelog (frontend)
 
+## Module: Landing Page
+
+### Step 18: Modern Animated Landing Page
+
+:calendar: `2025-12-01`
+
+**Added**
+
+- ✅ Полностью переработанный лендинг ProRab.space с современным дизайном.
+- ✅ Анимации на Framer Motion: fade-in, stagger, scroll-triggered animations.
+- ✅ Hero секция с интерактивным 3D мокапом телефона.
+- ✅ Секция проблем — три боли прораба с gradient-карточками.
+- ✅ Секция возможностей — 4 ключевые функции приложения.
+- ✅ Секция фотоотчётов — демонстрация killer-feature с мокапом отчёта.
+- ✅ Секция тарифов — 3 плана с выделенным спецпредложением.
+- ✅ Секция отзывов и финальный CTA.
+- ✅ Адаптивная навигация с мобильным меню.
+- ✅ Scroll-based header с backdrop blur.
+
+**Changed**
+
+- ✅ Использован синтаксис Tailwind v4 (`bg-linear-to-r`, `shrink-0`, `rounded-4xl`).
+- ✅ Применены глобальные стили из `globals.css` (анимации, цветовая схема).
+
+**Files Modified**
+
+- `apps/web/src/app/page.tsx`
+
+---
+
+## Module: Auth Pages
+
+### Step 17: Auth Pages (Login, Register, Forgot Password)
+
+:calendar: `2025-12-01`
+
+**Added**
+
+- ✅ Страница `/auth/login` — форма входа с email/password и кнопкой «Войти через Telegram».
+- ✅ Страница `/auth/register` — форма регистрации с полями: имя, email, телефон, пароль.
+- ✅ Страница `/auth/forgot-password` — форма восстановления пароля (отправка ссылки на email).
+- ✅ Общий layout для auth-страниц с переключателем темы.
+- ✅ UI компоненты `Input`, `Card` для форм авторизации.
+
+**Changed**
+
+- ✅ Разделена единая страница auth на отдельные маршруты для каждой формы.
+- ✅ Обновлены экспорты из `packages/components/ui`.
+
+**Fixed**
+
+- ✅ N/A.
+
+**Removed**
+
+- ❌ Удалена объединённая страница `auth/page.tsx` в пользу отдельных маршрутов.
+
+**Files Modified**
+
+- `apps/web/src/packages/components/ui/index.ts`
+- `docs/roadmap.md`
+
+**Files Created**
+
+- `apps/web/src/packages/components/ui/input.tsx`
+- `apps/web/src/packages/components/ui/card.tsx`
+- `apps/web/src/app/(root)/auth/layout.tsx`
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/register/page.tsx`
+- `apps/web/src/app/(root)/auth/forgot-password/page.tsx`
+
+---
+
 ## Module: Landing & Motion Polish
 
 ### Step 1: AOS‑style reveal + плавные hover
