@@ -1,5 +1,27 @@
 # Changelog (frontend)
 
+## Module: Auth Pages
+
+### Step 19: Toast Notifications Repositioning
+
+:calendar: `2025-12-01`
+
+**Changed**
+
+- ✅ Перемещены toast уведомления в нижнюю часть экрана (`fixed bottom-6`) на всех страницах авторизации.
+- ✅ Toast больше не перекрывает контент карточки формы.
+- ✅ Добавлен `AnimatePresence` из Framer Motion для плавной анимации появления/исчезновения.
+- ✅ Улучшена стилизация: закруглённые углы (`rounded-2xl`), красивая тень (`shadow-2xl`), z-index 50.
+
+**Files Modified**
+
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/register/page.tsx`
+- `apps/web/src/app/(root)/auth/reset-password/page.tsx`
+- `apps/web/src/app/(root)/auth/forgot-password/page.tsx`
+
+---
+
 ## Module: Landing Page
 
 ### Step 18: Modern Animated Landing Page
