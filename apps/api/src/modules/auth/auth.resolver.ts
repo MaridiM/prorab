@@ -7,8 +7,8 @@ import { LoginInput } from './dto/login.input'
 import { RegisterInput } from './dto/register.input'
 import { ResetPasswordInput } from './dto/reset-password.input'
 import { ChangePasswordInput } from './dto/change-password.input'
-import { AuthGuard } from './guards/auth.guard'
-import { Public } from './decorators/public.decorator'
+import { AuthGuard } from '../../shared/guards/auth.guard'
+import { Public } from '../../shared/decorators/public.decorator'
 import {
 	CurrentUser,
 	CurrentUserData,
@@ -16,7 +16,7 @@ import {
 	RefreshToken,
 	ClientIp,
 	UserAgent,
-} from './decorators/current-user.decorator'
+} from '../../shared/decorators/current-user.decorator'
 import { AuthPayload, Session } from './models/auth.model'
 
 const COOKIE_OPTIONS = {

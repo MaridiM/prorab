@@ -10,6 +10,8 @@
 - [x] Базовый Zustand-store для общих UI-состояний.
 - [x] Настроен next-intl с поддержкой RU/EN (config + middleware в apps/web).
 - [x] Layout обёрнут в NextIntlClientProvider, язык хранится в cookie language.
+- [x] Архитектура API реорганизована по шаблону: `core/`, `modules/`, `shared/` структура.
+- [x] Создан `CoreService` базовый класс для сервисов с доступом к Prisma/Redis/Config.
 
 
 ### Данные и ORM
@@ -87,6 +89,7 @@
 - Postgres в Docker, Prisma v7 с pg adapter; миграции init + sync-v7, db push.
 - Apollo сервер на backend, Apollo клиент на frontend; lint/сборка стабилизированы после Tailwind 4 и upload-link.
 - Prisma client генерируется в `apps/api/prisma/generated`, prisma.config.ts подключен.
+- Архитектура API: реорганизована структура проекта (`core/`, `modules/`, `shared/`), создан `CoreService`, централизованы декораторы и guards.
 
 ## Дополнительно выполнено
 
@@ -109,3 +112,11 @@
 - [x] **Docker** — добавлен Redis 8 в docker-compose.yml
 - [x] **Security** — Helmet с CSP, cookie secrets, CORS credentials
 - [x] **GraphQL Upload** — загрузка файлов через GraphQL (10MB / 10 files)
+
+### Архитектура API (2025-12-02)
+- [x] **Реорганизация структуры** — модули перемещены в `src/modules/` (auth, users, projects)
+- [x] **Core модули** — MailModule перемещен в `src/core/mail/` как инфраструктурный модуль
+- [x] **Shared элементы** — создана структура `src/shared/` с декораторами и guards
+- [x] **CoreService** — базовый класс для сервисов с типизированным доступом к Prisma/Redis/Config
+- [x] **Централизация** — все декораторы и guards перемещены в `shared/` для переиспользования
+- [x] **Документация** — создан `ARCHITECTURE.md` с описанием структуры и планом миграции

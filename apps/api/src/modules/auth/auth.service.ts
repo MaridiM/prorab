@@ -7,8 +7,8 @@ import { ConfigService } from '@nestjs/config'
 import * as argon2 from 'argon2'
 import { nanoid } from 'nanoid'
 
-import { RedisService } from '../core/redis/redis.service'
-import { MailService } from '../mail/mail.service'
+import { RedisService } from '../../core/redis/redis.service'
+import { MailService } from '../../core/mail/mail.service'
 import { UsersService } from '../users/users.service'
 
 import { LoginInput } from './dto/login.input'

@@ -1,6 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql'
 
-import { CurrentUser, CurrentUserData } from '../auth/decorators/current-user.decorator'
+import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 
 import { User } from './models/user.model'
 import { UsersService } from './users.service'

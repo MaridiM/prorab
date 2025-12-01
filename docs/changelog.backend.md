@@ -600,3 +600,94 @@
 
 ## 2025-11-23
 - Нет изменений в backend-коде в этой итерации; обновлены только документация и фронтенд-лендинг.
+
+---
+
+## Module: Architecture Reorganization
+
+### Step: Project Structure Refactoring
+
+:calendar: `2025-12-02`
+
+**Added**
+
+- ✅ Created `src/shared/` directory structure with subdirectories:
+  - `shared/decorators/` — reusable decorators (`@CurrentUser`, `@Public`, `@UserAgent`, `@ClientIp`, `@SessionToken`, `@RefreshToken`)
+  - `shared/guards/` — shared guards (`AuthGuard`)
+  - `shared/pipes/` — ready for future validation pipes
+  - `shared/utils/` — ready for future utilities
+- ✅ Created `CoreService` base class with typed access to:
+  - `PrismaService` (via `this.prisma`)
+  - `RedisService` (via `this.redis`)
+  - `ConfigService` (via `this.config`)
+  - Redis helper methods (strings, JSON, sets, rate limiting)
+- ✅ Created `ARCHITECTURE.md` documentation file with:
+  - Current project structure
+  - Target structure according to template
+  - Migration plan
+  - Usage examples for `CoreService`
+
+**Changed**
+
+- ✅ Moved business modules to `src/modules/`:
+  - `auth/` → `modules/auth/`
+  - `users/` → `modules/users/`
+  - `projects/` → `modules/projects/`
+- ✅ Moved `MailModule` to `src/core/mail/` as infrastructure module
+- ✅ Moved reusable decorators from `modules/auth/decorators/` to `shared/decorators/`
+- ✅ Moved `AuthGuard` from `modules/auth/guards/` to `shared/guards/`
+- ✅ Updated all imports to use `shared/` decorators and guards:
+  - `app.module.ts` — uses `shared/guards/auth.guard`
+  - `app.resolver.ts` — uses `shared/decorators/public.decorator`
+  - `modules/auth/auth.resolver.ts` — uses `shared/` decorators and guards
+  - `modules/users/users.resolver.ts` — uses `shared/decorators/current-user.decorator`
+- ✅ Updated module imports in `app.module.ts`:
+  - `AuthModule` → `modules/auth/auth.module`
+  - `UsersModule` → `modules/users/users.module`
+  - `ProjectsModule` → `modules/projects/projects.module`
+  - `MailModule` → `core/mail/mail.module`
+
+**Fixed**
+
+- ✅ Fixed dependency injection issues:
+  - `UsersModule` now imports `PrismaModule` for `PrismaService` access
+  - `AuthGuard` correctly imports `AuthService` from `modules/auth/`
+- ✅ Fixed import paths after module reorganization
+
+**Removed**
+
+- ❌ N/A (duplicate decorators/guards in `modules/auth/` remain but are unused)
+
+**Files Modified**
+
+- `apps/api/src/app.module.ts`
+- `apps/api/src/app.resolver.ts`
+- `apps/api/src/modules/auth/auth.module.ts`
+- `apps/api/src/modules/auth/auth.resolver.ts`
+- `apps/api/src/modules/users/users.module.ts`
+- `apps/api/src/modules/users/users.resolver.ts`
+- `apps/api/src/modules/projects/projects.module.ts`
+
+**Files Created**
+
+- `apps/api/src/shared/decorators/current-user.decorator.ts`
+- `apps/api/src/shared/decorators/public.decorator.ts`
+- `apps/api/src/shared/decorators/index.ts`
+- `apps/api/src/shared/guards/auth.guard.ts`
+- `apps/api/src/shared/guards/index.ts`
+- `apps/api/src/shared/pipes/index.ts`
+- `apps/api/src/shared/utils/index.ts`
+- `apps/api/src/core/core.service.ts`
+- `apps/api/ARCHITECTURE.md`
+
+**Architecture Improvements**
+
+- ✅ Project structure now follows template from `docs/templates/architecture.backend.md`
+- ✅ Clear separation of concerns:
+  - `core/` — infrastructure modules (Prisma, Redis, Mail, Config)
+  - `modules/` — business logic modules (Auth, Users, Projects)
+  - `shared/` — reusable cross-cutting concerns (decorators, guards, pipes, utils)
+- ✅ `CoreService` provides base class for services to avoid repetitive dependency injection
+- ✅ All modules use centralized shared decorators and guards
+
+---
