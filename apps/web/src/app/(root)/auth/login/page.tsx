@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Check, Loader2, Mail, Lock, Send } from "lucide-react"
 import { Button, Card, Input } from "@/packages/components"
 
@@ -42,10 +42,11 @@ export default function LoginPage() {
         showToast("Вход через Telegram выполнен")
         setTimeout(() => {
             router.push("/dashboard")
-        }, 800)
+        }, 1500)
     }
 
     return (
+        <>
         <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
             {/* Decorative gradient */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary via-accent to-primary" />
@@ -59,7 +60,7 @@ export default function LoginPage() {
                 transition={{ delay: 0.1 }}
             >
                 <motion.div 
-                    className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-accent/80 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/25"
+                    className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
                     whileHover={{ scale: 1.05, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -187,23 +188,31 @@ export default function LoginPage() {
                 </Link>
             </motion.div>
 
-            {/* Toast */}
-            <motion.div
-                className={`absolute top-4 left-4 right-4 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 pointer-events-none ${
-                    toastType === "success" 
-                        ? "bg-success text-success-foreground" 
-                        : "bg-destructive text-destructive-foreground"
-                }`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ 
-                    opacity: toastMessage ? 1 : 0, 
-                    y: toastMessage ? 0 : -20 
-                }}
-                transition={{ duration: 0.2 }}
-            >
-                <Check className="w-4 h-4" />
-                <span className="text-sm font-medium">{toastMessage}</span>
-            </motion.div>
         </Card>
+        <Toast message={toastMessage} type={toastType} />
+        </>
+    )
+}
+
+function Toast({ message, type = "success" }: { message: string | null; type?: "success" | "error" }) {
+    return (
+        <AnimatePresence>
+            {message && (
+                <motion.div
+                    className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
+                        type === "success" 
+                            ? "bg-success text-success-foreground shadow-success/25" 
+                            : "bg-destructive text-destructive-foreground shadow-destructive/25"
+                    }`}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                    <Check className="w-4 h-4" />
+                    <span className="text-sm font-medium whitespace-nowrap">{message}</span>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }

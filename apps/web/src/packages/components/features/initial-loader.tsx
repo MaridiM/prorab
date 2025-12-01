@@ -40,8 +40,8 @@ export function InitialLoader() {
                     <div className="absolute inset-0 rounded-2xl bg-accent/20 animate-pulse" />
                     
                     {/* Logo */}
-                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30 animate-pulse">
-                        <span className="font-bold text-2xl text-white">PR</span>
+                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-xl shadow-amber-500/30 animate-pulse">
+                        <span className="font-bold text-2xl text-amber-950">PR</span>
                     </div>
                 </div>
 

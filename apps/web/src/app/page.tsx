@@ -451,8 +451,12 @@ function ReportMockup() {
       {/* Reactions */}
       <div className="px-4 pb-4 flex items-center gap-3">
         <div className="flex -space-x-1">
-          <div className="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center text-xs shadow-lg border-2 border-card">❤️</div>
-          <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-xs shadow-lg border-2 border-card">✅</div>
+          <div className="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center shadow-lg border-2 border-card">
+            <Heart className="w-3.5 h-3.5 text-white fill-white" />
+          </div>
+          <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg border-2 border-card">
+            <Check className="w-4 h-4 text-white" strokeWidth={3} />
+          </div>
         </div>
         <span className="text-sm text-muted-foreground">Клиент доволен</span>
       </div>
@@ -840,25 +844,60 @@ export default function Page() {
                 </p>
 
                 <div className="space-y-5">
-                  {[
-                    { icon: Link2, text: "Одна ссылка навсегда — клиент видит всю историю", gradient: "from-blue-500 to-cyan-500" },
-                    { icon: Heart, text: "Реакции вместо звонков — ❤️ ✅ ❓", gradient: "from-rose-500 to-pink-500" },
-                    { icon: MessageCircle, text: "Кнопка связи — сразу в WhatsApp или Telegram", gradient: "from-emerald-500 to-teal-500" },
-                  ].map((item, i) => (
-                    <motion.div 
-                      key={i}
-                      className="flex items-center gap-4"
-                      initial={{ opacity: 0, x: -30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white bg-linear-to-br shadow-lg", item.gradient)}>
-                        <item.icon className="w-5 h-5" />
+                  {/* Link feature */}
+                  <motion.div 
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white bg-linear-to-br from-blue-500 to-cyan-500 shadow-lg">
+                      <Link2 className="w-5 h-5" />
+                    </div>
+                    <p className="font-medium">Одна ссылка навсегда — клиент видит всю историю</p>
+                  </motion.div>
+
+                  {/* Reactions feature */}
+                  <motion.div 
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white bg-linear-to-br from-rose-500 to-pink-500 shadow-lg">
+                      <Heart className="w-5 h-5" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="font-medium">Реакции вместо звонков</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shadow-md">
+                          <Heart className="w-3 h-3 text-white fill-white" />
+                        </span>
+                        <span className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-md">
+                          <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                        </span>
+                        <span className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center shadow-md">
+                          <span className="text-white text-xs font-bold">?</span>
+                        </span>
                       </div>
-                      <p className="font-medium">{item.text}</p>
-                    </motion.div>
-                  ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Message feature */}
+                  <motion.div 
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white bg-linear-to-br from-emerald-500 to-teal-500 shadow-lg">
+                      <MessageCircle className="w-5 h-5" />
+                    </div>
+                    <p className="font-medium">Кнопка связи — сразу в WhatsApp или Telegram</p>
+                  </motion.div>
                 </div>
               </motion.div>
 

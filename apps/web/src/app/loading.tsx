@@ -5,8 +5,8 @@ export default function Loading() {
                 {/* Logo */}
                 <div className="relative">
                     <div className="absolute inset-0 rounded-2xl bg-amber-400/30 animate-ping" style={{ animationDuration: '1.5s' }} />
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 animate-pulse">
-                        <span className="font-bold text-xl text-white">PR</span>
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/25 animate-pulse">
+                        <span className="font-bold text-xl text-amber-950">PR</span>
                     </div>
                 </div>
 

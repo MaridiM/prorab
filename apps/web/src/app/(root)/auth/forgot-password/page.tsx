@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, Check, Loader2, Mail, Send } from "lucide-react"
 import { Button, Card, Input } from "@/packages/components"
 
@@ -34,6 +34,7 @@ export default function ForgotPasswordPage() {
 
     if (isEmailSent) {
         return (
+            <>
             <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
                 {/* Decorative gradient */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-success via-emerald-400 to-success" />
@@ -88,10 +89,13 @@ export default function ForgotPasswordPage() {
                     </Link>
                 </motion.div>
             </Card>
+            <Toast message={toastMessage} />
+            </>
         )
     }
 
     return (
+        <>
         <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
             {/* Decorative gradient */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary via-blue-400 to-primary" />
@@ -183,19 +187,27 @@ export default function ForgotPasswordPage() {
                 </Link>
             </motion.div>
 
-            {/* Toast */}
-            <motion.div
-                className="absolute top-4 left-4 right-4 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 pointer-events-none bg-success text-success-foreground"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ 
-                    opacity: toastMessage ? 1 : 0, 
-                    y: toastMessage ? 0 : -20 
-                }}
-                transition={{ duration: 0.2 }}
-            >
-                <Check className="w-4 h-4" />
-                <span className="text-sm font-medium">{toastMessage}</span>
-            </motion.div>
         </Card>
+        <Toast message={toastMessage} />
+        </>
+    )
+}
+
+function Toast({ message }: { message: string | null }) {
+    return (
+        <AnimatePresence>
+            {message && (
+                <motion.div
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl shadow-success/25 flex items-center gap-3 bg-success text-success-foreground"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                >
+                    <Check className="w-4 h-4" />
+                    <span className="text-sm font-medium whitespace-nowrap">{message}</span>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }
