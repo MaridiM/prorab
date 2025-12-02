@@ -1,74 +1,63 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Check, Loader2, Mail, Lock, AlertCircle } from "lucide-react"
+import { useMutation } from "@apollo/client/react"
+
 import { Button, Card, Input } from "@/packages/components"
+import { LoginDocument } from "@/packages/api/graphql"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0 }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001'
-
 export default function LoginPage() {
     const router = useRouter()
-    const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [toastMessage, setToastMessage] = useState<string | null>(null)
     const [toastType, setToastType] = useState<"success" | "error">("success")
 
-    const showToast = (msg: string, type: "success" | "error" = "success") => {
+    // Apollo mutation with typed document
+    const [login, { loading: isLoading }] = useMutation(LoginDocument)
+
+    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
         setToastMessage(msg)
         setToastType(type)
         setTimeout(() => setToastMessage(null), 4000)
-    }
+    }, [])
 
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLogin = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setIsLoading(true)
         
-        try {
-            const response = await fetch(`${API_URL}/graphql`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    query: `mutation Login($input: LoginInput!) { 
-                        login(input: $input) { 
-                            user { id email name emailVerified } 
-                        } 
-                    }`,
-                    variables: { input: { email, password } },
-                }),
-            })
+        const response = await login({
+            variables: { input: { email, password } }
+        })
 
-            const { data, errors } = await response.json()
+        // Handle errors (errorPolicy: 'all' returns errors in response.error)
+        if (response.errors?.length) {
+            showToast(response.errors[0]?.message || 'Ошибка входа', 'error')
+            return
+        }
 
-            if (errors) {
-                showToast(errors[0]?.message || 'Ошибка входа', 'error')
-                return
-            }
-
+        // Handle successful login
+        const user = response.data?.login?.user
+        if (user) {
             showToast("Вход выполнен успешно")
             setTimeout(() => {
                 router.push("/dashboard")
             }, 800)
-        } catch (error) {
-            showToast('Ошибка подключения к серверу', 'error')
-        } finally {
-            setIsLoading(false)
         }
-    }
+    }, [login, email, password, showToast, router])
 
-    const handleTelegramLogin = async () => {
+    const handleTelegramLogin = useCallback(() => {
         // TODO: Implement Telegram login
         showToast("Вход через Telegram будет доступен позже", "error")
-    }
+    }, [showToast])
 
     return (
         <>

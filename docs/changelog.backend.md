@@ -300,7 +300,7 @@
 
 **Changed**
 
-- ✅ `pnpm dev` now launches both Next.js (3000) and NestJS API (3001) via Turborepo.
+- ✅ `pnpm dev` now launches both Next.js (3000) and NestJS API (8080) via Turborepo.
 
 **Fixed**
 
@@ -595,6 +595,85 @@
 
 - ✅ `redis.service.ts` — исправлены типы для `get()` и `sIsMember()` (Redis v5 typing issues)
 - ✅ `main.ts` — исправлен import cookie-parser (namespace → default import)
+
+---
+
+### Step: Database Connection Fix
+
+:calendar: `2025-12-02`
+
+**Added**
+
+- ✅ N/A.
+
+**Changed**
+
+- ✅ DATABASE_URL in `apps/api/.env` now uses hardcoded connection string instead of variable interpolation
+- ✅ Updated POSTGRES_PORT from 5432 to 5433 to match actual database port
+
+**Fixed**
+
+- ✅ Fixed PostgreSQL connection error "Cannot read properties of undefined (reading 'searchParams')"
+- ✅ Resolved issue where `pg` library received undefined connection string due to unresolved environment variable interpolation
+
+**Removed**
+
+- ❌ Removed `${VARIABLE}` syntax from DATABASE_URL (ConfigModule doesn't support bash-style interpolation)
+
+**Files Modified**
+
+- `apps/api/.env`
+
+**Files Created**
+
+- N/A
+
+---
+
+## Module: Documentation
+
+### Step: Authentication System Analysis Report
+
+:calendar: `2025-12-02`
+
+**Added**
+
+- ✅ Comprehensive authentication system analysis report in `docs/reports/auth.md`
+- ✅ Documentation includes:
+  - Architecture overview (NestJS + GraphQL + Redis + PostgreSQL)
+  - Key files and their purposes
+  - Step-by-step authentication flows (register, login, logout, refresh, etc.)
+  - Security mechanisms (Argon2id, tokens, rate limiting, cookies, email normalization)
+  - Additional flows (email verification, password reset, password change)
+  - Configuration and environment variables
+  - TTL settings for tokens
+  - Database schema (Prisma models)
+  - Middleware and global settings
+  - Decorators usage
+  - Graceful degradation (Redis)
+  - Security checklist (11 points)
+  - Dependencies list
+  - Data flow diagrams
+
+**Changed**
+
+- ✅ N/A
+
+**Fixed**
+
+- ✅ N/A
+
+**Removed**
+
+- ❌ N/A
+
+**Files Created**
+
+- `docs/reports/auth.md`
+
+**Files Modified**
+
+- N/A
 
 ---
 

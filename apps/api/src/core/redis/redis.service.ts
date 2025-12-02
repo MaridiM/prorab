@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { createClient, RedisClientType } from 'redis'
 
 interface RedisOptions {
@@ -8,7 +8,10 @@ interface RedisOptions {
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
+	private readonly logger = new Logger(RedisService.name)
 	private client: RedisClientType
+	private isConnected = false
+	private connectionAttempted = false
 
 	constructor(@Inject('REDIS_OPTIONS') private options: RedisOptions) {}
 
@@ -17,44 +20,119 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 			socket: {
 				host: this.options.host,
 				port: this.options.port,
+				reconnectStrategy: (retries) => {
+					if (retries > 10) {
+						this.logger.warn('Redis reconnection attempts exceeded. Redis features will be unavailable.')
+						return false
+					}
+					return Math.min(retries * 100, 3000)
+				},
 			},
 		})
 
-		this.client.on('error', (err) => console.error('Redis Client Error', err))
+		// Only log errors once to avoid spam
+		let errorLogged = false
+		this.client.on('error', (err) => {
+			if (!errorLogged) {
+				this.logger.error(`Redis connection error: ${err.message}`)
+				this.logger.warn('Redis features will be unavailable until connection is established.')
+				errorLogged = true
+			}
+			this.isConnected = false
+		})
 
-		await this.client.connect()
-		console.log('✅ Redis connected')
+		this.client.on('connect', () => {
+			this.logger.log('Redis connecting...')
+		})
+
+		this.client.on('ready', () => {
+			this.isConnected = true
+			this.logger.log('✅ Redis connected')
+			errorLogged = false // Reset error flag on successful connection
+		})
+
+		this.client.on('reconnecting', () => {
+			this.logger.debug('Redis reconnecting...')
+		})
+
+		try {
+			await this.client.connect()
+			this.connectionAttempted = true
+		} catch (error) {
+			this.connectionAttempted = true
+			this.logger.warn(
+				`Failed to connect to Redis at ${this.options.host}:${this.options.port}. ` +
+				'Redis features will be unavailable. Make sure Redis is running.'
+			)
+			this.isConnected = false
+		}
 	}
 
 	async onModuleDestroy() {
-		await this.client.quit()
+		if (this.client && this.isConnected) {
+			try {
+				await this.client.quit()
+			} catch (error) {
+				this.logger.error('Error disconnecting from Redis', error)
+			}
+		}
+	}
+
+	private ensureConnected(): boolean {
+		if (!this.isConnected) {
+			this.logger.warn('Redis is not connected. Operation skipped.')
+			return false
+		}
+		return true
 	}
 
 	// ==================== Basic Operations ====================
 
 	async get(key: string): Promise<string | null> {
-		const result = await this.client.get(key)
-		if (typeof result === 'string') {
-			return result
+		if (!this.ensureConnected()) return null
+		try {
+			const result = await this.client.get(key)
+			if (typeof result === 'string') {
+				return result
+			}
+			return null
+		} catch (error) {
+			this.logger.error(`Redis get error for key "${key}":`, error)
+			return null
 		}
-		return null
 	}
 
 	async set(key: string, value: string, ttlMs?: number): Promise<void> {
-		if (ttlMs) {
-			await this.client.set(key, value, { PX: ttlMs })
-		} else {
-			await this.client.set(key, value)
+		if (!this.ensureConnected()) return
+		try {
+			if (ttlMs) {
+				await this.client.set(key, value, { PX: ttlMs })
+			} else {
+				await this.client.set(key, value)
+			}
+		} catch (error) {
+			this.logger.error(`Redis set error for key "${key}":`, error)
 		}
 	}
 
 	async del(key: string): Promise<void> {
-		await this.client.del(key)
+		if (!this.ensureConnected()) return
+		try {
+			await this.client.del(key)
+		} catch (error) {
+			this.logger.error(`Redis del error for key "${key}":`, error)
+		}
 	}
 
 	async exists(key: string): Promise<boolean> {
-		const result = await this.client.exists(key)
-		return result === 1
+		if (!this.ensureConnected()) return false
+		try {
+			const result = await this.client.exists(key)
+			return result === 1
+		} catch (error) {
+			this.logger.error(`Redis exists error for key "${key}":`, error)
+			return false
+		}
 	}
 
 	// ==================== JSON Operations ====================
@@ -76,30 +154,58 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 	// ==================== Set Operations ====================
 
 	async sAdd(key: string, value: string): Promise<void> {
-		await this.client.sAdd(key, value)
+		if (!this.ensureConnected()) return
+		try {
+			await this.client.sAdd(key, value)
+		} catch (error) {
+			this.logger.error(`Redis sAdd error for key "${key}":`, error)
+		}
 	}
 
 	async sRem(key: string, value: string): Promise<void> {
-		await this.client.sRem(key, value)
+		if (!this.ensureConnected()) return
+		try {
+			await this.client.sRem(key, value)
+		} catch (error) {
+			this.logger.error(`Redis sRem error for key "${key}":`, error)
+		}
 	}
 
 	async sMembers(key: string): Promise<string[]> {
-		return this.client.sMembers(key)
+		if (!this.ensureConnected()) return []
+		try {
+			return await this.client.sMembers(key)
+		} catch (error) {
+			this.logger.error(`Redis sMembers error for key "${key}":`, error)
+			return []
+		}
 	}
 
 	async sIsMember(key: string, value: string): Promise<boolean> {
-		const result = await this.client.sIsMember(key, value)
-		return Boolean(result)
+		if (!this.ensureConnected()) return false
+		try {
+			const result = await this.client.sIsMember(key, value)
+			return Boolean(result)
+		} catch (error) {
+			this.logger.error(`Redis sIsMember error for key "${key}":`, error)
+			return false
+		}
 	}
 
 	// ==================== Rate Limiting ====================
 
 	async incrementRateLimit(key: string, windowMs: number): Promise<number> {
-		const current = await this.client.incr(key)
-		if (current === 1) {
-			await this.client.pExpire(key, windowMs)
+		if (!this.ensureConnected()) return 0
+		try {
+			const current = await this.client.incr(key)
+			if (current === 1) {
+				await this.client.pExpire(key, windowMs)
+			}
+			return current
+		} catch (error) {
+			this.logger.error(`Redis incrementRateLimit error for key "${key}":`, error)
+			return 0
 		}
-		return current
 	}
 
 	async getRateLimit(key: string): Promise<number> {

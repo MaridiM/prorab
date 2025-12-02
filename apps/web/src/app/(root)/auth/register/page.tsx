@@ -1,22 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Check, Loader2, Mail, Lock, User, Phone, AlertCircle } from "lucide-react"
+import { useMutation } from "@apollo/client/react"
+
 import { Button, Card, Input } from "@/packages/components"
+import { RegisterDocument } from "@/packages/api/graphql"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0 }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001'
-
 export default function RegisterPage() {
     const router = useRouter()
-    const [isLoading, setIsLoading] = useState(false)
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
@@ -25,13 +25,16 @@ export default function RegisterPage() {
     const [toastMessage, setToastMessage] = useState<string | null>(null)
     const [toastType, setToastType] = useState<"success" | "error">("success")
 
-    const showToast = (msg: string, type: "success" | "error" = "success") => {
+    // Apollo mutation with typed document
+    const [register, { loading: isLoading }] = useMutation(RegisterDocument)
+
+    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
         setToastMessage(msg)
         setToastType(type)
         setTimeout(() => setToastMessage(null), 4000)
-    }
+    }, [])
 
-    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleRegister = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         
         if (password !== confirmPassword) {
@@ -44,48 +47,32 @@ export default function RegisterPage() {
             return
         }
 
-        setIsLoading(true)
-        
-        try {
-            const response = await fetch(`${API_URL}/graphql`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    query: `mutation Register($input: RegisterInput!) { 
-                        register(input: $input) { 
-                            user { id email name emailVerified }
-                            message
-                        } 
-                    }`,
-                    variables: { 
-                        input: { 
-                            email, 
-                            password, 
-                            name: name || undefined, 
-                            phone: phone || undefined 
-                        } 
-                    },
-                }),
-            })
-
-            const { data, errors } = await response.json()
-
-            if (errors) {
-                showToast(errors[0]?.message || 'Ошибка регистрации', 'error')
-                return
+        const response = await register({
+            variables: { 
+                input: { 
+                    email, 
+                    password, 
+                    name: name || undefined, 
+                    phone: phone || undefined 
+                } 
             }
+        })
 
-            showToast(data.register.message || "Аккаунт создан!")
+        // Handle errors (errorPolicy: 'all' returns errors in response.errors)
+        if (response.errors?.length) {
+            showToast(response.errors[0]?.message || 'Ошибка регистрации', 'error')
+            return
+        }
+
+        // Handle successful registration
+        const data = response.data?.register
+        if (data?.user) {
+            showToast(data.message || "Аккаунт создан!")
             setTimeout(() => {
                 router.push("/dashboard")
             }, 1000)
-        } catch (error) {
-            showToast('Ошибка подключения к серверу', 'error')
-        } finally {
-            setIsLoading(false)
         }
-    }
+    }, [register, email, password, confirmPassword, name, phone, showToast, router])
 
     return (
         <>

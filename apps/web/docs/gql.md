@@ -1,7 +1,7 @@
 **GraphQL / Apollo Configuration (web)**
 
 - **Env vars**: `NEXT_PUBLIC_SERVER_URL`, `NEXT_PUBLIC_WEBSOCKET_URL`, `NEXT_PUBLIC_APP_URL`
-- **Default dev endpoints**: `http://localhost:3001/graphql` (HTTP) and `ws://localhost:3001/graphql` (WS).
+- **Default dev endpoints**: `http://localhost:8080/graphql` (HTTP) and `ws://localhost:8080/graphql` (WS).
 
 **Dependencies**
 - `@apollo/client`
@@ -14,7 +14,7 @@
 ```js
 require('dotenv/config');
 
-const url = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001/graphql';
+const url = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080/graphql';
 
 module.exports = {
   client: {
@@ -38,8 +38,8 @@ module.exports = {
 
 **4) Constants** (`src/constants/url.ts`)
 ```ts
-export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3001/graphql';
-export const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL ?? 'ws://localhost:3001/graphql';
+export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:8080/graphql';
+export const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL ?? 'ws://localhost:8080/graphql';
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 ```
 

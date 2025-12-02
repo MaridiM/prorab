@@ -69,7 +69,12 @@ async function bootstrap() {
 		credentials: true,
 		exposedHeaders: ['set-cookie'],
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-		allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+		allowedHeaders: [
+			'Content-Type', 
+			'Authorization', 
+			'X-Requested-With',
+			'apollo-require-preflight',  // Required for Apollo Client
+		],
 	})
 
 	// ✅ Prisma shutdown hooks
@@ -77,7 +82,7 @@ async function bootstrap() {
 	prismaService.enableShutdownHooks(app)
 
 	// ✅ Start server
-	const port = config.get<number>('port') ?? 3001
+	const port = config.get<number>('port') ?? 8080
 	const nodeEnv = config.get<string>('nodeEnv') ?? 'development'
 	
 	await app.listen(port)

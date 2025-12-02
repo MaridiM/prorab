@@ -1,5 +1,26 @@
 # Changelog (frontend)
 
+## Module: Configuration
+
+### Step: Server URL Port Update
+
+:calendar: `2025-12-02`
+
+**Changed**
+
+- ✅ Updated backend API port from `3001` to `8080` in `apps/web/.env`
+- ✅ `NEXT_PUBLIC_SERVER_URL` now points to `http://localhost:8080/graphql`
+
+**Fixed**
+
+- ✅ Fixed incorrect API endpoint configuration that prevented frontend from connecting to backend
+
+**Files Modified**
+
+- `apps/web/.env`
+
+---
+
 ## Module: Auth Integration
 
 ### Step 20: Auth API Integration

@@ -2,8 +2,12 @@ import { CodegenConfig } from '@graphql-codegen/cli';
 import 'dotenv/config';
 
 const config: CodegenConfig = {
-  schema: process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3001/graphql',
-  documents: ['./src/modules/**/shared/api/graphql/**/*.{ts,tsx,graphql,gql}'],
+  // Use the auto-generated schema file from the API
+  schema: '../api/schema.gql',
+  documents: [
+    './src/packages/api/graphql/**/*.{graphql,gql}',
+    './src/modules/**/shared/api/graphql/**/*.{ts,tsx,graphql,gql}',
+  ],
   generates: {
     './src/packages/api/graphql/__generated__/output.ts': {
       plugins: ['typescript', 'typescript-operations', 'typed-document-node'],

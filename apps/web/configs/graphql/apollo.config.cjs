@@ -1,6 +1,6 @@
 require('dotenv/config');
 
-const url = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001/graphql';
+const url = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:8080/graphql';
 
 module.exports = {
   client: {

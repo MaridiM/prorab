@@ -1,13 +1,22 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
+
+import { 
+  LoginDocument, 
+  RegisterDocument, 
+  LogoutDocument, 
+  MeDocument,
+  type User as GqlUser 
+} from '@/packages/api/graphql'
 
 interface User {
   id: string
   email: string
-  name?: string
-  phone?: string
+  name?: string | null
+  phone?: string | null
   emailVerified: boolean
 }
 
@@ -47,101 +56,90 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
-  const refreshUser = async () => {
+  // Apollo mutations
+  const [loginMutation] = useMutation(LoginDocument)
+  const [registerMutation] = useMutation(RegisterDocument)
+  const [logoutMutation] = useMutation(LogoutDocument)
+  const [fetchMe] = useLazyQuery(MeDocument, {
+    fetchPolicy: 'network-only'
+  })
+
+  const refreshUser = useCallback(async () => {
     try {
-      const response = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `query Me { me { id email name phone emailVerified } }`,
-        }),
-      })
+      const { data, error } = await fetchMe()
       
-      const { data, errors } = await response.json()
-      
-      if (errors || !data?.me) {
+      if (error || !data?.me) {
         setUser(null)
       } else {
-        setUser(data.me)
+        setUser({
+          id: data.me.id,
+          email: data.me.email,
+          name: data.me.name,
+          phone: data.me.phone,
+          emailVerified: data.me.emailVerified
+        })
       }
     } catch {
       setUser(null)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [fetchMe])
 
   useEffect(() => {
     refreshUser()
-  }, [])
+  }, [refreshUser])
 
-  const login = async (email: string, password: string) => {
-    const response = await fetch('/api/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        query: `mutation Login($input: LoginInput!) { 
-          login(input: $input) { 
-            user { id email name emailVerified } 
-          } 
-        }`,
-        variables: { input: { email, password } },
-      }),
+  const login = useCallback(async (email: string, password: string) => {
+    const response = await loginMutation({ 
+      variables: { input: { email, password } } 
     })
 
-    const { data, errors } = await response.json()
-
-    if (errors) {
-      throw new Error(errors[0]?.message || 'Ошибка входа')
+    if (response.errors?.length) {
+      throw new Error(response.errors[0]?.message || 'Ошибка входа')
     }
 
-    setUser(data.login.user)
-    router.push('/dashboard')
-  }
-
-  const register = async (registerData: RegisterData) => {
-    const response = await fetch('/api/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        query: `mutation Register($input: RegisterInput!) { 
-          register(input: $input) { 
-            user { id email name emailVerified }
-            message
-          } 
-        }`,
-        variables: { input: registerData },
-      }),
-    })
-
-    const { data, errors } = await response.json()
-
-    if (errors) {
-      throw new Error(errors[0]?.message || 'Ошибка регистрации')
-    }
-
-    setUser(data.register.user)
-    router.push('/dashboard')
-  }
-
-  const logout = async () => {
-    try {
-      await fetch('/api/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `mutation Logout { logout }`,
-        }),
+    const userData = response.data?.login?.user
+    if (userData) {
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        emailVerified: userData.emailVerified
       })
+      router.push('/dashboard')
+    }
+  }, [loginMutation, router])
+
+  const register = useCallback(async (registerData: RegisterData) => {
+    const response = await registerMutation({
+      variables: { input: registerData }
+    })
+
+    if (response.errors?.length) {
+      throw new Error(response.errors[0]?.message || 'Ошибка регистрации')
+    }
+
+    const userData = response.data?.register?.user
+    if (userData) {
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        emailVerified: userData.emailVerified
+      })
+      router.push('/dashboard')
+    }
+  }, [registerMutation, router])
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutMutation()
     } finally {
       setUser(null)
       router.push('/auth/login')
     }
-  }
+  }, [logoutMutation, router])
 
   return (
     <AuthContext.Provider
@@ -159,4 +157,3 @@ export function AuthProvider({ children }: AuthProviderProps) {
     </AuthContext.Provider>
   )
 }
-
