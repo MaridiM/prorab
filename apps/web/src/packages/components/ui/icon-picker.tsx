@@ -27,6 +27,7 @@ const BACKGROUND_COLORS = [
 	{ id: 'yellow', color: 'hsl(48, 96%, 53%)', label: 'Жёлтый' },
 	{ id: 'pink', color: 'hsl(330, 81%, 60%)', label: 'Розовый' },
 	{ id: 'teal', color: 'hsl(173, 80%, 40%)', label: 'Бирюзовый' },
+	{ id: 'transparent', color: 'transparent', label: 'Прозрачный' },
 ]
 
 interface IconPickerProps {
@@ -53,8 +54,18 @@ export function IconPicker({
 			{/* Preview */}
 			<div className="flex justify-center">
 				<motion.div
-					className="flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg"
-					style={{ backgroundColor: currentColor }}
+					className={cn(
+						"flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg",
+						selectedColor === 'transparent' && "bg-background"
+					)}
+					style={{ 
+						backgroundColor: selectedColor === 'transparent' ? 'transparent' : currentColor,
+						backgroundImage: selectedColor === 'transparent' 
+							? 'linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(var(--border)) 75%), linear-gradient(-45deg, transparent 75%, hsl(var(--border)) 75%)'
+							: undefined,
+						backgroundSize: selectedColor === 'transparent' ? '12px 12px' : undefined,
+						backgroundPosition: selectedColor === 'transparent' ? '0 0, 0 6px, 6px -6px, -6px 0px' : undefined,
+					}}
 					initial={{ scale: 0.8, opacity: 0 }}
 					animate={{ scale: 1, opacity: 1 }}
 					transition={{ type: 'spring', stiffness: 200, damping: 15 }}
@@ -101,7 +112,7 @@ export function IconPicker({
 				<h3 className="mb-3 text-sm font-medium text-foreground">
 					Выберите цвет
 				</h3>
-				<div className="grid grid-cols-8 gap-2">
+				<div className="grid grid-cols-9 gap-2">
 					{BACKGROUND_COLORS.map((color, index) => (
 						<motion.button
 							key={color.id}
@@ -113,9 +124,17 @@ export function IconPicker({
 									'border-foreground ring-2 ring-primary ring-offset-2 ring-offset-background':
 										selectedColor === color.id,
 									'border-border': selectedColor !== color.id,
+									'bg-background': color.id === 'transparent',
 								}
 							)}
-							style={{ backgroundColor: color.color }}
+							style={{ 
+								backgroundColor: color.id === 'transparent' ? 'transparent' : color.color,
+								backgroundImage: color.id === 'transparent' 
+									? 'linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(var(--border)) 75%), linear-gradient(-45deg, transparent 75%, hsl(var(--border)) 75%)'
+									: undefined,
+								backgroundSize: color.id === 'transparent' ? '8px 8px' : undefined,
+								backgroundPosition: color.id === 'transparent' ? '0 0, 0 4px, 4px -4px, -4px 0px' : undefined,
+							}}
 							initial={{ scale: 0, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							transition={{ delay: index * 0.04 }}
