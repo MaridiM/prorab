@@ -92,7 +92,7 @@ export default function OnboardingStep1Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.2 }}
-					className="text-center mb-6"
+					className="text-center mb-8"
 				>
 					<motion.div
 						className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
@@ -112,7 +112,7 @@ export default function OnboardingStep1Page() {
 				<Form {...form}>
 					<motion.form
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-6"
+						className="space-y-5"
 						variants={fadeIn}
 						initial="hidden"
 						animate="visible"

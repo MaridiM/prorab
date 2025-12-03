@@ -1,6 +1,5 @@
 "use client"
 
-import type { Metadata } from 'next'
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -125,25 +124,25 @@ export default function OnboardingLayout({
 					duration: 0.6,
 					ease: [0.22, 0.61, 0.36, 1]
 				}}
-				className="relative z-10 w-full flex justify-center"
+				className="relative z-10 w-full flex flex-col items-center"
 			>
 				<div className="w-full max-w-[420px]">{children}</div>
-			</motion.div>
-
-			{/* Footer Links */}
-			<motion.div 
-				className="mt-8 text-center text-xs text-muted-foreground/60 relative z-10"
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				transition={{ delay: 0.5 }}
-			>
-				<Link href="#" className="hover:text-muted-foreground transition-colors">
-					Политика конфиденциальности
-				</Link>{" "}
-				<span className="mx-2">•</span>
-				<Link href="#" className="hover:text-muted-foreground transition-colors">
-					Оферта
-				</Link>
+				
+				{/* Footer Links */}
+				<motion.div 
+					className="mt-6 text-center text-xs text-muted-foreground/60 relative z-10"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.5 }}
+				>
+					<Link href="#" className="hover:text-muted-foreground transition-colors">
+						Политика конфиденциальности
+					</Link>{" "}
+					<span className="mx-2">•</span>
+					<Link href="#" className="hover:text-muted-foreground transition-colors">
+						Оферта
+					</Link>
+				</motion.div>
 			</motion.div>
 		</div>
 	)

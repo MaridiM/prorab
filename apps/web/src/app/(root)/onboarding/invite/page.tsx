@@ -95,7 +95,7 @@ export default function OnboardingInvitePage() {
 			<Form {...form}>
 				<motion.form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="space-y-6"
+					className="space-y-5"
 					variants={fadeIn}
 					initial="hidden"
 					animate="visible"
@@ -170,11 +170,9 @@ export default function OnboardingInvitePage() {
 				initial="hidden"
 				animate="visible"
 				transition={{ delay: 0.3 }}
-				className="mt-6 text-center"
+				className="mt-6 text-center text-sm text-muted-foreground"
 			>
-				<p className="text-sm text-muted-foreground">
-					Код приглашения можно получить у владельца бригады
-				</p>
+				Код приглашения можно получить у владельца бригады
 			</motion.div>
 		</Card>
 	)
