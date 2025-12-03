@@ -1,5 +1,86 @@
 # Changelog (frontend)
 
+## Module: Forms Validation
+
+### Step: Forms Migration to react-hook-form + Zod
+
+:calendar: `2025-12-03`
+
+**Added**
+
+- ✅ Созданы Zod схемы валидации для всех форм авторизации:
+  - `apps/web/src/packages/schemas/auth/login.schema.ts` — валидация email + password (минимум 8 символов)
+  - `apps/web/src/packages/schemas/auth/register.schema.ts` — валидация с проверкой совпадения паролей, regex для телефона, требования к паролю (буквы + цифры)
+  - `apps/web/src/packages/schemas/auth/forgot-password.schema.ts` — валидация email
+  - `apps/web/src/packages/schemas/auth/reset-password.schema.ts` — валидация паролей с проверкой совпадения и требованиями
+- ✅ Создан хук `useAutoValidateForm` с debounce 300ms для автоматической валидации полей
+- ✅ Экспорт всех auth схем через `apps/web/src/packages/schemas/index.ts`
+
+**Changed**
+
+- ✅ **Login форма** (`apps/web/src/app/(root)/auth/login/page.tsx`):
+  - Заменен `useState` на `useForm` с `zodResolver`
+  - Интегрирован `useAutoValidateForm` для real-time валидации
+  - Формат компонентов: `Form`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`
+  - Кнопка submit disabled до валидного состояния (`!form.formState.isValid`)
+- ✅ **Register форма** (`apps/web/src/app/(root)/auth/register/page.tsx`):
+  - Заменены все `useState` (email, password, confirmPassword, name, phone) на `useForm`
+  - Удалена ручная валидация паролей (теперь через Zod `.refine()`)
+  - Автоматическая валидация всех 5 полей с debounce
+  - `confirmPassword` удаляется перед отправкой в GraphQL
+- ✅ **Forgot Password форма** (`apps/web/src/app/(root)/auth/forgot-password/page.tsx`):
+  - Удален mock `setTimeout`, интегрирована реальная GraphQL мутация `ForgotPasswordDocument`
+  - Использована Zod схема `forgotPasswordSchema`
+  - Обработка успеха/ошибок через toast с типами success/error
+  - Toast компонент обновлен для поддержки иконки `AlertCircle` при ошибках
+- ✅ **Reset Password форма** (`apps/web/src/app/(root)/auth/reset-password/page.tsx`):
+  - Заменен `FormData` подход на `useForm` + zodResolver
+  - Удалена ручная валидация паролей
+  - Интегрирована реальная GraphQL мутация `ResetPasswordDocument`
+  - Токен извлекается из URL query параметров через `useSearchParams`
+  - Toast компонент поддерживает success/error типы
+
+**Fixed**
+
+- ✅ Удалена дублирующаяся логика валидации паролей во всех формах
+- ✅ Toast компонент дублировался в 4 файлах — теперь с консистентной реализацией
+- ✅ Forgot Password и Reset Password использовали mock логику — теперь реальные GraphQL мутации
+
+**Removed**
+
+- ❌ Удалены все ручные `useState` для управления полями форм
+- ❌ Удалена ручная валидация (проверка совпадения паролей, длины, regex)
+- ❌ Удалены HTML5 атрибуты `required`, `minLength` в пользу Zod валидации
+
+**Files Created**
+
+- `apps/web/src/packages/schemas/auth/login.schema.ts`
+- `apps/web/src/packages/schemas/auth/register.schema.ts`
+- `apps/web/src/packages/schemas/auth/forgot-password.schema.ts`
+- `apps/web/src/packages/schemas/auth/reset-password.schema.ts`
+- `apps/web/src/packages/schemas/auth/index.ts`
+- `apps/web/src/packages/hooks/use-auto-validate-form.ts`
+- `apps/web/src/packages/hooks/index.ts`
+
+**Files Modified**
+
+- `apps/web/src/packages/schemas/index.ts`
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/register/page.tsx`
+- `apps/web/src/app/(root)/auth/forgot-password/page.tsx`
+- `apps/web/src/app/(root)/auth/reset-password/page.tsx`
+
+**Benefits**
+
+- 🎯 Централизованная валидация — единые Zod схемы с автоматическим выводом типов
+- ⚡ Real-time валидация — debounce 300ms, валидация при `onTouched` и `onChange`
+- 🧹 Меньше кода — сокращение на 30-40% за счет удаления ручного управления состоянием
+- ✅ Консистентность — единый подход во всех формах с shadcn/ui Form компонентами
+- 🔒 Типобезопасность — автоматический вывод типов из Zod схем (`z.infer<>`)
+- 🚀 UX улучшения — немедленная визуальная индикация ошибок, disabled кнопки до валидного состояния
+
+---
+
 ## Module: Configuration
 
 ### Step: Server URL Port Update

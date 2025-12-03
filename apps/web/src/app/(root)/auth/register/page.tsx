@@ -6,9 +6,13 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Check, Loader2, Mail, Lock, User, Phone, AlertCircle } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-import { Button, Card, Input } from "@/packages/components"
+import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
 import { RegisterDocument } from "@/packages/api/graphql"
+import { registerSchema, TRegisterSchema } from "@/packages/schemas"
+import { useAutoValidateForm } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -17,13 +21,25 @@ const fadeIn = {
 
 export default function RegisterPage() {
     const router = useRouter()
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [phone, setPhone] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
     const [toastMessage, setToastMessage] = useState<string | null>(null)
     const [toastType, setToastType] = useState<"success" | "error">("success")
+
+    // React Hook Form with Zod validation
+    const form = useForm<TRegisterSchema>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: ''
+        },
+        mode: 'onTouched',
+        reValidateMode: 'onChange'
+    })
+
+    // Auto-validate form with debounce
+    useAutoValidateForm(form, ['email', 'password', 'confirmPassword', 'name', 'phone'])
 
     // Apollo mutation with typed document
     const [register, { loading: isLoading }] = useMutation(RegisterDocument)
@@ -34,27 +50,18 @@ export default function RegisterPage() {
         setTimeout(() => setToastMessage(null), 4000)
     }, [])
 
-    const handleRegister = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        
-        if (password !== confirmPassword) {
-            showToast("Пароли не совпадают", "error")
-            return
-        }
-
-        if (password.length < 8) {
-            showToast("Пароль должен содержать минимум 8 символов", "error")
-            return
-        }
+    const onSubmit = async (data: TRegisterSchema) => {
+        // Remove confirmPassword from input
+        const { confirmPassword, ...input } = data
 
         const response = await register({
-            variables: { 
-                input: { 
-                    email, 
-                    password, 
-                    name: name || undefined, 
-                    phone: phone || undefined 
-                } 
+            variables: {
+                input: {
+                    email: input.email,
+                    password: input.password,
+                    name: input.name || undefined,
+                    phone: input.phone || undefined
+                }
             }
         })
 
@@ -65,14 +72,14 @@ export default function RegisterPage() {
         }
 
         // Handle successful registration
-        const data = response.data?.register
-        if (data?.user) {
-            showToast(data.message || "Аккаунт создан!")
+        const responseData = response.data?.register
+        if (responseData?.user) {
+            showToast(responseData.message || "Аккаунт создан!")
             setTimeout(() => {
                 router.push("/dashboard")
             }, 1000)
         }
-    }, [register, email, password, confirmPassword, name, phone, showToast, router])
+    }
 
     return (
         <>
@@ -101,117 +108,154 @@ export default function RegisterPage() {
                 </p>
             </motion.div>
 
-            <motion.form 
-                className="space-y-4" 
-                onSubmit={handleRegister}
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.2 }}
-            >
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5" />
-                        Имя
-                    </label>
-                    <Input
-                        type="text"
-                        placeholder="Иван Петров"
-                        disabled={isLoading}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-                
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5" />
-                        Email
-                    </label>
-                    <Input
-                        type="email"
-                        placeholder="name@example.com"
-                        required
-                        disabled={isLoading}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5" />
-                        Телефон
-                    </label>
-                    <Input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+7 (999) 123-45-67"
-                        disabled={isLoading}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5" />
-                            Пароль
-                        </label>
-                        <Input
-                            type="password"
-                            placeholder="••••••••"
-                            required
-                            disabled={isLoading}
-                            minLength={8}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground ml-1">
-                            Повтор
-                        </label>
-                        <Input
-                            type="password"
-                            placeholder="••••••••"
-                            required
-                            disabled={isLoading}
-                            minLength={8}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                        />
-                    </div>
-                </div>
-
-                <motion.div
+            <Form {...form}>
+                <motion.form
+                    className="space-y-4"
+                    onSubmit={form.handleSubmit(onSubmit)}
                     variants={fadeIn}
                     initial="hidden"
                     animate="visible"
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.2 }}
                 >
-                    <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group mt-2"
-                    >
-                        {isLoading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <>
-                                Создать аккаунт
-                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </>
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <User className="w-3.5 h-3.5" />
+                                    Имя
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        placeholder="Иван Петров"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
                         )}
-                    </Button>
-                </motion.div>
-            </motion.form>
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5" />
+                                    Email
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="name@example.com"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5" />
+                                    Телефон
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="tel"
+                                        placeholder="+7 (999) 123-45-67"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                        <Lock className="w-3.5 h-3.5" />
+                                        Пароль
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            disabled={isLoading}
+                                            className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-xs font-medium text-muted-foreground ml-1">
+                                        Повтор
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            disabled={isLoading}
+                                            className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <motion.div
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: 0.3 }}
+                    >
+                        <Button
+                            type="submit"
+                            disabled={isLoading || !form.formState.isValid}
+                            className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group mt-2"
+                        >
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    Создать аккаунт
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </Button>
+                    </motion.div>
+                </motion.form>
+            </Form>
 
             <motion.div 
                 className="mt-6 text-center text-sm text-muted-foreground"

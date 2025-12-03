@@ -1,10 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Check, Loader2, Mail, Send } from "lucide-react"
-import { Button, Card, Input } from "@/packages/components"
+import { ArrowLeft, Check, Loader2, Mail, Send, AlertCircle } from "lucide-react"
+import { useMutation } from "@apollo/client/react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
+import { ForgotPasswordDocument } from "@/packages/api/graphql"
+import { forgotPasswordSchema, TForgotPasswordSchema } from "@/packages/schemas"
+import { useAutoValidateForm } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -12,24 +19,46 @@ const fadeIn = {
 }
 
 export default function ForgotPasswordPage() {
-    const [isLoading, setIsLoading] = useState(false)
     const [isEmailSent, setIsEmailSent] = useState(false)
     const [toastMessage, setToastMessage] = useState<string | null>(null)
+    const [toastType, setToastType] = useState<"success" | "error">("success")
 
-    const showToast = (msg: string) => {
+    // React Hook Form with Zod validation
+    const form = useForm<TForgotPasswordSchema>({
+        resolver: zodResolver(forgotPasswordSchema),
+        defaultValues: { email: '' },
+        mode: 'onTouched',
+        reValidateMode: 'onChange'
+    })
+
+    // Auto-validate form with debounce
+    useAutoValidateForm(form, ['email'])
+
+    // Apollo mutation
+    const [forgotPassword, { loading: isLoading }] = useMutation(ForgotPasswordDocument)
+
+    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
         setToastMessage(msg)
-        setTimeout(() => setToastMessage(null), 3000)
-    }
+        setToastType(type)
+        setTimeout(() => setToastMessage(null), 4000)
+    }, [])
 
-    const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setIsLoading(true)
-        
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        setIsLoading(false)
-        setIsEmailSent(true)
-        showToast("Ссылка отправлена")
+    const onSubmit = async (data: TForgotPasswordSchema) => {
+        const response = await forgotPassword({
+            variables: { email: data.email }
+        })
+
+        // Handle errors
+        if (response.errors?.length) {
+            showToast(response.errors[0]?.message || 'Ошибка отправки', 'error')
+            return
+        }
+
+        // Handle success
+        if (response.data?.forgotPassword) {
+            setIsEmailSent(true)
+            showToast("Ссылка отправлена")
+        }
     }
 
     if (isEmailSent) {
@@ -133,43 +162,54 @@ export default function ForgotPasswordPage() {
                 </p>
             </motion.div>
 
-            <motion.form 
-                className="space-y-5" 
-                onSubmit={handleForgotPassword}
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.2 }}
-            >
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5" />
-                        Email
-                    </label>
-                    <Input
-                        type="email"
-                        placeholder="name@example.com"
-                        required
-                        disabled={isLoading}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-
-                <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+            <Form {...form}>
+                <motion.form
+                    className="space-y-5"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    variants={fadeIn}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ delay: 0.2 }}
                 >
-                    {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        <>
-                            <Send className="w-4 h-4 mr-2" />
-                            Отправить ссылку
-                        </>
-                    )}
-                </Button>
-            </motion.form>
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5" />
+                                    Email
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="name@example.com"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Button
+                        type="submit"
+                        disabled={isLoading || !form.formState.isValid}
+                        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                <Send className="w-4 h-4 mr-2" />
+                                Отправить ссылку
+                            </>
+                        )}
+                    </Button>
+                </motion.form>
+            </Form>
 
             <motion.div 
                 className="mt-6"
@@ -188,23 +228,31 @@ export default function ForgotPasswordPage() {
             </motion.div>
 
         </Card>
-        <Toast message={toastMessage} />
+        <Toast message={toastMessage} type={toastType} />
         </>
     )
 }
 
-function Toast({ message }: { message: string | null }) {
+function Toast({ message, type = "success" }: { message: string | null; type?: "success" | "error" }) {
     return (
         <AnimatePresence>
             {message && (
                 <motion.div
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl shadow-success/25 flex items-center gap-3 bg-success text-success-foreground"
+                    className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
+                        type === "success"
+                            ? "bg-success text-success-foreground shadow-success/25"
+                            : "bg-destructive text-destructive-foreground shadow-destructive/25"
+                    }`}
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                    <Check className="w-4 h-4" />
+                    {type === "success" ? (
+                        <Check className="w-4 h-4" />
+                    ) : (
+                        <AlertCircle className="w-4 h-4" />
+                    )}
                     <span className="text-sm font-medium whitespace-nowrap">{message}</span>
                 </motion.div>
             )}

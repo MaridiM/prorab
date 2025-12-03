@@ -6,9 +6,13 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Check, Loader2, Mail, Lock, AlertCircle } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-import { Button, Card, Input } from "@/packages/components"
+import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
 import { LoginDocument } from "@/packages/api/graphql"
+import { loginSchema, TLoginSchema } from "@/packages/schemas"
+import { useAutoValidateForm } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -17,10 +21,19 @@ const fadeIn = {
 
 export default function LoginPage() {
     const router = useRouter()
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
     const [toastMessage, setToastMessage] = useState<string | null>(null)
     const [toastType, setToastType] = useState<"success" | "error">("success")
+
+    // React Hook Form with Zod validation
+    const form = useForm<TLoginSchema>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: '', password: '' },
+        mode: 'onTouched',
+        reValidateMode: 'onChange'
+    })
+
+    // Auto-validate form with debounce
+    useAutoValidateForm(form, ['email', 'password'])
 
     // Apollo mutation with typed document
     const [login, { loading: isLoading }] = useMutation(LoginDocument)
@@ -31,11 +44,9 @@ export default function LoginPage() {
         setTimeout(() => setToastMessage(null), 4000)
     }, [])
 
-    const handleLogin = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        
+    const onSubmit = async (data: TLoginSchema) => {
         const response = await login({
-            variables: { input: { email, password } }
+            variables: { input: data }
         })
 
         // Handle errors (errorPolicy: 'all' returns errors in response.error)
@@ -52,7 +63,7 @@ export default function LoginPage() {
                 router.push("/dashboard")
             }, 800)
         }
-    }, [login, email, password, showToast, router])
+    }
 
     const handleTelegramLogin = useCallback(() => {
         // TODO: Implement Telegram login
@@ -86,68 +97,85 @@ export default function LoginPage() {
                 </p>
             </motion.div>
 
-            <motion.form 
-                className="space-y-5" 
-                onSubmit={handleLogin}
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.2 }}
-            >
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5" />
-                        Email
-                    </label>
-                    <Input
-                        type="email"
-                        placeholder="name@example.com"
-                        required
-                        disabled={isLoading}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center ml-1">
-                        <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5" />
-                            Пароль
-                        </label>
-                        <Link
-                            href="/auth/forgot-password"
-                            className="text-xs text-primary hover:text-primary/80 transition-colors"
-                        >
-                            Забыли пароль?
-                        </Link>
-                    </div>
-                    <Input
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        disabled={isLoading}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-
-                <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+            <Form {...form}>
+                <motion.form
+                    className="space-y-5"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    variants={fadeIn}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ delay: 0.2 }}
                 >
-                    {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        <>
-                            Войти
-                            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                </Button>
-            </motion.form>
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5" />
+                                    Email
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        placeholder="name@example.com"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex justify-between items-center ml-1">
+                                    <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                                        <Lock className="w-3.5 h-3.5" />
+                                        Пароль
+                                    </FormLabel>
+                                    <Link
+                                        href="/auth/forgot-password"
+                                        className="text-xs text-primary hover:text-primary/80 transition-colors"
+                                    >
+                                        Забыли пароль?
+                                    </Link>
+                                </div>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Button
+                        type="submit"
+                        disabled={isLoading || !form.formState.isValid}
+                        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                Войти
+                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </Button>
+                </motion.form>
+            </Form>
 
             <motion.div 
                 className="relative my-6"

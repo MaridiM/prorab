@@ -1,11 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, Loader2, Lock, ShieldCheck } from "lucide-react"
-import { Button, Card, Input } from "@/packages/components"
+import { ArrowLeft, ArrowRight, Check, Loader2, Lock, ShieldCheck, AlertCircle } from "lucide-react"
+import { useMutation } from "@apollo/client/react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
+import { ResetPasswordDocument } from "@/packages/api/graphql"
+import { resetPasswordSchema, TResetPasswordSchema } from "@/packages/schemas"
+import { useAutoValidateForm } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -14,40 +21,62 @@ const fadeIn = {
 
 export default function ResetPasswordPage() {
     const router = useRouter()
-    const [isLoading, setIsLoading] = useState(false)
+    const searchParams = useSearchParams()
+    const token = searchParams.get('token')
     const [toastMessage, setToastMessage] = useState<string | null>(null)
     const [toastType, setToastType] = useState<"success" | "error">("success")
 
-    const showToast = (msg: string, type: "success" | "error" = "success") => {
+    // React Hook Form with Zod validation
+    const form = useForm<TResetPasswordSchema>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: {
+            password: '',
+            confirmPassword: ''
+        },
+        mode: 'onTouched',
+        reValidateMode: 'onChange'
+    })
+
+    // Auto-validate form with debounce
+    useAutoValidateForm(form, ['password', 'confirmPassword'])
+
+    // Apollo mutation
+    const [resetPassword, { loading: isLoading }] = useMutation(ResetPasswordDocument)
+
+    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
         setToastMessage(msg)
         setToastType(type)
-        setTimeout(() => setToastMessage(null), 3000)
-    }
+        setTimeout(() => setToastMessage(null), 4000)
+    }, [])
 
-    const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const password = formData.get("password") as string
-        const confirmPassword = formData.get("confirmPassword") as string
-
-        if (password !== confirmPassword) {
-            showToast("Пароли не совпадают", "error")
+    const onSubmit = async (data: TResetPasswordSchema) => {
+        if (!token) {
+            showToast("Токен не найден", "error")
             return
         }
 
-        if (password.length < 8) {
-            showToast("Минимум 8 символов", "error")
+        const response = await resetPassword({
+            variables: {
+                input: {
+                    token,
+                    newPassword: data.password
+                }
+            }
+        })
+
+        // Handle errors
+        if (response.errors?.length) {
+            showToast(response.errors[0]?.message || 'Ошибка сброса пароля', 'error')
             return
         }
 
-        setIsLoading(true)
-        
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        showToast("Пароль изменён!")
-        setTimeout(() => {
-            router.push("/auth/login")
-        }, 1500)
+        // Handle success
+        if (response.data?.resetPassword) {
+            showToast("Пароль изменён!")
+            setTimeout(() => {
+                router.push("/auth/login")
+            }, 1500)
+        }
     }
 
     return (
@@ -77,77 +106,94 @@ export default function ResetPasswordPage() {
                 </p>
             </motion.div>
 
-            <motion.form 
-                className="space-y-5" 
-                onSubmit={handleResetPassword}
-                variants={fadeIn}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.2 }}
-            >
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5" />
-                        Новый пароль
-                    </label>
-                    <Input
-                        type="password"
-                        name="password"
-                        placeholder="Минимум 8 символов"
-                        required
-                        disabled={isLoading}
-                        minLength={8}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5" />
-                        Повторите пароль
-                    </label>
-                    <Input
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="••••••••"
-                        required
-                        disabled={isLoading}
-                        minLength={8}
-                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-                    />
-                </div>
-
-                {/* Password requirements */}
-                <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Требования к паролю:</p>
-                    {[
-                        "Минимум 8 символов",
-                        "Латинские буквы",
-                        "Хотя бы одна цифра"
-                    ].map((req, i) => (
-                        <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5" />
-                            </div>
-                            {req}
-                        </div>
-                    ))}
-                </div>
-
-                <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 rounded-xl bg-success text-success-foreground font-semibold shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30 hover:bg-success/90 active:scale-[0.98] transition-all duration-200 group"
+            <Form {...form}>
+                <motion.form
+                    className="space-y-5"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    variants={fadeIn}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ delay: 0.2 }}
                 >
-                    {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        <>
-                            Сохранить пароль
-                            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                </Button>
-            </motion.form>
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Lock className="w-3.5 h-3.5" />
+                                    Новый пароль
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder="Минимум 8 символов"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                                    <Lock className="w-3.5 h-3.5" />
+                                    Повторите пароль
+                                </FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        disabled={isLoading}
+                                        className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Password requirements */}
+                    <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Требования к паролю:</p>
+                        {[
+                            "Минимум 8 символов",
+                            "Латинские буквы",
+                            "Хотя бы одна цифра"
+                        ].map((req, i) => (
+                            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center">
+                                    <Check className="w-2.5 h-2.5" />
+                                </div>
+                                {req}
+                            </div>
+                        ))}
+                    </div>
+
+                    <Button
+                        type="submit"
+                        disabled={isLoading || !form.formState.isValid}
+                        className="w-full h-12 rounded-xl bg-success text-success-foreground font-semibold shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30 hover:bg-success/90 active:scale-[0.98] transition-all duration-200 group"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                Сохранить пароль
+                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </Button>
+                </motion.form>
+            </Form>
 
             <motion.div 
                 className="mt-6"
@@ -177,8 +223,8 @@ function Toast({ message, type = "success" }: { message: string | null; type?: "
             {message && (
                 <motion.div
                     className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
-                        type === "success" 
-                            ? "bg-success text-success-foreground shadow-success/25" 
+                        type === "success"
+                            ? "bg-success text-success-foreground shadow-success/25"
                             : "bg-destructive text-destructive-foreground shadow-destructive/25"
                     }`}
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -186,7 +232,11 @@ function Toast({ message, type = "success" }: { message: string | null; type?: "
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                 >
-                    <Check className="w-4 h-4" />
+                    {type === "success" ? (
+                        <Check className="w-4 h-4" />
+                    ) : (
+                        <AlertCircle className="w-4 h-4" />
+                    )}
                     <span className="text-sm font-medium whitespace-nowrap">{message}</span>
                 </motion.div>
             )}
