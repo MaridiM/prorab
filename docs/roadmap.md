@@ -158,3 +158,23 @@
   - [x] Проверить наличие ForgotPasswordDocument и ResetPasswordDocument (✅ найдены в output.ts)
   - [x] Мутации уже существуют в GraphQL API
   - [x] Codegen не требуется (типы уже сгенерированы)
+
+### Централизация Toast системы с Zustand (2025-12-03)
+
+- [x] **Проблема**: Дублирование кода Toast компонента в 4 страницах (login, register, forgot-password, reset-password) - 104 строки дублирования
+- [x] **Решение**: Создана централизованная Toast система с Zustand state management
+- [x] **Этап 1: Создание инфраструктуры**
+  - [x] `toast.types.ts` - TypeScript типы (ToastType, Toast interface)
+  - [x] `toast.store.ts` - Zustand store с auto-hide через 4 секунды
+  - [x] `toast.tsx` - глобальный UI компонент с Framer Motion анимацией
+  - [x] `use-toast.ts` - convenience hook с методами success/error
+- [x] **Этап 2: Интеграция в приложение**
+  - [x] Добавлен Toast в providers.tsx как глобальный компонент
+  - [x] Экспорты в components/ui/index.ts и hooks/index.ts
+- [x] **Этап 3: Рефакторинг auth страниц**
+  - [x] Login page - удалено 26 строк дублированного кода
+  - [x] Register page - удалено 26 строк дублированного кода
+  - [x] Forgot Password page - удалено 26 строк дублированного кода
+  - [x] Reset Password page - удалено 26 строк дублированного кода
+  - [x] Auth context - исправлена обработка ошибок (response.error вместо response.errors)
+- [x] **Результат**: Удалено 104 строки дублированного кода, создана переиспользуемая Toast система

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Check, Loader2, Mail, Send, AlertCircle } from "lucide-react"
+import { motion } from "framer-motion"
+import { ArrowLeft, Loader2, Mail, Send } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
 import { ForgotPasswordDocument } from "@/packages/api/graphql"
 import { forgotPasswordSchema, TForgotPasswordSchema } from "@/packages/schemas"
-import { useAutoValidateForm } from "@/packages/hooks"
+import { useAutoValidateForm, useToast } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -20,8 +20,7 @@ const fadeIn = {
 
 export default function ForgotPasswordPage() {
     const [isEmailSent, setIsEmailSent] = useState(false)
-    const [toastMessage, setToastMessage] = useState<string | null>(null)
-    const [toastType, setToastType] = useState<"success" | "error">("success")
+    const { success, error } = useToast()
 
     // React Hook Form with Zod validation
     const form = useForm<TForgotPasswordSchema>({
@@ -34,36 +33,49 @@ export default function ForgotPasswordPage() {
     // Auto-validate form with debounce
     useAutoValidateForm(form, ['email'])
 
-    // Apollo mutation
-    const [forgotPassword, { loading: isLoading }] = useMutation(ForgotPasswordDocument)
-
-    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
-        setToastMessage(msg)
-        setToastType(type)
-        setTimeout(() => setToastMessage(null), 4000)
-    }, [])
+    // Apollo mutation with error handling
+    const [forgotPassword, { loading: isLoading }] = useMutation(ForgotPasswordDocument, {
+        errorPolicy: 'all',
+        onError: (apolloError) => {
+            // Handle errors that don't make it to response.errors
+            const errorMessage = apolloError.message || 'Ошибка отправки'
+            error(errorMessage)
+        }
+    })
 
     const onSubmit = async (data: TForgotPasswordSchema) => {
-        const response = await forgotPassword({
-            variables: { email: data.email }
-        })
+        try {
+            const response = await forgotPassword({
+                variables: { email: data.email }
+            })
 
-        // Handle errors
-        if (response.errors?.length) {
-            showToast(response.errors[0]?.message || 'Ошибка отправки', 'error')
-            return
-        }
+            // Handle GraphQL errors (errorPolicy: 'all' returns errors in response.error)
+            if (response.error) {
+                const errorMessage = response.error.message || 'Ошибка отправки'
+                error(errorMessage)
+                return
+            }
 
-        // Handle success
-        if (response.data?.forgotPassword) {
-            setIsEmailSent(true)
-            showToast("Ссылка отправлена")
+            // Handle success
+            if (response.data?.forgotPassword) {
+                setIsEmailSent(true)
+                success("Ссылка отправлена")
+            } else if (response.data === null || response.data === undefined) {
+                // No data at all - this shouldn't happen with errorPolicy: 'all', but handle it
+                error('Ошибка соединения с сервером. Попробуйте еще раз.')
+            } else {
+                // Unexpected response: no errors but no success data
+                error('Неожиданный ответ от сервера. Попробуйте еще раз.')
+            }
+        } catch (err: any) {
+            // Handle network or other errors
+            const errorMessage = err?.message || 'Ошибка отправки'
+            error(errorMessage)
         }
     }
 
     if (isEmailSent) {
         return (
-            <>
             <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
                 {/* Decorative gradient */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-success via-emerald-400 to-success" />
@@ -118,13 +130,10 @@ export default function ForgotPasswordPage() {
                     </Link>
                 </motion.div>
             </Card>
-            <Toast message={toastMessage} />
-            </>
         )
     }
 
     return (
-        <>
         <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
             {/* Decorative gradient */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary via-blue-400 to-primary" />
@@ -228,34 +237,5 @@ export default function ForgotPasswordPage() {
             </motion.div>
 
         </Card>
-        <Toast message={toastMessage} type={toastType} />
-        </>
-    )
-}
-
-function Toast({ message, type = "success" }: { message: string | null; type?: "success" | "error" }) {
-    return (
-        <AnimatePresence>
-            {message && (
-                <motion.div
-                    className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
-                        type === "success"
-                            ? "bg-success text-success-foreground shadow-success/25"
-                            : "bg-destructive text-destructive-foreground shadow-destructive/25"
-                    }`}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                >
-                    {type === "success" ? (
-                        <Check className="w-4 h-4" />
-                    ) : (
-                        <AlertCircle className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-medium whitespace-nowrap">{message}</span>
-                </motion.div>
-            )}
-        </AnimatePresence>
     )
 }

@@ -782,6 +782,74 @@
 
 ---
 
+## Module: Frontend UX Improvements
+
+### Step: Password Visibility Toggle & Error Handling
+
+:calendar: `2025-12-02`
+
+**Added**
+
+- ✅ Created `PasswordInput` component with show/hide password toggle
+  - Eye/EyeOff icons from lucide-react
+  - Toggle button positioned on the right side of input
+  - Smooth transition between password and text input types
+- ✅ Improved error handling in authentication forms:
+  - Added try-catch blocks for better error catching
+  - Enhanced error message extraction from GraphQL errors
+  - Better handling of network errors and GraphQL errors
+- ✅ Applied password visibility toggle to all password fields:
+  - Login form (`/auth/login`)
+  - Register form (`/auth/register`) - both password and confirmPassword fields
+  - Reset password form (`/auth/reset-password`) - both password fields
+
+**Changed**
+
+- ✅ Replaced `Input` with `type="password"` to `PasswordInput` component in all auth forms
+- ✅ Enhanced error handling in `onSubmit` handlers:
+  - Login form now catches and displays GraphQL errors properly
+  - Register form improved error handling
+  - Reset password form improved error handling
+- ✅ Updated component exports to include `PasswordInput`
+
+**Fixed**
+
+- ✅ Fixed error display issue where GraphQL errors weren't shown to users
+- ✅ Improved error message extraction to handle different error formats
+- ✅ Fixed password input UX by adding visibility toggle
+- ✅ Added fallback error handling for unexpected responses (no errors but no data)
+- ✅ All auth forms now show toast notifications for all error scenarios:
+  - GraphQL errors (e.g., "Неверный email или пароль", "Слишком много попыток")
+  - Network errors
+  - Unexpected responses (no errors but no expected data)
+- ✅ Added `onError` callback to `useMutation` hooks for better error catching
+- ✅ Improved error message extraction to handle all error formats:
+  - `response.errors[0].message` (GraphQL errors)
+  - `error.message` (general errors)
+  - `error.graphQLErrors[0].message` (GraphQL errors in catch)
+  - `error.networkError.message` (network errors)
+- ✅ Fixed error display issue where actual error messages weren't shown to users
+
+**Removed**
+
+- ❌ N/A
+
+**Files Modified**
+
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/register/page.tsx`
+- `apps/web/src/app/(root)/auth/reset-password/page.tsx`
+
+**Files Created**
+
+- `apps/web/src/packages/components/ui/password-input.tsx`
+
+**Files Modified (Exports)**
+
+- `apps/web/src/packages/components/ui/index.ts`
+
+---
+
 ## Module: Architecture Reorganization
 
 ### Step: Project Structure Refactoring

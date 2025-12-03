@@ -95,8 +95,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       variables: { input: { email, password } } 
     })
 
-    if (response.errors?.length) {
-      throw new Error(response.errors[0]?.message || 'Ошибка входа')
+    if (response.error) {
+      throw new Error(response.error.message || 'Ошибка входа')
     }
 
     const userData = response.data?.login?.user
@@ -113,11 +113,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const register = useCallback(async (registerData: RegisterData) => {
     const response = await registerMutation({
-      variables: { input: registerData }
+      variables: {
+        input: {
+          email: registerData.email,
+          password: registerData.password,
+          name: registerData.name || null,
+          phone: registerData.phone || null
+        }
+      }
     })
 
-    if (response.errors?.length) {
-      throw new Error(response.errors[0]?.message || 'Ошибка регистрации')
+    if (response.error) {
+      throw new Error(response.error.message || 'Ошибка регистрации')
     }
 
     const userData = response.data?.register?.user

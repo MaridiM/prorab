@@ -1,5 +1,98 @@
 # Changelog (frontend)
 
+## Module: UI Components
+
+### Step: Toast System Centralization with Zustand
+
+:calendar: `2025-12-03`
+
+**Problem**
+
+- ❌ Toast notification component duplicated across 4 auth pages (login, register, forgot-password, reset-password)
+- ❌ 104 lines of duplicated code (26 lines × 4 files)
+- ❌ Inconsistent state management with local useState in each page
+- ❌ Difficult to maintain and update Toast behavior across all pages
+
+**Solution**
+
+- ✅ Created centralized Toast system using Zustand state management
+- ✅ Single source of truth for Toast notifications across the entire application
+- ✅ Global Toast component mounted once in providers.tsx
+- ✅ Convenient useToast hook with success/error methods
+
+**Added**
+
+- ✅ `toast.types.ts` — TypeScript types for Toast system (ToastType = 'success' | 'error', Toast interface)
+- ✅ `toast.store.ts` — Zustand store with auto-hide functionality (4 seconds timeout)
+- ✅ `toast.tsx` — Global Toast UI component with Framer Motion animations and ARIA attributes
+- ✅ `use-toast.ts` — Convenience hook with methods: toast(), success(), error()
+- ✅ Toast component integrated in providers.tsx as global component
+- ✅ Exports added to components/ui/index.ts and hooks/index.ts
+
+**Changed**
+
+- ✅ **Login page** — replaced local Toast with useToast hook, removed 26 lines of duplicated code
+- ✅ **Register page** — replaced local Toast with useToast hook, removed 26 lines of duplicated code
+- ✅ **Forgot Password page** — replaced local Toast with useToast hook, removed 26 lines of duplicated code
+- ✅ **Reset Password page** — replaced local Toast with useToast hook, removed 26 lines of duplicated code
+- ✅ **Auth context** — fixed error handling (response.error instead of response.errors for Apollo mutation result)
+
+**Fixed**
+
+- ✅ Removed JSX fragment wrappers (`<>` and `</>`) from auth pages
+- ✅ Fixed TypeScript errors: response.errors → response.error for Apollo Client mutation results
+- ✅ Fixed register page: optional fields (name, phone) now use `|| null` instead of `|| undefined` for GraphQL InputMaybe type
+- ✅ Added missing Check icon import in reset-password page
+
+**Removed**
+
+- ❌ Local Toast component from login page (26 lines)
+- ❌ Local Toast component from register page (26 lines)
+- ❌ Local Toast component from forgot-password page (26 lines)
+- ❌ Local Toast component from reset-password page (26 lines)
+- ❌ useState for toast message and type management from all auth pages
+- ❌ useCallback for showToast functions from all auth pages
+
+**Files Created**
+
+- `apps/web/src/packages/libs/store/toast.types.ts`
+- `apps/web/src/packages/libs/store/toast.store.ts`
+- `apps/web/src/packages/components/ui/toast.tsx`
+- `apps/web/src/packages/hooks/use-toast.ts`
+- `apps/web/src/packages/hooks/index.ts`
+
+**Files Modified**
+
+- `apps/web/src/packages/libs/store/index.ts` — added toast exports
+- `apps/web/src/packages/components/ui/index.ts` — added Toast export
+- `apps/web/src/packages/components/features/providers.tsx` — added global Toast component
+- `apps/web/src/app/(root)/auth/login/page.tsx` — integrated useToast hook
+- `apps/web/src/app/(root)/auth/register/page.tsx` — integrated useToast hook
+- `apps/web/src/app/(root)/auth/forgot-password/page.tsx` — integrated useToast hook
+- `apps/web/src/app/(root)/auth/reset-password/page.tsx` — integrated useToast hook
+- `apps/web/src/packages/libs/auth/auth.context.tsx` — fixed error handling
+
+**Benefits**
+
+- 🎯 **DRY Principle** — eliminated 104 lines of duplicated code
+- 🏗️ **Centralized Management** — single Toast system for entire application
+- ⚡ **Better Performance** — single Toast component instead of 4 separate instances
+- 🔄 **Easier Maintenance** — changes to Toast behavior now require updating only one file
+- 🎨 **Consistent UX** — identical Toast behavior and styling across all pages
+- 🧪 **Testability** — centralized Toast logic easier to test and mock
+- 📦 **Scalability** — new pages can easily use Toast via simple useToast() hook
+
+**Technical Details**
+
+- Zustand store manages Toast state with automatic cleanup after 4 seconds
+- Framer Motion AnimatePresence provides smooth enter/exit animations
+- ARIA attributes (role="status", aria-live="polite", aria-atomic="true") ensure accessibility
+- Toast positioned at bottom center (fixed bottom-6 left-1/2 -translate-x-1/2)
+- Supports success (green with Check icon) and error (red with AlertCircle icon) types
+- Z-index 50 ensures Toast appears above all content
+
+---
+
 ## Module: Forms Validation
 
 ### Step: Forms Migration to react-hook-form + Zod

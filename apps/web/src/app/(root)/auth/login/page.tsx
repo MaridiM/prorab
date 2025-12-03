@@ -1,18 +1,18 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Check, Loader2, Mail, Lock, AlertCircle } from "lucide-react"
+import { motion } from "framer-motion"
+import { ArrowRight, Loader2, Mail, Lock } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
-import { Button, Card, Input, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
+import { Button, Card, Input, PasswordInput, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
 import { LoginDocument } from "@/packages/api/graphql"
 import { loginSchema, TLoginSchema } from "@/packages/schemas"
-import { useAutoValidateForm } from "@/packages/hooks"
+import { useAutoValidateForm, useToast } from "@/packages/hooks"
 
 const fadeIn = {
     hidden: { opacity: 0, y: 10 },
@@ -21,8 +21,7 @@ const fadeIn = {
 
 export default function LoginPage() {
     const router = useRouter()
-    const [toastMessage, setToastMessage] = useState<string | null>(null)
-    const [toastType, setToastType] = useState<"success" | "error">("success")
+    const { success, error } = useToast()
 
     // React Hook Form with Zod validation
     const form = useForm<TLoginSchema>({
@@ -35,43 +34,56 @@ export default function LoginPage() {
     // Auto-validate form with debounce
     useAutoValidateForm(form, ['email', 'password'])
 
-    // Apollo mutation with typed document
-    const [login, { loading: isLoading }] = useMutation(LoginDocument)
-
-    const showToast = useCallback((msg: string, type: "success" | "error" = "success") => {
-        setToastMessage(msg)
-        setToastType(type)
-        setTimeout(() => setToastMessage(null), 4000)
-    }, [])
+    // Apollo mutation with typed document and error handling
+    const [login, { loading: isLoading }] = useMutation(LoginDocument, {
+        errorPolicy: 'all',
+        onError: (apolloError) => {
+            // Handle errors that don't make it to response.errors
+            const errorMessage = apolloError.message || 'Ошибка входа'
+            error(errorMessage)
+        }
+    })
 
     const onSubmit = async (data: TLoginSchema) => {
-        const response = await login({
-            variables: { input: data }
-        })
+        try {
+            const response = await login({
+                variables: { input: data }
+            })
 
-        // Handle errors (errorPolicy: 'all' returns errors in response.error)
-        if (response.errors?.length) {
-            showToast(response.errors[0]?.message || 'Ошибка входа', 'error')
-            return
-        }
+            // Handle GraphQL errors (errorPolicy: 'all' returns errors in response.errors)
+            if (response.error) {
+                const errorMessage = response.error.message || 'Ошибка входа'
+                error(errorMessage)
+                return
+            }
 
-        // Handle successful login
-        const user = response.data?.login?.user
-        if (user) {
-            showToast("Вход выполнен успешно")
-            setTimeout(() => {
-                router.push("/dashboard")
-            }, 800)
+            // Handle successful login
+            const user = response.data?.login?.user
+            if (user) {
+                success("Вход выполнен успешно")
+                setTimeout(() => {
+                    router.push("/dashboard")
+                }, 800)
+            } else if (response.data === null || response.data === undefined) {
+                // No data at all - this shouldn't happen with errorPolicy: 'all', but handle it
+                error('Ошибка соединения с сервером. Попробуйте еще раз.')
+            } else {
+                // Unexpected response: no errors but no user data
+                error('Неожиданный ответ от сервера. Попробуйте еще раз.')
+            }
+        } catch (err: any) {
+            // Handle network or other errors
+            const errorMessage = err?.message || 'Ошибка входа'
+            error(errorMessage)
         }
     }
 
     const handleTelegramLogin = useCallback(() => {
         // TODO: Implement Telegram login
-        showToast("Вход через Telegram будет доступен позже", "error")
-    }, [showToast])
+        error("Вход через Telegram будет доступен позже")
+    }, [error])
 
     return (
-        <>
         <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
             {/* Decorative gradient */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary via-accent to-primary" />
@@ -147,8 +159,7 @@ export default function LoginPage() {
                                     </Link>
                                 </div>
                                 <FormControl>
-                                    <Input
-                                        type="password"
+                                    <PasswordInput
                                         placeholder="••••••••"
                                         disabled={isLoading}
                                         className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
@@ -202,7 +213,7 @@ export default function LoginPage() {
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0 }}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
             >
@@ -235,34 +246,5 @@ export default function LoginPage() {
             </motion.div>
 
         </Card>
-        <Toast message={toastMessage} type={toastType} />
-        </>
-    )
-}
-
-function Toast({ message, type = "success" }: { message: string | null; type?: "success" | "error" }) {
-    return (
-        <AnimatePresence>
-            {message && (
-                <motion.div
-                    className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 ${
-                        type === "success" 
-                            ? "bg-success text-success-foreground shadow-success/25" 
-                            : "bg-destructive text-destructive-foreground shadow-destructive/25"
-                    }`}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                >
-                    {type === "success" ? (
-                        <Check className="w-4 h-4" />
-                    ) : (
-                        <AlertCircle className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-medium whitespace-nowrap">{message}</span>
-                </motion.div>
-            )}
-        </AnimatePresence>
     )
 }

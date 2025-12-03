@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes"
 import { Suspense } from "react"
 import { NavigationProgress } from "./navigation-progress"
 import { InitialLoader } from "./initial-loader"
+import { Toast } from "@/packages/components/ui/toast"
 
 interface ProvidersProps {
     children: React.ReactNode
@@ -22,6 +23,7 @@ export function Providers({ children }: ProvidersProps) {
                 <NavigationProgress />
             </Suspense>
             {children}
+            <Toast />
         </ThemeProvider>
     )
 }
