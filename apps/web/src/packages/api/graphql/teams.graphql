@@ -1,0 +1,234 @@
+# ==================== TYPES ====================
+
+type Team {
+  id: ID!
+  name: String!
+  logo: String
+  iconId: String
+  ownerId: String!
+  createdAt: String!
+  updatedAt: String!
+  owner: User!
+  members: [TeamMember!]!
+  projects: [Project!]!
+}
+
+type TeamMember {
+  id: ID!
+  teamId: String!
+  userId: String!
+  role: String!
+  joinedAt: String!
+  team: Team!
+  user: User!
+}
+
+type Project {
+  id: ID!
+  teamId: String!
+  name: String!
+  address: String
+  description: String
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  team: Team!
+}
+
+type InviteCode {
+  id: ID!
+  teamId: String!
+  code: String!
+  expiresAt: String!
+  usedBy: String
+  usedAt: String
+  createdAt: String!
+}
+
+type InviteCodeValidation {
+  valid: Boolean!
+  teamName: String
+  expired: Boolean!
+  used: Boolean!
+}
+
+# ==================== QUERIES ====================
+
+query MyTeams {
+  myTeams {
+    id
+    name
+    logo
+    iconId
+    ownerId
+    createdAt
+    updatedAt
+    members {
+      id
+      role
+      joinedAt
+      user {
+        id
+        name
+        email
+      }
+    }
+    projects {
+      id
+      name
+      address
+      description
+      isActive
+      createdAt
+    }
+  }
+}
+
+query ValidateInviteCode($code: String!) {
+  validateInviteCode(code: $code) {
+    valid
+    teamName
+    expired
+    used
+  }
+}
+
+query GetTeamInviteCode($teamId: String!) {
+  getTeamInviteCode(teamId: $teamId) {
+    id
+    code
+    expiresAt
+    usedBy
+    usedAt
+    createdAt
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation CompleteOnboarding(
+  $teamName: String!
+  $projectName: String!
+  $projectAddress: String
+  $projectDescription: String
+) {
+  completeOnboarding(
+    teamName: $teamName
+    projectName: $projectName
+    projectAddress: $projectAddress
+    projectDescription: $projectDescription
+  ) {
+    team {
+      id
+      name
+      logo
+      iconId
+      createdAt
+    }
+    project {
+      id
+      name
+      address
+      description
+      isActive
+      createdAt
+    }
+  }
+}
+
+mutation UpdateTeamLogo($teamId: String!, $logo: Upload, $iconId: String) {
+  updateTeamLogo(teamId: $teamId, logo: $logo, iconId: $iconId) {
+    id
+    name
+    logo
+    iconId
+    updatedAt
+  }
+}
+
+mutation CreateInviteCode($teamId: String!) {
+  createInviteCode(teamId: $teamId) {
+    id
+    code
+    expiresAt
+    createdAt
+  }
+}
+
+mutation JoinTeamByInvite($code: String!) {
+  joinTeamByInvite(code: $code) {
+    id
+    name
+    logo
+    iconId
+    members {
+      id
+      role
+      user {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+
+mutation CreateTeam($name: String!) {
+  createTeam(name: $name) {
+    id
+    name
+    createdAt
+  }
+}
+
+mutation UpdateTeam($teamId: String!, $name: String) {
+  updateTeam(teamId: $teamId, name: $name) {
+    id
+    name
+    updatedAt
+  }
+}
+
+mutation CreateProject(
+  $teamId: String!
+  $name: String!
+  $address: String
+  $description: String
+) {
+  createProject(
+    teamId: $teamId
+    name: $name
+    address: $address
+    description: $description
+  ) {
+    id
+    name
+    address
+    description
+    isActive
+    createdAt
+  }
+}
+
+mutation UpdateProject(
+  $projectId: String!
+  $name: String
+  $address: String
+  $description: String
+  $isActive: Boolean
+) {
+  updateProject(
+    projectId: $projectId
+    name: $name
+    address: $address
+    description: $description
+    isActive: $isActive
+  ) {
+    id
+    name
+    address
+    description
+    isActive
+    updatedAt
+  }
+}

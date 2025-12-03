@@ -11,7 +11,8 @@ export class UsersResolver {
 
 	@Query(() => User, { nullable: true })
 	async me(@CurrentUser() currentUser: CurrentUserData): Promise<User | null> {
-		return this.usersService.findById(currentUser.id)
+		const user = await this.usersService.findById(currentUser.id)
+		return user as unknown as User | null
 	}
 }
 

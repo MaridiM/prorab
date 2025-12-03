@@ -83,6 +83,7 @@ type User {
   createdAt: DateTime!
   email: String!
   emailVerified: Boolean!
+  hasCompletedOnboarding: Boolean!
   id: ID!
   name: String
   phone: String

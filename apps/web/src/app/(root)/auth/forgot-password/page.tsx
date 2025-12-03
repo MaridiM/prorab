@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { ArrowLeft, Loader2, Mail, Send } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
@@ -13,9 +13,16 @@ import { ForgotPasswordDocument } from "@/packages/api/graphql"
 import { forgotPasswordSchema, TForgotPasswordSchema } from "@/packages/schemas"
 import { useAutoValidateForm, useToast } from "@/packages/hooks"
 
-const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+const fadeIn: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: [0.22, 0.61, 0.36, 1]
+        }
+    }
 }
 
 export default function ForgotPasswordPage() {
@@ -146,8 +153,11 @@ export default function ForgotPasswordPage() {
                 animate="visible"
                 transition={{ delay: 0.1 }}
             >
-                <motion.div 
+                <motion.div
                     className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     whileHover={{ scale: 1.05 }}
                 >
                     <svg
@@ -203,20 +213,27 @@ export default function ForgotPasswordPage() {
                         )}
                     />
 
-                    <Button
-                        type="submit"
-                        disabled={isLoading || !form.formState.isValid}
-                        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+                    <motion.div
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: 0.3 }}
                     >
-                        {isLoading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4 mr-2" />
-                                Отправить ссылку
-                            </>
-                        )}
-                    </Button>
+                        <Button
+                            type="submit"
+                            disabled={isLoading || !form.formState.isValid}
+                            className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+                        >
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4 mr-2" />
+                                    Отправить ссылку
+                                </>
+                            )}
+                        </Button>
+                    </motion.div>
                 </motion.form>
             </Form>
 

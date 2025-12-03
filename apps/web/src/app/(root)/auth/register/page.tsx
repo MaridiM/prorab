@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { ArrowRight, Loader2, Mail, Lock, User, Phone } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
@@ -13,9 +13,16 @@ import { RegisterDocument } from "@/packages/api/graphql"
 import { registerSchema, TRegisterSchema } from "@/packages/schemas"
 import { useAutoValidateForm, useToast } from "@/packages/hooks"
 
-const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+const fadeIn: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: [0.22, 0.61, 0.36, 1]
+        }
+    }
 }
 
 export default function RegisterPage() {
@@ -103,10 +110,12 @@ export default function RegisterPage() {
                 animate="visible"
                 transition={{ delay: 0.1 }}
             >
-                <motion.div 
+                <motion.div
                     className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     whileHover={{ scale: 1.05, rotate: -5 }}
-                    transition={{ type: "spring", stiffness: 400 }}
                 >
                     PR
                 </motion.div>

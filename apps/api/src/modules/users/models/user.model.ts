@@ -18,6 +18,9 @@ export class User {
 	emailVerified: boolean
 
 	@Field()
+	hasCompletedOnboarding: boolean
+
+	@Field()
 	createdAt: Date
 
 	@Field()

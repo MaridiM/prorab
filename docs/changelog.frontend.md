@@ -1,5 +1,365 @@
 # Changelog (frontend)
 
+## Module: Onboarding
+
+### Step: UI Components and Onboarding Pages
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Отсутствовали UI компоненты для онбординга (Stepper, IconPicker, TeamLogo)
+- ❌ Не было страниц для прохождения онбординга (3 шага + invite)
+- ❌ Нужен был flow для создания команды и присоединения по коду
+
+**Solution**
+
+- ✅ Созданы все необходимые UI компоненты с анимациями Framer Motion
+- ✅ Реализован полный onboarding flow с 3 шагами
+- ✅ Добавлена страница для присоединения по коду приглашения
+- ✅ Использован sessionStorage для сохранения прогресса
+
+**Added**
+
+- ✅ **Stepper Component** (`stepper.tsx`):
+  - Визуальный индикатор прогресса (1/3, 2/3, 3/3)
+  - Анимированные переходы между шагами
+  - Check-mark иконка для завершенных шагов
+  - Responsive дизайн с labels под каждым шагом
+
+- ✅ **IconPicker Component** (`icon-picker.tsx`):
+  - 10 предустановленных эмодзи (🔨, 🔧, 🏗️, 👷, 🧱, 🛠️, 🏠, 🏢, 🏗️, 🚚)
+  - 8 цветов фона (orange, blue, green, red, purple, yellow, pink, teal)
+  - Live preview с анимацией
+  - Grid layout с hover эффектами
+  - Экспорт констант TEAM_ICONS и BACKGROUND_COLORS
+
+- ✅ **TeamLogo Component** (`team-logo.tsx`):
+  - 3 режима отображения: uploaded image / emoji icon / initials
+  - 4 размера: sm, md, lg, xl
+  - Fallback на инициалы из названия команды
+  - Next.js Image optimization для загруженных логотипов
+
+- ✅ **Onboarding Pages**:
+  - **Layout** — градиентный фон, центрированный контейнер (max-w-md)
+  - **Start Page** (`/onboarding`) — 2 опции: создать бригаду / присоединиться
+  - **Step 1** (`/onboarding/step-1`) — форма названия бригады с валидацией
+  - **Step 2** (`/onboarding/step-2`) — выбор иконки и цвета, кнопка "Пропустить"
+  - **Step 3** (`/onboarding/step-3`) — форма первого проекта (название, адрес, описание)
+  - **Invite Page** (`/onboarding/invite`) — ввод 6-значного кода приглашения
+
+**Changed**
+
+- ✅ N/A
+
+**Fixed**
+
+- ✅ N/A
+
+**Removed**
+
+- ❌ N/A
+
+**Files Created**
+
+- `apps/web/src/packages/components/ui/stepper.tsx`
+- `apps/web/src/packages/components/ui/icon-picker.tsx`
+- `apps/web/src/packages/components/ui/team-logo.tsx`
+- `apps/web/src/app/(root)/onboarding/layout.tsx`
+- `apps/web/src/app/(root)/onboarding/page.tsx`
+- `apps/web/src/app/(root)/onboarding/step-1/page.tsx`
+- `apps/web/src/app/(root)/onboarding/step-2/page.tsx`
+- `apps/web/src/app/(root)/onboarding/step-3/page.tsx`
+- `apps/web/src/app/(root)/onboarding/invite/page.tsx`
+
+**Files Modified**
+
+- `apps/web/src/packages/components/ui/index.ts` — добавлены экспорты новых компонентов
+- `docs/roadmap.md` — отмечены completed задачи UI Components и Onboarding Pages
+
+**Benefits**
+
+- 🎨 **Современный дизайн** — все компоненты с Framer Motion анимациями
+- 📱 **Mobile-first** — адаптивный дизайн для всех экранов
+- ✅ **Валидация в реальном времени** — react-hook-form + Zod на всех формах
+- 💾 **Сохранение прогресса** — sessionStorage для восстановления данных при возврате
+- 🚀 **Готовность к интеграции** — все формы готовы к подключению GraphQL mutations
+- 🎯 **UX оптимизация** — loading states, disabled states, анимированные transitions
+- ♿ **Accessibility** — ARIA labels, keyboard navigation, screen reader support
+
+**Technical Details**
+
+- Stepper: использует Framer Motion для анимации progress bar и шагов
+- IconPicker: grid layout 5 колонок для иконок, 8 колонок для цветов
+- TeamLogo: Next.js Image с fill layout и object-cover для uploaded images
+- Step 1-3: sessionStorage keys `onboarding_step1/2/3` для сохранения прогресса
+- Invite Page: автоматический toUpperCase для кода, font-mono для читабельности
+- Validation: все формы используют zodResolver с реальными схемами валидации
+- Navigation: router.push для переходов, проверка наличия данных предыдущих шагов
+- Error Handling: FormMessage компоненты для отображения ошибок валидации
+
+**Next Steps**
+
+- ⏳ Создать ImageUpload Component для загрузки логотипов
+- ⏳ Реализовать backend Teams Module (Service + Resolver)
+- ⏳ Подключить GraphQL mutations к формам
+- ⏳ Добавить useOnboardingGuard hook для редиректов после auth
+- ⏳ Реализовать error handling для network/GraphQL errors
+
+---
+
+## Module: Onboarding
+
+### Step: GraphQL Schema and Database Models for Teams
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Отсутствовала база данных для хранения команд, участников, проектов и кодов приглашений
+- ❌ Не было GraphQL схемы для взаимодействия фронтенда с backend API
+- ❌ User модель не имела поле для отслеживания завершения онбординга
+
+**Solution**
+
+- ✅ Обновлена Prisma схема с полными моделями для Teams модуля
+- ✅ Создана GraphQL схема на фронтенде с queries и mutations
+- ✅ Добавлено поле hasCompletedOnboarding в User модель (backend GraphQL)
+
+**Added**
+
+- ✅ **Prisma Models** (`apps/api/prisma/schema.prisma`):
+  - `Team` — команда/бригада (id, name, logo, iconId, ownerId, timestamps)
+  - `TeamMember` — участник команды (id, teamId, userId, role, joinedAt)
+  - `InviteCode` — код приглашения (id, teamId, code, expiresAt, usedBy, usedAt)
+  - `Project` — проект/объект (id, teamId, name, address, description, isActive)
+  - `User.hasCompletedOnboarding` — флаг завершения онбординга (default: false)
+  - Relations: User ↔ Team (owner), User ↔ TeamMember, Team ↔ Project, Team ↔ InviteCode
+  - Индексы для оптимизации: ownerId, userId, teamId, code
+  - Каскадное удаление (onDelete: Cascade) для связанных записей
+
+- ✅ **GraphQL Schema** (`apps/web/src/packages/api/graphql/teams.graphql`):
+  - **Types**: Team, TeamMember, Project, InviteCode, InviteCodeValidation
+  - **Queries**: MyTeams, ValidateInviteCode, GetTeamInviteCode
+  - **Mutations**:
+    - CompleteOnboarding — завершение онбординга с созданием команды и первого проекта
+    - CreateTeam, UpdateTeam — управление командой
+    - UpdateTeamLogo — загрузка/обновление логотипа (Upload type)
+    - CreateProject, UpdateProject — управление проектами
+    - CreateInviteCode — генерация кода приглашения
+    - JoinTeamByInvite — присоединение к команде по коду
+
+- ✅ **Backend User Model** (`apps/api/src/modules/users/models/user.model.ts`):
+  - Добавлено поле `hasCompletedOnboarding: boolean` с GraphQL @Field декоратором
+
+**Changed**
+
+- ✅ Prisma schema обновлена с новыми моделями и отношениями
+- ✅ User модель расширена полем hasCompletedOnboarding и relations (ownedTeams, teamMemberships)
+- ✅ Project модель изменена: id теперь String (UUID), добавлены teamId, address, isActive
+
+**Fixed**
+
+- ✅ N/A
+
+**Removed**
+
+- ❌ N/A
+
+**Files Created**
+
+- `apps/web/src/packages/api/graphql/teams.graphql`
+
+**Files Modified**
+
+- `apps/api/prisma/schema.prisma` — добавлены модели Team, TeamMember, InviteCode, обновлены User и Project
+- `apps/api/src/modules/users/models/user.model.ts` — добавлено hasCompletedOnboarding
+- `docs/roadmap.md` — отмечены completed задачи в Backend Database & Models, Auth Updates, Frontend GraphQL Integration
+
+**Benefits**
+
+- 🗄️ **Полная схема данных** — все необходимые таблицы для Teams модуля готовы
+- 🔗 **Правильные связи** — отношения между User, Team, Project настроены с каскадным удалением
+- ⚡ **Оптимизация** — индексы на часто используемых полях для быстрых запросов
+- 🎯 **Type Safety** — GraphQL схема готова для кодогенерации TypeScript типов
+- 📡 **Полное API** — все необходимые queries и mutations для онбординга и управления командами
+- 🔒 **Безопасность** — уникальные коды приглашений, проверка owner/member ролей
+- 🔄 **Готовность к миграции** — Prisma схема готова для создания миграции (требуется освобождение места на диске)
+
+**Technical Details**
+
+- Prisma models используют UUID для всех ID (кроме старых моделей для совместимости)
+- snake_case для имен таблиц и колонок через @map и @@map
+- Invite codes: 6-значные коды (A-Z, 0-9), уникальные, с expiration tracking
+- Team ownership: один пользователь может быть owner только одной команды
+- GraphQL Upload type для загрузки логотипов (через apollo-upload-client)
+- Cascading deletes: при удалении Team удаляются все связанные Project, TeamMember, InviteCode
+
+**Next Steps**
+
+- ⏳ Освободить место на системном диске для запуска Prisma migrations
+- ⏳ Выполнить `prisma migrate dev --name add_teams_onboarding`
+- ⏳ Выполнить `prisma generate` для обновления Prisma Client
+- ⏳ Реализовать Teams Module на backend (Service + Resolver)
+- ⏳ Запустить codegen после готовности backend API
+
+---
+
+## Module: Onboarding
+
+### Step: Teams Validation Schemas with Zod
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Отсутствовала валидация для форм онбординга (создание команды, проекта, приглашений)
+- ❌ Нужна централизованная система валидации для всех форм teams модуля
+
+**Solution**
+
+- ✅ Созданы Zod схемы валидации для всех форм онбординга и управления командами
+- ✅ Типобезопасность через автоматический вывод TypeScript типов из Zod схем
+- ✅ Валидация на стороне клиента с детальными сообщениями об ошибках
+
+**Added**
+
+- ✅ `team.schema.ts` — валидация создания/обновления команды:
+  - `createTeamSchema` — название команды (2-50 символов, обязательно)
+  - `updateTeamLogoSchema` — загрузка логотипа (JPG/PNG/WEBP, до 5MB) или выбор иконки
+  - `updateTeamSchema` — обновление названия команды
+- ✅ `project.schema.ts` — валидация создания/обновления проекта:
+  - `createProjectSchema` — название объекта (2-100 символов), адрес (опционально, 5-200 символов), описание (до 500 символов)
+  - `updateProjectSchema` — обновление всех полей + статус isActive
+- ✅ `invite.schema.ts` — валидация кодов приглашений:
+  - `inviteCodeSchema` — валидация 6-значного кода (A-Z, 0-9) с автоматическим toUpperCase
+  - `generateInviteCodeSchema` — валидация UUID команды
+  - `joinTeamByCodeSchema` — валидация кода при присоединении к команде
+- ✅ `index.ts` — централизованный экспорт всех схем teams модуля
+
+**Changed**
+
+- ✅ N/A
+
+**Fixed**
+
+- ✅ N/A
+
+**Removed**
+
+- ❌ N/A
+
+**Files Created**
+
+- `apps/web/src/packages/schemas/teams/team.schema.ts`
+- `apps/web/src/packages/schemas/teams/project.schema.ts`
+- `apps/web/src/packages/schemas/teams/invite.schema.ts`
+- `apps/web/src/packages/schemas/teams/index.ts`
+
+**Files Modified**
+
+- `docs/roadmap.md` — отмечены completed задачи в секции "Frontend - Validation Schemas"
+
+**Benefits**
+
+- 🎯 **Типобезопасность** — автоматический вывод TypeScript типов из Zod схем (CreateTeamInput, CreateProjectInput, InviteCodeInput)
+- ✅ **Централизованная валидация** — единые правила валидации для всех форм teams модуля
+- 🎨 **Детальные ошибки** — понятные сообщения на русском языке для пользователя
+- 🔒 **Строгая валидация** — форматы файлов, размеры, регулярные выражения для кодов приглашений
+- 🚀 **Готовность к интеграции** — схемы готовы для использования с react-hook-form и zodResolver
+- 📦 **Переиспользуемость** — TypeScript типы экспортируются и могут использоваться в любых компонентах
+
+**Technical Details**
+
+- Zod версия: совместима с react-hook-form через @hookform/resolvers/zod
+- Валидация кодов приглашений: ровно 6 символов, только A-Z и 0-9, автоматическое приведение к uppercase
+- Валидация файлов: проверка size (max 5MB) и MIME type (image/jpeg, image/png, image/webp)
+- Строковые поля используют `.trim()` для удаления пробелов и `.refine()` для дополнительных проверок
+- Все опциональные поля помечены `.optional()` для гибкости форм
+
+---
+
+## Module: Auth Pages Animations
+
+### Step: Unified Button Animations and Telegram Button Fix
+
+:calendar: `2025-12-03`
+
+**Problem**
+
+- ❌ Telegram button on login page had delayed animation (delay: 0.4) causing visual lag
+- ❌ Telegram button appeared to jump up and down, not synchronized with other elements
+- ❌ Inconsistent animation structure across auth pages (login, register, forgot-password, reset-password)
+- ❌ Telegram button used different animation approach than "Enter" button
+- ❌ Elements below "Enter" button (divider, Telegram button, register link) were not unified
+
+**Solution**
+
+- ✅ Unified all button animations across all auth pages using consistent `motion.div` wrapper structure
+- ✅ Synchronized Telegram button animation with "Enter" button using identical `fadeIn` variant
+- ✅ Combined divider, Telegram button, and register link into unified animation block
+- ✅ Standardized animation delays and durations across all auth pages
+
+**Added**
+
+- ✅ Consistent `motion.div` wrapper structure for all submit buttons on auth pages
+- ✅ Unified animation block for divider, Telegram button, and register link on login page
+- ✅ Standardized `fadeIn` variant usage with `delay: 0.3` for all buttons
+
+**Changed**
+
+- ✅ **Login page** (`apps/web/src/app/(root)/auth/login/page.tsx`):
+  - Wrapped "Enter" button in `motion.div` with `fadeIn` variant and `delay: 0.3`
+  - Unified divider, Telegram button, and register link into single `motion.div` block
+  - Changed Telegram button from `motion.button` to regular `button` inside `motion.div` wrapper
+  - Synchronized Telegram button animation delay from `0.4` to `0.3` to match "Enter" button
+  - Removed separate `hover:scale-[1.01]` from Telegram button, using only `active:scale-[0.98]` like "Enter" button
+  - Added `group` class to Telegram button for consistency
+- ✅ **Register page** (`apps/web/src/app/(root)/auth/register/page.tsx`):
+  - Already had correct structure, no changes needed
+- ✅ **Forgot Password page** (`apps/web/src/app/(root)/auth/forgot-password/page.tsx`):
+  - Wrapped submit button in `motion.div` with `fadeIn` variant and `delay: 0.3`
+- ✅ **Reset Password page** (`apps/web/src/app/(root)/auth/reset-password/page.tsx`):
+  - Wrapped submit button in `motion.div` with `fadeIn` variant and `delay: 0.3`
+
+**Fixed**
+
+- ✅ Fixed Telegram button animation delay causing visual lag
+- ✅ Fixed Telegram button appearing to jump by removing separate Y-axis movement
+- ✅ Fixed inconsistent button animation structure across auth pages
+- ✅ Fixed Telegram button not working the same way as "Enter" button
+- ✅ Fixed elements below "Enter" button not appearing as unified block
+
+**Removed**
+
+- ❌ Removed `fadeInOnly` variant (unused after unification)
+- ❌ Removed separate `hover:scale-[1.01]` from Telegram button className
+- ❌ Removed individual animation delays for divider, Telegram button, and register link
+
+**Files Modified**
+
+- `apps/web/src/app/(root)/auth/login/page.tsx`
+- `apps/web/src/app/(root)/auth/forgot-password/page.tsx`
+- `apps/web/src/app/(root)/auth/reset-password/page.tsx`
+
+**Benefits**
+
+- 🎯 **Consistent UX** — all buttons across all auth pages now have identical animation behavior
+- ⚡ **Smooth Animations** — no visual lag or jumping, all elements appear synchronously
+- 🎨 **Unified Design** — Telegram button works exactly like "Enter" button
+- 🔄 **Easier Maintenance** — consistent animation structure makes future updates simpler
+- 📦 **Better Performance** — optimized animation structure reduces layout shifts
+
+**Technical Details**
+
+- All buttons use `fadeIn` variant: `{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }`
+- Standard animation delay: `0.3` seconds for all buttons
+- Animation duration: `0.5` seconds with easing `[0.22, 0.61, 0.36, 1]`
+- All buttons wrapped in `motion.div` with `variants={fadeIn}`, `initial="hidden"`, `animate="visible"`
+- Telegram button uses regular `button` element inside `motion.div` wrapper (same structure as "Enter" button)
+
+---
+
 ## Module: UI Components
 
 ### Step: Toast System Centralization with Zustand

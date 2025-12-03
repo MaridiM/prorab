@@ -11,18 +11,21 @@ datasource db {
 // ==================== AUTH ====================
 
 model User {
-  id              String   @id @default(uuid())
-  email           String   @unique
-  emailNormalized String   @unique @map("email_normalized")
-  emailVerified   Boolean  @default(false) @map("email_verified")
-  passwordHash    String   @map("password_hash")
-  name            String?
-  phone           String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(uuid())
+  email                 String   @unique
+  emailNormalized       String   @unique @map("email_normalized")
+  emailVerified         Boolean  @default(false) @map("email_verified")
+  passwordHash          String   @map("password_hash")
+  name                  String?
+  phone                 String?
+  hasCompletedOnboarding Boolean @default(false) @map("has_completed_onboarding")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   verificationTokens  VerificationToken[]
   passwordResetTokens PasswordResetToken[]
+  ownedTeams          Team[]              @relation("TeamOwner")
+  teamMemberships     TeamMember[]
 
   @@map("users")
 }
@@ -54,12 +57,68 @@ model PasswordResetToken {
 
 // ==================== BUSINESS ====================
 
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String?
+  iconId    String?  @map("icon_id")
+  ownerId   String   @map("owner_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner        User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  projects     Project[]
+  inviteCodes  InviteCode[]
+
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  role      String   @default("member")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@index([teamId])
+  @@map("team_members")
+}
+
+model InviteCode {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  code      String   @unique
+  expiresAt DateTime @map("expires_at")
+  usedBy    String?  @map("used_by")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([code])
+  @@map("invite_codes")
+}
+
 model Project {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
+  teamId      String   @map("team_id")
   name        String
+  address     String?
   description String?
+  isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
   @@map("projects")
 }

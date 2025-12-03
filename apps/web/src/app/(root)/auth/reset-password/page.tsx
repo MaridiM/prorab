@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, Variants } from "framer-motion"
 import { ArrowLeft, ArrowRight, Loader2, Lock, ShieldCheck, Check } from "lucide-react"
 import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
@@ -13,9 +13,16 @@ import { ResetPasswordDocument } from "@/packages/api/graphql"
 import { resetPasswordSchema, TResetPasswordSchema } from "@/packages/schemas"
 import { useAutoValidateForm, useToast } from "@/packages/hooks"
 
-const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+const fadeIn: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: [0.22, 0.61, 0.36, 1]
+        }
+    }
 }
 
 export default function ResetPasswordPage() {
@@ -106,8 +113,10 @@ export default function ResetPasswordPage() {
             >
                 <motion.div
                     className="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     whileHover={{ scale: 1.05, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 400 }}
                 >
                     <ShieldCheck className="w-8 h-8 text-success" />
                 </motion.div>
@@ -187,20 +196,27 @@ export default function ResetPasswordPage() {
                         ))}
                     </div>
 
-                    <Button
-                        type="submit"
-                        disabled={isLoading || !form.formState.isValid}
-                        className="w-full h-12 rounded-xl bg-success text-success-foreground font-semibold shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30 hover:bg-success/90 active:scale-[0.98] transition-all duration-200 group"
+                    <motion.div
+                        variants={fadeIn}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: 0.3 }}
                     >
-                        {isLoading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <>
-                                Сохранить пароль
-                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                            </>
-                        )}
-                    </Button>
+                        <Button
+                            type="submit"
+                            disabled={isLoading || !form.formState.isValid}
+                            className="w-full h-12 rounded-xl bg-success text-success-foreground font-semibold shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/30 hover:bg-success/90 active:scale-[0.98] transition-all duration-200 group"
+                        >
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    Сохранить пароль
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </Button>
+                    </motion.div>
                 </motion.form>
             </Form>
 

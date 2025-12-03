@@ -38,12 +38,117 @@
 - [x] Rate Limiting (5 попыток / 15 минут)
 - [x] GraphQL Guards и Decorators для защиты resolvers
 - [x] Сущность `User` с верификацией email
-- [ ] Telegram как провайдер (запланировано)
-- [ ] Сущности `Team`, `TeamMember`
-- [ ] API для управления командами; гварды по ролям/доступам
 - [x] Frontend: страницы логина/регистрации/восстановления пароля
 - [x] Frontend: интеграция с Auth API
-- [ ] Frontend: wizard создания команды (шаги: данные команды → участники)
+- [ ] Telegram как провайдер (запланировано)
+
+### Этап 2.1. Онбординг и Teams (неделя 6–9) - 🔄 В РАБОТЕ
+**Приоритет:** 🔴 Критический (MVP)
+**Статус:** В разработке
+**Начало:** 2024-12-03
+**ETA:** 2024-12-20
+**Время:** 42-54 часа (3-4 недели)
+**План:** `docs/analisys/onboarding/onboarding-implementation-plan.md`
+
+#### Неделя 1: Backend Foundation (2024-12-03 - 2024-12-09)
+
+**Backend - Database & Models**
+- [x] Обновить Prisma schema (Team, TeamMember, InviteCode, Project)
+- [x] Добавить `hasCompletedOnboarding` в модель User
+- [ ] Создать и применить миграцию `add_teams_onboarding` (требуется очистка диска)
+- [ ] Сгенерировать Prisma Client (требуется очистка диска)
+
+**Backend - Teams Module**
+- [ ] Создать структуру модуля `apps/api/src/modules/teams/`
+- [ ] Реализовать Teams Service (6 методов)
+  - [ ] `createTeam()` - создание бригады с валидацией
+  - [ ] `createDemoProject()` - генерация демо-данных
+  - [ ] `completeOnboarding()` - завершение онбординга
+  - [ ] `createInviteCode()` - генерация 6-значных кодов
+  - [ ] `joinTeamByInvite()` - присоединение по коду
+  - [ ] `getTeamsByUserId()` - получение бригад пользователя
+- [ ] Реализовать Teams Resolver (GraphQL API)
+- [ ] Создать DTOs и Models (GraphQL Object Types)
+- [ ] Добавить TeamsModule в app.module.ts
+
+**Backend - Uploads Module**
+- [ ] Создать структуру модуля `apps/api/src/modules/uploads/`
+- [ ] Реализовать Uploads Service (Sharp resize, валидация)
+- [ ] Реализовать Uploads Resolver
+- [ ] Установить зависимости: sharp, graphql-upload-minimal
+
+**Backend - Auth Updates**
+- [x] Обновить User Model (hasCompletedOnboarding поле)
+- [ ] Обновить Auth GraphQL schema
+- [ ] Обновить Me query для возврата hasCompletedOnboarding
+
+#### Неделя 2: Frontend Implementation (2024-12-10 - 2024-12-16)
+
+**Frontend - Validation Schemas**
+- [x] Создать `apps/web/src/packages/schemas/teams/`
+- [x] Реализовать team.schema.ts (Zod)
+- [x] Реализовать project.schema.ts (Zod)
+- [x] Реализовать invite.schema.ts (Zod)
+- [x] Экспортировать все схемы
+
+**Frontend - GraphQL Integration**
+- [x] Создать `apps/web/src/packages/api/graphql/teams.graphql`
+- [x] Добавить мутации (CompleteOnboarding, CreateInviteCode, JoinTeamByInvite, UploadTeamLogo)
+- [x] Добавить queries (MyTeams, ValidateInviteCode)
+- [ ] Запустить codegen (ожидает реализации backend Teams module)
+- [ ] Проверить Apollo upload link
+
+**Frontend - UI Components**
+- [x] Создать Stepper Component (прогресс 1/3, 2/3, 3/3)
+- [ ] Создать ImageUpload Component (drag & drop, resize preview)
+- [x] Создать IconPicker Component (10 эмодзи + 8 цветов)
+- [x] Создать TeamLogo Component (изображение/эмодзи/инициалы)
+
+**Frontend - Onboarding Pages**
+- [x] Создать структуру `apps/web/src/app/(root)/onboarding/`
+- [x] Реализовать Onboarding Layout (guards, Stepper)
+- [x] Реализовать стартовый экран (2 кнопки: "Начать настройку" / "Меня пригласили")
+- [x] Реализовать Step 1: Название бригады (форма + sessionStorage)
+- [x] Реализовать Step 2: Логотип (IconPicker, skip button)
+- [x] Реализовать Step 3: Первый проект (форма + CompleteOnboarding mutation)
+- [x] Реализовать Invite Page (6-digit code input + JoinTeamByInvite)
+
+#### Неделя 3: Integration & Polish (2024-12-17 - 2024-12-20)
+
+**Integration**
+- [ ] Обновить Login Page (редирект на /onboarding если !hasCompletedOnboarding)
+- [ ] Обновить Register Page (всегда редирект на /onboarding)
+- [ ] Создать useOnboardingGuard hook
+
+**Error Handling & Testing**
+- [ ] Backend валидации (Owner ограничения, код истек/использован)
+- [ ] Frontend error handling (network, validation, GraphQL errors)
+- [ ] Happy path тестирование (новый пользователь, присоединение по коду)
+- [ ] Edge cases тестирование (истекший код, повторное создание бригады)
+- [ ] UX проверка (loading states, toast, mobile responsive)
+
+**Documentation**
+- [ ] Обновить roadmap.md
+- [ ] Обновить changelog.md
+- [ ] Создать API документацию для Teams
+
+#### Критерии успеха Этапа 2.1
+- ✅ Обязательный онбординг (3 шага) работает
+- ✅ Система приглашений с 6-значными кодами
+- ✅ Владелец может иметь только 1 бригаду
+- ✅ Загрузка/выбор логотипа
+- ✅ Автогенерация демо-проекта
+- ✅ Mobile-first дизайн
+- ✅ Валидация в реальном времени
+- ✅ Toast уведомления
+- ✅ Редиректы после auth
+
+#### Post-MVP Enhancements (Phase 2.2 - запланировано)
+- [ ] Wizard для создания дополнительных команд
+- [ ] Cloudflare R2 для хранения логотипов
+- [ ] Email приглашения с magic links
+- [ ] Страница настроек бригады (редактирование, передача владения)
+- [ ] E2E тесты (Playwright)
 
 ## Этап 3. Проекты (недели 6–7)
 - [ ] Entity `Project` (название, описание, бюджет, статус, сроки).
