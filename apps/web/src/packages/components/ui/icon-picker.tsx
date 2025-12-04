@@ -123,7 +123,7 @@ export function IconPicker({
 			)}
 
 			{/* Preview with click to open picker */}
-			<div className="flex flex-col items-center gap-3">
+			<div className="flex flex-col items-center gap-5">
 				<motion.div
 					onClick={handlePreviewClick}
 					className={cn(

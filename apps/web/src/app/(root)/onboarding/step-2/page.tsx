@@ -186,7 +186,7 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.4 }}
-					className="mt-4 space-y-2"
+					className="mt-8 space-y-4"
 				>
 					<div className="flex gap-2">
 						<Button
