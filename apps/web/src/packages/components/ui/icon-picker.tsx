@@ -132,7 +132,7 @@ export function IconPicker({
 							: "border-border/50 hover:border-primary/30 shadow-md hover:shadow-lg"
 					)}
 					style={{
-						backgroundColor: previewUrl ? 'hsl(0, 0%, 100%)' : currentColor,
+						backgroundColor: previewUrl ? 'transparent' : currentColor,
 					}}
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
@@ -142,7 +142,7 @@ export function IconPicker({
 							src={previewUrl}
 							alt="Uploaded logo"
 							fill
-							className="object-contain p-1"
+							className="object-cover object-center"
 							sizes="80px"
 						/>
 					) : (
