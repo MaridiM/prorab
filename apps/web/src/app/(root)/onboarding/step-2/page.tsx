@@ -107,31 +107,30 @@ export default function OnboardingStep2Page() {
 			</motion.div>
 
 			{/* Form Card */}
-			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
+			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-6 relative overflow-hidden">
 				{/* Decorative gradient */}
 				<div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent via-primary to-accent" />
-				
+
 				{/* Header */}
 				<motion.div
 					variants={fadeIn}
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.2 }}
-					className="text-center mb-6"
+					className="text-center mb-5"
 				>
 					<motion.div
-						className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-lg mb-3 shadow-lg shadow-accent/30"
+						className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-base mb-2 shadow-lg shadow-accent/30"
 						initial={{ scale: 0.8, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1 }}
 						transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
 						whileHover={{ scale: 1.05, rotate: -5 }}
 					>
-						<Image className="w-6 h-6" />
+						<Image className="w-5 h-5" />
 					</motion.div>
-					<h1 className="text-xl font-bold tracking-tight">Логотип бригады</h1>
-					<p className="text-muted-foreground mt-1.5 text-xs">
-						Выберите иконку и цвет для{' '}
-						<span className="font-medium text-foreground">{teamName}</span>
+					<h1 className="text-lg font-bold tracking-tight">Логотип бригады</h1>
+					<p className="text-muted-foreground mt-1 text-xs">
+						для <span className="font-medium text-foreground">{teamName}</span>
 					</p>
 				</motion.div>
 
@@ -157,26 +156,28 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.4 }}
-					className="mt-5 space-y-2.5"
+					className="mt-4 space-y-2"
 				>
-					<div className="flex gap-3">
+					<div className="flex gap-2">
 						<Button
 							type="button"
 							onClick={() => router.push('/onboarding/step-1')}
 							variant="outline"
-							className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border-2 border-border/50 bg-background font-medium transition-all hover:border-primary/50 active:scale-[0.98]"
+							size="sm"
+							className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border-2 border-border/50 bg-background font-medium transition-all hover:border-primary/50 active:scale-[0.98]"
 						>
-							<ArrowLeft className="h-4 w-4" />
+							<ArrowLeft className="h-3.5 w-3.5" />
 							Назад
 						</Button>
 
 						<Button
 							type="button"
 							onClick={handleNext}
-							className="group flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200"
+							size="sm"
+							className="group flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200"
 						>
 							Далее
-							<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+							<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
 						</Button>
 					</div>
 
@@ -184,7 +185,8 @@ export default function OnboardingStep2Page() {
 						type="button"
 						onClick={handleSkip}
 						variant="ghost"
-						className="w-full text-sm text-muted-foreground underline-offset-4 transition-all hover:text-foreground hover:underline"
+						size="sm"
+						className="w-full h-8 text-xs text-muted-foreground underline-offset-4 transition-all hover:text-foreground hover:underline"
 					>
 						Пропустить этот шаг
 					</Button>

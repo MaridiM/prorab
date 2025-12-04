@@ -2,6 +2,96 @@
 
 ## Module: Onboarding
 
+### Step: IconPicker Redesign - Modal Logic & Compact Layout
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ IconPicker занимал слишком много места на странице
+- ❌ Все элементы (иконки, цвета) были видны одновременно
+- ❌ Неинтуитивная логика: нужно было кликать на превью для загрузки
+- ❌ Step 2 выглядел громоздко с большими отступами
+
+**Solution**
+
+- ✅ Переделан IconPicker с модальной логикой (клик открывает picker)
+- ✅ Клик на превью открывает picker с иконками и кнопкой загрузки
+- ✅ Цвета показываются только когда picker закрыт
+- ✅ Уменьшены размеры элементов и отступы в Step 2
+
+**Added**
+
+- ✅ **Модальная логика в IconPicker**:
+  - Клик на превью открывает/закрывает picker
+  - Picker содержит: сетку иконок + кнопка "Загрузить изображение"
+  - Кнопка "Удалить логотип" при загруженном изображении
+  - Кнопка "Готово" для закрытия picker
+  - AnimatePresence для плавных переходов
+  - Подсказка "Нажмите, чтобы выбрать/изменить"
+
+- ✅ **Компактный дизайн**:
+  - Превью: 20x20 вместо 24x24
+  - Иконки в picker: 11x11 вместо 12x12
+  - Цвета: 8x8 в одну строку с flex-wrap
+  - Picker блок: bg-secondary/50 rounded-xl border
+
+**Changed**
+
+- ✅ **IconPicker Component** (`icon-picker.tsx`):
+  - Добавлен state `showIconPicker` для управления видимостью
+  - Превью теперь всегда кликабельно (toggle picker)
+  - Иконки и кнопка загрузки в picker блоке (скрыты по умолчанию)
+  - Цвета показываются отдельно когда picker закрыт
+  - Автозакрытие picker при выборе иконки или загрузке
+  - Уменьшены размеры: h-20 w-20, text-4xl (было h-24, text-5xl)
+  - Убран hover overlay, добавлен border при активном picker
+
+- ✅ **Step 2 Page** (`step-2/page.tsx`):
+  - Уменьшен padding Card: p-8 → p-6
+  - Уменьшен header icon: h-12 w-12 → h-10 w-10
+  - Уменьшены заголовки: text-xl → text-lg
+  - Уменьшены margins: mb-6 → mb-5, mt-5 → mt-4
+  - Кнопки size="sm" с h-10 вместо h-12
+  - Кнопка "Пропустить": h-8 text-xs
+  - Уменьшены gaps: gap-3 → gap-2
+
+**Fixed**
+
+- ✅ Убрана перегруженность интерфейса
+- ✅ Улучшена читаемость за счёт компактности
+- ✅ Более интуитивный UX с модальным picker
+
+**Removed**
+
+- ❌ Постоянно видимая сетка иконок (теперь в picker)
+- ❌ Hover overlay на превью (заменён на click-to-open)
+- ❌ Отдельные секции с заголовками h3
+
+**Files Modified**
+
+- `apps/web/src/packages/components/ui/icon-picker.tsx` — модальная логика
+- `apps/web/src/app/(root)/onboarding/step-2/page.tsx` — компактный layout
+- `docs/changelog.frontend.md` — эта запись
+
+**Benefits**
+
+- 📱 **Компактный** — меньше прокрутки
+- 🎯 **Интуитивный** — клик открывает опции
+- ⚡ **Быстрый** — автозакрытие после выбора
+- 🎨 **Чистый** — только нужное на экране
+
+**Technical Details**
+
+- useState для showIconPicker
+- AnimatePresence для анимации picker
+- Автозакрытие через setShowIconPicker(false)
+- Условный рендеринг: picker XOR цвета
+
+---
+
+## Module: Onboarding
+
 ### Step: IconPicker Enhancement - Image Upload Integration & Pastel Colors
 
 :calendar: `2025-12-04`
