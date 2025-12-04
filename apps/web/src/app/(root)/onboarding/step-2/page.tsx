@@ -125,7 +125,7 @@ export default function OnboardingStep2Page() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			{/* Stepper */}
 			<motion.div
 				variants={fadeIn}
@@ -137,7 +137,7 @@ export default function OnboardingStep2Page() {
 			</motion.div>
 
 			{/* Form Card */}
-			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-6 relative overflow-hidden">
+			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-5 relative overflow-hidden">
 				{/* Decorative gradient */}
 				<div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent via-primary to-accent" />
 
@@ -147,18 +147,18 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.2 }}
-					className="text-center mb-5"
+					className="text-center mb-4"
 				>
 					<motion.div
-						className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-base mb-2 shadow-lg shadow-accent/30"
+						className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-sm mb-2 shadow-lg shadow-accent/30"
 						initial={{ scale: 0.8, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1 }}
 						transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
 						whileHover={{ scale: 1.05, rotate: -5 }}
 					>
-						<Image className="w-5 h-5" />
+						<Image className="w-4 h-4" />
 					</motion.div>
-					<h1 className="text-lg font-bold tracking-tight">Логотип бригады</h1>
+					<h1 className="text-base font-bold tracking-tight">Логотип бригады</h1>
 					<p className="text-muted-foreground mt-1 text-xs">
 						для <span className="font-medium text-foreground">{teamName}</span>
 					</p>
@@ -186,7 +186,7 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.4 }}
-					className="mt-8 space-y-4"
+					className="mt-5 space-y-3"
 				>
 					<div className="flex gap-2">
 						<Button

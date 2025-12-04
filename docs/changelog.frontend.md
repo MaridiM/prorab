@@ -2,6 +2,51 @@
 
 ## Module: Onboarding
 
+### UX: Compact IconPicker Layout
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ IconPicker занимает слишком много места на экране
+- ❌ Интерфейс не помещается на странице (требует прокрутки)
+- ❌ Слишком большие элементы (иконки, превью, кнопки)
+- ❌ Большие отступы между секциями
+
+**Solution**
+
+- ✅ Компактный layout для всех элементов
+- ✅ Уменьшены размеры без потери читаемости
+- ✅ Оптимизированы отступы для лучшего использования пространства
+- ✅ Весь интерфейс помещается на экране без прокрутки
+
+**Changed**
+
+- ✅ **IconPicker Component** (`icon-picker.tsx`):
+  - Preview: `h-24 w-24` → `h-20 w-20`, `rounded-2xl` → `rounded-xl`, `text-5xl` → `text-4xl`
+  - Container: `space-y-4` → `space-y-3`, `gap-5` → `gap-2`
+  - Modal: `p-5` → `p-4`, `space-y-4` → `space-y-3`, `rounded-2xl` → `rounded-xl`
+  - Icon grid: `gap-2` → `gap-1.5`, `h-12 w-12` → `h-10 w-10`, `text-2xl` → `text-xl`, `rounded-xl` → `rounded-lg`
+  - Color buttons: `h-10 w-10` → `h-8 w-8`, `gap-2.5` → `gap-2`
+  - Buttons: `h-10` → `h-9`/`h-8`, `text-sm` → `text-xs`, icons `h-4 w-4` → `h-3.5 w-3.5`
+  - Section titles: `text-sm` → `text-xs`, `space-y-3` → `space-y-2`
+
+- ✅ **Step 2 Page** (`step-2/page.tsx`):
+  - Container: `space-y-6` → `space-y-4`
+  - Card: `p-6` → `p-5`
+  - Header icon: `h-10 w-10` → `h-9 w-9`, `w-5 h-5` → `w-4 h-4`
+  - Title: `text-lg` → `text-base`, `mb-5` → `mb-4`
+  - Actions: `mt-8 space-y-4` → `mt-5 space-y-3`
+
+**Benefits**
+
+- ✅ Весь интерфейс помещается на экране без прокрутки
+- ✅ Более компактный и профессиональный вид
+- ✅ Лучшее использование пространства экрана
+- ✅ Сохранена читаемость и удобство использования
+
+---
+
 ### Fix: Hydration Mismatch - SSR/Client Synchronization
 
 :calendar: `2025-12-04`

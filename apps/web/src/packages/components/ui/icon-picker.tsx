@@ -110,7 +110,7 @@ export function IconPicker({
 		: null
 
 	return (
-		<div className={cn('space-y-4', className)}>
+		<div className={cn('space-y-3', className)}>
 			{/* Hidden file input */}
 			{onLogoUpload && (
 				<input
@@ -123,14 +123,14 @@ export function IconPicker({
 			)}
 
 			{/* Preview with click to open picker */}
-			<div className="flex flex-col items-center gap-5">
+			<div className="flex flex-col items-center gap-2">
 				<motion.div
 					onClick={handlePreviewClick}
 					className={cn(
-						"relative flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg shadow-black/5 dark:shadow-black/20 overflow-hidden cursor-pointer border-2 transition-all duration-200",
-						showIconPicker 
-							? "border-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-xl shadow-primary/20" 
-							: "border-border/30 hover:border-primary/50 hover:shadow-xl"
+						"relative flex h-20 w-20 items-center justify-center rounded-xl text-4xl shadow-md shadow-black/5 dark:shadow-black/20 overflow-hidden cursor-pointer border-2 transition-all duration-200",
+						showIconPicker
+							? "border-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-background shadow-lg shadow-primary/20"
+							: "border-border/30 hover:border-primary/50 hover:shadow-lg"
 					)}
 					style={{
 						backgroundColor: previewUrl ? 'hsl(0, 0%, 100%)' : currentColor,
@@ -144,7 +144,7 @@ export function IconPicker({
 							alt="Uploaded logo"
 							fill
 							className="object-cover"
-							sizes="96px"
+							sizes="80px"
 						/>
 					) : (
 						TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨'
@@ -164,22 +164,22 @@ export function IconPicker({
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: -10, scale: 0.95 }}
 						transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
-						className="space-y-4 p-5 bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/20"
+						className="space-y-3 p-4 bg-card/90 backdrop-blur-xl rounded-xl border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/20"
 					>
 						{/* Icon Grid - Only show if no logo uploaded */}
 						{!previewUrl && (
-							<div className="space-y-3">
-								<h3 className="text-sm font-semibold text-foreground">
+							<div className="space-y-2">
+								<h3 className="text-xs font-semibold text-foreground">
 									Выберите иконку
 								</h3>
-								<div className="grid grid-cols-5 gap-2">
+								<div className="grid grid-cols-5 gap-1.5">
 									{TEAM_ICONS.map((icon, index) => (
 										<motion.button
 											key={icon.id}
 											type="button"
 											onClick={() => handleIconSelect(icon.id)}
 											className={cn(
-												'flex h-12 w-12 items-center justify-center rounded-xl text-2xl transition-all duration-200 border-2',
+												'flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-all duration-200 border-2',
 												selectedIcon === icon.id
 													? 'bg-primary/10 border-primary shadow-md shadow-primary/20 scale-105'
 													: 'bg-background border-border/50 hover:border-primary/30 hover:bg-secondary/30 hover:scale-105'
@@ -200,18 +200,18 @@ export function IconPicker({
 
 						{/* Color Selection - Show when icon is selected and no logo uploaded */}
 						{!previewUrl && selectedIcon && (
-							<div className="space-y-3">
-								<h3 className="text-sm font-semibold text-foreground">
+							<div className="space-y-2">
+								<h3 className="text-xs font-semibold text-foreground">
 									Выберите цвет
 								</h3>
-								<div className="flex gap-2.5 justify-center flex-wrap">
+								<div className="flex gap-2 justify-center flex-wrap">
 									{BACKGROUND_COLORS.map((color, index) => (
 										<motion.button
 											key={color.id}
 											type="button"
 											onClick={() => onColorSelect(color.id)}
 											className={cn(
-												'h-10 w-10 rounded-full border-2 transition-all duration-200',
+												'h-8 w-8 rounded-full border-2 transition-all duration-200',
 												selectedColor === color.id
 													? 'border-foreground shadow-lg shadow-primary/20 scale-110'
 													: 'border-border/50 hover:border-primary/30 hover:scale-105'
@@ -244,9 +244,9 @@ export function IconPicker({
 								variant="outline"
 								size="sm"
 								onClick={handleUploadClick}
-								className="w-full h-10 text-sm gap-2 border-2 border-border/50 hover:border-primary/50 transition-all"
+								className="w-full h-9 text-xs gap-2 border-2 border-border/50 hover:border-primary/50 transition-all"
 							>
-								<ImageIcon className="h-4 w-4" />
+								<ImageIcon className="h-3.5 w-3.5" />
 								Загрузить изображение
 							</Button>
 						)}
@@ -258,9 +258,9 @@ export function IconPicker({
 								variant="ghost"
 								size="sm"
 								onClick={handleRemoveLogo}
-								className="w-full h-10 text-sm gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
+								className="w-full h-9 text-xs gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
 							>
-								<X className="h-4 w-4" />
+								<X className="h-3.5 w-3.5" />
 								Удалить логотип
 							</Button>
 						)}
@@ -271,7 +271,7 @@ export function IconPicker({
 							variant="ghost"
 							size="sm"
 							onClick={() => setShowIconPicker(false)}
-							className="w-full h-9 text-sm font-medium text-muted-foreground hover:text-foreground transition-all"
+							className="w-full h-8 text-xs font-medium text-muted-foreground hover:text-foreground transition-all"
 						>
 							Готово
 						</Button>
