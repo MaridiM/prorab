@@ -2,6 +2,9 @@
 
 import { cn } from '@/packages/utils'
 import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import Image from 'next/image'
+import { Upload } from 'lucide-react'
 
 // Предустановленные иконки-эмодзи для команд
 const TEAM_ICONS = [
@@ -17,61 +20,111 @@ const TEAM_ICONS = [
 	{ id: 'truck', emoji: '🚚', label: 'Грузовик' },
 ]
 
-// Предустановленные цвета фона
+// Предустановленные цвета фона (пастельные)
 const BACKGROUND_COLORS = [
-	{ id: 'orange', color: 'hsl(var(--accent))', label: 'Оранжевый' },
-	{ id: 'blue', color: 'hsl(217, 91%, 60%)', label: 'Синий' },
-	{ id: 'green', color: 'hsl(142, 71%, 45%)', label: 'Зелёный' },
-	{ id: 'red', color: 'hsl(0, 72%, 51%)', label: 'Красный' },
-	{ id: 'purple', color: 'hsl(271, 81%, 56%)', label: 'Фиолетовый' },
-	{ id: 'yellow', color: 'hsl(48, 96%, 53%)', label: 'Жёлтый' },
-	{ id: 'pink', color: 'hsl(330, 81%, 60%)', label: 'Розовый' },
-	{ id: 'teal', color: 'hsl(173, 80%, 40%)', label: 'Бирюзовый' },
-	{ id: 'transparent', color: 'transparent', label: 'Прозрачный' },
+	{ id: 'orange', color: 'hsl(25, 85%, 75%)', label: 'Оранжевый' },
+	{ id: 'blue', color: 'hsl(217, 70%, 80%)', label: 'Синий' },
+	{ id: 'green', color: 'hsl(142, 60%, 75%)', label: 'Зелёный' },
+	{ id: 'red', color: 'hsl(0, 65%, 75%)', label: 'Красный' },
+	{ id: 'purple', color: 'hsl(271, 65%, 80%)', label: 'Фиолетовый' },
+	{ id: 'yellow', color: 'hsl(48, 85%, 80%)', label: 'Жёлтый' },
+	{ id: 'pink', color: 'hsl(330, 70%, 82%)', label: 'Розовый' },
+	{ id: 'teal', color: 'hsl(173, 60%, 75%)', label: 'Бирюзовый' },
+	{ id: 'white', color: 'hsl(0, 0%, 100%)', label: 'Белый' },
 ]
 
 interface IconPickerProps {
 	selectedIcon?: string
 	selectedColor?: string
+	uploadedLogo?: File | string | null
 	onIconSelect: (iconId: string) => void
 	onColorSelect: (colorId: string) => void
+	onLogoUpload?: (file: File | null) => void
 	className?: string
 }
 
 export function IconPicker({
 	selectedIcon = 'hammer',
 	selectedColor = 'orange',
+	uploadedLogo,
 	onIconSelect,
 	onColorSelect,
+	onLogoUpload,
 	className,
 }: IconPickerProps) {
 	const currentColor =
 		BACKGROUND_COLORS.find((c) => c.id === selectedColor)?.color ||
 		BACKGROUND_COLORS[0].color
 
+	const fileInputRef = useRef<HTMLInputElement>(null)
+
+	const handlePreviewClick = () => {
+		if (onLogoUpload) {
+			fileInputRef.current?.click()
+		}
+	}
+
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (file && onLogoUpload) {
+			onLogoUpload(file)
+		}
+	}
+
+	// Generate preview URL for uploaded logo
+	const previewUrl = uploadedLogo
+		? typeof uploadedLogo === 'string'
+			? uploadedLogo
+			: URL.createObjectURL(uploadedLogo)
+		: null
+
 	return (
 		<div className={cn('space-y-6', className)}>
+			{/* Hidden file input */}
+			{onLogoUpload && (
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="image/jpeg,image/png,image/webp"
+					onChange={handleFileChange}
+					className="hidden"
+				/>
+			)}
+
 			{/* Preview */}
 			<div className="flex justify-center">
 				<motion.div
+					onClick={handlePreviewClick}
 					className={cn(
-						"flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg",
-						selectedColor === 'transparent' && "bg-background"
+						"relative flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg overflow-hidden",
+						onLogoUpload && "cursor-pointer hover:ring-2 hover:ring-primary hover:ring-offset-2 transition-all"
 					)}
-					style={{ 
-						backgroundColor: selectedColor === 'transparent' ? 'transparent' : currentColor,
-						backgroundImage: selectedColor === 'transparent' 
-							? 'linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(var(--border)) 75%), linear-gradient(-45deg, transparent 75%, hsl(var(--border)) 75%)'
-							: undefined,
-						backgroundSize: selectedColor === 'transparent' ? '12px 12px' : undefined,
-						backgroundPosition: selectedColor === 'transparent' ? '0 0, 0 6px, 6px -6px, -6px 0px' : undefined,
+					style={{
+						backgroundColor: currentColor,
 					}}
 					initial={{ scale: 0.8, opacity: 0 }}
 					animate={{ scale: 1, opacity: 1 }}
 					transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-					key={`${selectedIcon}-${selectedColor}`}
+					key={`${selectedIcon}-${selectedColor}-${previewUrl}`}
 				>
-					{TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨'}
+					{previewUrl ? (
+						<Image
+							src={previewUrl}
+							alt="Uploaded logo"
+							fill
+							className="object-cover"
+							sizes="96px"
+						/>
+					) : (
+						TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨'
+					)}
+
+					{/* Upload overlay on hover */}
+					{onLogoUpload && !previewUrl && (
+						<div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+							<Upload className="w-8 h-8 text-white" />
+						</div>
+					)}
 				</motion.div>
 			</div>
 
@@ -112,7 +165,7 @@ export function IconPicker({
 				<h3 className="mb-3 text-sm font-medium text-foreground">
 					Выберите цвет
 				</h3>
-				<div className="grid grid-cols-9 gap-2">
+				<div className="grid grid-cols-9 gap-3">
 					{BACKGROUND_COLORS.map((color, index) => (
 						<motion.button
 							key={color.id}
@@ -124,16 +177,10 @@ export function IconPicker({
 									'border-foreground ring-2 ring-primary ring-offset-2 ring-offset-background':
 										selectedColor === color.id,
 									'border-border': selectedColor !== color.id,
-									'bg-background': color.id === 'transparent',
 								}
 							)}
-							style={{ 
-								backgroundColor: color.id === 'transparent' ? 'transparent' : color.color,
-								backgroundImage: color.id === 'transparent' 
-									? 'linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(var(--border)) 75%), linear-gradient(-45deg, transparent 75%, hsl(var(--border)) 75%)'
-									: undefined,
-								backgroundSize: color.id === 'transparent' ? '8px 8px' : undefined,
-								backgroundPosition: color.id === 'transparent' ? '0 0, 0 4px, 4px -4px, -4px 0px' : undefined,
+							style={{
+								backgroundColor: color.color,
 							}}
 							initial={{ scale: 0, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}

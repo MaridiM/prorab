@@ -30,6 +30,7 @@ export default function OnboardingStep2Page() {
 	const router = useRouter()
 	const [selectedIcon, setSelectedIcon] = useState('hammer')
 	const [selectedColor, setSelectedColor] = useState('orange')
+	const [uploadedLogo, setUploadedLogo] = useState<File | null>(null)
 	const [teamName, setTeamName] = useState('')
 
 	// Load data from sessionStorage
@@ -55,21 +56,34 @@ export default function OnboardingStep2Page() {
 				const data = JSON.parse(step2Data)
 				if (data.iconId) setSelectedIcon(data.iconId)
 				if (data.colorId) setSelectedColor(data.colorId)
+				// Note: uploaded logo files cannot be restored from sessionStorage
 			} catch (error) {
 				console.error('Failed to parse step 2 data:', error)
 			}
 		}
 	}, [router])
 
+	const handleLogoUpload = (file: File | null) => {
+		setUploadedLogo(file)
+	}
+
 	const handleNext = () => {
 		// Save to sessionStorage
-		sessionStorage.setItem(
-			'onboarding_step2',
-			JSON.stringify({
-				iconId: selectedIcon,
-				colorId: selectedColor,
-			})
-		)
+		const step2Data: {
+			iconId?: string
+			colorId?: string
+			hasUploadedLogo?: boolean
+		} = {}
+
+		if (uploadedLogo) {
+			step2Data.hasUploadedLogo = true
+			// Note: actual file will be uploaded when completing onboarding
+		} else {
+			step2Data.iconId = selectedIcon
+			step2Data.colorId = selectedColor
+		}
+
+		sessionStorage.setItem('onboarding_step2', JSON.stringify(step2Data))
 		router.push('/onboarding/step-3')
 	}
 
@@ -129,8 +143,10 @@ export default function OnboardingStep2Page() {
 					<IconPicker
 						selectedIcon={selectedIcon}
 						selectedColor={selectedColor}
+						uploadedLogo={uploadedLogo}
 						onIconSelect={setSelectedIcon}
 						onColorSelect={setSelectedColor}
+						onLogoUpload={handleLogoUpload}
 					/>
 				</motion.div>
 

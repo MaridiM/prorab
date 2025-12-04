@@ -101,7 +101,8 @@
 **Frontend - UI Components**
 - [x] Создать Stepper Component (прогресс 1/3, 2/3, 3/3)
 - [x] Создать ImageUpload Component (drag & drop, preview, validation)
-- [x] Создать IconPicker Component (10 эмодзи + 9 цветов)
+- [x] Создать IconPicker Component (10 эмодзи + 9 пастельных цветов + белый)
+- [x] Интегрировать ImageUpload в IconPicker (клик по превью для загрузки)
 - [x] Создать TeamLogo Component (изображение/эмодзи/инициалы)
 
 **Frontend - Onboarding Pages**
@@ -109,7 +110,7 @@
 - [x] Реализовать Onboarding Layout (guards, Stepper)
 - [x] Реализовать стартовый экран (2 кнопки: "Начать настройку" / "Меня пригласили")
 - [x] Реализовать Step 1: Название бригады (форма + sessionStorage)
-- [x] Реализовать Step 2: Логотип (IconPicker, skip button)
+- [x] Реализовать Step 2: Логотип (IconPicker с загрузкой изображений, skip button)
 - [x] Реализовать Step 3: Первый проект (форма + CompleteOnboarding mutation)
 - [x] Реализовать Invite Page (6-digit code input + JoinTeamByInvite)
 
