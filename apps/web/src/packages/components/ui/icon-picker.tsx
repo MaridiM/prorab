@@ -2,9 +2,9 @@
 
 import { cn } from '@/packages/utils'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { ImageIcon, X } from 'lucide-react'
+import { ImageIcon, X, Loader2 } from 'lucide-react'
 import { Button } from './button'
 
 // Предустановленные иконки-эмодзи для команд (10 иконок)
@@ -58,6 +58,39 @@ export function IconPicker({
 
 	const fileInputRef = useRef<HTMLInputElement>(null)
 	const [showIconPicker, setShowIconPicker] = useState(false)
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+	const [isImageLoading, setIsImageLoading] = useState(false)
+
+	// Generate preview URL for uploaded logo
+	useEffect(() => {
+		if (uploadedLogo) {
+			if (typeof uploadedLogo === 'string') {
+				// Base64 string (from sessionStorage)
+				setPreviewUrl(uploadedLogo)
+				setIsImageLoading(true) // Start loading when we have base64
+				// For base64, preload image to check if it's ready
+				const img = new window.Image()
+				img.onload = () => {
+					// Small delay to ensure smooth transition
+					setTimeout(() => setIsImageLoading(false), 50)
+				}
+				img.onerror = () => setIsImageLoading(false)
+				img.src = uploadedLogo
+			} else {
+				// File object
+				const url = URL.createObjectURL(uploadedLogo)
+				setPreviewUrl(url)
+				setIsImageLoading(true) // Start loading when we have file URL
+				// Cleanup function
+				return () => {
+					URL.revokeObjectURL(url)
+				}
+			}
+		} else {
+			setPreviewUrl(null)
+			setIsImageLoading(false)
+		}
+	}, [uploadedLogo])
 
 	const handlePreviewClick = () => {
 		if (previewUrl) {
@@ -101,13 +134,6 @@ export function IconPicker({
 		fileInputRef.current?.click()
 	}
 
-	// Generate preview URL for uploaded logo
-	const previewUrl = uploadedLogo
-		? typeof uploadedLogo === 'string'
-			? uploadedLogo
-			: URL.createObjectURL(uploadedLogo)
-		: null
-
 	return (
 		<div className={cn('space-y-3', className)}>
 			{/* Hidden file input */}
@@ -132,21 +158,44 @@ export function IconPicker({
 							: "border-border/50 hover:border-primary/30 shadow-md hover:shadow-lg"
 					)}
 					style={{
-						backgroundColor: previewUrl ? 'transparent' : currentColor,
+						backgroundColor: previewUrl || uploadedLogo ? 'transparent' : currentColor,
 					}}
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.98 }}
 				>
+					{/* Show loader immediately if logo exists but preview not ready */}
+					{uploadedLogo && !previewUrl && (
+						<div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+							<Loader2 className="w-6 h-6 animate-spin text-primary" />
+						</div>
+					)}
+
 					{previewUrl ? (
-						<Image
-							src={previewUrl}
-							alt="Uploaded logo"
-							fill
-							className="object-cover object-center"
-							sizes="80px"
-						/>
+						<>
+							{isImageLoading && (
+								<div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+									<Loader2 className="w-6 h-6 animate-spin text-primary" />
+								</div>
+							)}
+							<Image
+								src={previewUrl}
+								alt="Uploaded logo"
+								fill
+								className={cn(
+									"object-cover object-center transition-opacity duration-200",
+									isImageLoading ? "opacity-0" : "opacity-100"
+								)}
+								sizes="80px"
+								onLoad={() => {
+									setIsImageLoading(false)
+								}}
+								onError={() => setIsImageLoading(false)}
+								priority={typeof uploadedLogo === 'string'}
+								unoptimized={typeof uploadedLogo === 'string'}
+							/>
+						</>
 					) : (
-						TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨'
+						!uploadedLogo && (TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨')
 					)}
 				</motion.div>
 

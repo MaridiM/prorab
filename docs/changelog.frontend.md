@@ -2,6 +2,239 @@
 
 ## Module: Onboarding
 
+### UX: Unified Onboarding Design System
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Несогласованные стили между Step 1, 2, 3
+- ❌ Step 2 имел меньше padding, отступов, размеры иконок
+- ❌ Кнопки разных размеров: `h-10` vs `h-12`
+- ❌ Placeholders недостаточно прозрачные, сливаются с введённым текстом
+
+**Solution**
+
+- ✅ Полная унификация дизайна всех 3 шагов онбординга
+- ✅ Единые размеры: padding, spacing, buttons, icons
+- ✅ Прозрачные placeholders для различия с реальным текстом
+
+**Changed - Unified Styles (Step 2 → Step 1/3)**
+
+- ✅ **Card Container**:
+  - Padding: `p-5` → `p-8` (20px → 32px) - единый стиль
+  - Container spacing: `space-y-4` → `space-y-6` (16px → 24px)
+
+- ✅ **Header**:
+  - Icon size: `h-9 w-9` → `h-14 w-14` (36px → 56px, +56%)
+  - Icon content: `w-4 h-4` → `w-7 h-7` (16px → 28px, +75%)
+  - Icon margin: `mb-2` → `mb-4` (8px → 16px)
+  - Title size: `text-base` → `text-2xl` (16px → 24px, +50%)
+  - Description margin: `mt-1` → `mt-2` (4px → 8px)
+  - Description size: `text-xs` → `text-sm` (12px → 14px)
+  - Header margin: `mb-4` → `mb-8` (16px → 32px)
+  - Border radius: `rounded-xl` → `rounded-2xl` (12px → 16px)
+
+- ✅ **Buttons**:
+  - Height: `h-10` → `h-12` (40px → 48px, +20%)
+  - Icons: `h-3.5 w-3.5` → `h-4 w-4` (14px → 16px)
+  - Gap: `gap-1.5` → `gap-2` (6px → 8px)
+  - Skip button: `h-8` → `h-9`, `text-xs` → `text-sm`, добавлен `mt-3`
+  - Button spacing: `gap-2` → `gap-3` (8px → 12px)
+
+- ✅ **Actions Section**:
+  - Margin top: `mt-5 space-y-3` → `mt-6` с `gap-3` и `mt-3`
+  - Оптимизирована структура для визуальной иерархии
+
+- ✅ **Input Placeholders**:
+  - Opacity: `text-muted-foreground` → `text-muted-foreground/40`
+  - Теперь плейсхолдеры в 2.5 раза прозрачнее
+  - Чётко различимы от введённого текста
+
+**Before/After Comparison**
+
+```
+Element          Step 2 (before)  Unified (after)  Change
+──────────────────────────────────────────────────────
+Card padding     20px (p-5)       32px (p-8)       +60%
+Header icon      36px (h-9)       56px (h-14)      +56%
+Title            16px (base)      24px (2xl)       +50%
+Buttons          40px (h-10)      48px (h-12)      +20%
+Spacing          16px (4)         24px (6)         +50%
+Placeholder      100% opacity     40% opacity      -60%
+```
+
+**Benefits**
+
+- ✅ **Визуальная консистентность** - все шаги выглядят едино
+- ✅ **Профессиональный вид** - правильная иерархия и пропорции
+- ✅ **Лучшая читаемость** - прозрачные placeholders не сливаются с текстом
+- ✅ **Единая типографика** - одинаковые размеры на всех шагах
+
+---
+
+### Fix: Logo Loading - Smooth Display Without Flickering
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ При возврате на Step 2 с загруженным логотипом происходит flickering:
+  1. Сначала показывается дефолтная иконка с цветным фоном
+  2. Затем появляется loader
+  3. Только потом загружается реальный логотип
+- ❌ Пользователь видит 3 разных состояния за доли секунды
+- ❌ Создаётся впечатление нестабильности и "дёрганья" интерфейса
+
+**Solution**
+
+- ✅ Показывать loader **сразу**, если `uploadedLogo` существует
+- ✅ Скрывать дефолтную иконку при наличии загруженного лого
+- ✅ Плавный fade-in эффект для загруженного изображения
+- ✅ Оптимизация загрузки base64 из sessionStorage
+
+**Changed - Smart Loading States**
+
+- ✅ **Icon Picker Component** (`icon-picker.tsx`):
+  - Добавлена проверка: `{uploadedLogo && !previewUrl && <Loader />}`
+  - Условие рендера иконки: `!uploadedLogo && (emoji)`
+  - Background: `previewUrl || uploadedLogo ? 'transparent' : currentColor`
+  - Убран двойной delay в `onLoad` (50ms → мгновенно)
+  - Transition: `duration-300` → `duration-200` (быстрее)
+  - Loader backdrop: `bg-background/90` → `bg-background/80` (менее навязчиво)
+
+**Loading Flow**
+
+```
+БЫЛО (3 шага, flickering):
+1. [Default Icon] → видим иконку
+2. [Loader]       → видим spinner
+3. [Real Logo]    → видим логотип
+
+СТАЛО (1 шаг, smooth):
+1. [Loader] → [Real Logo] ✨
+```
+
+**Technical Implementation**
+
+```tsx
+// Show loader immediately if logo exists but preview not ready
+{uploadedLogo && !previewUrl && (
+  <Loader />
+)}
+
+// Only show default icon if NO uploaded logo
+{!uploadedLogo && (
+  <DefaultIcon />
+)}
+```
+
+**Benefits**
+
+- ✅ **Нет flickering** - пользователь не видит промежуточных состояний
+- ✅ **Плавная загрузка** - smooth fade-in эффект
+- ✅ **Лучший UX** - профессиональное ощущение стабильности
+- ✅ **Быстрее** - оптимизированы переходы и delays
+
+---
+
+### Fix: IconPicker - Avatar Display & Persistence Improvements
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Загруженный аватар обрезался при отображении (`object-contain` оставлял белые поля)
+- ❌ Загруженный аватар исчезал при возврате на шаг 2 (не сохранялся между шагами)
+- ❌ Объект `File` нельзя сериализовать в JSON для sessionStorage
+- ❌ Всего 8 иконок, нужно было больше вариантов
+- ❌ Иконки располагались в 3 ряда (4+4+2) вместо 2 рядов
+
+**Solution**
+
+- ✅ Изменен режим отображения на `object-cover` для заполнения всего квадрата без белых полей
+- ✅ Реализовано сохранение загруженного аватара в base64 через sessionStorage
+- ✅ Добавлены 2 новые иконки (всего 10 иконок)
+- ✅ Изменена сетка с 4 на 5 колонок для расположения в 2 ряда по 5 иконок
+
+**Added**
+
+- ✅ **Новые иконки** (2 шт.):
+  - 🚧 Дорожные работы (`construction_zone`)
+  - 🔩 Болт (`bolt`)
+  - Теперь всего 10 иконок для выбора
+
+- ✅ **Сохранение аватара в base64**:
+  - Конвертация `File` в base64 через `FileReader.readAsDataURL()`
+  - Сохранение `logoBase64` в sessionStorage при загрузке файла
+  - Восстановление аватара из base64 при возврате на шаг 2
+  - Автоматическая очистка base64 при удалении логотипа
+
+- ✅ **Управление памятью**:
+  - `useEffect` для управления `previewUrl` в IconPicker
+  - Автоматическая очистка `URL.createObjectURL` при размонтировании
+  - Предотвращение утечек памяти
+
+**Changed**
+
+- ✅ **IconPicker Component** (`icon-picker.tsx`):
+  - Изменен режим отображения: `object-contain p-1` → `object-cover object-center`
+  - Убран белый фон: `backgroundColor: 'hsl(0, 0%, 100%)'` → `'transparent'`
+  - Добавлен `useEffect` для управления `previewUrl` с очисткой URL
+  - Тип `uploadedLogo`: `File | null` → `File | string | null` (поддержка base64)
+  - Сетка иконок: `grid-cols-4` → `grid-cols-5` (2 ряда по 5 иконок)
+
+- ✅ **Step 2 Page** (`step-2/page.tsx`):
+  - Тип `uploadedLogo`: `File | null` → `File | string | null`
+  - Добавлена конвертация файла в base64 в `handleLogoUpload`
+  - Сохранение `logoBase64` в sessionStorage при загрузке
+  - Восстановление аватара из `logoBase64` при загрузке страницы
+  - Обновлен `handleNext` для сохранения base64 в sessionStorage
+
+- ✅ **TEAM_ICONS массив**:
+  - Добавлены 2 новые иконки: `construction_zone` и `bolt`
+  - Обновлен комментарий: "8 иконок" → "10 иконок"
+
+**Fixed**
+
+- ✅ Исправлено отображение загруженного аватара без белых полей
+- ✅ Исправлена проблема исчезновения аватара при возврате на шаг 2
+- ✅ Исправлена утечка памяти при работе с `URL.createObjectURL`
+- ✅ Улучшено расположение иконок (2 ряда по 5 вместо 3 рядов)
+
+**Removed**
+
+- ❌ Padding `p-1` у изображения (больше не нужен с `object-cover`)
+- ❌ Белый фон у контейнера превью (заменен на `transparent`)
+
+**Files Modified**
+
+- `apps/web/src/packages/components/ui/icon-picker.tsx` — отображение аватара и управление памятью
+- `apps/web/src/app/(root)/onboarding/step-2/page.tsx` — сохранение/восстановление base64
+- `docs/changelog.frontend.md` — эта запись
+
+**Benefits**
+
+- 🖼️ **Правильное отображение** — аватар заполняет весь квадрат без белых полей
+- 💾 **Сохранение данных** — загруженный аватар сохраняется между шагами
+- 🎨 **Больше вариантов** — 10 иконок вместо 8 для большего выбора
+- 📐 **Улучшенная сетка** — 2 ряда по 5 иконок вместо 3 рядов
+- 🧹 **Нет утечек памяти** — правильная очистка URL объектов
+- ⚡ **Лучший UX** — пользователь не теряет загруженный аватар при навигации
+
+**Technical Details**
+
+- Base64 конвертация через `FileReader.readAsDataURL()` в `handleLogoUpload`
+- Сохранение в sessionStorage: `{ logoBase64: string, hasUploadedLogo: true }`
+- Восстановление: проверка `data.logoBase64` в `useEffect` при монтировании
+- `object-cover` с `object-center` для заполнения квадрата с минимальной обрезкой
+- `URL.revokeObjectURL()` в cleanup функции `useEffect` для предотвращения утечек
+- Grid layout: `grid-cols-5` для 10 иконок в 2 ряда (5+5)
+
+---
+
+## Module: Onboarding
+
 ### UX: Ultra-Compact IconPicker - Fits Any Screen
 
 :calendar: `2025-12-04`
