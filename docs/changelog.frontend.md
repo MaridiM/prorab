@@ -2,6 +2,76 @@
 
 ## Module: Onboarding
 
+### Step: ImageUpload Component
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Отсутствовал компонент для загрузки изображений (логотипов)
+- ❌ Нужна была поддержка drag & drop для удобства пользователя
+- ❌ Требовалась валидация файлов (размер, формат)
+
+**Solution**
+
+- ✅ Создан ImageUpload компонент с полной функциональностью
+- ✅ Реализован drag & drop с визуальной индикацией
+- ✅ Добавлена валидация файлов и отображение ошибок
+- ✅ Live preview загруженного изображения
+
+**Added**
+
+- ✅ **ImageUpload Component** (`image-upload.tsx`):
+  - Drag & drop интерфейс с визуальной индикацией
+  - Клик для выбора файла (fallback для мобильных)
+  - Live preview с Next.js Image оптимизацией
+  - Валидация размера файла (до 5MB по умолчанию)
+  - Валидация формата (JPG, PNG, WEBP)
+  - Кнопка удаления с анимацией
+  - Обработка ошибок с сообщениями
+
+**Changed**
+
+- ✅ N/A
+
+**Fixed**
+
+- ✅ N/A
+
+**Removed**
+
+- ❌ N/A
+
+**Files Created**
+
+- `apps/web/src/packages/components/ui/image-upload.tsx`
+
+**Files Modified**
+
+- `apps/web/src/packages/components/ui/index.ts` — добавлен экспорт ImageUpload
+- `docs/roadmap.md` — отмечена completed задача
+
+**Benefits**
+
+- 📤 **Drag & Drop** — удобная загрузка перетаскиванием
+- 📱 **Mobile-friendly** — работает на всех устройствах
+- ✅ **Валидация** — проверка размера и формата
+- 👁️ **Live Preview** — мгновенный предпросмотр
+- 🎨 **Анимации** — плавные переходы Framer Motion
+- ⚠️ **Error Handling** — понятные сообщения об ошибках
+
+**Technical Details**
+
+- Drag events: onDragEnter, onDragLeave, onDragOver, onDrop
+- File validation: size + MIME type check
+- Preview: FileReader API с readAsDataURL
+- Props: value, onChange, maxSize, accept, className
+- Animations: AnimatePresence для upload ↔ preview
+
+---
+
+## Module: Onboarding
+
 ### Step: Unified Design System - Onboarding Redesign
 
 :calendar: `2025-12-04`

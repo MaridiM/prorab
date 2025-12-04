@@ -2,6 +2,7 @@ export * from "./button";
 export * from "./card";
 export * from "./form";
 export * from "./icon-picker";
+export * from "./image-upload";
 export * from "./input"
 export * from "./password-input";
 export * from "./select";

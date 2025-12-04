@@ -100,8 +100,8 @@
 
 **Frontend - UI Components**
 - [x] Создать Stepper Component (прогресс 1/3, 2/3, 3/3)
-- [ ] Создать ImageUpload Component (drag & drop, resize preview)
-- [x] Создать IconPicker Component (10 эмодзи + 8 цветов)
+- [x] Создать ImageUpload Component (drag & drop, preview, validation)
+- [x] Создать IconPicker Component (10 эмодзи + 9 цветов)
 - [x] Создать TeamLogo Component (изображение/эмодзи/инициалы)
 
 **Frontend - Onboarding Pages**
