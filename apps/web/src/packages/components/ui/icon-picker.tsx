@@ -21,16 +21,16 @@ const TEAM_ICONS = [
 	{ id: 'truck', emoji: '🚚', label: 'Грузовик' },
 ]
 
-// Предустановленные цвета фона (пастельные)
+// Предустановленные цвета фона (пастельные, легкие и светлые)
 const BACKGROUND_COLORS = [
-	{ id: 'orange', color: 'hsl(25, 85%, 75%)', label: 'Оранжевый' },
-	{ id: 'blue', color: 'hsl(217, 70%, 80%)', label: 'Синий' },
-	{ id: 'green', color: 'hsl(142, 60%, 75%)', label: 'Зелёный' },
-	{ id: 'red', color: 'hsl(0, 65%, 75%)', label: 'Красный' },
-	{ id: 'purple', color: 'hsl(271, 65%, 80%)', label: 'Фиолетовый' },
-	{ id: 'yellow', color: 'hsl(48, 85%, 80%)', label: 'Жёлтый' },
-	{ id: 'pink', color: 'hsl(330, 70%, 82%)', label: 'Розовый' },
-	{ id: 'teal', color: 'hsl(173, 60%, 75%)', label: 'Бирюзовый' },
+	{ id: 'orange', color: 'hsl(25, 40%, 90%)', label: 'Оранжевый' },
+	{ id: 'blue', color: 'hsl(217, 35%, 88%)', label: 'Синий' },
+	{ id: 'green', color: 'hsl(142, 30%, 87%)', label: 'Зелёный' },
+	{ id: 'red', color: 'hsl(0, 35%, 88%)', label: 'Красный' },
+	{ id: 'purple', color: 'hsl(271, 35%, 89%)', label: 'Фиолетовый' },
+	{ id: 'yellow', color: 'hsl(48, 45%, 92%)', label: 'Жёлтый' },
+	{ id: 'pink', color: 'hsl(330, 35%, 90%)', label: 'Розовый' },
+	{ id: 'teal', color: 'hsl(173, 30%, 86%)', label: 'Бирюзовый' },
 	{ id: 'white', color: 'hsl(0, 0%, 100%)', label: 'Белый' },
 ]
 
@@ -85,12 +85,17 @@ export function IconPicker({
 		if (fileInputRef.current) {
 			fileInputRef.current.value = ''
 		}
-		setShowIconPicker(false)
+		// Set random icon and color after removing logo
+		const randomIcon = TEAM_ICONS[Math.floor(Math.random() * TEAM_ICONS.length)]
+		const randomColor = BACKGROUND_COLORS[Math.floor(Math.random() * BACKGROUND_COLORS.length)]
+		onIconSelect(randomIcon.id)
+		onColorSelect(randomColor.id)
+		// Keep picker open to show icon selection
 	}
 
 	const handleIconSelect = (iconId: string) => {
 		onIconSelect(iconId)
-		setShowIconPicker(false)
+		// Don't close picker - let user also select color
 	}
 
 	const handleUploadClick = () => {
@@ -151,7 +156,7 @@ export function IconPicker({
 				</p>
 			</div>
 
-			{/* Icon Picker Modal */}
+			{/* Icon Picker Modal - All options in one place */}
 			<AnimatePresence>
 				{showIconPicker && (
 					<motion.div
@@ -161,35 +166,73 @@ export function IconPicker({
 						transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
 						className="space-y-4 p-5 bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 shadow-xl shadow-black/5 dark:shadow-black/20"
 					>
-						{/* Icon Grid */}
-						<div className="space-y-3">
-							<h3 className="text-sm font-semibold text-foreground">
-								Выберите иконку
-							</h3>
-							<div className="grid grid-cols-5 gap-2">
-								{TEAM_ICONS.map((icon, index) => (
-									<motion.button
-										key={icon.id}
-										type="button"
-										onClick={() => handleIconSelect(icon.id)}
-										className={cn(
-											'flex h-12 w-12 items-center justify-center rounded-xl text-2xl transition-all duration-200 border-2',
-											selectedIcon === icon.id
-												? 'bg-primary/10 border-primary shadow-md shadow-primary/20 scale-105'
-												: 'bg-background border-border/50 hover:border-primary/30 hover:bg-secondary/30 hover:scale-105'
-										)}
-										initial={{ scale: 0, opacity: 0 }}
-										animate={{ scale: 1, opacity: 1 }}
-										transition={{ delay: index * 0.02, duration: 0.15 }}
-										whileHover={{ scale: 1.08, y: -2 }}
-										whileTap={{ scale: 0.95 }}
-										aria-label={icon.label}
-									>
-										{icon.emoji}
-									</motion.button>
-								))}
+						{/* Icon Grid - Only show if no logo uploaded */}
+						{!previewUrl && (
+							<div className="space-y-3">
+								<h3 className="text-sm font-semibold text-foreground">
+									Выберите иконку
+								</h3>
+								<div className="grid grid-cols-5 gap-2">
+									{TEAM_ICONS.map((icon, index) => (
+										<motion.button
+											key={icon.id}
+											type="button"
+											onClick={() => handleIconSelect(icon.id)}
+											className={cn(
+												'flex h-12 w-12 items-center justify-center rounded-xl text-2xl transition-all duration-200 border-2',
+												selectedIcon === icon.id
+													? 'bg-primary/10 border-primary shadow-md shadow-primary/20 scale-105'
+													: 'bg-background border-border/50 hover:border-primary/30 hover:bg-secondary/30 hover:scale-105'
+											)}
+											initial={{ scale: 0, opacity: 0 }}
+											animate={{ scale: 1, opacity: 1 }}
+											transition={{ delay: index * 0.02, duration: 0.15 }}
+											whileHover={{ scale: 1.08, y: -2 }}
+											whileTap={{ scale: 0.95 }}
+											aria-label={icon.label}
+										>
+											{icon.emoji}
+										</motion.button>
+									))}
+								</div>
 							</div>
-						</div>
+						)}
+
+						{/* Color Selection - Show when icon is selected and no logo uploaded */}
+						{!previewUrl && selectedIcon && (
+							<div className="space-y-3">
+								<h3 className="text-sm font-semibold text-foreground">
+									Выберите цвет
+								</h3>
+								<div className="flex gap-2.5 justify-center flex-wrap">
+									{BACKGROUND_COLORS.map((color, index) => (
+										<motion.button
+											key={color.id}
+											type="button"
+											onClick={() => onColorSelect(color.id)}
+											className={cn(
+												'h-10 w-10 rounded-full border-2 transition-all duration-200',
+												selectedColor === color.id
+													? 'border-foreground shadow-lg shadow-primary/20 scale-110'
+													: 'border-border/50 hover:border-primary/30 hover:scale-105'
+											)}
+											style={{
+												backgroundColor: color.color,
+												boxShadow: selectedColor === color.id
+													? '0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary)), 0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+													: undefined,
+											}}
+											initial={{ scale: 0, opacity: 0 }}
+											animate={{ scale: 1, opacity: 1 }}
+											transition={{ delay: index * 0.03, duration: 0.15 }}
+											whileHover={{ scale: 1.1, y: -2 }}
+											whileTap={{ scale: 0.95 }}
+											aria-label={color.label}
+										/>
+									))}
+								</div>
+							</div>
+						)}
 
 						{/* Divider */}
 						<div className="h-px bg-border/50" />
@@ -235,47 +278,6 @@ export function IconPicker({
 					</motion.div>
 				)}
 			</AnimatePresence>
-
-			{/* Color Selection - Only shown when icon is selected and no picker open */}
-			{!previewUrl && !showIconPicker && (
-				<motion.div
-					initial={{ opacity: 0, y: 5 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.2 }}
-					className="space-y-3"
-				>
-					<h3 className="text-sm font-semibold text-foreground text-center">
-						Выберите цвет
-					</h3>
-					<div className="flex gap-3 justify-center flex-wrap">
-						{BACKGROUND_COLORS.map((color, index) => (
-							<motion.button
-								key={color.id}
-								type="button"
-								onClick={() => onColorSelect(color.id)}
-								className={cn(
-									'h-10 w-10 rounded-full border-2 transition-all duration-200',
-									selectedColor === color.id
-										? 'border-foreground shadow-lg shadow-primary/20 scale-110'
-										: 'border-border/50 hover:border-primary/30 hover:scale-105'
-								)}
-								style={{
-									backgroundColor: color.color,
-									boxShadow: selectedColor === color.id 
-										? '0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary)), 0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
-										: undefined,
-								}}
-								initial={{ scale: 0, opacity: 0 }}
-								animate={{ scale: 1, opacity: 1 }}
-								transition={{ delay: index * 0.03, duration: 0.15 }}
-								whileHover={{ scale: 1.1, y: -2 }}
-								whileTap={{ scale: 0.95 }}
-								aria-label={color.label}
-							/>
-						))}
-					</div>
-				</motion.div>
-			)}
 		</div>
 	)
 }

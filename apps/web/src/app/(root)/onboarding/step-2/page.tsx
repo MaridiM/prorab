@@ -26,15 +26,27 @@ const steps = [
 	{ id: 3, label: 'Объект' },
 ]
 
+// Available icons and colors
+const ICON_IDS = ['hammer', 'wrench', 'construction', 'hardhat', 'brick', 'tools', 'house', 'building', 'crane', 'truck']
+const COLOR_IDS = ['orange', 'blue', 'green', 'red', 'purple', 'yellow', 'pink', 'teal']
+
 export default function OnboardingStep2Page() {
 	const router = useRouter()
-	const [selectedIcon, setSelectedIcon] = useState('hammer')
-	const [selectedColor, setSelectedColor] = useState('white')
-	const [uploadedLogo, setUploadedLogo] = useState<File | null>(null)
 	const [teamName, setTeamName] = useState('')
+	const [isMounted, setIsMounted] = useState(false)
 
-	// Load data from sessionStorage
+	// Initialize with stable default values (will be replaced after mount)
+	const [selectedIcon, setSelectedIcon] = useState('hammer')
+	const [selectedColor, setSelectedColor] = useState('orange')
+	const [uploadedLogo, setUploadedLogo] = useState<File | null>(null)
+
+	// Load data from sessionStorage and generate random values after mount
 	useEffect(() => {
+		// Only run on client side
+		if (typeof window === 'undefined') return
+		
+		setIsMounted(true)
+
 		const step1Data = sessionStorage.getItem('onboarding_step1')
 		if (!step1Data) {
 			router.push('/onboarding/step-1')
@@ -43,24 +55,38 @@ export default function OnboardingStep2Page() {
 
 		try {
 			const data = JSON.parse(step1Data)
-			setTeamName(data.name || '')
+			// Set team name from step 1 data
+			if (data.name) {
+				setTeamName(data.name)
+			} else {
+				console.warn('No team name found in step 1 data')
+			}
 		} catch (error) {
 			console.error('Failed to parse step 1 data:', error)
 			router.push('/onboarding/step-1')
+			return
 		}
 
-		// Load step 2 data if exists
+		// Load step 2 data if exists (to preserve icon/color selection)
 		const step2Data = sessionStorage.getItem('onboarding_step2')
 		if (step2Data) {
 			try {
 				const data = JSON.parse(step2Data)
-				if (data.iconId) setSelectedIcon(data.iconId)
-				if (data.colorId) setSelectedColor(data.colorId)
-				else setSelectedColor('white') // Default to white if no color saved
-				// Note: uploaded logo files cannot be restored from sessionStorage
+				if (data.iconId && !data.hasUploadedLogo) {
+					setSelectedIcon(data.iconId)
+				}
+				if (data.colorId && !data.hasUploadedLogo) {
+					setSelectedColor(data.colorId)
+				}
 			} catch (error) {
 				console.error('Failed to parse step 2 data:', error)
 			}
+		} else {
+			// Only generate random icon and color if no saved data
+			const randomIcon = ICON_IDS[Math.floor(Math.random() * ICON_IDS.length)]
+			const randomColor = COLOR_IDS[Math.floor(Math.random() * COLOR_IDS.length)]
+			setSelectedIcon(randomIcon)
+			setSelectedColor(randomColor)
 		}
 	}, [router])
 
@@ -69,6 +95,8 @@ export default function OnboardingStep2Page() {
 	}
 
 	const handleNext = () => {
+		if (typeof window === 'undefined') return
+		
 		// Save to sessionStorage
 		const step2Data: {
 			iconId?: string
@@ -89,6 +117,8 @@ export default function OnboardingStep2Page() {
 	}
 
 	const handleSkip = () => {
+		if (typeof window === 'undefined') return
+		
 		// Clear step 2 data
 		sessionStorage.removeItem('onboarding_step2')
 		router.push('/onboarding/step-3')
