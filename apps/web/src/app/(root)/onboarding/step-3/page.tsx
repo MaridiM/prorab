@@ -1,10 +1,10 @@
 'use client'
 
-import { motion, Variants } from 'framer-motion'
+import { motion, Variants, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Check, Loader2, MapPin, FileText } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, MapPin, FileText, Sparkles } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Stepper } from '@/packages/components/ui/stepper'
 import {
@@ -19,6 +19,7 @@ import {
 	Input,
 } from '@/packages/components'
 import { createProjectSchema, type CreateProjectInput } from '@/packages/schemas/teams'
+import confetti from 'canvas-confetti'
 
 const fadeIn: Variants = {
 	hidden: { opacity: 0, y: 20 },
@@ -41,6 +42,7 @@ const steps = [
 export default function OnboardingStep3Page() {
 	const router = useRouter()
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [isCompleted, setIsCompleted] = useState(false)
 	const [teamName, setTeamName] = useState('')
 
 	const form = useForm<CreateProjectInput>({
@@ -52,6 +54,40 @@ export default function OnboardingStep3Page() {
 			description: '',
 		},
 	})
+
+	// Confetti effect function
+	const triggerConfetti = () => {
+		const duration = 3000
+		const animationEnd = Date.now() + duration
+		const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+
+		function randomInRange(min: number, max: number) {
+			return Math.random() * (max - min) + min
+		}
+
+		const interval: NodeJS.Timeout = setInterval(function() {
+			const timeLeft = animationEnd - Date.now()
+
+			if (timeLeft <= 0) {
+				return clearInterval(interval)
+			}
+
+			const particleCount = 50 * (timeLeft / duration)
+
+			// Left side
+			confetti({
+				...defaults,
+				particleCount,
+				origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+			})
+			// Right side
+			confetti({
+				...defaults,
+				particleCount,
+				origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+			})
+		}, 250)
+	}
 
 	// Load data from sessionStorage
 	useEffect(() => {
@@ -100,14 +136,26 @@ export default function OnboardingStep3Page() {
 			//   projectDescription: data.description,
 			// })
 
-			// Clear sessionStorage
-			sessionStorage.removeItem('onboarding_step1')
-			sessionStorage.removeItem('onboarding_step2')
-			sessionStorage.removeItem('onboarding_step3')
+			// Simulate API call
+			await new Promise(resolve => setTimeout(resolve, 800))
 
-			// Redirect to dashboard
-			// TODO: Replace with actual dashboard route
-			router.push('/')
+			// Trigger completion animation
+			setIsCompleted(true)
+
+			// Trigger confetti effect
+			triggerConfetti()
+
+			// Wait for animation to complete before redirect
+			setTimeout(() => {
+				// Clear sessionStorage
+				sessionStorage.removeItem('onboarding_step1')
+				sessionStorage.removeItem('onboarding_step2')
+				sessionStorage.removeItem('onboarding_step3')
+
+				// Redirect to dashboard
+				// TODO: Replace with actual dashboard route
+				router.push('/')
+			}, 2000)
 		} catch (error) {
 			console.error('Failed to complete onboarding:', error)
 			setIsSubmitting(false)
@@ -115,7 +163,73 @@ export default function OnboardingStep3Page() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 relative">
+			{/* Success Animation Overlay */}
+			<AnimatePresence>
+				{isCompleted && (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md"
+					>
+						<motion.div
+							initial={{ scale: 0, rotate: -180 }}
+							animate={{ scale: 1, rotate: 0 }}
+							transition={{
+								type: "spring",
+								stiffness: 200,
+								damping: 20,
+								duration: 0.8
+							}}
+							className="flex flex-col items-center gap-6 p-12 bg-card/90 backdrop-blur-xl rounded-3xl border-2 border-primary/50 shadow-2xl"
+						>
+							<motion.div
+								initial={{ scale: 0 }}
+								animate={{ scale: [0, 1.2, 1] }}
+								transition={{ delay: 0.2, duration: 0.6 }}
+								className="relative"
+							>
+								<div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl" />
+								<div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent">
+									<Check className="h-12 w-12 text-primary-foreground" strokeWidth={3} />
+								</div>
+							</motion.div>
+
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: 0.4, duration: 0.5 }}
+								className="text-center space-y-2"
+							>
+								<h2 className="text-3xl font-bold">Готово!</h2>
+								<p className="text-muted-foreground text-lg">
+									Онбординг успешно завершён
+								</p>
+							</motion.div>
+
+							<motion.div
+								initial={{ scaleX: 0 }}
+								animate={{ scaleX: 1 }}
+								transition={{ delay: 0.6, duration: 0.5 }}
+								className="flex gap-1"
+							>
+								{[...Array(3)].map((_, i) => (
+									<motion.div
+										key={i}
+										initial={{ scale: 0 }}
+										animate={{ scale: [0, 1.5, 1] }}
+										transition={{ delay: 0.8 + i * 0.1, duration: 0.4 }}
+									>
+										<Sparkles className="h-6 w-6 text-primary" />
+									</motion.div>
+								))}
+							</motion.div>
+						</motion.div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+
 			{/* Stepper */}
 			<motion.div
 				variants={fadeIn}
@@ -127,7 +241,14 @@ export default function OnboardingStep3Page() {
 			</motion.div>
 
 			{/* Form Card */}
-			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
+			<AnimatePresence mode="wait">
+				{!isCompleted && (
+					<motion.div
+						initial={{ opacity: 1 }}
+						exit={{ opacity: 0, scale: 0.95, y: 20 }}
+						transition={{ duration: 0.3 }}
+					>
+						<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
 				{/* Decorative gradient */}
 				<div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent via-primary to-accent" />
 				
@@ -261,7 +382,10 @@ export default function OnboardingStep3Page() {
 						</div>
 					</motion.form>
 				</Form>
-			</Card>
+						</Card>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	)
 }
