@@ -44,6 +44,7 @@ export default function OnboardingStep3Page() {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [isCompleted, setIsCompleted] = useState(false)
 	const [teamName, setTeamName] = useState('')
+	const [isValidating, setIsValidating] = useState(true)
 
 	const form = useForm<CreateProjectInput>({
 		resolver: zodResolver(createProjectSchema),
@@ -89,20 +90,53 @@ export default function OnboardingStep3Page() {
 		}, 250)
 	}
 
-	// Load data from sessionStorage
+	// Load data from sessionStorage and validate previous steps
 	useEffect(() => {
+		// Only run on client side
+		if (typeof window === 'undefined') return
+
+		// Validate Step 1 completion
 		const step1Data = sessionStorage.getItem('onboarding_step1')
 		if (!step1Data) {
+			console.warn('Step 1 not completed, redirecting...')
 			router.push('/onboarding/step-1')
+			return
+		}
+
+		// Validate Step 2 completion
+		const step2Data = sessionStorage.getItem('onboarding_step2')
+		if (!step2Data) {
+			console.warn('Step 2 not completed, redirecting...')
+			router.push('/onboarding/step-2')
 			return
 		}
 
 		try {
 			const data = JSON.parse(step1Data)
-			setTeamName(data.name || '')
+			if (!data.name) {
+				console.warn('Step 1 incomplete: missing team name')
+				router.push('/onboarding/step-1')
+				return
+			}
+			setTeamName(data.name)
 		} catch (error) {
 			console.error('Failed to parse step 1 data:', error)
 			router.push('/onboarding/step-1')
+			return
+		}
+
+		try {
+			const step2 = JSON.parse(step2Data)
+			// Validate that step 2 has either uploaded logo or selected icon/color
+			if (!step2.hasUploadedLogo && !step2.logoBase64 && (!step2.iconId || !step2.colorId)) {
+				console.warn('Step 2 incomplete: missing logo or icon selection')
+				router.push('/onboarding/step-2')
+				return
+			}
+		} catch (error) {
+			console.error('Failed to parse step 2 data:', error)
+			router.push('/onboarding/step-2')
+			return
 		}
 
 		// Load step 3 data if exists
@@ -115,6 +149,9 @@ export default function OnboardingStep3Page() {
 				console.error('Failed to parse step 3 data:', error)
 			}
 		}
+
+		// All validations passed
+		setIsValidating(false)
 	}, [router, form])
 
 	const onSubmit = async (data: CreateProjectInput) => {
@@ -160,6 +197,15 @@ export default function OnboardingStep3Page() {
 			console.error('Failed to complete onboarding:', error)
 			setIsSubmitting(false)
 		}
+	}
+
+	// Show loader while validating
+	if (isValidating) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+			</div>
+		)
 	}
 
 	return (

@@ -2,7 +2,7 @@
 
 import { motion, Variants } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Image } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Image, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Stepper } from '@/packages/components/ui/stepper'
 import { IconPicker } from '@/packages/components/ui/icon-picker'
@@ -34,6 +34,7 @@ export default function OnboardingStep2Page() {
 	const router = useRouter()
 	const [teamName, setTeamName] = useState('')
 	const [isMounted, setIsMounted] = useState(false)
+	const [isValidating, setIsValidating] = useState(true)
 
 	// Initialize with stable default values (will be replaced after mount)
 	const [selectedIcon, setSelectedIcon] = useState('hammer')
@@ -44,23 +45,26 @@ export default function OnboardingStep2Page() {
 	useEffect(() => {
 		// Only run on client side
 		if (typeof window === 'undefined') return
-		
+
 		setIsMounted(true)
 
+		// Validate Step 1 completion
 		const step1Data = sessionStorage.getItem('onboarding_step1')
 		if (!step1Data) {
+			console.warn('Step 1 not completed, redirecting...')
 			router.push('/onboarding/step-1')
 			return
 		}
 
 		try {
 			const data = JSON.parse(step1Data)
-			// Set team name from step 1 data
-			if (data.name) {
-				setTeamName(data.name)
-			} else {
-				console.warn('No team name found in step 1 data')
+			// Validate that step 1 has team name
+			if (!data.name) {
+				console.warn('Step 1 incomplete: missing team name')
+				router.push('/onboarding/step-1')
+				return
 			}
+			setTeamName(data.name)
 		} catch (error) {
 			console.error('Failed to parse step 1 data:', error)
 			router.push('/onboarding/step-1')
@@ -91,6 +95,9 @@ export default function OnboardingStep2Page() {
 			setSelectedIcon(randomIcon)
 			setSelectedColor(randomColor)
 		}
+
+		// All validations passed
+		setIsValidating(false)
 	}, [router])
 
 	const handleLogoUpload = async (file: File | null) => {
@@ -168,6 +175,15 @@ export default function OnboardingStep2Page() {
 		// Clear step 2 data
 		sessionStorage.removeItem('onboarding_step2')
 		router.push('/onboarding/step-3')
+	}
+
+	// Show loader while validating
+	if (isValidating) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+			</div>
+		)
 	}
 
 	return (

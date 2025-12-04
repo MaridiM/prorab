@@ -2,6 +2,95 @@
 
 ## Module: Onboarding
 
+### Security: Route Protection - Prevent Step Skipping 🔒
+
+:calendar: `2025-12-04`
+
+**Problem**
+
+- ❌ Пользователь мог перейти на Step 2 или Step 3 напрямую по URL
+- ❌ Без завершения предыдущих шагов можно было обойти онбординг
+- ❌ Нет валидации данных предыдущих шагов
+- ❌ Страница отображалась до проверки доступа
+
+**Solution**
+
+- ✅ Строгая валидация completion всех предыдущих шагов
+- ✅ Проверка не только наличия, но и корректности данных
+- ✅ Автоматический redirect на нужный шаг при попытке skip
+- ✅ Loader экран во время валидации
+
+**Added - Route Guards**
+
+- ✅ **Step 2 Protection**:
+  - Проверка наличия `onboarding_step1` в sessionStorage
+  - Валидация поля `name` (не пустое)
+  - Redirect на `/onboarding/step-1` при неудаче
+  - Loader spinner во время проверки
+
+- ✅ **Step 3 Protection**:
+  - Проверка наличия `onboarding_step1` и `onboarding_step2`
+  - Валидация Step 1: `name` не пустое
+  - Валидация Step 2: либо `logoBase64`/`hasUploadedLogo`, либо `iconId` + `colorId`
+  - Redirect на соответствующий шаг при неудаче
+  - Loader spinner во время проверки
+
+**Validation Flow**
+
+```typescript
+// Step 2 Guard
+if (!sessionStorage.getItem('onboarding_step1')) {
+  router.push('/onboarding/step-1')
+}
+if (!step1Data.name) {
+  router.push('/onboarding/step-1')
+}
+
+// Step 3 Guard
+if (!sessionStorage.getItem('onboarding_step1')) {
+  router.push('/onboarding/step-1')
+}
+if (!sessionStorage.getItem('onboarding_step2')) {
+  router.push('/onboarding/step-2')
+}
+if (!step1Data.name) {
+  router.push('/onboarding/step-1')
+}
+if (!step2.hasUploadedLogo && !step2.logoBase64 && (!step2.iconId || !step2.colorId)) {
+  router.push('/onboarding/step-2')
+}
+```
+
+**Loader State**
+
+```tsx
+// Show loader while validating
+if (isValidating) {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  )
+}
+```
+
+**Console Warnings**
+
+- `"Step 1 not completed, redirecting..."`
+- `"Step 1 incomplete: missing team name"`
+- `"Step 2 not completed, redirecting..."`
+- `"Step 2 incomplete: missing logo or icon selection"`
+
+**Benefits**
+
+- ✅ **Безопасность** - невозможно пропустить шаги
+- ✅ **Валидация данных** - проверка корректности
+- ✅ **UX** - плавный redirect на нужный шаг
+- ✅ **No flash** - loader предотвращает мигание контента
+- ✅ **Debug friendly** - console warnings для отладки
+
+---
+
 ### Feature: Celebration Effect on Onboarding Completion 🎉
 
 :calendar: `2025-12-04`
