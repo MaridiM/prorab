@@ -259,7 +259,7 @@ export default function OnboardingStep2Page() {
 						type="button"
 						onClick={handleSkip}
 						variant="ghost"
-						className="w-full h-9 mt-3 text-sm text-muted-foreground underline-offset-4 transition-all hover:text-foreground hover:underline"
+						className="w-full h-9 mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
 						Пропустить этот шаг
 					</Button>
