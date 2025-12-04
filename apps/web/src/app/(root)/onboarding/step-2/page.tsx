@@ -26,9 +26,9 @@ const steps = [
 	{ id: 3, label: 'Объект' },
 ]
 
-// Available icons and colors
-const ICON_IDS = ['hammer', 'wrench', 'construction', 'hardhat', 'brick', 'tools', 'house', 'building', 'crane', 'truck']
-const COLOR_IDS = ['orange', 'blue', 'green', 'red', 'purple', 'yellow', 'pink', 'teal']
+// Available icons and colors (8 icons, 8 colors)
+const ICON_IDS = ['hammer', 'wrench', 'construction', 'hardhat', 'brick', 'tools', 'house', 'building']
+const COLOR_IDS = ['orange', 'blue', 'green', 'red', 'purple', 'yellow', 'pink', 'white']
 
 export default function OnboardingStep2Page() {
 	const router = useRouter()
