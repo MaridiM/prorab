@@ -1,10 +1,10 @@
 'use client'
 
 import { cn } from '@/packages/utils'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRef } from 'react'
 import Image from 'next/image'
-import { Upload } from 'lucide-react'
+import { Upload, X } from 'lucide-react'
 
 // Предустановленные иконки-эмодзи для команд
 const TEAM_ICONS = [
@@ -45,7 +45,7 @@ interface IconPickerProps {
 
 export function IconPicker({
 	selectedIcon = 'hammer',
-	selectedColor = 'orange',
+	selectedColor = 'white',
 	uploadedLogo,
 	onIconSelect,
 	onColorSelect,
@@ -54,7 +54,7 @@ export function IconPicker({
 }: IconPickerProps) {
 	const currentColor =
 		BACKGROUND_COLORS.find((c) => c.id === selectedColor)?.color ||
-		BACKGROUND_COLORS[0].color
+		BACKGROUND_COLORS[BACKGROUND_COLORS.length - 1].color // Default to white (last in array)
 
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -71,6 +71,16 @@ export function IconPicker({
 		}
 	}
 
+	const handleRemoveLogo = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		if (onLogoUpload) {
+			onLogoUpload(null)
+		}
+		if (fileInputRef.current) {
+			fileInputRef.current.value = ''
+		}
+	}
+
 	// Generate preview URL for uploaded logo
 	const previewUrl = uploadedLogo
 		? typeof uploadedLogo === 'string'
@@ -79,7 +89,7 @@ export function IconPicker({
 		: null
 
 	return (
-		<div className={cn('space-y-6', className)}>
+		<div className={cn('space-y-5', className)}>
 			{/* Hidden file input */}
 			{onLogoUpload && (
 				<input
@@ -97,10 +107,10 @@ export function IconPicker({
 					onClick={handlePreviewClick}
 					className={cn(
 						"relative flex h-24 w-24 items-center justify-center rounded-2xl text-5xl shadow-lg overflow-hidden",
-						onLogoUpload && "cursor-pointer hover:ring-2 hover:ring-primary hover:ring-offset-2 transition-all"
+						onLogoUpload && !previewUrl && "cursor-pointer hover:ring-2 hover:ring-primary hover:ring-offset-2 transition-all"
 					)}
 					style={{
-						backgroundColor: currentColor,
+						backgroundColor: previewUrl ? 'hsl(0, 0%, 100%)' : currentColor, // White background for uploaded logo
 					}}
 					initial={{ scale: 0.8, opacity: 0 }}
 					animate={{ scale: 1, opacity: 1 }}
@@ -108,13 +118,26 @@ export function IconPicker({
 					key={`${selectedIcon}-${selectedColor}-${previewUrl}`}
 				>
 					{previewUrl ? (
-						<Image
-							src={previewUrl}
-							alt="Uploaded logo"
-							fill
-							className="object-cover"
-							sizes="96px"
-						/>
+						<>
+							<Image
+								src={previewUrl}
+								alt="Uploaded logo"
+								fill
+								className="object-cover"
+								sizes="96px"
+							/>
+							{/* Remove button */}
+							{onLogoUpload && (
+								<button
+									type="button"
+									onClick={handleRemoveLogo}
+									className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground backdrop-blur-sm shadow-md transition-all hover:bg-destructive hover:text-destructive-foreground active:scale-95 z-10"
+									aria-label="Удалить логотип"
+								>
+									<X className="h-4 w-4" />
+								</button>
+							)}
+						</>
 					) : (
 						TEAM_ICONS.find((i) => i.id === selectedIcon)?.emoji || '🔨'
 					)}
@@ -128,70 +151,102 @@ export function IconPicker({
 				</motion.div>
 			</div>
 
-			{/* Icon Grid */}
-			<div>
-				<h3 className="mb-3 text-sm font-medium text-foreground">
-					Выберите иконку
-				</h3>
-				<div className="grid grid-cols-5 gap-2">
-					{TEAM_ICONS.map((icon, index) => (
-						<motion.button
-							key={icon.id}
-							type="button"
-							onClick={() => onIconSelect(icon.id)}
-							className={cn(
-								'flex h-12 w-12 items-center justify-center rounded-lg border-2 text-2xl transition-all hover:scale-105 active:scale-95',
-								{
-									'border-primary bg-primary/10': selectedIcon === icon.id,
-									'border-border bg-background hover:border-primary/50':
-										selectedIcon !== icon.id,
-								}
-							)}
-							initial={{ scale: 0, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							transition={{ delay: index * 0.03 }}
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							aria-label={icon.label}
-						>
-							{icon.emoji}
-						</motion.button>
-					))}
-				</div>
-			</div>
+			{/* Icon Grid - Hidden when logo is uploaded */}
+			<AnimatePresence>
+				{!previewUrl && (
+					<motion.div
+						key="icon-grid"
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: 'auto' }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.2 }}
+						className="space-y-3"
+					>
+						<h3 className="text-sm font-semibold text-foreground">
+							Выберите иконку
+						</h3>
+						<div className="grid grid-cols-5 gap-2">
+							{TEAM_ICONS.map((icon, index) => (
+								<motion.button
+									key={icon.id}
+									type="button"
+									onClick={() => onIconSelect(icon.id)}
+									className={cn(
+										'relative flex h-12 w-12 items-center justify-center rounded-xl border-2 text-2xl transition-all duration-200',
+										{
+											'border-primary bg-primary/10 shadow-md shadow-primary/20': selectedIcon === icon.id,
+											'border-border/50 bg-background hover:border-primary/30 hover:bg-secondary/50':
+												selectedIcon !== icon.id,
+										}
+									)}
+									initial={{ scale: 0, opacity: 0 }}
+									animate={{ scale: 1, opacity: 1 }}
+									transition={{ delay: index * 0.02, duration: 0.2 }}
+									whileHover={{ scale: 1.05, y: -2 }}
+									whileTap={{ scale: 0.95 }}
+									aria-label={icon.label}
+								>
+									{icon.emoji}
+									{selectedIcon === icon.id && (
+										<motion.div
+											className="absolute -inset-0.5 rounded-xl border-2 border-primary/50"
+											initial={{ opacity: 0, scale: 0.8 }}
+											animate={{ opacity: 1, scale: 1 }}
+											transition={{ duration: 0.2 }}
+										/>
+									)}
+								</motion.button>
+							))}
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 
-			{/* Color Grid */}
-			<div>
-				<h3 className="mb-3 text-sm font-medium text-foreground">
-					Выберите цвет
-				</h3>
-				<div className="grid grid-cols-9 gap-3">
-					{BACKGROUND_COLORS.map((color, index) => (
-						<motion.button
-							key={color.id}
-							type="button"
-							onClick={() => onColorSelect(color.id)}
-							className={cn(
-								'h-10 w-10 rounded-full border-2 transition-all hover:scale-110 active:scale-95',
-								{
-									'border-foreground ring-2 ring-primary ring-offset-2 ring-offset-background':
-										selectedColor === color.id,
-									'border-border': selectedColor !== color.id,
-								}
-							)}
-							style={{
-								backgroundColor: color.color,
-							}}
-							initial={{ scale: 0, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							transition={{ delay: index * 0.04 }}
-							whileHover={{ scale: 1.1 }}
-							whileTap={{ scale: 0.95 }}
-							aria-label={color.label}
-						/>
-					))}
-				</div>
-			</div>
+			{/* Color Grid - Hidden when logo is uploaded */}
+			<AnimatePresence>
+				{!previewUrl && (
+					<motion.div
+						key="color-grid"
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: 'auto' }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{ duration: 0.2 }}
+						className="space-y-3"
+					>
+						<h3 className="text-sm font-semibold text-foreground">
+							Выберите цвет
+						</h3>
+						<div className="grid grid-cols-9 gap-4">
+							{BACKGROUND_COLORS.map((color, index) => (
+								<motion.button
+									key={color.id}
+									type="button"
+									onClick={() => onColorSelect(color.id)}
+									className={cn(
+										'h-10 w-10 rounded-full border-2 transition-all duration-200 relative',
+										{
+											'border-foreground shadow-md': selectedColor === color.id,
+											'border-border/50 hover:border-primary/30': selectedColor !== color.id,
+										}
+									)}
+									style={{
+										backgroundColor: color.color,
+										boxShadow: selectedColor === color.id 
+											? '0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary)), 0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
+											: undefined,
+									}}
+									initial={{ scale: 0, opacity: 0 }}
+									animate={{ scale: 1, opacity: 1 }}
+									transition={{ delay: index * 0.03, duration: 0.2 }}
+									whileHover={{ scale: 1.1, y: -2 }}
+									whileTap={{ scale: 0.95 }}
+									aria-label={color.label}
+								/>
+							))}
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	)
 }

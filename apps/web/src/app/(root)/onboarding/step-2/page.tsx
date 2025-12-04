@@ -29,7 +29,7 @@ const steps = [
 export default function OnboardingStep2Page() {
 	const router = useRouter()
 	const [selectedIcon, setSelectedIcon] = useState('hammer')
-	const [selectedColor, setSelectedColor] = useState('orange')
+	const [selectedColor, setSelectedColor] = useState('white')
 	const [uploadedLogo, setUploadedLogo] = useState<File | null>(null)
 	const [teamName, setTeamName] = useState('')
 
@@ -56,6 +56,7 @@ export default function OnboardingStep2Page() {
 				const data = JSON.parse(step2Data)
 				if (data.iconId) setSelectedIcon(data.iconId)
 				if (data.colorId) setSelectedColor(data.colorId)
+				else setSelectedColor('white') // Default to white if no color saved
 				// Note: uploaded logo files cannot be restored from sessionStorage
 			} catch (error) {
 				console.error('Failed to parse step 2 data:', error)
@@ -116,19 +117,19 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.2 }}
-					className="text-center mb-8"
+					className="text-center mb-6"
 				>
 					<motion.div
-						className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
+						className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-lg mb-3 shadow-lg shadow-accent/30"
 						initial={{ scale: 0.8, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1 }}
 						transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
 						whileHover={{ scale: 1.05, rotate: -5 }}
 					>
-						<Image className="w-7 h-7" />
+						<Image className="w-6 h-6" />
 					</motion.div>
-					<h1 className="text-2xl font-bold tracking-tight">Логотип бригады</h1>
-					<p className="text-muted-foreground mt-2 text-sm">
+					<h1 className="text-xl font-bold tracking-tight">Логотип бригады</h1>
+					<p className="text-muted-foreground mt-1.5 text-xs">
 						Выберите иконку и цвет для{' '}
 						<span className="font-medium text-foreground">{teamName}</span>
 					</p>
@@ -156,7 +157,7 @@ export default function OnboardingStep2Page() {
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.4 }}
-					className="mt-6 space-y-3"
+					className="mt-5 space-y-2.5"
 				>
 					<div className="flex gap-3">
 						<Button
