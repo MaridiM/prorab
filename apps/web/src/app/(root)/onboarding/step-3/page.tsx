@@ -6,20 +6,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Check, Loader2, MapPin, FileText, Sparkles } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useMutation } from '@apollo/client/react'
+import { apolloClient } from '@/packages/libs/apollo/apollo-client.config'
+import { CompleteOnboardingDocument, type CompleteOnboardingInput } from '@/packages/api/graphql'
 import { Stepper } from '@/packages/components/ui/stepper'
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	Button,
-	Card,
-	Input,
-} from '@/packages/components'
+
 import { createProjectSchema, type CreateProjectInput } from '@/packages/schemas/teams'
 import confetti from 'canvas-confetti'
+import { Button, Card, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from '@/packages/components'
 
 const fadeIn: Variants = {
 	hidden: { opacity: 0, y: 20 },
@@ -45,6 +39,11 @@ export default function OnboardingStep3Page() {
 	const [isCompleted, setIsCompleted] = useState(false)
 	const [teamName, setTeamName] = useState('')
 	const [isValidating, setIsValidating] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+
+	const [completeOnboarding] = useMutation(CompleteOnboardingDocument, {
+		client: apolloClient,
+	})
 
 	const form = useForm<CreateProjectInput>({
 		resolver: zodResolver(createProjectSchema),
@@ -156,45 +155,68 @@ export default function OnboardingStep3Page() {
 
 	const onSubmit = async (data: CreateProjectInput) => {
 		setIsSubmitting(true)
+		setError(null)
 
 		try {
 			// Save to sessionStorage
 			sessionStorage.setItem('onboarding_step3', JSON.stringify(data))
 
-			// TODO: Call GraphQL mutation CompleteOnboarding
-			// const step1Data = JSON.parse(sessionStorage.getItem('onboarding_step1') || '{}')
-			// const step2Data = JSON.parse(sessionStorage.getItem('onboarding_step2') || '{}')
+			// Get data from previous steps
+			const step1Data = JSON.parse(sessionStorage.getItem('onboarding_step1') || '{}')
+			const step2Data = JSON.parse(sessionStorage.getItem('onboarding_step2') || '{}')
 
-			// await completeOnboarding({
-			//   teamName: step1Data.name,
-			//   iconId: step2Data.iconId,
-			//   projectName: data.name,
-			//   projectAddress: data.address,
-			//   projectDescription: data.description,
-			// })
+			// Prepare mutation input
+			const input: CompleteOnboardingInput = {
+				teamName: step1Data.name,
+				projectName: data.name,
+				projectAddress: data.address || null,
+				projectDescription: data.description || null,
+				colorId: step2Data.colorId || null,
+				iconId: step2Data.iconId || null,
+				logoFile: step2Data.logoBase64 ? new File([step2Data.logoBase64], 'logo.png', { type: 'image/png' }) : undefined
+			}
 
-			// Simulate API call
-			await new Promise(resolve => setTimeout(resolve, 800))
+			// Add logo data based on step 2
+			if (step2Data.hasUploadedLogo && step2Data.logoBase64) {
+				// Convert base64 to File object for upload
+				const base64Response = await fetch(step2Data.logoBase64)
+				const blob = await base64Response.blob()
+				const file = new File([blob], 'logo.png', { type: 'image/png' })
+				input.logoFile = file
+			} else if (step2Data.iconId && step2Data.colorId) {
+				// Use generated icon + color
+				input.iconId = step2Data.iconId
+				input.colorId = step2Data.colorId
+			}
 
-			// Trigger completion animation
-			setIsCompleted(true)
+			// Call GraphQL mutation
+			const result = await completeOnboarding({
+				variables: { input },
+			})
 
-			// Trigger confetti effect
-			triggerConfetti()
+			if (result.data?.completeOnboarding.success) {
+				// Trigger completion animation
+				setIsCompleted(true)
 
-			// Wait for animation to complete before redirect
-			setTimeout(() => {
-				// Clear sessionStorage
-				sessionStorage.removeItem('onboarding_step1')
-				sessionStorage.removeItem('onboarding_step2')
-				sessionStorage.removeItem('onboarding_step3')
+				// Trigger confetti effect
+				triggerConfetti()
 
-				// Redirect to dashboard
-				// TODO: Replace with actual dashboard route
-				router.push('/')
-			}, 2000)
-		} catch (error) {
-			console.error('Failed to complete onboarding:', error)
+				// Wait for animation to complete before redirect
+				setTimeout(() => {
+					// Clear sessionStorage
+					sessionStorage.removeItem('onboarding_step1')
+					sessionStorage.removeItem('onboarding_step2')
+					sessionStorage.removeItem('onboarding_step3')
+
+					// Redirect to dashboard
+					router.push('/')
+				}, 2000)
+			} else {
+				throw new Error(result.data?.completeOnboarding.message || 'Не удалось завершить онбординг')
+			}
+		} catch (err: any) {
+			console.error('Failed to complete onboarding:', err)
+			setError(err?.message || 'Произошла ошибка при завершении онбординга')
 			setIsSubmitting(false)
 		}
 	}
@@ -331,6 +353,17 @@ export default function OnboardingStep3Page() {
 						animate="visible"
 						transition={{ delay: 0.3 }}
 					>
+						{/* Error Display */}
+						{error && (
+							<motion.div
+								initial={{ opacity: 0, y: -10 }}
+								animate={{ opacity: 1, y: 0 }}
+								className="p-4 rounded-xl bg-destructive/10 border border-destructive/50 text-destructive text-sm"
+							>
+								{error}
+							</motion.div>
+						)}
+
 						<FormField
 							control={form.control}
 							name="name"

@@ -12,9 +12,27 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
-input CreateProjectInput {
-  description: String
-  name: String!
+input CompleteOnboardingInput {
+  """ID выбранного цвета (orange, blue, etc)"""
+  colorId: String
+
+  """ID выбранной иконки (hammer, wrench, etc)"""
+  iconId: String
+
+  """Загруженный файл логотипа"""
+  logoFile: Upload
+
+  """Адрес проекта (необязательно)"""
+  projectAddress: String
+
+  """Описание проекта (необязательно)"""
+  projectDescription: String
+
+  """Название первого проекта"""
+  projectName: String!
+
+  """Название бригады"""
+  teamName: String!
 }
 
 """
@@ -27,9 +45,18 @@ input LoginInput {
   password: String!
 }
 
+"""Тип логотипа команды"""
+enum LogoType {
+  DEFAULT
+  GENERATED
+  UPLOADED
+}
+
 type Mutation {
   changePassword(input: ChangePasswordInput!): Boolean!
-  createProject(input: CreateProjectInput!): Project!
+
+  """Завершение онбординга: создание команды и первого проекта"""
+  completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!
   forgotPassword(email: String!): Boolean!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
@@ -43,11 +70,44 @@ type Mutation {
   verifyEmail(token: String!): Boolean!
 }
 
+type OnboardingResult {
+  """Сообщение для пользователя"""
+  message: String!
+
+  """Созданный первый проект"""
+  project: Project!
+
+  """Успешность операции"""
+  success: Boolean!
+
+  """Созданная команда"""
+  team: Team!
+}
+
 type Project {
+  """Адрес объекта"""
+  address: String
+
+  """Дата создания"""
   createdAt: DateTime!
+
+  """ID создателя проекта"""
+  createdById: ID!
+
+  """Описание проекта"""
   description: String
-  id: Int!
+  id: ID!
+
+  """Активен ли проект"""
+  isActive: Boolean!
+
+  """Название проекта"""
   name: String!
+
+  """ID команды"""
+  teamId: ID!
+
+  """Дата последнего обновления"""
   updatedAt: DateTime!
 }
 
@@ -55,7 +115,9 @@ type Query {
   """Simple health check"""
   health: String!
   me: User
-  projects: [Project!]!
+
+  """Получение всех команд, в которых состоит пользователь"""
+  myTeams: [Team!]!
   sessions: [Session!]!
 }
 
@@ -78,6 +140,36 @@ type Session {
   ip: String
   userAgent: String
 }
+
+type Team {
+  """ID цвета (orange, blue, etc)"""
+  colorId: String
+
+  """Дата создания"""
+  createdAt: DateTime!
+
+  """ID иконки (hammer, wrench, etc)"""
+  iconId: String
+  id: ID!
+
+  """Тип логотипа"""
+  logoType: LogoType!
+
+  """URL загруженного логотипа"""
+  logoUrl: String
+
+  """Название бригады"""
+  name: String!
+
+  """ID владельца команды"""
+  ownerId: ID!
+
+  """Дата последнего обновления"""
+  updatedAt: DateTime!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   createdAt: DateTime!

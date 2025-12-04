@@ -54,6 +54,9 @@ export const ModelName = {
   User: 'User',
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
+  Team: 'Team',
+  TeamMember: 'TeamMember',
+  InviteCode: 'InviteCode',
   Project: 'Project'
 } as const
 
@@ -81,6 +84,9 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   phone: 'phone',
+  hasCompletedOnboarding: 'hasCompletedOnboarding',
+  onboardingCompletedAt: 'onboardingCompletedAt',
+  currentTeamId: 'currentTeamId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -111,10 +117,53 @@ export const PasswordResetTokenScalarFieldEnum = {
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
-export const ProjectScalarFieldEnum = {
+export const TeamScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  logoType: 'logoType',
+  logoUrl: 'logoUrl',
+  iconId: 'iconId',
+  colorId: 'colorId',
+  ownerId: 'ownerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
+
+
+export const TeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const InviteCodeScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  code: 'code',
+  expiresAt: 'expiresAt',
+  usedBy: 'usedBy',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InviteCodeScalarFieldEnum = (typeof InviteCodeScalarFieldEnum)[keyof typeof InviteCodeScalarFieldEnum]
+
+
+export const ProjectScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  name: 'name',
+  address: 'address',
   description: 'description',
+  isActive: 'isActive',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

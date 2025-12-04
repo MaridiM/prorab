@@ -18,9 +18,9 @@ const config: CodegenConfig = {
       },
     },
   },
-  hooks: {
-    afterAllFileWrite: ['prettier --write'],
-  },
+  // hooks: {
+  //   afterAllFileWrite: ['prettier --write'],
+  // },
   ignoreNoDocuments: true,
 };
 

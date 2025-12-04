@@ -2,6 +2,320 @@
 
 ## Module: Onboarding
 
+### Feature: Backend Integration - Complete ✅
+
+:calendar: `2025-12-04`
+
+**Frontend полностью интегрирован с backend API для завершения онбординга.**
+
+**Изменения:**
+
+1. **GraphQL Schema Updates** ([teams.graphql](../apps/web/src/packages/api/graphql/teams.graphql))
+   - Добавлен `CompleteOnboardingInput` с полями: `teamName`, `logoFile`, `iconId`, `colorId`, `projectName`, `projectAddress`, `projectDescription`
+   - Добавлен `OnboardingResult` с полями: `success`, `message`, `team`, `project`
+   - Добавлен enum `LogoType` (UPLOADED, GENERATED, DEFAULT)
+   - Обновлена `CompleteOnboarding` mutation для использования `input` объекта
+   - Обновлены Team типы с новыми полями: `logoType`, `logoUrl`, `iconId`, `colorId`
+
+2. **TypeScript Types Generation**
+   - Установлен `dotenv` для поддержки codegen config
+   - Запущен GraphQL Codegen для генерации типов из schema.gql
+   - Сгенерированы типы: `CompleteOnboardingInput`, `CompleteOnboardingMutation`, `CompleteOnboardingDocument`
+
+3. **Step 3 Integration** ([step-3/page.tsx](../apps/web/src/app/(root)/onboarding/step-3/page.tsx))
+   - Добавлен `useMutation` hook с `CompleteOnboardingDocument`
+   - Реализована функция `onSubmit` с вызовом GraphQL mutation
+   - Добавлена конвертация base64 в File объект для загрузки логотипа
+   - Реализована обработка ошибок с UI отображением
+   - Добавлен state для отображения ошибок (`error`, `setError`)
+   - После успешного завершения:
+     - Запускается confetti анимация
+     - Очищается sessionStorage
+     - Редирект на главную страницу
+
+4. **Error Handling**
+   - Добавлен error display UI с анимацией (motion.div)
+   - Стилизация ошибок: `bg-destructive/10 border-destructive/50 text-destructive`
+   - Console logging для debugging
+
+**Техническая реализация:**
+
+```typescript
+// Import Apollo Client & Generated Types
+import { useMutation } from '@apollo/client'
+import { apolloClient } from '@/packages/libs/apollo/apollo-client.config'
+import { CompleteOnboardingDocument, CompleteOnboardingInput } from '@/packages/api/graphql'
+
+// Initialize mutation hook
+const [completeOnboarding] = useMutation(CompleteOnboardingDocument, {
+  client: apolloClient,
+})
+
+// Convert base64 to File for upload
+if (step2Data.hasUploadedLogo && step2Data.logoBase64) {
+  const base64Response = await fetch(step2Data.logoBase64)
+  const blob = await base64Response.blob()
+  const file = new File([blob], 'logo.png', { type: 'image/png' })
+  input.logoFile = file
+}
+
+// Call mutation
+const result = await completeOnboarding({
+  variables: { input },
+})
+```
+
+**Data Flow:**
+
+```
+Step 1 → sessionStorage → Step 2 → sessionStorage → Step 3 → Combine all data → GraphQL Mutation → Backend Transaction → Success → Confetti → Redirect
+```
+
+**Testing Checklist:**
+- [ ] Тест с загруженным логотипом (logoFile)
+- [ ] Тест с сгенерированным логотипом (iconId + colorId)
+- [ ] Тест с ошибкой сети
+- [ ] Тест с валидационными ошибками
+- [ ] Тест confetti анимации
+- [ ] Тест очистки sessionStorage
+- [ ] Проверка redirect после completion
+
+**Next Steps:**
+- Запустить API server и frontend для end-to-end тестирования
+- Убедиться что AuthGuard не блокирует mutation
+- Проверить загрузку файлов с apollo-upload-client
+- Добавить redirect на dashboard вместо корневой страницы
+
+---
+
+### Architecture: Backend Integration Strategy 🏗️
+
+:calendar: `2025-12-04`
+
+**Decision: Single Atomic Mutation Approach**
+
+После анализа различных подходов к отправке данных онбординга на бэкэнд, была выбрана **архитектура одной финальной мутации** с атомарной транзакцией.
+
+**Рассмотренные подходы:**
+
+1. ✅ **Single Final Mutation** (выбран)
+   - Одна мутация `completeOnboarding` со всеми данными 3-х шагов
+   - Атомарная транзакция: Team → TeamMember → Project → User update
+   - sessionStorage для временного хранения данных
+
+2. ❌ **Step-by-Step Mutations** (отклонён)
+   - Отдельные мутации для каждого шага (createTeamDraft, updateLogo, finalizeOnboarding)
+   - Промежуточные состояния в БД
+   - Сложная обработка rollback
+
+**Why Single Atomic Mutation?**
+
+- ✅ **Атомарность** - либо весь онбординг успешен, либо нет (нет промежуточных состояний)
+- ✅ **Простота** - меньше кода, меньше запросов, меньше точек отказа
+- ✅ **Производительность** - один запрос вместо трёх
+- ✅ **Транзакция** - легко откатить при ошибке
+- ✅ **sessionStorage** - отлично справляется с временным хранением
+- ✅ **Меньше ошибок** - нет необходимости синхронизировать состояния между сервером и клиентом
+
+**GraphQL Schema Design**
+
+```graphql
+# Input
+input CompleteOnboardingInput {
+  # Step 1 - Team Data
+  teamName: String!
+
+  # Step 2 - Logo Data (одно из двух обязательно)
+  logoFile: Upload        # Uploaded image file
+  iconId: String          # Selected emoji icon (e.g., "hammer")
+  colorId: String         # Selected background color (e.g., "orange")
+
+  # Step 3 - First Project Data
+  projectName: String!
+  projectAddress: String
+  projectDescription: String
+}
+
+# Output
+type OnboardingResult {
+  success: Boolean!
+  team: Team!
+  project: Project!
+  user: User!  # Updated with onboardingCompleted: true
+}
+
+# Mutation
+type Mutation {
+  completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!
+}
+```
+
+**Backend Transaction Flow**
+
+```typescript
+async completeOnboarding(userId: string, input: CompleteOnboardingInput) {
+  return await prisma.$transaction(async (tx) => {
+    // 1. Создаём команду (Team)
+    const team = await tx.team.create({
+      data: {
+        name: input.teamName,
+        ownerId: userId,
+        ...(await processLogo(input)), // logoUrl OR iconId+colorId
+      }
+    })
+
+    // 2. Добавляем пользователя как владельца
+    await tx.teamMember.create({
+      data: {
+        teamId: team.id,
+        userId: userId,
+        role: 'OWNER',
+      }
+    })
+
+    // 3. Создаём первый проект
+    const project = await tx.project.create({
+      data: {
+        name: input.projectName,
+        address: input.projectAddress,
+        description: input.projectDescription,
+        teamId: team.id,
+        createdById: userId,
+      }
+    })
+
+    // 4. Отмечаем онбординг как завершённый
+    const user = await tx.user.update({
+      where: { id: userId },
+      data: {
+        onboardingCompleted: true,
+        currentTeamId: team.id,
+      }
+    })
+
+    return { success: true, team, project, user }
+  })
+}
+```
+
+**Frontend Integration Pattern**
+
+```typescript
+// Step 3 - Final submission
+const onSubmit = async (data: CreateProjectInput) => {
+  // Собираем данные со всех шагов из sessionStorage
+  const step1 = JSON.parse(sessionStorage.getItem('onboarding_step1'))
+  const step2 = JSON.parse(sessionStorage.getItem('onboarding_step2'))
+
+  const input = {
+    // Step 1
+    teamName: step1.name,
+
+    // Step 2 - Logo (either file or icon+color)
+    ...(step2.logoBase64 ? {
+      logoFile: await base64ToFile(step2.logoBase64)
+    } : {
+      iconId: step2.iconId,
+      colorId: step2.colorId,
+    }),
+
+    // Step 3
+    projectName: data.name,
+    projectAddress: data.address,
+    projectDescription: data.description,
+  }
+
+  // Одна мутация для всего онбординга
+  const result = await completeOnboarding({ variables: { input } })
+
+  if (result.success) {
+    // Celebrate & redirect
+    triggerConfetti()
+    sessionStorage.clear()
+    router.push(`/teams/${result.team.id}/dashboard`)
+  }
+}
+```
+
+**Data Storage Strategy**
+
+| Storage | Usage | Data | Lifetime |
+|---------|-------|------|----------|
+| sessionStorage | Temporary onboarding data | Step 1-3 inputs | Until completion |
+| PostgreSQL | Permanent team data | Team, Project, User | Permanent |
+| File System | Logo images (temp) | Uploaded files | Until S3 migration |
+| S3/R2 (future) | Logo images (prod) | Optimized images | Permanent |
+
+**Logo Processing Options**
+
+```typescript
+// Option 1: Uploaded file
+{
+  logoFile: File,
+  iconId: null,
+  colorId: null,
+}
+// → Backend uploads to storage, returns URL
+// → Saves: { logoType: 'UPLOADED', logoUrl: 'https://...' }
+
+// Option 2: Icon + Color
+{
+  logoFile: null,
+  iconId: 'hammer',
+  colorId: 'orange',
+}
+// → Backend saves IDs
+// → Saves: { logoType: 'GENERATED', iconId: 'hammer', colorId: 'orange' }
+```
+
+**Prisma Schema Updates**
+
+```prisma
+model User {
+  onboardingCompleted   Boolean   @default(false)
+  onboardingCompletedAt DateTime?
+  currentTeamId         String?
+  currentTeam           Team?     @relation("CurrentTeam", fields: [currentTeamId], references: [id])
+}
+
+model Team {
+  logoType    LogoType @default(GENERATED)
+  logoUrl     String?   // For uploaded images
+  iconId      String?   // For emoji icons (e.g., "hammer")
+  colorId     String?   // For background colors (e.g., "orange")
+}
+
+enum LogoType {
+  UPLOADED   // User uploaded custom image
+  GENERATED  // Using iconId + colorId
+  DEFAULT    // System default logo
+}
+```
+
+**Benefits of This Architecture**
+
+- ✅ **Clean separation** - Frontend handles UX, Backend handles data integrity
+- ✅ **Transaction safety** - All-or-nothing approach
+- ✅ **Easy rollback** - One transaction to revert
+- ✅ **Better performance** - Single round-trip to server
+- ✅ **Simpler state management** - No partial completion states
+- ✅ **Better error handling** - One failure point to handle
+- ✅ **Testability** - Easy to test one atomic operation
+
+**Next Steps (Backend Implementation)**
+
+- [ ] Create Teams Module with TeamsService
+- [ ] Implement `completeOnboarding()` mutation
+- [ ] Add StorageService for logo uploads (Sharp resize, validation)
+- [ ] Update Prisma schema (Team, Project models)
+- [ ] Create GraphQL types and resolvers
+- [ ] Frontend: Integrate mutation in Step 3
+- [ ] Frontend: Add error handling and loading states
+
+---
+
+## Module: Onboarding
+
 ### Security: Route Protection - Prevent Step Skipping 🔒
 
 :calendar: `2025-12-04`

@@ -4,7 +4,13 @@
       "Bash(npm run dev:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(npx prisma generate)"
+      "Bash(npx prisma generate)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm codegen:*)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

@@ -7,4 +7,13 @@ export class CreateProjectInput {
 
 	@Field(() => String, { nullable: true })
 	description?: string
+
+	@Field(() => String, { nullable: true })
+	address?: string
+
+	@Field()
+	teamId: string
+
+	@Field()
+	createdById: string
 }

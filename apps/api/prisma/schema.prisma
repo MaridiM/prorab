@@ -11,22 +11,26 @@ datasource db {
 // ==================== AUTH ====================
 
 model User {
-  id                    String   @id @default(uuid())
-  email                 String   @unique
-  emailNormalized       String   @unique @map("email_normalized")
-  emailVerified         Boolean  @default(false) @map("email_verified")
-  passwordHash          String   @map("password_hash")
-  name                  String?
-  phone                 String?
-  hasCompletedOnboarding Boolean @default(false) @map("has_completed_onboarding")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  emailNormalized        String    @unique @map("email_normalized")
+  emailVerified          Boolean   @default(false) @map("email_verified")
+  passwordHash           String    @map("password_hash")
+  name                   String?
+  phone                  String?
+  hasCompletedOnboarding Boolean   @default(false) @map("has_completed_onboarding")
+  onboardingCompletedAt  DateTime? @map("onboarding_completed_at")
+  currentTeamId          String?   @map("current_team_id")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   verificationTokens  VerificationToken[]
   passwordResetTokens PasswordResetToken[]
   ownedTeams          Team[]              @relation("TeamOwner")
   teamMemberships     TeamMember[]
+  currentTeam         Team?               @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
 
+  @@index([currentTeamId])
   @@map("users")
 }
 
@@ -58,21 +62,30 @@ model PasswordResetToken {
 // ==================== BUSINESS ====================
 
 model Team {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  logo      String?
-  iconId    String?  @map("icon_id")
-  ownerId   String   @map("owner_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  logoType  LogoType  @default(GENERATED) @map("logo_type")
+  logoUrl   String?   @map("logo_url")
+  iconId    String?   @map("icon_id")
+  colorId   String?   @map("color_id")
+  ownerId   String    @map("owner_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  owner        User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members      TeamMember[]
-  projects     Project[]
-  inviteCodes  InviteCode[]
+  owner           User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members         TeamMember[]
+  projects        Project[]
+  inviteCodes     InviteCode[]
+  currentForUsers User[]       @relation("CurrentTeam")
 
   @@index([ownerId])
   @@map("teams")
+}
+
+enum LogoType {
+  UPLOADED
+  GENERATED
+  DEFAULT
 }
 
 model TeamMember {
@@ -114,11 +127,13 @@ model Project {
   address     String?
   description String?
   isActive    Boolean  @default(true) @map("is_active")
+  createdById String   @map("created_by_id")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@index([teamId])
+  @@index([createdById])
   @@map("projects")
 }

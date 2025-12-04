@@ -95,8 +95,8 @@
 - [x] Создать `apps/web/src/packages/api/graphql/teams.graphql`
 - [x] Добавить мутации (CompleteOnboarding, CreateInviteCode, JoinTeamByInvite, UploadTeamLogo)
 - [x] Добавить queries (MyTeams, ValidateInviteCode)
-- [ ] Запустить codegen (ожидает реализации backend Teams module)
-- [ ] Проверить Apollo upload link
+- [x] Запустить codegen (успешно, типы сгенерированы)
+- [ ] Проверить Apollo upload link (требуется E2E тест)
 
 **Frontend - UI Components**
 - [x] Создать Stepper Component (прогресс 1/3, 2/3, 3/3)
@@ -113,13 +113,66 @@
 - [x] Реализовать Step 2: Логотип (IconPicker с загрузкой изображений, skip button)
 - [x] Реализовать Step 3: Первый проект (форма + CompleteOnboarding mutation)
 - [x] Реализовать Invite Page (6-digit code input + JoinTeamByInvite)
+- [x] Реализовать Route Protection (валидация шагов, автоматический redirect)
+- [x] Добавить Celebration Animation (confetti + success overlay)
+- [x] Унифицировать дизайн системы всех 3 шагов (p-8, text-2xl, h-14)
+- [x] Исправить SSR hydration mismatch в IconPicker
+- [x] Исправить logo loading flickering (loader → image transition)
+- [x] Оптимизировать компактность UI (влазит на экран без скролла)
 
-#### Неделя 3: Integration & Polish (2024-12-17 - 2024-12-20)
+#### Неделя 3: Backend Integration (2024-12-17 - 2024-12-20)
 
-**Integration**
+**Architecture Decision**
+- [x] Определена архитектура отправки данных: одна финальная мутация `completeOnboarding`
+- [x] Атомарная транзакция: Team → TeamMember → Project → User update
+- [x] Logo обработка: Upload file ИЛИ iconId + colorId
+- [x] sessionStorage для временного хранения данных (Step 1-3)
+
+**Backend - Teams Module Implementation**
+- [x] Создать структуру модуля `apps/api/src/modules/teams/`
+- [x] Реализовать Teams Service
+  - [x] `completeOnboarding()` - главная атомарная транзакция
+  - [x] `processLogo()` - обработка загруженного файла или иконки/цвета
+  - [x] `validateOnboardingData()` - валидация входных данных
+  - [x] `getMyTeams()` - получение команд пользователя
+- [x] Реализовать Teams Resolver (GraphQL)
+  - [x] Mutation: `completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!`
+  - [x] Query: `myTeams: [Team!]!`
+- [x] Создать DTOs и GraphQL Types
+  - [x] `CompleteOnboardingInput` (teamName, logoFile?, iconId?, colorId?, projectName, projectAddress?, projectDescription?)
+  - [x] `OnboardingResult` (success, team, project, message)
+  - [x] `Team`, `Project`, `LogoType` GraphQL models
+- [x] Добавить TeamsModule в app.module.ts
+
+**Backend - Storage Service**
+- [x] Создать StorageService для загрузки файлов
+- [x] Временно: локальное хранение в `/uploads/team-logos/`
+- [x] Валидация: max 5MB, только PNG/JPG/JPEG/WEBP
+- [x] Resize/optimize с Sharp (max 512x512, WebP конвертация)
+- [x] Возврат публичного URL
+- [x] Установлен пакет sharp@^0.34.5
+
+**Backend - Database Schema**
+- [x] Обновлена Prisma schema (User, Team, Project)
+- [x] Добавлены поля онбординга (onboardingCompletedAt, currentTeamId)
+- [x] Добавлена система логотипов (logoType, logoUrl, iconId, colorId)
+- [x] Добавлен enum LogoType (UPLOADED, GENERATED, DEFAULT)
+- [x] Выполнен `prisma db push` для синхронизации
+- [x] Сгенерирован Prisma Client с новыми типами
+
+**Frontend Integration**
+- [x] Обновить GraphQL schema (completeOnboarding mutation)
+- [x] Запустить codegen для генерации типов
+- [x] Интегрировать mutation в Step 3
+- [x] Конвертация base64 → File для загрузки
+- [x] Обработка loading/error/success состояний
+- [x] Редирект на dashboard после успешного завершения
+- [x] Очистка sessionStorage после успешного завершения
+
+**Auth Integration**
 - [ ] Обновить Login Page (редирект на /onboarding если !hasCompletedOnboarding)
 - [ ] Обновить Register Page (всегда редирект на /onboarding)
-- [ ] Создать useOnboardingGuard hook
+- [ ] Создать useOnboardingGuard hook для защиты маршрутов
 
 **Error Handling & Testing**
 - [ ] Backend валидации (Owner ограничения, код истек/использован)

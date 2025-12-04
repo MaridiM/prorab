@@ -53,6 +53,21 @@ export type VerificationToken = Prisma.VerificationTokenModel
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
 /**
+ * Model Team
+ * 
+ */
+export type Team = Prisma.TeamModel
+/**
+ * Model TeamMember
+ * 
+ */
+export type TeamMember = Prisma.TeamMemberModel
+/**
+ * Model InviteCode
+ * 
+ */
+export type InviteCode = Prisma.InviteCodeModel
+/**
  * Model Project
  * 
  */
