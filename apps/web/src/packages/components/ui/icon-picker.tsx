@@ -142,7 +142,7 @@ export function IconPicker({
 							src={previewUrl}
 							alt="Uploaded logo"
 							fill
-							className="object-cover"
+							className="object-contain p-1"
 							sizes="80px"
 						/>
 					) : (
