@@ -110,7 +110,7 @@ export class AuthService {
 			email: input.email.trim().toLowerCase(),
 			emailNormalized,
 			passwordHash,
-			name: input.name,
+			fullName: input.fullName,
 			phone: input.phone,
 		})
 
@@ -252,7 +252,7 @@ export class AuthService {
 
 		const user = await this.usersService.findById(userId)
 		if (user) {
-			await this.mailService.sendVerificationEmail(user.email, user.name ?? '', token)
+			await this.mailService.sendVerificationEmail(user.email, user.fullName, token)
 		}
 
 		return token
@@ -311,7 +311,7 @@ export class AuthService {
 		const expiresAt = new Date(Date.now() + this.passwordResetTokenTtl)
 
 		await this.usersService.createPasswordResetToken(user.id, token, expiresAt)
-		await this.mailService.sendPasswordResetEmail(user.email, user.name ?? '', token)
+		await this.mailService.sendPasswordResetEmail(user.email, user.fullName, token)
 
 		await this.incrementRateLimit('forgot_password', ip ?? 'unknown')
 		return true

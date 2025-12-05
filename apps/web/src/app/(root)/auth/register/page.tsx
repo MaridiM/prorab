@@ -33,7 +33,7 @@ export default function RegisterPage() {
     const form = useForm<TRegisterSchema>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            name: '',
+            fullName: '',
             email: '',
             phone: '',
             password: '',
@@ -44,7 +44,7 @@ export default function RegisterPage() {
     })
 
     // Auto-validate form with debounce
-    useAutoValidateForm(form, ['email', 'password', 'confirmPassword', 'name', 'phone'])
+    useAutoValidateForm(form, ['email', 'password', 'confirmPassword', 'fullName', 'phone'])
 
     // Apollo mutation with typed document and error handling
     const [register, { loading: isLoading }] = useMutation(RegisterDocument, {
@@ -63,7 +63,7 @@ export default function RegisterPage() {
                     input: {
                         email: data.email,
                         password: data.password,
-                        name: data.name || null,
+                        fullName: data.fullName,
                         phone: data.phone || null
                     }
                 }
@@ -136,12 +136,12 @@ export default function RegisterPage() {
                 >
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="fullName"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
                                     <User className="w-3.5 h-3.5" />
-                                    Имя
+                                    Полное имя
                                 </FormLabel>
                                 <FormControl>
                                     <Input

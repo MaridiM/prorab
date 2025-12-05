@@ -16,7 +16,7 @@ model User {
   emailNormalized        String    @unique @map("email_normalized")
   emailVerified          Boolean   @default(false) @map("email_verified")
   passwordHash           String    @map("password_hash")
-  name                   String?
+  fullName               String    @map("full_name")
   phone                  String?
   hasCompletedOnboarding Boolean   @default(false) @map("has_completed_onboarding")
   onboardingCompletedAt  DateTime? @map("onboarding_completed_at")

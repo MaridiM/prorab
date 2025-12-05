@@ -5,7 +5,8 @@ mutation Register($input: RegisterInput!) {
     user {
       id
       email
-      name
+      fullName
+      phone
       emailVerified
       hasCompletedOnboarding
     }
@@ -18,7 +19,8 @@ mutation Login($input: LoginInput!) {
     user {
       id
       email
-      name
+      fullName
+      phone
       emailVerified
       hasCompletedOnboarding
     }
@@ -34,7 +36,8 @@ mutation RefreshSession {
     user {
       id
       email
-      name
+      fullName
+      phone
       emailVerified
       hasCompletedOnboarding
     }
@@ -81,7 +84,7 @@ query Me {
   me {
     id
     email
-    name
+    fullName
     phone
     emailVerified
     hasCompletedOnboarding

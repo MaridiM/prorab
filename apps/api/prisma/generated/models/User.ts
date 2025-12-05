@@ -30,7 +30,7 @@ export type UserMinAggregateOutputType = {
   emailNormalized: string | null
   emailVerified: boolean | null
   passwordHash: string | null
-  name: string | null
+  fullName: string | null
   phone: string | null
   hasCompletedOnboarding: boolean | null
   onboardingCompletedAt: Date | null
@@ -45,7 +45,7 @@ export type UserMaxAggregateOutputType = {
   emailNormalized: string | null
   emailVerified: boolean | null
   passwordHash: string | null
-  name: string | null
+  fullName: string | null
   phone: string | null
   hasCompletedOnboarding: boolean | null
   onboardingCompletedAt: Date | null
@@ -60,7 +60,7 @@ export type UserCountAggregateOutputType = {
   emailNormalized: number
   emailVerified: number
   passwordHash: number
-  name: number
+  fullName: number
   phone: number
   hasCompletedOnboarding: number
   onboardingCompletedAt: number
@@ -77,7 +77,7 @@ export type UserMinAggregateInputType = {
   emailNormalized?: true
   emailVerified?: true
   passwordHash?: true
-  name?: true
+  fullName?: true
   phone?: true
   hasCompletedOnboarding?: true
   onboardingCompletedAt?: true
@@ -92,7 +92,7 @@ export type UserMaxAggregateInputType = {
   emailNormalized?: true
   emailVerified?: true
   passwordHash?: true
-  name?: true
+  fullName?: true
   phone?: true
   hasCompletedOnboarding?: true
   onboardingCompletedAt?: true
@@ -107,7 +107,7 @@ export type UserCountAggregateInputType = {
   emailNormalized?: true
   emailVerified?: true
   passwordHash?: true
-  name?: true
+  fullName?: true
   phone?: true
   hasCompletedOnboarding?: true
   onboardingCompletedAt?: true
@@ -195,7 +195,7 @@ export type UserGroupByOutputType = {
   emailNormalized: string
   emailVerified: boolean
   passwordHash: string
-  name: string | null
+  fullName: string
   phone: string | null
   hasCompletedOnboarding: boolean
   onboardingCompletedAt: Date | null
@@ -231,7 +231,7 @@ export type UserWhereInput = {
   emailNormalized?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   passwordHash?: Prisma.StringFilter<"User"> | string
-  name?: Prisma.StringNullableFilter<"User"> | string | null
+  fullName?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   hasCompletedOnboarding?: Prisma.BoolFilter<"User"> | boolean
   onboardingCompletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -251,7 +251,7 @@ export type UserOrderByWithRelationInput = {
   emailNormalized?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
-  name?: Prisma.SortOrderInput | Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   hasCompletedOnboarding?: Prisma.SortOrder
   onboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -274,7 +274,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   passwordHash?: Prisma.StringFilter<"User"> | string
-  name?: Prisma.StringNullableFilter<"User"> | string | null
+  fullName?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   hasCompletedOnboarding?: Prisma.BoolFilter<"User"> | boolean
   onboardingCompletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -294,7 +294,7 @@ export type UserOrderByWithAggregationInput = {
   emailNormalized?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
-  name?: Prisma.SortOrderInput | Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   hasCompletedOnboarding?: Prisma.SortOrder
   onboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -315,7 +315,7 @@ export type UserScalarWhereWithAggregatesInput = {
   emailNormalized?: Prisma.StringWithAggregatesFilter<"User"> | string
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string
-  name?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  fullName?: Prisma.StringWithAggregatesFilter<"User"> | string
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   hasCompletedOnboarding?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   onboardingCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -330,7 +330,7 @@ export type UserCreateInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -349,7 +349,7 @@ export type UserUncheckedCreateInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -368,7 +368,7 @@ export type UserUpdateInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -387,7 +387,7 @@ export type UserUncheckedUpdateInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -406,7 +406,7 @@ export type UserCreateManyInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -421,7 +421,7 @@ export type UserUpdateManyMutationInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -435,7 +435,7 @@ export type UserUncheckedUpdateManyInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -450,7 +450,7 @@ export type UserCountOrderByAggregateInput = {
   emailNormalized?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   hasCompletedOnboarding?: Prisma.SortOrder
   onboardingCompletedAt?: Prisma.SortOrder
@@ -465,7 +465,7 @@ export type UserMaxOrderByAggregateInput = {
   emailNormalized?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   hasCompletedOnboarding?: Prisma.SortOrder
   onboardingCompletedAt?: Prisma.SortOrder
@@ -480,7 +480,7 @@ export type UserMinOrderByAggregateInput = {
   emailNormalized?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  fullName?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   hasCompletedOnboarding?: Prisma.SortOrder
   onboardingCompletedAt?: Prisma.SortOrder
@@ -628,7 +628,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -646,7 +646,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -680,7 +680,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -698,7 +698,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -716,7 +716,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -734,7 +734,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -768,7 +768,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -786,7 +786,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -804,7 +804,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -822,7 +822,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -845,7 +845,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -863,7 +863,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -902,7 +902,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -920,7 +920,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -957,7 +957,7 @@ export type UserScalarWhereInput = {
   emailNormalized?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   passwordHash?: Prisma.StringFilter<"User"> | string
-  name?: Prisma.StringNullableFilter<"User"> | string | null
+  fullName?: Prisma.StringFilter<"User"> | string
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   hasCompletedOnboarding?: Prisma.BoolFilter<"User"> | boolean
   onboardingCompletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -972,7 +972,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -990,7 +990,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -1024,7 +1024,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1042,7 +1042,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1060,7 +1060,7 @@ export type UserCreateManyCurrentTeamInput = {
   emailNormalized: string
   emailVerified?: boolean
   passwordHash: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: Date | string | null
@@ -1074,7 +1074,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1092,7 +1092,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1110,7 +1110,7 @@ export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
   emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1182,7 +1182,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   emailNormalized?: boolean
   emailVerified?: boolean
   passwordHash?: boolean
-  name?: boolean
+  fullName?: boolean
   phone?: boolean
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: boolean
@@ -1203,7 +1203,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   emailNormalized?: boolean
   emailVerified?: boolean
   passwordHash?: boolean
-  name?: boolean
+  fullName?: boolean
   phone?: boolean
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: boolean
@@ -1219,7 +1219,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   emailNormalized?: boolean
   emailVerified?: boolean
   passwordHash?: boolean
-  name?: boolean
+  fullName?: boolean
   phone?: boolean
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: boolean
@@ -1235,7 +1235,7 @@ export type UserSelectScalar = {
   emailNormalized?: boolean
   emailVerified?: boolean
   passwordHash?: boolean
-  name?: boolean
+  fullName?: boolean
   phone?: boolean
   hasCompletedOnboarding?: boolean
   onboardingCompletedAt?: boolean
@@ -1244,7 +1244,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "name" | "phone" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -1275,7 +1275,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     emailNormalized: string
     emailVerified: boolean
     passwordHash: string
-    name: string | null
+    fullName: string
     phone: string | null
     hasCompletedOnboarding: boolean
     onboardingCompletedAt: Date | null
@@ -1715,7 +1715,7 @@ export interface UserFieldRefs {
   readonly emailNormalized: Prisma.FieldRef<"User", 'String'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
-  readonly name: Prisma.FieldRef<"User", 'String'>
+  readonly fullName: Prisma.FieldRef<"User", 'String'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly hasCompletedOnboarding: Prisma.FieldRef<"User", 'Boolean'>
   readonly onboardingCompletedAt: Prisma.FieldRef<"User", 'DateTime'>

@@ -2,7 +2,10 @@ import { z } from 'zod'
 
 export const registerSchema = z
 	.object({
-		name: z.string().optional(),
+		fullName: z
+			.string()
+			.nonempty({ message: 'Полное имя обязательно' })
+			.min(2, { message: 'Имя должно содержать минимум 2 символа' }),
 		email: z
 			.string()
 			.nonempty({ message: 'Email обязателен' })

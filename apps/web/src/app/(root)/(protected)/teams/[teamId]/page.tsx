@@ -27,12 +27,12 @@ export default function TeamDashboardPage() {
 	const { data, loading, error } = useQuery(ProjectsByTeamDocument, {
 		variables: {
 			teamId,
-			filter: statusFilter === 'ALL' && !searchQuery
-				? undefined
+			filter: (statusFilter === 'ALL' && !searchQuery
+				? null
 				: {
-					status: statusFilter === 'ALL' ? undefined : (statusFilter as any),
-					searchQuery: searchQuery || undefined,
-				},
+					status: statusFilter === 'ALL' ? null : (statusFilter as any),
+					searchQuery: searchQuery || null,
+				}) as any,
 		},
 		fetchPolicy: 'cache-and-network',
 	})
@@ -163,13 +163,19 @@ export default function TeamDashboardPage() {
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{projects.map(project => (
-						<ProjectCard
-							key={project.id}
-							{...project}
-							status={project.status as any}
-						/>
-					))}
+					{projects.map(project => {
+						if (!project?.id) return null
+						return (
+							<ProjectCard
+								key={project.id}
+								{...project as any}
+								id={project.id}
+								name={project.name || ''}
+								teamId={project.teamId || teamId}
+								status={project.status as any}
+							/>
+						)
+					})}
 				</div>
 			)}
 

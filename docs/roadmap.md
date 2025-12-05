@@ -241,6 +241,7 @@
 - ✅ Лимит 10 активных проектов на команду
 - ✅ Toast уведомления для всех операций
 - ✅ Skeleton loaders, Empty states, Error handling
+- ✅ **Prisma миграции** - создана и применена миграция `20251205_add_teams_and_projects_stage3`
 
 ### Фаза 1: Backend Foundation - ✅ ЗАВЕРШЕНО (2025-12-05)
 
@@ -508,3 +509,189 @@
   - [x] Reset Password page - удалено 26 строк дублированного кода
   - [x] Auth context - исправлена обработка ошибок (response.error вместо response.errors)
 - [x] **Результат**: Удалено 104 строки дублированного кода, создана переиспользуемая Toast система
+
+### Рефакторинг User Model: name → fullName (2025-12-05) - ✅ ЗАВЕРШЕНО
+
+**Контекст**: Изменение поля `name` на `fullName` с обязательной валидацией для улучшения UX регистрации
+
+**Цели**:
+- [x] Сделать поле имени обязательным при регистрации
+- [x] Переименовать `name` → `fullName` для ясности
+- [x] Обновить лендинг с поддержкой авторизованных пользователей
+
+#### Database & Backend (6 файлов)
+- [x] **Prisma Schema** - `fullName String @map("full_name")` (обязательное)
+- [x] **Migration** - `20251205_rename_name_to_fullname` (ALTER TABLE + NOT NULL)
+- [x] **User Model** - `apps/api/src/modules/users/models/user.model.ts:12`
+- [x] **RegisterInput DTO** - валидация: `@IsNotEmpty`, `@MinLength(2)`
+- [x] **Auth Service** - использование `fullName` в create user
+- [x] **Users Service** - интерфейс `CreateUserData` обновлён
+
+#### Frontend (5 файлов)
+- [x] **Zod Schema** - `register.schema.ts` с валидацией min 2 символа
+- [x] **Register Page** - форма с лейблом "Полное имя"
+- [x] **GraphQL Queries** - все auth mutations обновлены (Register, Login, RefreshSession, Me)
+- [x] **Auth Context** - интерфейсы User и RegisterData обновлены
+- [x] **Landing Page** - адаптивные кнопки для авторизованных/неавторизованных пользователей
+
+#### Landing Page Improvements
+- [x] **Навигация**:
+  - Неавторизован: "Войти" + "Начать бесплатно"
+  - Авторизован: "Дашборд" (только одна кнопка)
+- [x] **Hero секция**: динамическая кнопка "Перейти к дашборду" для залогиненных
+- [x] **Секция тарифов**: все кнопки адаптированы под статус авторизации
+- [x] **Финальная CTA**: условный рендеринг на основе `user` из AuthContext
+- [x] **Mobile menu**: корректная работа кнопок в мобильном меню
+
+#### Проверки
+- [x] TypeScript компиляция frontend: **0 ошибок**
+- [x] TypeScript компиляция backend: **0 ошибок**
+- [x] GraphQL codegen успешно выполнен
+- [x] Все типы синхронизированы
+
+**Результат**: Полная миграция с `name` → `fullName`, улучшенная регистрация с обязательным полным именем, умный лендинг с адаптацией под авторизацию
+
+### Dashboard Placeholder Page (2025-12-05) - ✅ ЗАВЕРШЕНО
+
+**Контекст**: Создание красивой заглушки для главной страницы дашборда с учётом дизайн-системы
+
+**Цели**:
+- [x] Создать визуально привлекательную заглушку
+- [x] Показать основные разделы приложения
+- [x] Интегрировать с системой авторизации
+- [x] Обеспечить навигацию к существующим разделам
+
+#### Реализованные компоненты
+
+**Welcome Header**
+- [x] Персонализированное приветствие с `user.fullName`
+- [x] Backdrop blur эффект для современного вида
+- [x] Responsive дизайн
+
+**Welcome Card**
+- [x] Градиентный фон с анимированными бликами
+- [x] Badge "Платформа для прорабов" с иконкой Sparkles
+- [x] Описание возможностей платформы
+- [x] Framer Motion анимации (fadeIn, stagger)
+
+**Features Grid** (4 карточки)
+- [x] **Команды** - активная, переход на `/teams`
+- [x] **Проекты** - активная, переход на `/teams`
+- [x] **Расходы** - заглушка с badge "Скоро"
+- [x] **Фотоотчёты** - заглушка с badge "Скоро"
+- [x] Каждая карточка:
+  - Градиентная иконка (blue, emerald, amber, violet)
+  - Hover эффекты (поднятие, градиентный фон, тень)
+  - Стрелка навигации для активных
+  - Disabled состояние для будущих разделов
+
+**Quick Actions**
+- [x] Кнопка "Мои команды" - активная
+- [x] Кнопка "Создать проект" - disabled
+- [x] Кнопка "Добавить расход" - disabled
+
+#### Технические детали
+
+**Использованные технологии**:
+- Framer Motion для анимаций
+- Lucide React для иконок
+- Tailwind CSS v4 для стилизации
+- useAuth hook для персонализации
+
+**Анимации**:
+- fadeIn для элементов (opacity + y)
+- stagger для последовательного появления
+- whileHover для интерактивности
+- Плавные transitions (300-500ms)
+
+**Градиенты** (matching дизайн-систему):
+- Blue → Indigo (Команды)
+- Emerald → Teal (Проекты)
+- Amber → Orange (Расходы)
+- Violet → Purple (Фотоотчёты)
+
+#### Навигация
+- [x] Клик по активным карточкам → переход на роут
+- [x] Disabled карточки не кликабельны
+- [x] Кнопка "Мои команды" → `/teams`
+- [x] Route protection через (protected) layout
+
+**Результат**: Современная заглушка дашборда с плавными анимациями, соответствующая дизайн-системе ProRab, готовая к расширению функционала
+
+### Teams List Page (2025-12-05) - ✅ ЗАВЕРШЕНО
+
+**Контекст**: Создание страницы `/teams` со списком всех команд пользователя для полноценной навигации из Dashboard
+
+**Цели**:
+- [x] Создать страницу со списком всех команд
+- [x] Обеспечить навигацию на конкретную команду
+- [x] Показать статус владельца/участника
+- [x] Empty state для пользователей без команд
+
+#### Реализованные компоненты
+
+**Header с информацией**
+- [x] Заголовок "Мои команды" с иконкой Users
+- [x] Динамический подзаголовок (количество команд или "У вас пока нет команд")
+- [x] Кнопка "Создать команду" → `/onboarding`
+- [x] Backdrop blur эффект
+
+**Teams Grid**
+- [x] Adaptive grid layout (md:2 cols, lg:3 cols)
+- [x] Карточки команд с hover эффектами
+- [x] Gradient background on hover (blue→indigo)
+- [x] Display team logo (uploaded image или иконка по умолчанию)
+- [x] Crown badge для владельцев команды
+- [x] Дата создания команды
+- [x] Role badge (Владелец/Участник)
+- [x] Arrow navigation indicator
+
+**Empty State**
+- [x] Centered layout с иконкой
+- [x] Призыв к действию "Создайте свою первую команду"
+- [x] Большая кнопка создания с arrow
+
+**Create Team Card**
+- [x] Dashed border карточка в grid
+- [x] Plus icon с hover scale эффектом
+- [x] Transition на primary/5 background при hover
+
+#### Технические детали
+
+**GraphQL Integration**:
+- [x] `MyTeamsDocument` query для загрузки команд
+- [x] `fetchPolicy: "cache-and-network"` для актуальных данных
+- [x] Проверка `user.id === team.ownerId` для определения владельца
+
+**Loading & Error States**:
+- [x] Skeleton loader (3 карточки) во время загрузки
+- [x] Error state с кнопкой "Попробовать снова"
+- [x] Graceful handling с reload страницы
+
+**Навигация**:
+- [x] Клик по карточке → `/teams/{teamId}`
+- [x] Кнопка "Создать команду" → `/onboarding`
+- [x] Create team card → `/onboarding`
+
+**Animations**:
+- [x] Header fadeIn from top
+- [x] Grid stagger children animation
+- [x] Card hover lift (-4px translateY)
+- [x] Arrow gap transition on hover
+
+**Design System**:
+- [x] Gradient: blue→indigo (matching Teams theme)
+- [x] Consistent spacing (p-8, gap-6, mb-6)
+- [x] Border radius (rounded-3xl, rounded-2xl)
+- [x] Color tokens (primary, secondary, border, muted-foreground)
+
+#### Файлы
+- **Created**: `apps/web/src/app/(root)/(protected)/teams/page.tsx` (252 строки)
+
+#### Проверки
+- [x] TypeScript: 0 ошибок
+- [x] Используются только доступные поля из MyTeams query
+- [x] Owner detection через `user.id === team.ownerId`
+- [x] Responsive дизайн (mobile, tablet, desktop)
+
+**Результат**: Полноценная страница списка команд с beautiful UI, empty state, и навигацией на детали команды

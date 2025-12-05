@@ -245,7 +245,7 @@ type Query {
 
 input RegisterInput {
   email: String!
-  name: String
+  fullName: String!
   password: String!
   phone: String
 }
@@ -329,9 +329,9 @@ type User {
   createdAt: DateTime!
   email: String!
   emailVerified: Boolean!
+  fullName: String!
   hasCompletedOnboarding: Boolean!
   id: ID!
-  name: String
   phone: String
   updatedAt: DateTime!
 }

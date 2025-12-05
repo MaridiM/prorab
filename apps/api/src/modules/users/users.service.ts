@@ -6,7 +6,7 @@ interface CreateUserData {
 	email: string
 	emailNormalized: string
 	passwordHash: string
-	name?: string
+	fullName: string
 	phone?: string
 }
 
@@ -20,7 +20,7 @@ export class UsersService {
 				email: data.email,
 				emailNormalized: data.emailNormalized,
 				passwordHash: data.passwordHash,
-				name: data.name,
+				fullName: data.fullName,
 				phone: data.phone,
 			},
 		})

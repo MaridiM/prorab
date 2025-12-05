@@ -26,7 +26,8 @@
       "Bash(npm run build:*)",
       "Bash(npm run start:dev:*)",
       "Bash(npm run codegen:*)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=да)"
     ],
     "deny": [],
     "ask": []

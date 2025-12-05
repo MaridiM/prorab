@@ -12,6 +12,7 @@ import {
   Hammer,
   Heart,
   Link2,
+  LayoutDashboard,
   Menu,
   MessageCircle,
   Moon,
@@ -30,6 +31,7 @@ import {
 import { useTheme } from "next-themes";
 
 import { cn } from "@/packages/utils";
+import { useAuth } from "@/packages/libs/auth";
 
 // --- Данные ---
 const navItems = [
@@ -478,6 +480,7 @@ export default function Page() {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -578,13 +581,24 @@ export default function Page() {
               </AnimatePresence>
             </motion.button>
 
-            <GlowButton href="/auth/login" variant="ghost" size="sm">
-              Войти
-            </GlowButton>
-            <GlowButton href="/auth/register" variant="primary" size="sm">
-              Начать бесплатно
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </GlowButton>
+            {!isAuthLoading && (
+              user ? (
+                <GlowButton href="/dashboard" variant="primary" size="sm">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Дашборд
+                </GlowButton>
+              ) : (
+                <>
+                  <GlowButton href="/auth/login" variant="ghost" size="sm">
+                    Войти
+                  </GlowButton>
+                  <GlowButton href="/auth/register" variant="primary" size="sm">
+                    Начать бесплатно
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </GlowButton>
+                </>
+              )
+            )}
           </div>
 
           {/* Mobile menu */}
@@ -617,12 +631,23 @@ export default function Page() {
                   </a>
                 ))}
                 <div className="pt-4 border-t border-border/30 space-y-3">
-                  <GlowButton href="/auth/login" variant="outline" className="w-full">
-                    Войти
-                  </GlowButton>
-                  <GlowButton href="/auth/register" variant="primary" className="w-full">
-                    Начать бесплатно
-                  </GlowButton>
+                  {!isAuthLoading && (
+                    user ? (
+                      <GlowButton href="/dashboard" variant="primary" className="w-full">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Дашборд
+                      </GlowButton>
+                    ) : (
+                      <>
+                        <GlowButton href="/auth/login" variant="outline" className="w-full">
+                          Войти
+                        </GlowButton>
+                        <GlowButton href="/auth/register" variant="primary" className="w-full">
+                          Начать бесплатно
+                        </GlowButton>
+                      </>
+                    )
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -670,14 +695,24 @@ export default function Page() {
                   закрывает вопросы клиентов и считает зарплату без скандалов.
                 </motion.p>
 
-                <motion.div 
+                <motion.div
                   className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
                   variants={fadeIn}
                 >
-                  <GlowButton href="/auth/register" variant="primary" size="lg">
-                    Попробовать бесплатно
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </GlowButton>
+                  {!isAuthLoading && (
+                    user ? (
+                      <GlowButton href="/dashboard" variant="primary" size="lg">
+                        <LayoutDashboard className="w-5 h-5" />
+                        Перейти к дашборду
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </GlowButton>
+                    ) : (
+                      <GlowButton href="/auth/register" variant="primary" size="lg">
+                        Попробовать бесплатно
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </GlowButton>
+                    )
+                  )}
                   <GlowButton href="#features" variant="outline" size="lg">
                     <Play className="w-5 h-5" />
                     Как это работает
@@ -986,12 +1021,12 @@ export default function Page() {
                     ))}
                   </ul>
 
-                  <GlowButton 
-                    href="/auth/register"
+                  <GlowButton
+                    href={user ? "/dashboard" : "/auth/register"}
                     variant={plan.best ? "secondary" : plan.featured ? "primary" : "outline"}
                     className="w-full"
                   >
-                    {plan.best ? "Забрать навсегда" : "Выбрать"}
+                    {user ? "Перейти к дашборду" : plan.best ? "Забрать навсегда" : "Выбрать"}
                   </GlowButton>
                 </motion.div>
               ))}
@@ -1076,15 +1111,30 @@ export default function Page() {
                   Присоединяйтесь к прорабам, которые уже экономят время и увеличивают прибыль
                 </motion.p>
                 <motion.div variants={fadeIn}>
-                  <GlowButton 
-                    href="/auth/register" 
-                    variant="secondary" 
-                    size="lg"
-                    className="shadow-2xl"
-                  >
-                    Создать аккаунт бесплатно
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </GlowButton>
+                  {!isAuthLoading && (
+                    user ? (
+                      <GlowButton
+                        href="/dashboard"
+                        variant="secondary"
+                        size="lg"
+                        className="shadow-2xl"
+                      >
+                        <LayoutDashboard className="w-5 h-5" />
+                        Перейти к дашборду
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </GlowButton>
+                    ) : (
+                      <GlowButton
+                        href="/auth/register"
+                        variant="secondary"
+                        size="lg"
+                        className="shadow-2xl"
+                      >
+                        Создать аккаунт бесплатно
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </GlowButton>
+                    )
+                  )}
                 </motion.div>
               </div>
             </motion.div>

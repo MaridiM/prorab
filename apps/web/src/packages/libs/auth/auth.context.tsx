@@ -15,7 +15,7 @@ import {
 interface User {
   id: string
   email: string
-  name?: string | null
+  fullName: string
   phone?: string | null
   emailVerified: boolean
   hasCompletedOnboarding: boolean
@@ -34,7 +34,7 @@ interface AuthContextType {
 interface RegisterData {
   email: string
   password: string
-  name?: string
+  fullName: string
   phone?: string
 }
 
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser({
           id: data.me.id,
           email: data.me.email,
-          name: data.me.name,
+          fullName: data.me.fullName,
           phone: data.me.phone,
           emailVerified: data.me.emailVerified,
           hasCompletedOnboarding: data.me.hasCompletedOnboarding
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser({
         id: userData.id,
         email: userData.email,
-        name: userData.name,
+        fullName: userData.fullName,
         phone: userData.phone,
         emailVerified: userData.emailVerified,
         hasCompletedOnboarding: userData.hasCompletedOnboarding
@@ -156,7 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         input: {
           email: registerData.email,
           password: registerData.password,
-          name: registerData.name || null,
+          fullName: registerData.fullName,
           phone: registerData.phone || null
         }
       }
@@ -176,7 +176,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser({
         id: userData.id,
         email: userData.email,
-        name: userData.name,
+        fullName: userData.fullName,
         phone: userData.phone,
         emailVerified: userData.emailVerified,
         hasCompletedOnboarding: userData.hasCompletedOnboarding
