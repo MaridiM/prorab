@@ -110,3 +110,6 @@ pnpm dev
 - **Frontend типы:** `apps/web/src/packages/api/graphql/__generated__/output.ts`
 
 
+
+
+

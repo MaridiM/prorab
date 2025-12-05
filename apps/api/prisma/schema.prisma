@@ -154,10 +154,78 @@ model Project {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+  photoReports PhotoReport[]
 
   @@index([teamId])
   @@index([teamId, status])
   @@index([status])
   @@index([createdById])
   @@map("projects")
+}
+
+model Expense {
+  id            String    @id @default(uuid())
+  projectId     String    @map("project_id")
+  amount        Decimal   @db.Decimal(12, 2)
+  category      String
+  photos        String[]  @default([])
+  comment       String?   @db.Text
+  paidByClient  Boolean   @default(false) @map("paid_by_client")
+
+  createdById   String    @map("created_by_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([createdById])
+  @@index([createdAt])
+  @@index([projectId, category])
+  @@map("expenses")
+}
+
+model PhotoReport {
+  id            String       @id @default(uuid())
+  slug          String       @unique @db.VarChar(10)
+  projectId     String       @map("project_id")
+  title         String       @db.VarChar(200)
+  description   String?      @db.Text
+  coverPhotoUrl String?      @map("cover_photo_url")
+  isPublic      Boolean      @default(true) @map("is_public")
+  viewCount     Int          @default(0) @map("view_count")
+
+  createdById   String       @map("created_by_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  publishedAt   DateTime?    @map("published_at")
+
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  photos        ReportPhoto[]
+
+  @@index([slug])
+  @@index([projectId])
+  @@index([createdAt])
+  @@index([isPublic])
+  @@map("photo_reports")
+}
+
+model ReportPhoto {
+  id           String      @id @default(uuid())
+  reportId     String      @map("report_id")
+  photoUrl     String      @map("photo_url")
+  thumbnailUrl String?     @map("thumbnail_url")
+  caption      String?     @db.Text
+  orderIndex   Int         @default(0) @map("order_index")
+  width        Int?
+  height       Int?
+  fileSize     Int?        @map("file_size")
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  report       PhotoReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, orderIndex])
+  @@map("report_photos")
 }

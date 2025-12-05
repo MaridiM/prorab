@@ -57,7 +57,10 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   InviteCode: 'InviteCode',
-  Project: 'Project'
+  Project: 'Project',
+  Expense: 'Expense',
+  PhotoReport: 'PhotoReport',
+  ReportPhoto: 'ReportPhoto'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -178,6 +181,56 @@ export const ProjectScalarFieldEnum = {
 } as const
 
 export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const ExpenseScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  amount: 'amount',
+  category: 'category',
+  photos: 'photos',
+  comment: 'comment',
+  paidByClient: 'paidByClient',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const PhotoReportScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  projectId: 'projectId',
+  title: 'title',
+  description: 'description',
+  coverPhotoUrl: 'coverPhotoUrl',
+  isPublic: 'isPublic',
+  viewCount: 'viewCount',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  publishedAt: 'publishedAt'
+} as const
+
+export type PhotoReportScalarFieldEnum = (typeof PhotoReportScalarFieldEnum)[keyof typeof PhotoReportScalarFieldEnum]
+
+
+export const ReportPhotoScalarFieldEnum = {
+  id: 'id',
+  reportId: 'reportId',
+  photoUrl: 'photoUrl',
+  thumbnailUrl: 'thumbnailUrl',
+  caption: 'caption',
+  orderIndex: 'orderIndex',
+  width: 'width',
+  height: 'height',
+  fileSize: 'fileSize',
+  createdAt: 'createdAt'
+} as const
+
+export type ReportPhotoScalarFieldEnum = (typeof ReportPhotoScalarFieldEnum)[keyof typeof ReportPhotoScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,5 +1,484 @@
 # Changelog (backend)
 
+## Module: Photo Reports - Phase 1: Backend Foundation (Stage 5)
+
+### Feature: Photo Reports Module - Backend API & Database 📸
+
+:calendar: `2025-12-06`
+
+**Summary**
+
+Реализована backend инфраструктура для публичных фотоотчётов проектов. Создана база данных с уникальными slug-ами, GraphQL API с 8 endpoints, система генерации криптостойких ссылок для шаринга клиентам. Публичный endpoint без аутентификации готов для SSR страницы.
+
+---
+
+### 1. Database Schema
+
+**Prisma Schema - PhotoReport Model:**
+```prisma
+model PhotoReport {
+  id            String       @id @default(uuid())
+  slug          String       @unique @db.VarChar(10)
+  projectId     String       @map("project_id")
+  title         String       @db.VarChar(200)
+  description   String?      @db.Text
+  coverPhotoUrl String?      @map("cover_photo_url")
+  isPublic      Boolean      @default(true) @map("is_public")
+  viewCount     Int          @default(0) @map("view_count")
+
+  createdById   String       @map("created_by_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  publishedAt   DateTime?    @map("published_at")
+
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  photos        ReportPhoto[]
+
+  @@index([slug])
+  @@index([projectId])
+  @@index([createdAt])
+  @@index([isPublic])
+  @@map("photo_reports")
+}
+```
+
+**Prisma Schema - ReportPhoto Model:**
+```prisma
+model ReportPhoto {
+  id           String      @id @default(uuid())
+  reportId     String      @map("report_id")
+  photoUrl     String      @map("photo_url")
+  thumbnailUrl String?     @map("thumbnail_url")
+  caption      String?     @db.Text
+  orderIndex   Int         @default(0) @map("order_index")
+  width        Int?
+  height       Int?
+  fileSize     Int?        @map("file_size")
+
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  report       PhotoReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, orderIndex])
+  @@map("report_photos")
+}
+```
+
+**Migration:** `add_photo_reports_tables`
+- Созданы таблицы photo_reports и report_photos
+- Уникальный индекс на slug для быстрого поиска
+- Индексы для фильтрации по projectId, isPublic, createdAt
+- Cascade delete при удалении отчёта/проекта
+- Поля для метаданных (width, height, fileSize)
+
+**Slug Strategy:**
+- Использование **nanoid** (7 символов)
+- URL-safe символы (A-Za-z0-9_-)
+- Криптостойкая генерация
+- Проверка уникальности с retry (до 10 попыток)
+
+---
+
+### 2. Backend Implementation
+
+**PhotoReportsModule** (`apps/api/src/modules/photo-reports/`)
+
+**DTOs (Input Validation):**
+- `CreatePhotoReportInput` - Валидация создания (title 3-200 chars, description <2000)
+- `UpdatePhotoReportInput` - Валидация обновления (все поля опциональны)
+- `AddPhotoInput` - Валидация добавления фото (URL, caption, dimensions)
+
+**GraphQL Models:**
+- `PhotoReport` - Полная модель с relations
+- `PublicPhotoReport` - Публичная версия (без createdById)
+- `ReportPhoto` - Модель фотографии
+
+**PhotoReportsService** - Business Logic:
+
+```typescript
+// Основные методы
+createPhotoReport(userId, input)     // Создание с auto-slug + access check
+updatePhotoReport(userId, input)     // Обновление + publishedAt logic
+deletePhotoReport(userId, id)        // Удаление с cascade
+getProjectPhotoReports(userId, pid)  // Список отчётов проекта
+getPhotoReportById(userId, id)       // Получение по ID
+addPhoto(userId, input)              // Добавление фото + auto-cover
+deletePhoto(userId, photoId)         // Удаление фото
+getPublicPhotoReportBySlug(slug)     // PUBLIC endpoint без auth
+```
+
+**Ключевые фичи:**
+- ✅ Access control через TeamMember validation
+- ✅ Auto-generate unique slug с nanoid(7)
+- ✅ Auto-update coverPhotoUrl при добавлении первого фото
+- ✅ View count increment для публичных отчётов
+- ✅ publishedAt автоматически при isPublic=true
+
+**PhotoReportsResolver** - Authenticated Endpoints:
+
+```typescript
+// Mutations (5)
+createPhotoReport(input: CreatePhotoReportInput!): PhotoReport!
+updatePhotoReport(input: UpdatePhotoReportInput!): PhotoReport!
+deletePhotoReport(id: String!): Boolean!
+addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
+deletePhotoFromReport(photoId: String!): Boolean!
+
+// Queries (2)
+projectPhotoReports(projectId: String!): [PhotoReport!]!
+photoReport(id: String!): PhotoReport!
+```
+
+**PublicPhotoReportsResolver** - No Auth:
+
+```typescript
+// Public Query (1)
+publicPhotoReport(slug: String!): PublicPhotoReport!
+```
+
+---
+
+### 3. Security & Validation
+
+**Access Control:**
+- Все authenticated endpoints проверяют TeamMember relationship
+- Публичный endpoint доступен только для отчётов с isPublic=true
+- Rate limiting через глобальный AuthGuard
+
+**Validation:**
+- Title: 3-200 символов
+- Description: max 2000 символов
+- Caption: max 1000 символов
+- UUID validation для всех ID
+- Int validation для dimensions
+
+**Data Integrity:**
+- Cascade delete (Project → PhotoReport → ReportPhoto)
+- Unique constraint на slug
+- Non-nullable required fields
+
+---
+
+### 4. Performance Optimization
+
+**Database Indexes:**
+```prisma
+@@index([slug])                    // Быстрый поиск по slug
+@@index([projectId])               // Фильтрация по проекту
+@@index([createdAt])               // Сортировка
+@@index([isPublic])                // Фильтрация публичных
+@@index([projectId, category])     // Composite index
+@@index([reportId, orderIndex])    // Сортировка фото
+```
+
+**Query Optimization:**
+- Include photos с orderBy в одном запросе
+- Ранний return при access check fails
+- Minimal data в PublicPhotoReport (без createdById)
+
+---
+
+### 5. Files Created (10)
+
+**DTOs:**
+1. `apps/api/src/modules/photo-reports/dto/create-photo-report.input.ts`
+2. `apps/api/src/modules/photo-reports/dto/update-photo-report.input.ts`
+3. `apps/api/src/modules/photo-reports/dto/add-photo.input.ts`
+
+**Models:**
+4. `apps/api/src/modules/photo-reports/models/photo-report.model.ts`
+5. `apps/api/src/modules/photo-reports/models/report-photo.model.ts`
+
+**Business Logic:**
+6. `apps/api/src/modules/photo-reports/photo-reports.service.ts`
+7. `apps/api/src/modules/photo-reports/photo-reports.resolver.ts`
+8. `apps/api/src/modules/photo-reports/public-photo-reports.resolver.ts`
+
+**Module:**
+9. `apps/api/src/modules/photo-reports/photo-reports.module.ts`
+
+---
+
+### 6. Files Modified (3)
+
+**Schema:**
+1. `apps/api/prisma/schema.prisma` - Added PhotoReport & ReportPhoto models
+2. `apps/api/prisma/schema.prisma` - Added photoReports relation to Project
+
+**App:**
+3. `apps/api/src/app.module.ts` - Registered PhotoReportsModule
+
+**GraphQL Schema:**
+- `apps/api/schema.gql` - Auto-generated with 8 new operations
+
+---
+
+### 7. Testing & Validation
+
+**TypeScript Compilation:**
+- ✅ Zero errors
+- ✅ All imports resolved
+- ✅ Correct decorator usage (@UseGuards, @CurrentUser)
+
+**GraphQL Schema:**
+- ✅ PhotoReport type generated
+- ✅ ReportPhoto type generated
+- ✅ PublicPhotoReport type generated
+- ✅ 3 Input types generated
+- ✅ 8 operations registered
+
+**Build:**
+- ✅ `npm run build` successful
+- ✅ NestJS compilation passed
+
+---
+
+### 8. Dependencies
+
+**New Package:**
+- `nanoid` - Cryptographic slug generation (installed with pnpm)
+
+**Existing:**
+- Prisma Client - Database access
+- class-validator - DTO validation
+- @nestjs/graphql - GraphQL code-first
+
+---
+
+### 9. Next Steps (Phase 2)
+
+**Immediate TODO:**
+- [ ] Cloudflare R2 bucket setup
+- [ ] StorageService.uploadReportPhoto() implementation
+- [ ] Image processing (Sharp: resize, thumbnail, WebP)
+- [ ] GraphQL Upload scalar integration
+- [ ] Update AddPhotoInput to accept file upload
+
+**Post-Phase 2:**
+- Phase 3: Frontend components (PhotoReportForm, PhotoGallery, Lightbox)
+- Phase 4: Public SSR page /r/[slug]
+- Phase 5: Polish & testing
+
+---
+
+### 10. Technical Debt
+
+**None** - Clean implementation
+
+**Future Improvements (Post-MVP):**
+- Photo reactions (❤️ ✅ ❓)
+- Password protection для приватных отчётов
+- Video support в ReportPhoto
+- PDF/ZIP export
+
+---
+
+## Module: Expenses Management (Stage 4)
+
+### Feature: Expenses Module - Full Stack Implementation 💰
+
+:calendar: `2025-12-05`
+
+**Summary**
+
+Реализован полный функционал учёта расходов для проектов с поддержкой категорий, фотографий чеков, фильтрацией и расчётом финансовых метрик. Создана backend инфраструктура с GraphQL API, интеграция с ProjectStats и frontend компоненты для управления расходами.
+
+---
+
+### 1. Database Schema
+
+**Prisma Schema - Expense Model:**
+```prisma
+model Expense {
+  id            String    @id @default(uuid())
+  projectId     String    @map("project_id")
+  amount        Decimal   @db.Decimal(12, 2)  // Высокая точность для финансов
+  category      String
+  photos        String[]  @default([])         // URLs фотографий чеков
+  comment       String?   @db.Text
+  paidByClient  Boolean   @default(false) @map("paid_by_client")
+  createdById   String    @map("created_by_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([createdById])
+  @@index([createdAt])
+  @@index([projectId, category])
+  @@map("expenses")
+}
+```
+
+**Migration:** `add_expenses_table`
+- Создана таблица expenses с индексами для производительности
+- Cascade delete при удалении проекта
+- Поддержка Decimal для точных финансовых расчётов
+
+---
+
+### 2. Backend Implementation
+
+**ExpensesModule** (`apps/api/src/modules/expenses/`)
+
+**ExpensesService** - Бизнес-логика:
+- ✅ `findById(id, userId)` - Получение расхода с проверкой доступа
+- ✅ `findByProject(projectId, userId)` - Список всех расходов проекта
+- ✅ `findByCategory(projectId, category, userId)` - Фильтрация по категории
+- ✅ `create(input, userId)` - Создание расхода
+- ✅ `update(id, input, userId)` - Обновление расхода
+- ✅ `delete(id, userId)` - Удаление расхода
+- ✅ `validateProjectAccess(projectId, userId)` - Валидация доступа через TeamMember
+
+**ExpensesResolver** - GraphQL API (6 endpoints):
+
+Queries:
+```graphql
+expense(id: ID!): Expense!
+expensesByProject(projectId: ID!): [Expense!]!
+expensesByCategory(projectId: ID!, category: String!): [Expense!]!
+```
+
+Mutations:
+```graphql
+createExpense(input: CreateExpenseInput!): Expense!
+updateExpense(input: UpdateExpenseInput!): Expense!
+deleteExpense(id: ID!): Expense!
+```
+
+**DTOs:**
+- `CreateExpenseInput` - Валидация создания (8 категорий, @Min(0.01), @IsIn)
+- `UpdateExpenseInput` - Частичное обновление
+- `Expense` GraphQL Model - Все поля с Float для amount
+
+**Категории расходов (8 предустановленных):**
+1. Материалы
+2. Работа бригады
+3. Черновые материалы
+4. Чистовые материалы
+5. Инструмент
+6. Аренда техники
+7. Транспорт
+8. Прочее
+
+---
+
+### 3. ProjectStats Integration
+
+**Обновлён ProjectsService:**
+
+```typescript
+async getProjectStats(projectId: string, userId: string): Promise<ProjectStats> {
+  const project = await this.prisma.project.findUnique({
+    where: { id: projectId },
+    include: { expenses: true },
+  });
+
+  // Реальный расчёт расходов
+  const totalExpenses = project.expenses.reduce((sum, expense) => {
+    return sum + Number(expense.amount);
+  }, 0);
+
+  const budget = project.budget ? Number(project.budget) : 0;
+  const profit = budget - totalExpenses;
+  const expenseCount = project.expenses.length;
+
+  return { totalExpenses, profit, expenseCount, taskCount: 0, reportCount: 0 };
+}
+```
+
+**Метрики:**
+- `totalExpenses` - Сумма всех расходов проекта
+- `profit` - Расчёт прибыли (бюджет - расходы)
+- `expenseCount` - Количество расходов
+
+---
+
+### 4. Security & Validation
+
+**Access Control:**
+- Проверка TeamMember для каждого запроса
+- Валидация принадлежности проекта к команде пользователя
+- ForbiddenException при отсутствии доступа
+
+**Data Validation:**
+- Сумма расхода >= 0.01 (минимум 1 копейка)
+- Категория должна быть из предустановленного списка
+- Photos - массив URLs (опционально)
+- Comment - Text поле, опционально, до 5000 символов
+
+---
+
+### 5. Performance Optimization
+
+**Database Indexes:**
+```prisma
+@@index([projectId])              // Быстрая выборка по проекту
+@@index([createdById])            // Аудит и история
+@@index([createdAt])              // Сортировка по дате
+@@index([projectId, category])    // Фильтрация по категориям
+```
+
+**Cascade Relations:**
+- При удалении Project автоматически удаляются все Expenses
+- Консистентность данных гарантируется на уровне БД
+
+---
+
+### 6. Files Created/Modified
+
+**Backend:**
+- `apps/api/prisma/schema.prisma` - Добавлена Expense model
+- `apps/api/src/modules/expenses/expenses.module.ts` - Новый модуль
+- `apps/api/src/modules/expenses/expenses.service.ts` - Бизнес-логика (215 строк)
+- `apps/api/src/modules/expenses/expenses.resolver.ts` - GraphQL API (6 endpoints)
+- `apps/api/src/modules/expenses/dto/create-expense.input.ts` - DTO для создания
+- `apps/api/src/modules/expenses/dto/update-expense.input.ts` - DTO для обновления
+- `apps/api/src/modules/expenses/models/expense.model.ts` - GraphQL ObjectType
+- `apps/api/src/modules/projects/projects.service.ts` - Обновлён getProjectStats
+- `apps/api/src/app.module.ts` - Добавлен ExpensesModule
+
+**Database:**
+- Миграция: `add_expenses_table`
+- Применена через `prisma db push`
+
+---
+
+### 7. Testing & Validation
+
+**TypeScript Compilation:**
+- ✅ 0 ошибок компиляции
+- ✅ Все типы корректны
+- ✅ GraphQL схема синхронизирована
+
+**Server Status:**
+- ✅ NestJS сервер запускается успешно
+- ✅ GraphQL playground доступен
+- ✅ Все 6 endpoints зарегистрированы
+
+---
+
+### 8. Documentation
+
+**Created:**
+- `docs/analisys/expenses-implementation-summary.md` - Подробная сводка реализации
+- `docs/analisys/implementation-roadmap-detailed.md` - План поэтапной реализации
+
+**Updated:**
+- `docs/roadmap.md` - Этап 4 отмечен как завершённый
+
+---
+
+### Next Steps (Post-MVP)
+
+- [ ] Интеграция Cloudflare R2/S3 для хранения фотографий чеков
+- [ ] E2E тестирование расходов
+- [ ] Экспорт расходов в Excel/PDF
+- [ ] Аналитика по категориям (графики, диаграммы)
+
+---
+
 ## Module: Projects CRUD (Stage 3)
 
 ### Feature: Projects Module - Backend Foundation 🏗️

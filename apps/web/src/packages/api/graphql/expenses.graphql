@@ -1,0 +1,82 @@
+# ========== QUERIES ==========
+
+query Expense($id: ID!) {
+  expense(id: $id) {
+    id
+    projectId
+    amount
+    category
+    photos
+    comment
+    paidByClient
+    createdById
+    createdAt
+    updatedAt
+  }
+}
+
+query ExpensesByProject($projectId: ID!) {
+  expensesByProject(projectId: $projectId) {
+    id
+    projectId
+    amount
+    category
+    photos
+    comment
+    paidByClient
+    createdById
+    createdAt
+    updatedAt
+  }
+}
+
+query ExpensesByCategory($projectId: ID!, $category: String!) {
+  expensesByCategory(projectId: $projectId, category: $category) {
+    id
+    projectId
+    amount
+    category
+    photos
+    comment
+    paidByClient
+    createdById
+    createdAt
+    updatedAt
+  }
+}
+
+# ========== MUTATIONS ==========
+
+mutation CreateExpense($input: CreateExpenseInput!) {
+  createExpense(input: $input) {
+    id
+    projectId
+    amount
+    category
+    photos
+    comment
+    paidByClient
+    createdById
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateExpense($input: UpdateExpenseInput!) {
+  updateExpense(input: $input) {
+    id
+    projectId
+    amount
+    category
+    photos
+    comment
+    paidByClient
+    updatedAt
+  }
+}
+
+mutation DeleteExpense($id: ID!) {
+  deleteExpense(id: $id) {
+    id
+  }
+}

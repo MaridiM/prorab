@@ -390,7 +390,10 @@ export const ModelName = {
   Team: 'Team',
   TeamMember: 'TeamMember',
   InviteCode: 'InviteCode',
-  Project: 'Project'
+  Project: 'Project',
+  Expense: 'Expense',
+  PhotoReport: 'PhotoReport',
+  ReportPhoto: 'ReportPhoto'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "verificationToken" | "passwordResetToken" | "team" | "teamMember" | "inviteCode" | "project"
+    modelProps: "user" | "verificationToken" | "passwordResetToken" | "team" | "teamMember" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -928,6 +931,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Expense: {
+      payload: Prisma.$ExpensePayload<ExtArgs>
+      fields: Prisma.ExpenseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ExpenseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ExpenseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        findFirst: {
+          args: Prisma.ExpenseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ExpenseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        findMany: {
+          args: Prisma.ExpenseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>[]
+        }
+        create: {
+          args: Prisma.ExpenseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        createMany: {
+          args: Prisma.ExpenseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ExpenseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>[]
+        }
+        delete: {
+          args: Prisma.ExpenseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        update: {
+          args: Prisma.ExpenseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        deleteMany: {
+          args: Prisma.ExpenseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ExpenseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ExpenseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>[]
+        }
+        upsert: {
+          args: Prisma.ExpenseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpensePayload>
+        }
+        aggregate: {
+          args: Prisma.ExpenseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateExpense>
+        }
+        groupBy: {
+          args: Prisma.ExpenseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpenseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ExpenseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpenseCountAggregateOutputType> | number
+        }
+      }
+    }
+    PhotoReport: {
+      payload: Prisma.$PhotoReportPayload<ExtArgs>
+      fields: Prisma.PhotoReportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PhotoReportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PhotoReportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        findFirst: {
+          args: Prisma.PhotoReportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PhotoReportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        findMany: {
+          args: Prisma.PhotoReportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>[]
+        }
+        create: {
+          args: Prisma.PhotoReportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        createMany: {
+          args: Prisma.PhotoReportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PhotoReportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>[]
+        }
+        delete: {
+          args: Prisma.PhotoReportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        update: {
+          args: Prisma.PhotoReportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        deleteMany: {
+          args: Prisma.PhotoReportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PhotoReportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PhotoReportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>[]
+        }
+        upsert: {
+          args: Prisma.PhotoReportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PhotoReportPayload>
+        }
+        aggregate: {
+          args: Prisma.PhotoReportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePhotoReport>
+        }
+        groupBy: {
+          args: Prisma.PhotoReportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhotoReportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PhotoReportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PhotoReportCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReportPhoto: {
+      payload: Prisma.$ReportPhotoPayload<ExtArgs>
+      fields: Prisma.ReportPhotoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportPhotoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportPhotoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportPhotoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportPhotoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        findMany: {
+          args: Prisma.ReportPhotoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>[]
+        }
+        create: {
+          args: Prisma.ReportPhotoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        createMany: {
+          args: Prisma.ReportPhotoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportPhotoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportPhotoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        update: {
+          args: Prisma.ReportPhotoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportPhotoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportPhotoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportPhotoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportPhotoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPhotoPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportPhotoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportPhoto>
+        }
+        groupBy: {
+          args: Prisma.ReportPhotoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportPhotoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportPhotoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportPhotoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1069,6 +1294,56 @@ export const ProjectScalarFieldEnum = {
 } as const
 
 export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const ExpenseScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  amount: 'amount',
+  category: 'category',
+  photos: 'photos',
+  comment: 'comment',
+  paidByClient: 'paidByClient',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
+
+
+export const PhotoReportScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  projectId: 'projectId',
+  title: 'title',
+  description: 'description',
+  coverPhotoUrl: 'coverPhotoUrl',
+  isPublic: 'isPublic',
+  viewCount: 'viewCount',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  publishedAt: 'publishedAt'
+} as const
+
+export type PhotoReportScalarFieldEnum = (typeof PhotoReportScalarFieldEnum)[keyof typeof PhotoReportScalarFieldEnum]
+
+
+export const ReportPhotoScalarFieldEnum = {
+  id: 'id',
+  reportId: 'reportId',
+  photoUrl: 'photoUrl',
+  thumbnailUrl: 'thumbnailUrl',
+  caption: 'caption',
+  orderIndex: 'orderIndex',
+  width: 'width',
+  height: 'height',
+  fileSize: 'fileSize',
+  createdAt: 'createdAt'
+} as const
+
+export type ReportPhotoScalarFieldEnum = (typeof ReportPhotoScalarFieldEnum)[keyof typeof ReportPhotoScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1291,6 +1566,9 @@ export type GlobalOmitConfig = {
   teamMember?: Prisma.TeamMemberOmit
   inviteCode?: Prisma.InviteCodeOmit
   project?: Prisma.ProjectOmit
+  expense?: Prisma.ExpenseOmit
+  photoReport?: Prisma.PhotoReportOmit
+  reportPhoto?: Prisma.ReportPhotoOmit
 }
 
 /* Types for Logging */

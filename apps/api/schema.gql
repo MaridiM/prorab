@@ -2,6 +2,17 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddPhotoInput {
+  caption: String
+  fileSize: Int
+  height: Int
+  orderIndex: Int = 0
+  photoUrl: String!
+  reportId: String!
+  thumbnailUrl: String
+  width: Int
+}
+
 type AuthPayload {
   message: String
   user: User!
@@ -33,6 +44,33 @@ input CompleteOnboardingInput {
 
   """Название бригады"""
   teamName: String!
+}
+
+input CreateExpenseInput {
+  """Сумма расхода"""
+  amount: Float!
+
+  """Категория расхода"""
+  category: String!
+
+  """Комментарий к расходу"""
+  comment: String
+
+  """Оплачено клиентом"""
+  paidByClient: Boolean
+
+  """Массив URL фотографий"""
+  photos: [String!]
+
+  """ID проекта"""
+  projectId: String!
+}
+
+input CreatePhotoReportInput {
+  description: String
+  isPublic: Boolean = true
+  projectId: String!
+  title: String!
 }
 
 input CreateProjectInput {
@@ -69,6 +107,36 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Expense {
+  """Сумма расхода"""
+  amount: Float!
+
+  """Категория расхода"""
+  category: String!
+
+  """Комментарий к расходу"""
+  comment: String
+
+  """Дата создания"""
+  createdAt: DateTime!
+
+  """ID создателя расхода"""
+  createdById: ID!
+  id: ID!
+
+  """Оплачено клиентом"""
+  paidByClient: Boolean!
+
+  """Массив URL фотографий"""
+  photos: [String!]!
+
+  """ID проекта"""
+  projectId: ID!
+
+  """Дата последнего обновления"""
+  updatedAt: DateTime!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -82,6 +150,9 @@ enum LogoType {
 }
 
 type Mutation {
+  """Добавить фото к фотоотчёту"""
+  addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
+
   """Архивировать проект"""
   archiveProject(id: ID!): Project!
   changePassword(input: ChangePasswordInput!): Boolean!
@@ -89,8 +160,23 @@ type Mutation {
   """Завершение онбординга: создание команды и первого проекта"""
   completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!
 
+  """Создать расход"""
+  createExpense(input: CreateExpenseInput!): Expense!
+
+  """Создать новый фотоотчёт"""
+  createPhotoReport(input: CreatePhotoReportInput!): PhotoReport!
+
   """Создать проект"""
   createProject(input: CreateProjectInput!): Project!
+
+  """Удалить расход"""
+  deleteExpense(id: ID!): Expense!
+
+  """Удалить фото из фотоотчёта"""
+  deletePhotoFromReport(photoId: String!): Boolean!
+
+  """Удалить фотоотчёт"""
+  deletePhotoReport(id: String!): Boolean!
   forgotPassword(email: String!): Boolean!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
@@ -104,6 +190,12 @@ type Mutation {
   revokeAllSessions: Boolean!
   revokeAllSessionsIncludingCurrent: Boolean!
   revokeSession(sessionId: String!): Boolean!
+
+  """Обновить расход"""
+  updateExpense(input: UpdateExpenseInput!): Expense!
+
+  """Обновить фотоотчёт"""
+  updatePhotoReport(input: UpdatePhotoReportInput!): PhotoReport!
 
   """Обновить проект"""
   updateProject(id: ID!, input: UpdateProjectInput!): Project!
@@ -125,6 +217,22 @@ type OnboardingResult {
 
   """Созданная команда"""
   team: Team!
+}
+
+type PhotoReport {
+  coverPhotoUrl: String
+  createdAt: DateTime!
+  createdById: String!
+  description: String
+  id: String!
+  isPublic: Boolean!
+  photos: [ReportPhoto!]
+  projectId: String!
+  publishedAt: DateTime
+  slug: String!
+  title: String!
+  updatedAt: DateTime!
+  viewCount: Int!
 }
 
 type Project {
@@ -224,7 +332,27 @@ enum ProjectStatus {
   COMPLETED
 }
 
+type PublicPhotoReport {
+  coverPhotoUrl: String
+  createdAt: DateTime!
+  description: String
+  photos: [ReportPhoto!]!
+  publishedAt: DateTime
+  slug: String!
+  title: String!
+  viewCount: Int!
+}
+
 type Query {
+  """Получить расход по ID"""
+  expense(id: ID!): Expense!
+
+  """Получить расходы по категории"""
+  expensesByCategory(category: String!, projectId: ID!): [Expense!]!
+
+  """Получить все расходы проекта"""
+  expensesByProject(projectId: ID!): [Expense!]!
+
   """Simple health check"""
   health: String!
   me: User
@@ -232,14 +360,23 @@ type Query {
   """Получение всех команд, в которых состоит пользователь"""
   myTeams: [Team!]!
 
+  """Получить фотоотчёт по ID"""
+  photoReport(id: String!): PhotoReport!
+
   """Получить проект по ID"""
   project(id: ID!): Project!
+
+  """Получить все фотоотчёты проекта"""
+  projectPhotoReports(projectId: String!): [PhotoReport!]!
 
   """Статистика проекта"""
   projectStats(projectId: ID!): ProjectStats!
 
   """Получить проекты команды"""
   projectsByTeam(filter: ProjectFilterInput, teamId: ID!): [Project!]!
+
+  """Публичный эндпоинт: получить фотоотчёт по slug (без аутентификации)"""
+  publicPhotoReport(slug: String!): PublicPhotoReport!
   sessions: [Session!]!
 }
 
@@ -248,6 +385,19 @@ input RegisterInput {
   fullName: String!
   password: String!
   phone: String
+}
+
+type ReportPhoto {
+  caption: String
+  createdAt: DateTime!
+  fileSize: Int
+  height: Int
+  id: String!
+  orderIndex: Int!
+  photoUrl: String!
+  reportId: String!
+  thumbnailUrl: String
+  width: Int
 }
 
 input ResetPasswordInput {
@@ -288,6 +438,33 @@ type Team {
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+input UpdateExpenseInput {
+  """Сумма расхода"""
+  amount: Float
+
+  """Категория расхода"""
+  category: String
+
+  """Комментарий к расходу"""
+  comment: String
+
+  """ID расхода"""
+  id: String!
+
+  """Оплачено клиентом"""
+  paidByClient: Boolean
+
+  """Массив URL фотографий"""
+  photos: [String!]
+}
+
+input UpdatePhotoReportInput {
+  description: String
+  id: String!
+  isPublic: Boolean
+  title: String
 }
 
 input UpdateProjectInput {

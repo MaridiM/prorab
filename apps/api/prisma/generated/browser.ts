@@ -52,3 +52,18 @@ export type InviteCode = Prisma.InviteCodeModel
  * 
  */
 export type Project = Prisma.ProjectModel
+/**
+ * Model Expense
+ * 
+ */
+export type Expense = Prisma.ExpenseModel
+/**
+ * Model PhotoReport
+ * 
+ */
+export type PhotoReport = Prisma.PhotoReportModel
+/**
+ * Model ReportPhoto
+ * 
+ */
+export type ReportPhoto = Prisma.ReportPhotoModel

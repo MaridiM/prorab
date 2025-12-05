@@ -8,6 +8,11 @@ import {
 	ArchiveProjectDocument,
 	RestoreProjectDocument,
 	ProjectsByTeamDocument,
+	ExpensesByProjectDocument,
+	ProjectStatsDocument,
+	CreateExpenseDocument,
+	UpdateExpenseDocument,
+	DeleteExpenseDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
 import {
@@ -20,6 +25,9 @@ import {
 	ProgressBar,
 	Skeleton,
 } from '@/packages/components/ui'
+import { ExpenseList } from '@/packages/components/expenses'
+import { FinancialDashboard } from '@/packages/components/financial'
+import { ExpenseForm } from '@/packages/components/expenses'
 import { useToast } from '@/packages/hooks'
 import { ArrowLeft, Edit, Archive, ArchiveRestore, MapPin, Calendar, Phone, Wallet } from 'lucide-react'
 import { format } from 'date-fns'
@@ -33,9 +41,21 @@ export default function ProjectDetailsPage() {
 	const projectId = params.projectId as string
 
 	const [activeTab, setActiveTab] = useState<'info' | 'expenses' | 'tasks' | 'reports'>('info')
+	const [showExpenseForm, setShowExpenseForm] = useState(false)
+	const [editingExpense, setEditingExpense] = useState<any>(null)
 
 	const { data, loading, error } = useQuery(ProjectDocument, {
 		variables: { id: projectId },
+	})
+
+	const { data: expensesData, loading: expensesLoading } = useQuery(ExpensesByProjectDocument, {
+		variables: { projectId },
+		skip: activeTab !== 'expenses',
+	})
+
+	const { data: statsData, loading: statsLoading } = useQuery(ProjectStatsDocument, {
+		variables: { projectId },
+		skip: activeTab !== 'expenses',
 	})
 
 	const [archiveProject, { loading: archiving }] = useMutation(ArchiveProjectDocument, {
@@ -52,7 +72,30 @@ export default function ProjectDetailsPage() {
 		],
 	})
 
+	const [createExpense, { loading: creating }] = useMutation(CreateExpenseDocument, {
+		refetchQueries: [
+			{ query: ExpensesByProjectDocument, variables: { projectId } },
+			{ query: ProjectStatsDocument, variables: { projectId } },
+		],
+	})
+
+	const [updateExpense, { loading: updating }] = useMutation(UpdateExpenseDocument, {
+		refetchQueries: [
+			{ query: ExpensesByProjectDocument, variables: { projectId } },
+			{ query: ProjectStatsDocument, variables: { projectId } },
+		],
+	})
+
+	const [deleteExpense, { loading: deleting }] = useMutation(DeleteExpenseDocument, {
+		refetchQueries: [
+			{ query: ExpensesByProjectDocument, variables: { projectId } },
+			{ query: ProjectStatsDocument, variables: { projectId } },
+		],
+	})
+
 	const project = data?.project
+	const expenses = expensesData?.expensesByProject || []
+	const stats = statsData?.projectStats
 
 	const handleEdit = () => {
 		router.push(`/teams/${teamId}/projects/${projectId}/edit`)
@@ -86,6 +129,71 @@ export default function ProjectDetailsPage() {
 			showToast({
 				type: 'error',
 				message: error.message || 'Не удалось восстановить проект',
+			})
+		}
+	}
+
+	const handleCreateExpense = async (data: any) => {
+		try {
+			await createExpense({
+				variables: {
+					input: {
+						projectId,
+						...data,
+					},
+				},
+			})
+			showToast({
+				type: 'success',
+				message: 'Расход успешно добавлен',
+			})
+			setShowExpenseForm(false)
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось добавить расход',
+			})
+		}
+	}
+
+	const handleUpdateExpense = async (data: any) => {
+		if (!editingExpense) return
+
+		try {
+			await updateExpense({
+				variables: {
+					input: {
+						id: editingExpense.id,
+						...data,
+					},
+				},
+			})
+			showToast({
+				type: 'success',
+				message: 'Расход успешно обновлён',
+			})
+			setEditingExpense(null)
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось обновить расход',
+			})
+		}
+	}
+
+	const handleDeleteExpense = async (id: string) => {
+		if (!confirm('Вы уверены, что хотите удалить этот расход?')) return
+
+		try {
+			await deleteExpense({ variables: { id } })
+			showToast({
+				type: 'success',
+				message: 'Расход успешно удалён',
+			})
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось удалить расход',
 			})
 		}
 	}
@@ -207,7 +315,7 @@ export default function ProjectDetailsPage() {
 			<div className="flex gap-2 mb-6 border-b">
 				{[
 					{ id: 'info' as const, label: 'Информация' },
-					{ id: 'expenses' as const, label: 'Расходы', disabled: true },
+					{ id: 'expenses' as const, label: 'Расходы', disabled: false },
 					{ id: 'tasks' as const, label: 'Задачи', disabled: true },
 					{ id: 'reports' as const, label: 'Фотоотчёты', disabled: true },
 				].map(tab => (
@@ -316,13 +424,58 @@ export default function ProjectDetailsPage() {
 			)}
 
 			{activeTab === 'expenses' && (
-				<Card>
-					<CardContent className="py-12">
-						<div className="text-center text-muted-foreground">
-							<p>Раздел расходов будет доступен в следующих версиях</p>
-						</div>
-					</CardContent>
-				</Card>
+				<div className="space-y-6">
+					{/* Financial Dashboard */}
+					{stats && (
+						<FinancialDashboard
+							stats={{
+								totalExpenses: stats.totalExpenses,
+								profit: stats.profit,
+								expenseCount: stats.expenseCount,
+								budget: project.budget,
+							}}
+							expenses={expenses}
+						/>
+					)}
+
+					{/* Expense Form */}
+					{(showExpenseForm || editingExpense) && (
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									{editingExpense ? 'Редактировать расход' : 'Добавить расход'}
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<ExpenseForm
+									mode={editingExpense ? 'edit' : 'create'}
+									projectId={projectId}
+									defaultValues={editingExpense}
+									onSubmit={editingExpense ? handleUpdateExpense : handleCreateExpense}
+									onCancel={() => {
+										setShowExpenseForm(false)
+										setEditingExpense(null)
+									}}
+									isSubmitting={creating || updating}
+								/>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Expense List */}
+					{!showExpenseForm && !editingExpense && (
+						<ExpenseList
+							expenses={expenses}
+							isLoading={expensesLoading}
+							onAdd={() => setShowExpenseForm(true)}
+							onEdit={(id) => {
+								const expense = expenses.find((e: any) => e.id === id)
+								if (expense) setEditingExpense(expense)
+							}}
+							onDelete={handleDeleteExpense}
+						/>
+					)}
+				</div>
 			)}
 
 			{activeTab === 'tasks' && (

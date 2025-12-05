@@ -63,18 +63,43 @@ export class ProjectsService {
 
   /**
    * Получить статистику проекта
-   * TODO: Реализовать в Этапе 4 (Expenses)
    */
   async getProjectStats(projectId: string, userId: string): Promise<ProjectStats> {
     await this.validateProjectAccess(projectId, userId);
 
-    // Заглушка - реальные данные будут в Этапе 4
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        expenses: true,
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Проект не найден');
+    }
+
+    // Подсчёт общей суммы расходов
+    const totalExpenses = project.expenses.reduce((sum, expense) => {
+      return sum + Number(expense.amount);
+    }, 0);
+
+    // Подсчёт прибыли (budget - totalExpenses)
+    const budget = project.budget ? Number(project.budget) : 0;
+    const profit = budget - totalExpenses;
+
+    // Подсчёт количества расходов
+    const expenseCount = project.expenses.length;
+
+    // TODO: Реализовать в будущих этапах
+    const taskCount = 0;
+    const reportCount = 0;
+
     return {
-      totalExpenses: 0,
-      profit: 0,
-      expenseCount: 0,
-      taskCount: 0,
-      reportCount: 0,
+      totalExpenses,
+      profit,
+      expenseCount,
+      taskCount,
+      reportCount,
     };
   }
 
