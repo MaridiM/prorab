@@ -35,6 +35,7 @@ import { useAuth } from "@/packages/libs/auth";
 
 // --- Данные ---
 const navItems = [
+  { label: "Как работает", href: "#how-it-works" },
   { label: "Возможности", href: "#features" },
   { label: "Фотоотчеты", href: "#reports" },
   { label: "Тарифы", href: "#pricing" },
@@ -145,6 +146,84 @@ const testimonials = [
     gradient: "from-emerald-500 to-teal-500",
   },
 ];
+
+const howItWorksSteps = [
+  {
+    number: "01",
+    title: "Создай объект",
+    desc: "Название, адрес, бюджет. Готово за 2 минуты. Можно прямо на стройке.",
+    icon: Plus,
+    gradient: "from-blue-500 to-indigo-500",
+  },
+  {
+    number: "02",
+    title: "Добавляй расходы",
+    desc: "Сфоткал чек → выбрал категорию → готово. 3 секунды на каждый расход.",
+    icon: Camera,
+    gradient: "from-emerald-500 to-teal-500",
+  },
+  {
+    number: "03",
+    title: "Отчитайся клиенту",
+    desc: "5-10 фото → комментарий → ссылка готова. Клиент видит прогресс и ставит реакции.",
+    icon: Link2,
+    gradient: "from-violet-500 to-purple-500",
+  },
+  {
+    number: "04",
+    title: "Закрой объект",
+    desc: "Система сама посчитает зарплату каждому. Копируй расчёт в WhatsApp — готово.",
+    icon: Check,
+    gradient: "from-amber-500 to-orange-500",
+  },
+];
+
+const beforeAfter = {
+  before: [
+    {
+      text: "Чеки теряются, расходы непонятны",
+      icon: X,
+    },
+    {
+      text: "Клиент звонит каждый день «Что сделали?»",
+      icon: X,
+    },
+    {
+      text: "Расчёт зарплаты вручную занимает полдня",
+      icon: X,
+    },
+    {
+      text: "В конце объекта непонятно сколько заработал",
+      icon: X,
+    },
+    {
+      text: "10-20% прибыли теряется в хаосе",
+      icon: X,
+    },
+  ],
+  after: [
+    {
+      text: "Каждый расход с фото чека и категорией",
+      icon: Check,
+    },
+    {
+      text: "Клиент сам смотрит отчёты, ставит реакции",
+      icon: Check,
+    },
+    {
+      text: "Автоматический расчёт зарплаты за 2 секунды",
+      icon: Check,
+    },
+    {
+      text: "Видишь реальную прибыль в любой момент",
+      icon: Check,
+    },
+    {
+      text: "10-20% дополнительной прибыли с каждого объекта",
+      icon: Check,
+    },
+  ],
+};
 
 // --- Анимации ---
 const fadeIn: Variants = {
@@ -857,6 +936,77 @@ export default function Page() {
           </div>
         </section>
 
+        {/* How It Works */}
+        <section id="how-it-works" className="py-24 lg:py-32 bg-secondary/20">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="text-center max-w-2xl mx-auto mb-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/10 text-sm text-primary mb-6">
+                <Zap className="w-4 h-4" />
+                Как это работает
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                Простой процесс — быстрый результат
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                От создания объекта до финального расчёта — всё интуитивно и быстро
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={stagger}
+            >
+              {howItWorksSteps.map((step, i) => (
+                <motion.div
+                  key={i}
+                  className="relative p-6 rounded-3xl bg-card border border-border/30 hover:border-border/60 transition-all duration-300 group overflow-hidden"
+                  variants={fadeIn}
+                  whileHover={{
+                    y: -8,
+                    scale: 1.02,
+                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                  }}
+                >
+                  {/* Step number */}
+                  <div className="absolute top-6 right-6 text-6xl font-bold opacity-5 group-hover:opacity-10 transition-opacity">
+                    {step.number}
+                  </div>
+
+                  {/* Icon */}
+                  <motion.div
+                    className={cn("relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-white bg-linear-to-br shadow-lg", step.gradient)}
+                    whileHover={{
+                      scale: 1.1,
+                      rotate: [0, -5, 5, 0],
+                      transition: { duration: 0.4 }
+                    }}
+                  >
+                    <step.icon className="w-7 h-7" />
+                  </motion.div>
+
+                  {/* Content */}
+                  <h3 className="relative text-lg font-bold mb-2">{step.title}</h3>
+                  <p className="relative text-sm text-muted-foreground">{step.desc}</p>
+
+                  {/* Arrow connector (except last) */}
+                  {i < howItWorksSteps.length - 1 && (
+                    <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-border to-transparent" />
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
         {/* Features */}
         <section id="features" className="py-24 lg:py-32 bg-linear-to-b from-secondary/30 to-background">
           <div className="container mx-auto px-4">
@@ -925,6 +1075,128 @@ export default function Page() {
                   <p className="relative text-sm text-muted-foreground">{feature.desc}</p>
                 </motion.div>
               ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Before/After */}
+        <section className="py-24 lg:py-32">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="text-center max-w-2xl mx-auto mb-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fadeInUp}
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                До и После ProRab.space
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Как меняется работа прораба с нашим инструментом
+              </p>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 max-w-5xl mx-auto">
+              {/* Before Column */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeInLeft}
+                className="space-y-6"
+              >
+                <div className="text-center lg:text-left mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-red-500/10 text-red-500 text-sm font-semibold mb-4">
+                    <X className="w-4 h-4" />
+                    Было
+                  </div>
+                  <h3 className="text-2xl font-bold text-muted-foreground">
+                    Хаос и потерянная прибыль
+                  </h3>
+                </div>
+
+                <motion.div
+                  className="space-y-4"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={stagger}
+                >
+                  {beforeAfter.before.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-start gap-4 p-4 rounded-2xl bg-red-500/5 border border-red-500/10"
+                      variants={fadeIn}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <item.icon className="w-4 h-4 text-red-500" strokeWidth={3} />
+                      </div>
+                      <p className="text-muted-foreground">{item.text}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
+
+              {/* After Column */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeInRight}
+                className="space-y-6"
+              >
+                <div className="text-center lg:text-left mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500/10 text-emerald-500 text-sm font-semibold mb-4">
+                    <Check className="w-4 h-4" strokeWidth={3} />
+                    Стало
+                  </div>
+                  <h3 className="text-2xl font-bold">
+                    Порядок и реальная прибыль
+                  </h3>
+                </div>
+
+                <motion.div
+                  className="space-y-4"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={stagger}
+                >
+                  {beforeAfter.after.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 hover:border-emerald-500/30 transition-colors"
+                      variants={fadeIn}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <item.icon className="w-4 h-4 text-emerald-500" strokeWidth={3} />
+                      </div>
+                      <p className="font-medium">{item.text}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* CTA in the middle */}
+            <motion.div
+              className="text-center mt-16"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeInUp}
+            >
+              <p className="text-lg text-muted-foreground mb-6">
+                Результат: <span className="font-bold text-emerald-500">10-20% дополнительной прибыли</span> с каждого объекта
+              </p>
+              {!isAuthLoading && !user && (
+                <GlowButton href="/auth/register" variant="primary" size="lg">
+                  Начать зарабатывать больше
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </GlowButton>
+              )}
             </motion.div>
           </div>
         </section>
