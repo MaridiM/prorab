@@ -42,51 +42,51 @@ const navItems = [
 
 const problems = [
   {
-    title: "Куда ушли деньги?",
-    desc: "Вроде объект жирный, а в конце денег нет. Чеки в бардачке, переводы смешались.",
-    icon: PiggyBank,
+    title: "Где мои деньги?",
+    desc: "Объект вроде прибыльный, а в конце копейки остались. Чеки потерялись, кто сколько взял — непонятно.",
+    icon: Wallet,
     gradient: "from-rose-500 to-orange-500",
     bg: "bg-rose-500/10",
   },
   {
-    title: 'Клиент "достает"',
-    desc: 'Постоянные звонки: "Что сделали?", "Скинь фото". Тратишь часы на переписки.',
-    icon: PhoneOff,
-    gradient: "from-amber-500 to-yellow-500",
-    bg: "bg-amber-500/10",
+    title: "Как быстро и красиво отчитаться перед клиентом?",
+    desc: "Клиент звонит каждый день: «Что сделали?», «Скинь фото». Переписки в WhatsApp, скриншоты — полный хаос.",
+    icon: Camera,
+    gradient: "from-blue-500 to-cyan-500",
+    bg: "bg-blue-500/10",
   },
   {
-    title: "Разборки с бригадой",
-    desc: '"Я думал договаривались на другую сумму". Расчет зарплаты занимает полдня.',
+    title: "Сколько кому платить в конце объекта?",
+    desc: "«Я думал на другое договаривались!» — скандал с бригадой. Расчет зарплаты вручную занимает полдня.",
     icon: Users,
-    gradient: "from-blue-500 to-indigo-500",
-    bg: "bg-blue-500/10",
+    gradient: "from-violet-500 to-purple-500",
+    bg: "bg-violet-500/10",
   },
 ];
 
 const features = [
   {
     icon: Wallet,
-    title: "Учёт расходов за 3 сек",
-    desc: "Сфоткал чек → выбрал категорию → готово. Видишь реальную прибыль в любой момент.",
+    title: "Учёт расходов за 3 секунды",
+    desc: "Сфоткал чек → выбрал категорию → готово. В любой момент видишь реальную прибыль объекта и сколько осталось в бюджете.",
     gradient: "from-emerald-500 to-teal-500",
   },
   {
     icon: Camera,
-    title: "Фотоотчёты в 1 клик",
-    desc: "Красивая страница для клиента. Он ставит реакции — ты не отвлекаешься на звонки.",
+    title: "Фотоотчёты клиенту — киллер-фича",
+    desc: "Делаешь 5-10 фото → жмёшь кнопку → красивая страница готова. Клиент видит прогресс и ставит реакции вместо звонков.",
     gradient: "from-blue-500 to-cyan-500",
   },
   {
     icon: Users,
-    title: "Расчёт зарплаты",
-    desc: "Система посчитает кому сколько платить. % от прибыли, фикс, почасовая — любая модель.",
+    title: "Автоматический расчёт зарплаты",
+    desc: "Объект закрыт — система сама посчитает кому сколько платить. % от прибыли, фикс, за м², за день — любая модель.",
     gradient: "from-violet-500 to-purple-500",
   },
   {
-    icon: Zap,
-    title: "Мульти-бригады",
-    desc: "Ваши ребята работают на разных объектах? Переключайтесь между бригадами в один тап.",
+    icon: LayoutDashboard,
+    title: "Финансовый дашборд",
+    desc: "Огромные цифры на главном экране: потрачено, осталось, прибыль объекта, чистая прибыль прораба. Всё прозрачно.",
     gradient: "from-amber-500 to-orange-500",
   },
 ];
@@ -102,8 +102,8 @@ const pricingPlans = [
     name: "Лайт",
     price: "490",
     period: "/мес",
-    subtitle: "Для одиночек",
-    perks: ["1 активный объект", "Только вы", "Учёт расходов", "Фотоотчёты"],
+    subtitle: "Одиночки, тест",
+    perks: ["1 активный объект", "1 участник (только прораб)", "Учёт расходов", "Фотоотчёты"],
     gradient: "from-slate-500 to-slate-600",
   },
   {
@@ -112,6 +112,7 @@ const pricingPlans = [
     period: "/мес",
     subtitle: "Частные прорабы",
     perks: ["До 4 объектов", "До 3 участников", "Расчёт зарплаты", "Все функции"],
+    yearPrice: "7 900 ₽/год",
     featured: true,
     gradient: "from-blue-500 to-indigo-500",
   },
@@ -120,8 +121,9 @@ const pricingPlans = [
     price: "990",
     oldPrice: "1 990",
     period: "/мес навсегда",
-    subtitle: "Спецпредложение",
+    subtitle: "Первые 500 бригад 🔥",
     perks: ["Безлимит объектов", "До 10 участников", "Полный контроль", "Приоритетная поддержка"],
+    yearPrice: "12 900 ₽/год (обычно)",
     best: true,
     gradient: "from-amber-500 to-orange-500",
   },
@@ -131,14 +133,14 @@ const testimonials = [
   {
     name: "Сергей К.",
     role: "Прораб, Москва",
-    text: "Раньше в конце объекта всегда был минус. Теперь вижу реальную прибыль каждый день.",
+    text: "Раньше в конце объекта всегда был минус. Теперь вижу реальную прибыль каждый день. Это реально делает меня богаче на 15-20% с каждого объекта.",
     avatar: "СК",
     gradient: "from-blue-500 to-indigo-500",
   },
   {
     name: "Дмитрий В.",
     role: "Бригадир, СПб",
-    text: "Клиенты сами смотрят отчёты. Звонки сократились в 3 раза минимум.",
+    text: "Клиенты сами смотрят отчёты и ставят реакции. Звонки сократились в 3 раза. Я наконец-то могу сосредоточиться на работе, а не на переписках.",
     avatar: "ДВ",
     gradient: "from-emerald-500 to-teal-500",
   },
@@ -173,6 +175,28 @@ const scaleIn: Variants = {
 const stagger: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+
+const floatAnimation = {
+  y: [0, -10, 0],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    ease: "easeInOut",
+  },
+};
+
+const pulseGlow = {
+  boxShadow: [
+    "0 0 20px rgba(59, 130, 246, 0.3)",
+    "0 0 40px rgba(59, 130, 246, 0.5)",
+    "0 0 20px rgba(59, 130, 246, 0.3)",
+  ],
+  transition: {
+    duration: 2,
+    repeat: Infinity,
+    ease: "easeInOut",
+  },
 };
 
 // --- Уникальная кнопка ---
@@ -226,8 +250,21 @@ function PhoneMockup() {
     <motion.div
       className="relative w-[300px] h-[620px] mx-auto"
       initial={{ opacity: 0, y: 60, rotateX: 10 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ duration: 1.2, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      animate={{
+        opacity: 1,
+        y: [0, -15, 0],
+        rotateX: 0
+      }}
+      transition={{
+        opacity: { duration: 1.2, delay: 0.2 },
+        y: {
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.5
+        },
+        rotateX: { duration: 1.2, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+      }}
     >
       {/* Glow */}
       <div className="absolute -inset-12 bg-linear-to-br from-primary/40 via-accent/30 to-primary/40 blur-3xl opacity-50 animate-pulse-slow" />
@@ -498,7 +535,7 @@ export default function Page() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="relative overflow-x-hidden bg-background text-foreground">
+    <div className="relative bg-background text-foreground">
       {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div 
@@ -687,16 +724,16 @@ export default function Page() {
                   </span>
                 </motion.h1>
 
-                <motion.p 
+                <motion.p
                   className="mt-6 text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0"
                   variants={fadeIn}
                 >
-                  Единственное приложение для прорабов, которое показывает реальную прибыль, 
-                  закрывает вопросы клиентов и считает зарплату без скандалов.
+                  Единственное приложение в СНГ, которое решает ровно ТРИ самые дорогие боли прораба одновременно:
+                  учёт денег, фотоотчёты клиенту и расчёт зарплаты бригаде.
                 </motion.p>
 
                 <motion.div
-                  className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                  className="mt-10 flex flex-wrap gap-4 justify-center lg:justify-start"
                   variants={fadeIn}
                 >
                   {!isAuthLoading && (
@@ -741,7 +778,7 @@ export default function Page() {
               </motion.div>
 
               {/* Phone */}
-              <div className="relative order-first lg:order-last">
+              <div className="relative order-first lg:order-last lg:pl-20 xl:pl-32">
                 <PhoneMockup />
               </div>
             </div>
@@ -769,10 +806,10 @@ export default function Page() {
               variants={fadeInUp}
             >
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                Знакомые проблемы?
+                Три боли, которые съедают прибыль
               </h2>
               <p className="text-lg text-muted-foreground">
-                90% прорабов теряют деньги и нервы на этих трёх вещах
+                Именно эти проблемы делают прорабов на 10-20% беднее с каждого объекта
               </p>
             </motion.div>
 
@@ -786,16 +823,32 @@ export default function Page() {
               {problems.map((problem, i) => (
                 <motion.div
                   key={i}
-                  className="relative p-8 rounded-3xl bg-card border border-border/30 hover:border-border/60 transition-all duration-300 group overflow-hidden"
+                  className="relative p-8 rounded-3xl bg-card border border-border/30 hover:border-border/60 transition-all duration-300 group overflow-hidden cursor-pointer"
                   variants={fadeIn}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  whileHover={{
+                    y: -12,
+                    scale: 1.02,
+                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                  }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   {/* Gradient bg on hover */}
                   <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-linear-to-br", problem.gradient, "opacity-5")} />
-                  
-                  <div className={cn("relative w-16 h-16 rounded-2xl flex items-center justify-center mb-6", problem.bg)}>
+
+                  {/* Animated gradient border */}
+                  <motion.div
+                    className={cn("absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl bg-linear-to-br", problem.gradient)}
+                    initial={false}
+                    animate={{ opacity: [0, 0.2, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+
+                  <motion.div
+                    className={cn("relative w-16 h-16 rounded-2xl flex items-center justify-center mb-6", problem.bg)}
+                    whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+                  >
                     <problem.icon className={cn("w-8 h-8 bg-linear-to-br bg-clip-text", problem.gradient)} style={{ color: 'currentColor' }} />
-                  </div>
+                  </motion.div>
                   <h3 className="relative text-xl font-bold mb-3">{problem.title}</h3>
                   <p className="relative text-muted-foreground">{problem.desc}</p>
                 </motion.div>
@@ -819,10 +872,10 @@ export default function Page() {
                 Возможности
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                Всё что нужно прорабу
+                Всё что нужно. Ничего лишнего
               </h2>
               <p className="text-lg text-muted-foreground">
-                Никакой сложности. Только то, что реально используется каждый день.
+                Это НЕ упрощённая версия PlanRadar. Это инструмент, который реально используется каждый день.
               </p>
             </motion.div>
 
@@ -836,19 +889,39 @@ export default function Page() {
               {features.map((feature, i) => (
                 <motion.div
                   key={i}
-                  className="group p-6 lg:p-8 rounded-3xl bg-card border border-border/30 hover:border-transparent hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 relative overflow-hidden"
+                  className="group p-6 lg:p-8 rounded-3xl bg-card border border-border/30 hover:border-transparent hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 relative overflow-hidden cursor-pointer"
                   variants={fadeIn}
-                  whileHover={{ y: -8 }}
+                  whileHover={{
+                    y: -12,
+                    scale: 1.03,
+                    transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                  }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   {/* Gradient border on hover */}
                   <div className={cn("absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-px bg-linear-to-br", feature.gradient)}>
                     <div className="absolute inset-px rounded-[calc(1.5rem-1px)] bg-card" />
                   </div>
-                  
-                  <div className={cn("relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-white bg-linear-to-br shadow-lg", feature.gradient)}>
+
+                  {/* Shine effect */}
+                  <motion.div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                    initial={false}
+                  >
+                    <div className={cn("absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shine_1.5s_ease-in-out]")} />
+                  </motion.div>
+
+                  <motion.div
+                    className={cn("relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-white bg-linear-to-br shadow-lg", feature.gradient)}
+                    whileHover={{
+                      scale: 1.1,
+                      rotate: [0, -5, 5, 0],
+                      transition: { duration: 0.4 }
+                    }}
+                  >
                     <feature.icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="relative text-lg font-bold mb-2">{feature.title}</h3>
+                  </motion.div>
+                  <h3 className="relative text-lg font-bold mb-2 group-hover:text-primary transition-colors">{feature.title}</h3>
                   <p className="relative text-sm text-muted-foreground">{feature.desc}</p>
                 </motion.div>
               ))}
@@ -871,11 +944,11 @@ export default function Page() {
                   Killer Feature
                 </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                  Фотоотчёты, которые работают за вас
+                  За что прорабы готовы платить сразу же
                 </h2>
                 <p className="text-lg text-muted-foreground mb-10">
-                  Клиент получает красивую страницу с фотографиями. 
-                  Ставит реакции вместо звонков. Вы экономите часы.
+                  Делаешь фото → жмёшь кнопку → клиент получает красивую страницу с прогрессом.
+                  Ставит реакции вместо звонков. Ты экономишь часы каждую неделю.
                 </p>
 
                 <div className="space-y-5">
@@ -963,10 +1036,10 @@ export default function Page() {
                 Простые тарифы
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                Выберите свой план
+                Простые и честные тарифы
               </h2>
               <p className="text-lg text-muted-foreground">
-                Начните бесплатно. Платите когда будете готовы.
+                Спецпредложение для первых 500 бригад: тариф «Бригада» за 990 ₽/мес вечно (вместо 1 990 ₽)
               </p>
             </motion.div>
 
@@ -981,18 +1054,48 @@ export default function Page() {
                 <motion.div
                   key={i}
                   className={cn(
-                    "relative p-8 rounded-3xl border transition-all duration-300",
-                    plan.best 
-                      ? "bg-card border-2 border-primary/50 shadow-2xl shadow-primary/10" 
+                    "relative p-8 rounded-3xl border transition-all duration-300 cursor-pointer",
+                    plan.best
+                      ? "bg-card border-2 border-primary/50 shadow-2xl shadow-primary/10"
                       : "bg-card border-border/30 hover:border-border/60"
                   )}
                   variants={fadeIn}
-                  whileHover={{ y: -8 }}
+                  whileHover={{
+                    y: -12,
+                    scale: 1.02,
+                    transition: { duration: 0.3, type: "spring", stiffness: 300 }
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  animate={plan.best ? {
+                    boxShadow: [
+                      "0 20px 60px rgba(59, 130, 246, 0.15)",
+                      "0 20px 80px rgba(59, 130, 246, 0.25)",
+                      "0 20px 60px rgba(59, 130, 246, 0.15)",
+                    ]
+                  } : {}}
+                  transition={plan.best ? {
+                    boxShadow: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }
+                  } : {}}
                 >
                   {plan.best && (
-                    <div className={cn("absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full text-white text-xs font-bold bg-linear-to-r shadow-lg", plan.gradient)}>
+                    <motion.div
+                      className={cn("absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full text-white text-xs font-bold bg-linear-to-r shadow-lg", plan.gradient)}
+                      animate={{
+                        scale: [1, 1.05, 1],
+                        y: [0, -2, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
                       🔥 Лучший выбор
-                    </div>
+                    </motion.div>
                   )}
 
                   <div className="mb-6">
@@ -1098,17 +1201,17 @@ export default function Page() {
               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
               
               <div className="relative p-10 md:p-20 text-center">
-                <motion.h2 
+                <motion.h2
                   className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
                   variants={fadeIn}
                 >
-                  Начните управлять стройкой правильно
+                  Инструмент, который делает прорабов богаче
                 </motion.h2>
-                <motion.p 
+                <motion.p
                   className="text-lg lg:text-xl text-white/80 mb-10 max-w-2xl mx-auto"
                   variants={fadeIn}
                 >
-                  Присоединяйтесь к прорабам, которые уже экономят время и увеличивают прибыль
+                  Реально на 10-20% с каждого объекта. Начните бесплатно — платите когда будете готовы.
                 </motion.p>
                 <motion.div variants={fadeIn}>
                   {!isAuthLoading && (

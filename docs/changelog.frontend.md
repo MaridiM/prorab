@@ -1,5 +1,63 @@
 # Changelog (frontend)
 
+## Module: Landing Page - Content & UX Improvements
+
+### Feature: Landing Page Redesign - Complete ✅
+
+:calendar: `2025-12-05`
+
+**Полностью переписаны тексты лендинга на основе продуктовой спецификации. Добавлены улучшенные анимации и исправлена адаптивность.**
+
+**Изменения:**
+
+1. **Content Rewrite Based on Product Spec** ([page.tsx](../apps/web/src/app/page.tsx))
+   - ✅ Hero section: подзаголовок точно отражает концепцию "ТРИ боли прораба"
+   - ✅ Problems section: переписаны все 3 проблемы по документации:
+     - "Где мои деньги?" (учёт расходов)
+     - "Как быстро и красиво отчитаться перед клиентом?" (фотоотчёты)
+     - "Сколько кому платить в конце объекта?" (расчёт зарплаты)
+   - ✅ Features section: обновлены описания всех 4 фич с деталями из MVP
+   - ✅ Pricing section: исправлены тарифы и подзаголовки
+   - ✅ Testimonials: расширены отзывы с конкретными цифрами (15-20%)
+   - ✅ CTA section: усилен фокус на value proposition
+
+2. **Responsive Design Fixes** ([page.tsx](../apps/web/src/app/page.tsx))
+   - Убран горизонтальный скролл (удалён `overflow-x-hidden`)
+   - Исправлены кнопки hero-секции: `flex-col sm:flex-row` → `flex-wrap`
+   - PhoneMockup сдвинут вправо: добавлены `lg:pl-12 xl:pl-20`
+   - Кнопки теперь никогда не становятся в два ряда на узких экранах
+
+3. **Enhanced Animations** ([page.tsx](../apps/web/src/app/page.tsx), [globals.css](../apps/web/src/app/styles/globals.css))
+   - PhoneMockup: добавлена плавающая анимация (floating effect)
+   - Problem cards: улучшенный hover с:
+     - Увеличенный подъём (y: -12) и масштабирование (scale: 1.02)
+     - Вращение иконки при наведении
+     - Пульсирующий gradient-бордер
+   - Feature cards: добавлены:
+     - Spring-анимация при hover (stiffness: 300)
+     - Shine-эффект (блик проходит по карточке)
+     - Вращение и масштабирование иконок
+     - Изменение цвета заголовка при наведении
+   - Pricing cards:
+     - Улучшенный hover с spring-эффектом
+     - Пульсирующая тень для "Лучшего выбора" (boxShadow animation)
+     - Анимированный бейдж "🔥 Лучший выбор" (scale + y движение)
+   - Добавлена CSS keyframe `@keyframes shine` для блика
+
+**Результаты:**
+
+- ✅ Контент полностью соответствует продуктовой документации
+- ✅ Нет горизонтального скролла на всех экранах
+- ✅ Все анимации плавные с использованием cubic-bezier и spring-эффектов
+- ✅ Адаптивность работает корректно на мобильных и десктопных экранах
+
+**Файлы изменены:**
+
+- `apps/web/src/app/page.tsx` - основной компонент лендинга
+- `apps/web/src/app/styles/globals.css` - CSS анимации
+
+---
+
 ## Module: Onboarding & Teams - E2E Testing & Bug Fixes
 
 ### Feature: Этап 2.1 завершён + 7 критических багов исправлено ✅
