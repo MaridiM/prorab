@@ -1,217 +1,437 @@
-"use client"
+'use client'
 
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
+import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { useQuery } from '@apollo/client/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Users,
-  FolderKanban,
-  Camera,
-  Wallet,
-  ArrowRight,
-  Sparkles
-} from "lucide-react"
+	FolderKanban,
+	Search,
+	ChevronDown,
+	ChevronUp,
+	Settings,
+	Bell,
+	LogOut,
+} from 'lucide-react'
 
-import { useAuth } from "@/packages/libs/auth"
-import { Button } from "@/packages/components"
-
-const features = [
-  {
-    icon: Users,
-    title: "Команды",
-    description: "Управление бригадами и участниками",
-    gradient: "from-blue-500 to-indigo-500",
-    comingSoon: false,
-    route: "/teams"
-  },
-  {
-    icon: FolderKanban,
-    title: "Проекты",
-    description: "Объекты и задачи в работе",
-    gradient: "from-emerald-500 to-teal-500",
-    comingSoon: false,
-    route: "/teams"
-  },
-  {
-    icon: Wallet,
-    title: "Расходы",
-    description: "Учёт финансов и затрат",
-    gradient: "from-amber-500 to-orange-500",
-    comingSoon: true
-  },
-  {
-    icon: Camera,
-    title: "Фотоотчёты",
-    description: "Отчёты для клиентов",
-    gradient: "from-violet-500 to-purple-500",
-    comingSoon: true
-  }
-]
+import { MyTeamsDocument, ProjectsByTeamDocument } from '@/packages/api/graphql'
+import { useAuth } from '@/packages/libs/auth'
+import { Button, Skeleton } from '@/packages/components'
+import {
+	TeamSwitcher,
+	FinancialSummary,
+	ProjectCardDashboard,
+	FabMenu,
+} from '@/packages/components/dashboard'
+import { ProjectStatus } from '@/packages/schemas'
+import { useToast } from '@/packages/hooks'
 
 const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 }
-  }
+	hidden: { opacity: 0, y: 20 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] },
+	},
 }
 
 const stagger = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.08 },
+	},
 }
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const { user } = useAuth()
+	const router = useRouter()
+	const { user, logout } = useAuth()
+	const { error: showError } = useToast()
 
-  const handleNavigation = (route?: string) => {
-    if (route) {
-      router.push(route)
-    }
-  }
+	// Состояния
+	const [currentTeamId, setCurrentTeamId] = useState<string | null>(null)
+	const [searchQuery, setSearchQuery] = useState('')
+	const [showArchived, setShowArchived] = useState(false)
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.div
-        className="border-b border-border/30 bg-card/50 backdrop-blur-sm"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">
-                Добро пожаловать, {user?.fullName || 'Пользователь'}! 👋
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Управляйте своими проектами и командами
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+	// Загрузка команд
+	const { data: teamsData, loading: teamsLoading } = useQuery(MyTeamsDocument, {
+		fetchPolicy: 'cache-and-network',
+		onCompleted: (data) => {
+			// Устанавливаем первую команду по умолчанию
+			if (data?.myTeams?.length > 0 && !currentTeamId) {
+				// Приоритет: команда где пользователь владелец
+				const ownedTeam = data.myTeams.find(t => t.ownerId === user?.id)
+				setCurrentTeamId(ownedTeam?.id || data.myTeams[0].id)
+			}
+		},
+	})
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-        >
-          {/* Welcome Card */}
-          <motion.div
-            className="mb-12 p-8 rounded-3xl bg-linear-to-br from-primary/10 via-blue-500/5 to-purple-500/10 border border-primary/20 relative overflow-hidden"
-            variants={fadeIn}
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                <Sparkles className="w-4 h-4" />
-                Платформа для прорабов
-              </div>
-              <h2 className="text-3xl font-bold mb-3">
-                Начните работу с ProRab
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl">
-                Управляйте проектами, отслеживайте расходы и делитесь фотоотчётами с клиентами.
-                Всё в одном месте.
-              </p>
-            </div>
-          </motion.div>
+	const teams = teamsData?.myTeams || []
+	const currentTeam = teams.find(t => t.id === currentTeamId)
+	const isOwner = currentTeam?.ownerId === user?.id
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                onClick={() => !feature.comingSoon && handleNavigation(feature.route)}
-                className={`
-                  p-8 rounded-3xl border border-border/30 bg-card
-                  ${!feature.comingSoon ? 'cursor-pointer hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5' : 'opacity-60 cursor-not-allowed'}
-                  transition-all duration-300 relative overflow-hidden group
-                `}
-              >
-                {/* Gradient background on hover */}
-                <div className={`
-                  absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                  bg-linear-to-br ${feature.gradient} opacity-5
-                `} />
+	// Загрузка проектов текущей команды
+	const { data: projectsData, loading: projectsLoading } = useQuery(ProjectsByTeamDocument, {
+		variables: { teamId: currentTeamId || '', filter: null },
+		skip: !currentTeamId,
+		fetchPolicy: 'cache-and-network',
+	})
 
-                <div className="relative z-10">
-                  {/* Icon */}
-                  <div className={`
-                    w-14 h-14 rounded-2xl flex items-center justify-center mb-6
-                    text-white bg-linear-to-br ${feature.gradient} shadow-lg
-                  `}>
-                    <feature.icon className="w-7 h-7" />
-                  </div>
+	const allProjects = projectsData?.projectsByTeam || []
 
-                  {/* Content */}
-                  <div className="mb-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold">{feature.title}</h3>
-                      {feature.comingSoon && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-secondary text-xs font-medium">
-                          Скоро
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </div>
+	// Фильтрация проектов
+	const filteredProjects = useMemo(() => {
+		let projects = allProjects
 
-                  {/* Arrow */}
-                  {!feature.comingSoon && (
-                    <div className="flex items-center gap-2 text-primary font-medium text-sm group-hover:gap-3 transition-all">
-                      Перейти
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+		// Фильтрация по поиску
+		if (searchQuery) {
+			const query = searchQuery.toLowerCase()
+			projects = projects.filter(p =>
+				p?.name?.toLowerCase().includes(query) ||
+				p?.address?.toLowerCase().includes(query)
+			)
+		}
 
-          {/* Quick Actions */}
-          <motion.div
-            variants={fadeIn}
-            className="mt-12 p-8 rounded-3xl bg-secondary/30 border border-border/30"
-          >
-            <h3 className="text-lg font-bold mb-4">Быстрые действия</h3>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={() => router.push("/teams")}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Мои команды
-              </Button>
-              <Button
-                variant="outline"
-                disabled
-              >
-                <FolderKanban className="w-4 h-4 mr-2" />
-                Создать проект
-              </Button>
-              <Button
-                variant="outline"
-                disabled
-              >
-                <Wallet className="w-4 h-4 mr-2" />
-                Добавить расход
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
-    </div>
-  )
+		return projects
+	}, [allProjects, searchQuery])
+
+	// Разделение на активные и архивные
+	const activeProjects = filteredProjects.filter(
+		p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
+	)
+	const archivedProjects = filteredProjects.filter(
+		p => p?.status === ProjectStatus.ARCHIVED
+	)
+
+	// Финансовые метрики (сумма по всем активным проектам)
+	const financialMetrics = useMemo(() => {
+		const active = allProjects.filter(
+			p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
+		)
+
+		const totalBudget = active.reduce((sum, p) => sum + (p?.budget || 0), 0)
+		// TODO: Добавить реальные расходы когда будет API
+		const totalExpenses = totalBudget * 0.65 // Временная заглушка
+		const membersCount = 1 // TODO: Получить из API
+
+		return {
+			totalBudget,
+			totalExpenses,
+			activeProjectsCount: active.length,
+			membersCount,
+		}
+	}, [allProjects])
+
+	// Обработчики
+	const handleTeamChange = (teamId: string) => {
+		setCurrentTeamId(teamId)
+		setSearchQuery('')
+	}
+
+	const handleCreateProject = () => {
+		if (currentTeamId) {
+			router.push(`/teams/${currentTeamId}/projects/new`)
+		}
+	}
+
+	const handleCreateExpense = () => {
+		// TODO: Открыть модалку создания расхода
+		showError('Функция будет доступна в ближайшее время')
+	}
+
+	const handleCreateReport = () => {
+		// TODO: Открыть модалку создания фотоотчёта
+		showError('Функция будет доступна в ближайшее время')
+	}
+
+	const handleLogout = async () => {
+		try {
+			await logout()
+			router.push('/auth/login')
+		} catch (err) {
+			showError('Ошибка при выходе из аккаунта')
+		}
+	}
+
+	// Loading state
+	if (teamsLoading && !teamsData) {
+		return (
+			<div className="min-h-screen bg-background">
+				{/* Header Skeleton */}
+				<div className="border-b border-border/30 bg-card/50">
+					<div className="container mx-auto px-4 py-4">
+						<div className="flex items-center justify-between">
+							<Skeleton className="h-12 w-64" />
+							<Skeleton className="h-10 w-10 rounded-full" />
+						</div>
+					</div>
+				</div>
+
+				{/* Content Skeleton */}
+				<div className="container mx-auto px-4 py-8">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+						<Skeleton className="h-32 rounded-2xl" />
+						<Skeleton className="h-32 rounded-2xl" />
+						<Skeleton className="h-32 rounded-2xl" />
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{[1, 2, 3, 4, 5, 6].map(i => (
+							<Skeleton key={i} className="h-48 rounded-2xl" />
+						))}
+					</div>
+				</div>
+			</div>
+		)
+	}
+
+	// Empty state (нет команд)
+	if (teams.length === 0) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="text-center max-w-md mx-auto px-4"
+				>
+					<div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+						<FolderKanban className="w-10 h-10 text-primary" />
+					</div>
+					<h2 className="text-2xl font-bold mb-3">Добро пожаловать в ProRab!</h2>
+					<p className="text-muted-foreground text-lg mb-8">
+						Создайте свою первую бригаду, чтобы начать работу с проектами
+					</p>
+					<Button
+						onClick={() => router.push('/onboarding')}
+						size="lg"
+						className="bg-primary hover:bg-primary/90"
+					>
+						Создать бригаду
+					</Button>
+				</motion.div>
+			</div>
+		)
+	}
+
+	return (
+		<div className="min-h-screen bg-background pb-24">
+			{/* Header */}
+			<motion.header
+				initial={{ opacity: 0, y: -20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5 }}
+				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
+			>
+				<div className="container mx-auto px-4 py-3">
+					<div className="flex items-center justify-between">
+						{/* Team Switcher */}
+						<TeamSwitcher
+							teams={teams as any}
+							currentTeamId={currentTeamId || ''}
+							userId={user?.id || ''}
+							onTeamChange={handleTeamChange}
+						/>
+
+						{/* Actions */}
+						<div className="flex items-center gap-2">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="hidden md:flex"
+								onClick={() => router.push('/settings')}
+							>
+								<Settings className="w-5 h-5" />
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={handleLogout}
+							>
+								<LogOut className="w-5 h-5" />
+							</Button>
+						</div>
+					</div>
+				</div>
+			</motion.header>
+
+			{/* Main Content */}
+			<main className="container mx-auto px-4 py-6">
+				<motion.div
+					initial="hidden"
+					animate="visible"
+					variants={stagger}
+				>
+					{/* Приветствие */}
+					<motion.div variants={fadeIn} className="mb-6">
+						<h1 className="text-2xl md:text-3xl font-bold">
+							Привет, {user?.fullName?.split(' ')[0] || 'Прораб'}! 👋
+						</h1>
+						<p className="text-muted-foreground mt-1">
+							{activeProjects.length > 0
+								? `У вас ${activeProjects.length} ${
+									activeProjects.length === 1 ? 'активный объект' :
+										activeProjects.length >= 2 && activeProjects.length <= 4 ? 'активных объекта' :
+											'активных объектов'
+								}`
+								: 'Создайте свой первый объект'}
+						</p>
+					</motion.div>
+
+					{/* Финансовый виджет (только для владельца) */}
+					{isOwner && (
+						<motion.div variants={fadeIn} className="mb-8">
+							<FinancialSummary
+								totalBudget={financialMetrics.totalBudget}
+								totalExpenses={financialMetrics.totalExpenses}
+								activeProjectsCount={financialMetrics.activeProjectsCount}
+								membersCount={financialMetrics.membersCount}
+								showFinancials={isOwner}
+							/>
+						</motion.div>
+					)}
+
+					{/* Поиск */}
+					<motion.div variants={fadeIn} className="mb-6">
+						<div className="relative max-w-md">
+							<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<input
+								type="text"
+								placeholder="Поиск по названию или адресу..."
+								value={searchQuery}
+								onChange={e => setSearchQuery(e.target.value)}
+								className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border/50 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+							/>
+						</div>
+					</motion.div>
+
+					{/* Активные объекты */}
+					<motion.section variants={fadeIn} className="mb-8">
+						<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+							<span className="w-2 h-2 rounded-full bg-emerald-500" />
+							Активные объекты
+							{activeProjects.length > 0 && (
+								<span className="text-sm font-normal text-muted-foreground">
+									({activeProjects.length})
+								</span>
+							)}
+						</h2>
+
+						{projectsLoading && !projectsData ? (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								{[1, 2, 3].map(i => (
+									<Skeleton key={i} className="h-48 rounded-2xl" />
+								))}
+							</div>
+						) : activeProjects.length > 0 ? (
+							<motion.div
+								variants={stagger}
+								className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+							>
+								{activeProjects.map((project, index) => (
+									project?.id && (
+										<motion.div key={project.id} variants={fadeIn}>
+											<ProjectCardDashboard
+												id={project.id}
+												teamId={currentTeamId || ''}
+												name={project.name || ''}
+												address={project.address}
+												photoUrl={project.photoUrl}
+												budget={project.budget}
+												progress={project.progress || 0}
+												status={project.status as any}
+												startDate={project.startDate}
+												endDate={project.endDate}
+												profit={project.budget ? project.budget * 0.35 : null} // TODO: Реальная прибыль
+												showFinancials={isOwner}
+											/>
+										</motion.div>
+									)
+								))}
+							</motion.div>
+						) : (
+							<motion.div
+								variants={fadeIn}
+								className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-secondary/20"
+							>
+								<FolderKanban className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+								<h3 className="text-lg font-medium mb-2">
+									{searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
+								</h3>
+								<p className="text-muted-foreground mb-4">
+									{searchQuery
+										? 'Попробуйте изменить поисковый запрос'
+										: 'Создайте свой первый строительный объект'}
+								</p>
+								{!searchQuery && (
+									<Button onClick={handleCreateProject}>
+										Создать объект
+									</Button>
+								)}
+							</motion.div>
+						)}
+					</motion.section>
+
+					{/* Архивные объекты */}
+					{archivedProjects.length > 0 && (
+						<motion.section variants={fadeIn}>
+							<button
+								onClick={() => setShowArchived(!showArchived)}
+								className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 transition-colors mb-4"
+							>
+								<div className="flex items-center gap-2">
+									<span className="w-2 h-2 rounded-full bg-muted-foreground" />
+									<span className="font-medium">Архив</span>
+									<span className="text-sm text-muted-foreground">
+										({archivedProjects.length})
+									</span>
+								</div>
+								{showArchived ? (
+									<ChevronUp className="w-5 h-5 text-muted-foreground" />
+								) : (
+									<ChevronDown className="w-5 h-5 text-muted-foreground" />
+								)}
+							</button>
+
+							<AnimatePresence>
+								{showArchived && (
+									<motion.div
+										initial={{ opacity: 0, height: 0 }}
+										animate={{ opacity: 1, height: 'auto' }}
+										exit={{ opacity: 0, height: 0 }}
+										transition={{ duration: 0.3 }}
+										className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+									>
+										{archivedProjects.map(project => (
+											project?.id && (
+												<ProjectCardDashboard
+													key={project.id}
+													id={project.id}
+													teamId={currentTeamId || ''}
+													name={project.name || ''}
+													address={project.address}
+													photoUrl={project.photoUrl}
+													budget={project.budget}
+													progress={project.progress || 0}
+													status={project.status as any}
+													startDate={project.startDate}
+													endDate={project.endDate}
+													showFinancials={isOwner}
+												/>
+											)
+										))}
+									</motion.div>
+								)}
+							</AnimatePresence>
+						</motion.section>
+					)}
+				</motion.div>
+			</main>
+
+			{/* FAB Menu */}
+			<FabMenu
+				onCreateProject={handleCreateProject}
+				onCreateExpense={handleCreateExpense}
+				onCreateReport={handleCreateReport}
+				hasActiveProject={activeProjects.length > 0}
+			/>
+		</div>
+	)
 }
