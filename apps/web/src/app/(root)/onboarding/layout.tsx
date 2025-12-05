@@ -122,7 +122,7 @@ export default function OnboardingLayout({
 				animate={{ opacity: 1, y: 0, scale: 1 }}
 				transition={{
 					duration: 0.6,
-					ease: [0.22, 0.61, 0.36, 1]
+					ease: [0.22, 0.61, 0.36, 1] as const
 				}}
 				className="relative z-10 w-full flex flex-col items-center"
 			>

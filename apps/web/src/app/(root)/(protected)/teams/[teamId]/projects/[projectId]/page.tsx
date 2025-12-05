@@ -65,7 +65,7 @@ const fadeIn = {
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] },
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as const },
 	},
 }
 
@@ -376,7 +376,8 @@ export default function ProjectDetailsPage() {
 					input: {
 						reportId: selectedReportId,
 						file,
-						caption,
+						caption: caption || null,
+						orderIndex: 0,
 					},
 				},
 			})

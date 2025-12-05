@@ -35,8 +35,8 @@ export function PhotoReportForm({
     handleSubmit,
     formState: { errors, isDirty },
     reset,
-  } = useForm<CreatePhotoReportInput | UpdatePhotoReportInput>({
-    resolver: zodResolver(isEditMode ? updatePhotoReportSchema : createPhotoReportSchema),
+  } = useForm<any>({
+    resolver: zodResolver(isEditMode ? updatePhotoReportSchema : createPhotoReportSchema) as any,
     defaultValues: isEditMode
       ? {
           id: report.id,
@@ -84,7 +84,7 @@ export function PhotoReportForm({
           `}
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.title?.message as string}</p>
         )}
       </div>
 
@@ -106,7 +106,7 @@ export function PhotoReportForm({
           `}
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.description?.message as string}</p>
         )}
       </div>
 

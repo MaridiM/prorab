@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import * as GraphQLUpload from 'graphql-upload-minimal';
 
 /**
@@ -21,6 +22,7 @@ export class CompleteOnboardingInput {
     description: 'Загруженный файл логотипа',
   })
   @IsOptional()
+  @Transform(({ value }) => value) // Skip transformation for GraphQLUpload
   logoFile?: GraphQLUpload.FileUpload;
 
   @Field(() => String, {

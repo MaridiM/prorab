@@ -1,6 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { GraphQLUpload } from 'graphql-upload-minimal';
 import { IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 import type { FileUpload } from 'graphql-upload-minimal';
 
 @InputType()
@@ -10,6 +11,7 @@ export class UploadPhotoInput {
   reportId: string;
 
   @Field(() => GraphQLUpload)
+  @Transform(({ value }) => value) // Skip transformation for GraphQLUpload
   file: Promise<FileUpload>;
 
   @Field({ nullable: true })

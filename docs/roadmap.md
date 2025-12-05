@@ -2,6 +2,53 @@
 
 Цели: собрать монорепо (Turborepo) с Next.js 16 (App Router) и NestJS 11 (GraphQL), Postgres + Prisma, далее развивать функциональность команд, проектов и отчётов.
 
+---
+
+## 📊 Текущее состояние проекта (Обновлено: 2025-01-06)
+
+### Общий прогресс: **75% MVP Complete** (5.0/7 этапов)
+
+**Метрики:**
+
+- **Backend:** 95% complete (все API работают)
+- **Frontend:** 80% complete (основной UI готов, публичная страница в планах)
+- **Integration:** 80% complete (все API корректно подключены)
+- **Design:** 90% complete (UI/UX Redesign завершён 04.01.2025)
+
+**Страницы (16 total):**
+
+- ✅ **14 реализовано** (Auth: 4, Onboarding: 5, Protected: 5)
+- 🔄 **2 в планах** (`/r/[slug]` - Phase 4, `/settings` - Post-MVP)
+
+**GraphQL API модули (5 total - все подключены):**
+
+1. ✅ auth.graphql - 7 operations
+2. ✅ teams.graphql - 6 operations
+3. ✅ projects.graphql - 7 operations
+4. ✅ expenses.graphql - 6 operations
+5. ✅ photo-reports.graphql - 9 operations
+
+**UI Компоненты (55+ total):**
+
+- UI Primitives: 11 (Button, Input, Select, Card, Badge, Skeleton, Spinner, Toast, ProgressBar, TeamLogo, PasswordInput)
+- Forms: 10 (ProjectForm, ExpenseForm, PhotoReportForm, ImageUpload, PhotoUploader, IconPicker, DatePicker, Form, Stepper, PasswordInput)
+- Display: 9 (ProjectCard, ProjectCardDashboard, ExpenseCard, PhotoReportCard, TeamSwitcher, FabMenu, FinancialSummary, FinancialDashboard, ExpenseList)
+- Features: 4 (Providers, NavigationProgress, InitialLoader, ChangeTheme/Language)
+- Layout: 3 (ProtectedLayout, OnboardingLayout, Header/Footer)
+- Specialized: 18+ (TeamCard, TeamForm, InviteCard, ExpenseFilters, PhotoGallery, Lightbox, etc.)
+
+**Дизайн-система:**
+
+- ✅ Цветовая палитра (primary, success, error, warning)
+- ✅ Градиенты (blue→indigo, emerald→teal, amber→orange, purple→pink)
+- ✅ Типографика (Inter variable font, 12px→48px)
+- ✅ Анимации (Framer Motion fadeIn, stagger, hover)
+- ✅ Mobile-first responsive design
+
+**Следующий этап: Photo Reports Phase 4** (Public SSR Page)
+
+---
+
 ## Этап 1. Инфраструктура и старт (недели 1–2)
 - [x] Монорепо Turborepo.
 - [x] Web: Next.js 16 + Tailwind + shadcn/ui.

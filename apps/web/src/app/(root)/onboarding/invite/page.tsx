@@ -27,7 +27,7 @@ const fadeIn: Variants = {
 		y: 0,
 		transition: {
 			duration: 0.5,
-			ease: [0.22, 0.61, 0.36, 1]
+			ease: [0.22, 0.61, 0.36, 1] as const
 		}
 	}
 }

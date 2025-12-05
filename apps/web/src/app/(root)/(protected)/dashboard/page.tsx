@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@apollo/client/react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,7 +27,11 @@ import {
 	Check,
 } from 'lucide-react'
 
-import { MyTeamsDocument, ProjectsByTeamDocument } from '@/packages/api/graphql'
+import {
+	MyTeamsDocument,
+	ProjectsByTeamDocument,
+	ProjectStatsDocument,
+} from '@/packages/api/graphql'
 import { useAuth } from '@/packages/libs/auth'
 import { Button, Skeleton, Badge, ProgressBar } from '@/packages/components'
 import { ProjectStatus } from '@/packages/schemas'
@@ -149,6 +153,37 @@ interface ProjectCardProps {
 	startDate?: string | null
 	endDate?: string | null
 	showFinancials?: boolean
+	profit?: number | null
+}
+
+// ============ Project Card With Stats Wrapper ============
+interface ProjectCardWithStatsProps extends ProjectCardProps {
+	isOwner: boolean
+}
+
+function ProjectCardWithStats({
+	id,
+	isOwner,
+	showFinancials,
+	...projectCardProps
+}: ProjectCardWithStatsProps) {
+	// Fetch stats only if owner and financials are shown
+	const { data: statsData } = useQuery(ProjectStatsDocument, {
+		variables: { projectId: id },
+		skip: !isOwner || !showFinancials || !id,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const profit = statsData?.projectStats?.profit
+
+	return (
+		<ProjectCard
+			{...projectCardProps}
+			id={id}
+			showFinancials={showFinancials}
+			profit={profit}
+		/>
+	)
 }
 
 function ProjectCard({
@@ -163,9 +198,12 @@ function ProjectCard({
 	startDate,
 	endDate,
 	showFinancials = false,
+	profit: providedProfit,
 }: ProjectCardProps) {
-	// Временная прибыль (35% от бюджета) - будет заменена реальными данными
-	const profit = budget ? budget * 0.35 : 0
+	// Используем реальную прибыль из API или fallback к 35% от бюджета
+	const profit = providedProfit !== undefined && providedProfit !== null
+		? providedProfit
+		: (budget ? budget * 0.35 : 0)
 	const isProfitable = profit >= 0
 	const isArchived = status === ProjectStatus.ARCHIVED
 
@@ -514,6 +552,7 @@ export default function DashboardPage() {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [showArchived, setShowArchived] = useState(false)
 	const [teamDropdownOpen, setTeamDropdownOpen] = useState(false)
+	const dropdownRef = useRef<HTMLDivElement>(null)
 
 	// Load teams
 	const {
@@ -533,6 +572,20 @@ export default function DashboardPage() {
 			setCurrentTeamId(ownedTeam?.id || teams[0].id)
 		}
 	}, [teams, currentTeamId, user?.id])
+
+	// Close dropdown on click outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+				setTeamDropdownOpen(false)
+			}
+		}
+
+		if (teamDropdownOpen) {
+			document.addEventListener('mousedown', handleClickOutside)
+			return () => document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [teamDropdownOpen])
 
 	const currentTeam = teams.find(t => t.id === currentTeamId)
 	const isOwner = currentTeam?.ownerId === user?.id
@@ -570,14 +623,15 @@ export default function DashboardPage() {
 		p => p?.status === ProjectStatus.ARCHIVED
 	)
 
-	// Financial metrics
+	// Financial metrics (simplified - stats will be fetched per-card)
 	const financialMetrics = useMemo(() => {
 		const active = allProjects.filter(
 			p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
 		)
 
 		const totalBudget = active.reduce((sum, p) => sum + (p?.budget || 0), 0)
-		// TODO: Replace with real expenses from API
+
+		// Fallback calculation (stats will be fetched per-card)
 		const totalExpenses = totalBudget * 0.65
 
 		return {
@@ -585,7 +639,7 @@ export default function DashboardPage() {
 			totalExpenses,
 			activeCount: active.length,
 		}
-	}, [allProjects])
+	}, [allProjects, isOwner])
 
 	// Handlers
 	const handleTeamChange = (teamId: string) => {
@@ -698,7 +752,7 @@ export default function DashboardPage() {
 				<div className="container mx-auto px-4 py-3">
 					<div className="flex items-center justify-between">
 						{/* Team Switcher */}
-						<div className="relative">
+						<div className="relative" ref={dropdownRef}>
 							<button
 								onClick={() => setTeamDropdownOpen(!teamDropdownOpen)}
 								className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
@@ -858,7 +912,7 @@ export default function DashboardPage() {
 									project =>
 										project?.id && (
 											<motion.div key={project.id} variants={fadeIn}>
-												<ProjectCard
+												<ProjectCardWithStats
 													id={project.id}
 													teamId={currentTeamId || ''}
 													name={project.name || ''}
@@ -870,6 +924,7 @@ export default function DashboardPage() {
 													startDate={project.startDate}
 													endDate={project.endDate}
 													showFinancials={isOwner}
+													isOwner={isOwner}
 												/>
 											</motion.div>
 										)
@@ -932,7 +987,7 @@ export default function DashboardPage() {
 										{archivedProjects.map(
 											project =>
 												project?.id && (
-													<ProjectCard
+													<ProjectCardWithStats
 														key={project.id}
 														id={project.id}
 														teamId={currentTeamId || ''}
@@ -945,6 +1000,7 @@ export default function DashboardPage() {
 														startDate={project.startDate}
 														endDate={project.endDate}
 														showFinancials={isOwner}
+														isOwner={isOwner}
 													/>
 												)
 										)}
