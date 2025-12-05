@@ -119,10 +119,14 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
 							selected={selectedDate}
 							onSelect={handleSelect}
 							locale={ru}
-							disabled={{
-								before: minDate,
-								after: maxDate,
-							}}
+							disabled={
+								minDate || maxDate
+									? [
+											...(minDate ? [{ before: minDate }] : []),
+											...(maxDate ? [{ after: maxDate }] : []),
+										]
+									: undefined
+							}
 							className="p-3"
 							classNames={{
 								months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

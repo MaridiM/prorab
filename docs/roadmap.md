@@ -224,11 +224,23 @@
 - [ ] Страница настроек бригады (редактирование, передача владения)
 - [ ] E2E тесты (Playwright)
 
-## Этап 3. Проекты (недели 10–11) - 🔄 В ПРОЦЕССЕ
+## Этап 3. Проекты (недели 10–11) - ✅ ЗАВЕРШЁН (MVP готов!)
 **Приоритет:** 🔴 Критический (MVP)
-**Статус:** 🔄 В процессе (Фаза 1: Backend ✅ Завершена, Фаза 2: Frontend ✅ Завершена, Фаза 3: Pages 📋 Запланировано)
-**Начало:** 2025-12-05
+**Статус:** ✅ Завершён за 1 день! (Фаза 1: Backend ✅, Фаза 2: Frontend ✅, Фаза 3: Pages ✅)
+**Дата:** 2025-12-05
 **План:** `docs/analisys/stage-3-projects-implementation-plan.md`
+
+**🎉 Что реализовано:**
+- ✅ Полный CRUD для проектов (Create, Read, Update, Archive/Restore)
+- ✅ Backend API с 8 GraphQL операциями (3 queries + 5 mutations)
+- ✅ 6 компонентов UI (DatePicker, Badge, ProgressBar, ProjectCard, ProjectForm + канонические)
+- ✅ 4 страницы (Dashboard с фильтрами, Create, Details с табами, Edit)
+- ✅ Валидация с Zod schemas (4 схемы)
+- ✅ Фильтрация по статусу + поиск в реальном времени
+- ✅ Автоматический COMPLETED при progress = 100%
+- ✅ Лимит 10 активных проектов на команду
+- ✅ Toast уведомления для всех операций
+- ✅ Skeleton loaders, Empty states, Error handling
 
 ### Фаза 1: Backend Foundation - ✅ ЗАВЕРШЕНО (2025-12-05)
 
@@ -313,29 +325,52 @@
 - [x] Создан `components/projects/` для специализированных компонентов
 - [x] Экспортированы schemas в `schemas/index.ts`
 
-### Фаза 3: Pages Implementation - 📋 ЗАПЛАНИРОВАНО
+### Фаза 3: Pages Implementation - ✅ ЗАВЕРШЕНО (2025-12-05)
 
-**Dashboard Page**
-- [ ] Обновить `/teams/[teamId]/page.tsx` (ProjectList)
-- [ ] Добавить фильтры (Active/Archived tabs)
-- [ ] Добавить FAB кнопку "Новый проект"
-- [ ] Реализовать empty state и loading state
+**Dashboard Page** - ✅ Завершено
+- [x] Обновлён `/teams/[teamId]/page.tsx` с полным функционалом:
+  - [x] ProjectList с grid-раскладкой (responsive: 1/2/3 колонки)
+  - [x] Фильтры по статусу (Все/Активные/Завершённые/Архив)
+  - [x] Поиск по названию и адресу в реальном времени
+  - [x] FAB кнопка "Создать проект" (появляется когда есть проекты)
+  - [x] Empty state с условным контентом (зависит от фильтров/поиска)
+  - [x] Loading state с Skeleton loaders
+  - [x] Error state с понятным сообщением
+  - [x] GraphQL integration с `ProjectsByTeamDocument`
 
-**Create Page**
-- [ ] Создать `/teams/[teamId]/projects/new/page.tsx`
-- [ ] Интегрировать ProjectForm
-- [ ] Реализовать CreateProject mutation
-- [ ] Добавить success toast + redirect
+**Create Page** - ✅ Завершено
+- [x] Создана `/teams/[teamId]/projects/new/page.tsx`:
+  - [x] Интеграция ProjectForm в режиме 'create'
+  - [x] CreateProject GraphQL mutation
+  - [x] Success toast + автоматический redirect на страницу проекта
+  - [x] Error handling с toast уведомлениями
+  - [x] Кнопка "Назад к проектам"
+  - [x] Refetch ProjectsByTeam после создания
 
-**Details Page**
-- [ ] Создать `/teams/[teamId]/projects/[projectId]/page.tsx`
-- [ ] Реализовать Tabs (Инфо, Расходы, Задачи, Фотоотчеты)
-- [ ] Кнопки "Редактировать" и "В архив"
+**Details Page** - ✅ Завершено
+- [x] Создана `/teams/[teamId]/projects/[projectId]/page.tsx`:
+  - [x] Header с названием, адресом, статусом badge
+  - [x] ProgressBar с текущим прогрессом
+  - [x] Tabs навигация (Информация/Расходы/Задачи/Фотоотчёты)
+  - [x] Tab "Информация" с двумя карточками:
+    - [x] Основная информация (бюджет, телефон клиента, даты)
+    - [x] Описание и заметки
+  - [x] Tabs "Расходы/Задачи/Фотоотчёты" с заглушками "скоро"
+  - [x] Кнопки "Редактировать" и "В архив/Восстановить"
+  - [x] ArchiveProject и RestoreProject mutations
+  - [x] Loading/Error states
+  - [x] Форматирование дат (русская локализация)
+  - [x] Форматирование валюты (₽)
 
-**Edit Page**
-- [ ] Создать `/teams/[teamId]/projects/[projectId]/edit/page.tsx`
-- [ ] Интегрировать ProjectForm с defaultValues
-- [ ] Реализовать UpdateProject mutation
+**Edit Page** - ✅ Завершено
+- [x] Создана `/teams/[teamId]/projects/[projectId]/edit/page.tsx`:
+  - [x] Интеграция ProjectForm в режиме 'edit'
+  - [x] Загрузка defaultValues из GraphQL
+  - [x] UpdateProject GraphQL mutation
+  - [x] Success toast + redirect на страницу проекта
+  - [x] Кнопка "Назад к проекту"
+  - [x] Refetch после обновления
+  - [x] Конвертация дат из string в Date объекты
 
 ### Фаза 4: Polish & Testing - 📋 ЗАПЛАНИРОВАНО
 

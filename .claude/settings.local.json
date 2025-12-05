@@ -25,7 +25,8 @@
       "Bash(dir /s /b \"G:\\Projects\\prorab\\v-1\\apps\\api\\src\\modules\\projects\\*.ts\")",
       "Bash(npm run build:*)",
       "Bash(npm run start:dev:*)",
-      "Bash(npm run codegen:*)"
+      "Bash(npm run codegen:*)",
+      "Bash(npx tsc --noEmit)"
     ],
     "deny": [],
     "ask": []
