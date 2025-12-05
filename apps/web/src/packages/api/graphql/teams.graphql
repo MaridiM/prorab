@@ -40,7 +40,8 @@ mutation CompleteOnboarding(
       name
       address
       description
-      isActive
+      status
+      progress
       createdAt
     }
   }

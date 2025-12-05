@@ -20,8 +20,20 @@ export type ProjectModel = runtime.Types.Result.DefaultSelection<Prisma.$Project
 
 export type AggregateProject = {
   _count: ProjectCountAggregateOutputType | null
+  _avg: ProjectAvgAggregateOutputType | null
+  _sum: ProjectSumAggregateOutputType | null
   _min: ProjectMinAggregateOutputType | null
   _max: ProjectMaxAggregateOutputType | null
+}
+
+export type ProjectAvgAggregateOutputType = {
+  budget: runtime.Decimal | null
+  progress: number | null
+}
+
+export type ProjectSumAggregateOutputType = {
+  budget: runtime.Decimal | null
+  progress: number | null
 }
 
 export type ProjectMinAggregateOutputType = {
@@ -30,7 +42,16 @@ export type ProjectMinAggregateOutputType = {
   name: string | null
   address: string | null
   description: string | null
-  isActive: boolean | null
+  budget: runtime.Decimal | null
+  clientPhone: string | null
+  startDate: Date | null
+  endDate: Date | null
+  photoUrl: string | null
+  progress: number | null
+  notes: string | null
+  status: $Enums.ProjectStatus | null
+  archivedAt: Date | null
+  completedAt: Date | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -42,7 +63,16 @@ export type ProjectMaxAggregateOutputType = {
   name: string | null
   address: string | null
   description: string | null
-  isActive: boolean | null
+  budget: runtime.Decimal | null
+  clientPhone: string | null
+  startDate: Date | null
+  endDate: Date | null
+  photoUrl: string | null
+  progress: number | null
+  notes: string | null
+  status: $Enums.ProjectStatus | null
+  archivedAt: Date | null
+  completedAt: Date | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -54,7 +84,16 @@ export type ProjectCountAggregateOutputType = {
   name: number
   address: number
   description: number
-  isActive: number
+  budget: number
+  clientPhone: number
+  startDate: number
+  endDate: number
+  photoUrl: number
+  progress: number
+  notes: number
+  status: number
+  archivedAt: number
+  completedAt: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -62,13 +101,32 @@ export type ProjectCountAggregateOutputType = {
 }
 
 
+export type ProjectAvgAggregateInputType = {
+  budget?: true
+  progress?: true
+}
+
+export type ProjectSumAggregateInputType = {
+  budget?: true
+  progress?: true
+}
+
 export type ProjectMinAggregateInputType = {
   id?: true
   teamId?: true
   name?: true
   address?: true
   description?: true
-  isActive?: true
+  budget?: true
+  clientPhone?: true
+  startDate?: true
+  endDate?: true
+  photoUrl?: true
+  progress?: true
+  notes?: true
+  status?: true
+  archivedAt?: true
+  completedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -80,7 +138,16 @@ export type ProjectMaxAggregateInputType = {
   name?: true
   address?: true
   description?: true
-  isActive?: true
+  budget?: true
+  clientPhone?: true
+  startDate?: true
+  endDate?: true
+  photoUrl?: true
+  progress?: true
+  notes?: true
+  status?: true
+  archivedAt?: true
+  completedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -92,7 +159,16 @@ export type ProjectCountAggregateInputType = {
   name?: true
   address?: true
   description?: true
-  isActive?: true
+  budget?: true
+  clientPhone?: true
+  startDate?: true
+  endDate?: true
+  photoUrl?: true
+  progress?: true
+  notes?: true
+  status?: true
+  archivedAt?: true
+  completedAt?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -137,6 +213,18 @@ export type ProjectAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ProjectAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ProjectSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ProjectMinAggregateInputType
@@ -167,6 +255,8 @@ export type ProjectGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: ProjectCountAggregateInputType | true
+  _avg?: ProjectAvgAggregateInputType
+  _sum?: ProjectSumAggregateInputType
   _min?: ProjectMinAggregateInputType
   _max?: ProjectMaxAggregateInputType
 }
@@ -177,11 +267,22 @@ export type ProjectGroupByOutputType = {
   name: string
   address: string | null
   description: string | null
-  isActive: boolean
+  budget: runtime.Decimal | null
+  clientPhone: string | null
+  startDate: Date | null
+  endDate: Date | null
+  photoUrl: string | null
+  progress: number
+  notes: string | null
+  status: $Enums.ProjectStatus
+  archivedAt: Date | null
+  completedAt: Date | null
   createdById: string
   createdAt: Date
   updatedAt: Date
   _count: ProjectCountAggregateOutputType | null
+  _avg: ProjectAvgAggregateOutputType | null
+  _sum: ProjectSumAggregateOutputType | null
   _min: ProjectMinAggregateOutputType | null
   _max: ProjectMaxAggregateOutputType | null
 }
@@ -210,7 +311,16 @@ export type ProjectWhereInput = {
   name?: Prisma.StringFilter<"Project"> | string
   address?: Prisma.StringNullableFilter<"Project"> | string | null
   description?: Prisma.StringNullableFilter<"Project"> | string | null
-  isActive?: Prisma.BoolFilter<"Project"> | boolean
+  budget?: Prisma.DecimalNullableFilter<"Project"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.StringNullableFilter<"Project"> | string | null
+  startDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  endDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  photoUrl?: Prisma.StringNullableFilter<"Project"> | string | null
+  progress?: Prisma.IntFilter<"Project"> | number
+  notes?: Prisma.StringNullableFilter<"Project"> | string | null
+  status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdById?: Prisma.StringFilter<"Project"> | string
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -223,7 +333,16 @@ export type ProjectOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  isActive?: Prisma.SortOrder
+  budget?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  progress?: Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -239,7 +358,16 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Project"> | string
   address?: Prisma.StringNullableFilter<"Project"> | string | null
   description?: Prisma.StringNullableFilter<"Project"> | string | null
-  isActive?: Prisma.BoolFilter<"Project"> | boolean
+  budget?: Prisma.DecimalNullableFilter<"Project"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.StringNullableFilter<"Project"> | string | null
+  startDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  endDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  photoUrl?: Prisma.StringNullableFilter<"Project"> | string | null
+  progress?: Prisma.IntFilter<"Project"> | number
+  notes?: Prisma.StringNullableFilter<"Project"> | string | null
+  status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdById?: Prisma.StringFilter<"Project"> | string
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -252,13 +380,24 @@ export type ProjectOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  isActive?: Prisma.SortOrder
+  budget?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  endDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  progress?: Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  status?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProjectCountOrderByAggregateInput
+  _avg?: Prisma.ProjectAvgOrderByAggregateInput
   _max?: Prisma.ProjectMaxOrderByAggregateInput
   _min?: Prisma.ProjectMinOrderByAggregateInput
+  _sum?: Prisma.ProjectSumOrderByAggregateInput
 }
 
 export type ProjectScalarWhereWithAggregatesInput = {
@@ -270,7 +409,16 @@ export type ProjectScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Project"> | string
   address?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
-  isActive?: Prisma.BoolWithAggregatesFilter<"Project"> | boolean
+  budget?: Prisma.DecimalNullableWithAggregatesFilter<"Project"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
+  startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+  endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+  photoUrl?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
+  progress?: Prisma.IntWithAggregatesFilter<"Project"> | number
+  notes?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
+  status?: Prisma.EnumProjectStatusWithAggregatesFilter<"Project"> | $Enums.ProjectStatus
+  archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   createdById?: Prisma.StringWithAggregatesFilter<"Project"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
@@ -281,7 +429,16 @@ export type ProjectCreateInput = {
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -294,7 +451,16 @@ export type ProjectUncheckedCreateInput = {
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -305,7 +471,16 @@ export type ProjectUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -318,7 +493,16 @@ export type ProjectUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -330,7 +514,16 @@ export type ProjectCreateManyInput = {
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -341,7 +534,16 @@ export type ProjectUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,7 +555,16 @@ export type ProjectUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,10 +586,24 @@ export type ProjectCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  isActive?: Prisma.SortOrder
+  budget?: Prisma.SortOrder
+  clientPhone?: Prisma.SortOrder
+  startDate?: Prisma.SortOrder
+  endDate?: Prisma.SortOrder
+  photoUrl?: Prisma.SortOrder
+  progress?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProjectAvgOrderByAggregateInput = {
+  budget?: Prisma.SortOrder
+  progress?: Prisma.SortOrder
 }
 
 export type ProjectMaxOrderByAggregateInput = {
@@ -387,7 +612,16 @@ export type ProjectMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  isActive?: Prisma.SortOrder
+  budget?: Prisma.SortOrder
+  clientPhone?: Prisma.SortOrder
+  startDate?: Prisma.SortOrder
+  endDate?: Prisma.SortOrder
+  photoUrl?: Prisma.SortOrder
+  progress?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -399,10 +633,24 @@ export type ProjectMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   address?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  isActive?: Prisma.SortOrder
+  budget?: Prisma.SortOrder
+  clientPhone?: Prisma.SortOrder
+  startDate?: Prisma.SortOrder
+  endDate?: Prisma.SortOrder
+  photoUrl?: Prisma.SortOrder
+  progress?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ProjectSumOrderByAggregateInput = {
+  budget?: Prisma.SortOrder
+  progress?: Prisma.SortOrder
 }
 
 export type ProjectCreateNestedManyWithoutTeamInput = {
@@ -447,12 +695,41 @@ export type ProjectUncheckedUpdateManyWithoutTeamNestedInput = {
   deleteMany?: Prisma.ProjectScalarWhereInput | Prisma.ProjectScalarWhereInput[]
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type EnumProjectStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ProjectStatus
+}
+
 export type ProjectCreateWithoutTeamInput = {
   id?: string
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -463,7 +740,16 @@ export type ProjectUncheckedCreateWithoutTeamInput = {
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -504,7 +790,16 @@ export type ProjectScalarWhereInput = {
   name?: Prisma.StringFilter<"Project"> | string
   address?: Prisma.StringNullableFilter<"Project"> | string | null
   description?: Prisma.StringNullableFilter<"Project"> | string | null
-  isActive?: Prisma.BoolFilter<"Project"> | boolean
+  budget?: Prisma.DecimalNullableFilter<"Project"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.StringNullableFilter<"Project"> | string | null
+  startDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  endDate?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  photoUrl?: Prisma.StringNullableFilter<"Project"> | string | null
+  progress?: Prisma.IntFilter<"Project"> | number
+  notes?: Prisma.StringNullableFilter<"Project"> | string | null
+  status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdById?: Prisma.StringFilter<"Project"> | string
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -515,7 +810,16 @@ export type ProjectCreateManyTeamInput = {
   name: string
   address?: string | null
   description?: string | null
-  isActive?: boolean
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -526,7 +830,16 @@ export type ProjectUpdateWithoutTeamInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -537,7 +850,16 @@ export type ProjectUncheckedUpdateWithoutTeamInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -548,7 +870,16 @@ export type ProjectUncheckedUpdateManyWithoutTeamInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -562,7 +893,16 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name?: boolean
   address?: boolean
   description?: boolean
-  isActive?: boolean
+  budget?: boolean
+  clientPhone?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  photoUrl?: boolean
+  progress?: boolean
+  notes?: boolean
+  status?: boolean
+  archivedAt?: boolean
+  completedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -575,7 +915,16 @@ export type ProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   address?: boolean
   description?: boolean
-  isActive?: boolean
+  budget?: boolean
+  clientPhone?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  photoUrl?: boolean
+  progress?: boolean
+  notes?: boolean
+  status?: boolean
+  archivedAt?: boolean
+  completedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -588,7 +937,16 @@ export type ProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   name?: boolean
   address?: boolean
   description?: boolean
-  isActive?: boolean
+  budget?: boolean
+  clientPhone?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  photoUrl?: boolean
+  progress?: boolean
+  notes?: boolean
+  status?: boolean
+  archivedAt?: boolean
+  completedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -601,13 +959,22 @@ export type ProjectSelectScalar = {
   name?: boolean
   address?: boolean
   description?: boolean
-  isActive?: boolean
+  budget?: boolean
+  clientPhone?: boolean
+  startDate?: boolean
+  endDate?: boolean
+  photoUrl?: boolean
+  progress?: boolean
+  notes?: boolean
+  status?: boolean
+  archivedAt?: boolean
+  completedAt?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "name" | "address" | "description" | "isActive" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
+export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "name" | "address" | "description" | "budget" | "clientPhone" | "startDate" | "endDate" | "photoUrl" | "progress" | "notes" | "status" | "archivedAt" | "completedAt" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
 export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
 }
@@ -629,7 +996,16 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     name: string
     address: string | null
     description: string | null
-    isActive: boolean
+    budget: runtime.Decimal | null
+    clientPhone: string | null
+    startDate: Date | null
+    endDate: Date | null
+    photoUrl: string | null
+    progress: number
+    notes: string | null
+    status: $Enums.ProjectStatus
+    archivedAt: Date | null
+    completedAt: Date | null
     createdById: string
     createdAt: Date
     updatedAt: Date
@@ -1062,7 +1438,16 @@ export interface ProjectFieldRefs {
   readonly name: Prisma.FieldRef<"Project", 'String'>
   readonly address: Prisma.FieldRef<"Project", 'String'>
   readonly description: Prisma.FieldRef<"Project", 'String'>
-  readonly isActive: Prisma.FieldRef<"Project", 'Boolean'>
+  readonly budget: Prisma.FieldRef<"Project", 'Decimal'>
+  readonly clientPhone: Prisma.FieldRef<"Project", 'String'>
+  readonly startDate: Prisma.FieldRef<"Project", 'DateTime'>
+  readonly endDate: Prisma.FieldRef<"Project", 'DateTime'>
+  readonly photoUrl: Prisma.FieldRef<"Project", 'String'>
+  readonly progress: Prisma.FieldRef<"Project", 'Int'>
+  readonly notes: Prisma.FieldRef<"Project", 'String'>
+  readonly status: Prisma.FieldRef<"Project", 'ProjectStatus'>
+  readonly archivedAt: Prisma.FieldRef<"Project", 'DateTime'>
+  readonly completedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly createdById: Prisma.FieldRef<"Project", 'String'>
   readonly createdAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Project", 'DateTime'>

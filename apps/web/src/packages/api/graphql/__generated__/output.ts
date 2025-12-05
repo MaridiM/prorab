@@ -47,6 +47,27 @@ export type CompleteOnboardingInput = {
   teamName: Scalars['String']['input'];
 };
 
+export type CreateProjectInput = {
+  /** Адрес объекта */
+  address: InputMaybe<Scalars['String']['input']>;
+  /** Бюджет проекта */
+  budget: InputMaybe<Scalars['Float']['input']>;
+  /** Телефон клиента */
+  clientPhone: InputMaybe<Scalars['String']['input']>;
+  /** Описание проекта */
+  description: InputMaybe<Scalars['String']['input']>;
+  /** Дата завершения проекта */
+  endDate: InputMaybe<Scalars['DateTime']['input']>;
+  /** Название проекта */
+  name: Scalars['String']['input'];
+  /** Заметки о проекте */
+  notes: InputMaybe<Scalars['String']['input']>;
+  /** Дата начала проекта */
+  startDate: InputMaybe<Scalars['DateTime']['input']>;
+  /** ID команды */
+  teamId: Scalars['String']['input'];
+};
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -61,9 +82,13 @@ export enum LogoType {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Архивировать проект */
+  archiveProject: Project;
   changePassword: Scalars['Boolean']['output'];
   /** Завершение онбординга: создание команды и первого проекта */
   completeOnboarding: OnboardingResult;
+  /** Создать проект */
+  createProject: Project;
   forgotPassword: Scalars['Boolean']['output'];
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
@@ -71,10 +96,21 @@ export type Mutation = {
   register: AuthPayload;
   resendVerificationEmail: Scalars['Boolean']['output'];
   resetPassword: Scalars['Boolean']['output'];
+  /** Восстановить проект */
+  restoreProject: Project;
   revokeAllSessions: Scalars['Boolean']['output'];
   revokeAllSessionsIncludingCurrent: Scalars['Boolean']['output'];
   revokeSession: Scalars['Boolean']['output'];
+  /** Обновить проект */
+  updateProject: Project;
+  /** Обновить прогресс проекта */
+  updateProjectProgress: Project;
   verifyEmail: Scalars['Boolean']['output'];
+};
+
+
+export type MutationArchiveProjectArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -85,6 +121,11 @@ export type MutationChangePasswordArgs = {
 
 export type MutationCompleteOnboardingArgs = {
   input: CompleteOnboardingInput;
+};
+
+
+export type MutationCreateProjectArgs = {
+  input: CreateProjectInput;
 };
 
 
@@ -108,8 +149,25 @@ export type MutationResetPasswordArgs = {
 };
 
 
+export type MutationRestoreProjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationRevokeSessionArgs = {
   sessionId: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateProjectArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateProjectInput;
+};
+
+
+export type MutationUpdateProjectProgressArgs = {
+  id: Scalars['ID']['input'];
+  progress: Scalars['Int']['input'];
 };
 
 
@@ -133,22 +191,75 @@ export type Project = {
   __typename?: 'Project';
   /** Адрес объекта */
   address: Maybe<Scalars['String']['output']>;
+  /** Дата архивации */
+  archivedAt: Maybe<Scalars['DateTime']['output']>;
+  /** Бюджет проекта */
+  budget: Maybe<Scalars['Float']['output']>;
+  /** Телефон клиента */
+  clientPhone: Maybe<Scalars['String']['output']>;
+  /** Дата завершения */
+  completedAt: Maybe<Scalars['DateTime']['output']>;
   /** Дата создания */
   createdAt: Scalars['DateTime']['output'];
   /** ID создателя проекта */
   createdById: Scalars['ID']['output'];
   /** Описание проекта */
   description: Maybe<Scalars['String']['output']>;
+  /** Дата завершения проекта */
+  endDate: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
-  /** Активен ли проект */
-  isActive: Scalars['Boolean']['output'];
   /** Название проекта */
   name: Scalars['String']['output'];
+  /** Заметки о проекте */
+  notes: Maybe<Scalars['String']['output']>;
+  /** URL фотографии проекта */
+  photoUrl: Maybe<Scalars['String']['output']>;
+  /** Прогресс выполнения (0-100) */
+  progress: Scalars['Int']['output'];
+  /** Дата начала проекта */
+  startDate: Maybe<Scalars['DateTime']['output']>;
+  /** Статус проекта */
+  status: ProjectStatus;
   /** ID команды */
   teamId: Scalars['ID']['output'];
   /** Дата последнего обновления */
   updatedAt: Scalars['DateTime']['output'];
 };
+
+export type ProjectFilterInput = {
+  /** Поиск по названию или адресу */
+  searchQuery: InputMaybe<Scalars['String']['input']>;
+  /** Смещение */
+  skip: InputMaybe<Scalars['Int']['input']>;
+  /** Фильтр по статусу */
+  status: InputMaybe<ProjectStatus>;
+  /** Количество записей */
+  take: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ProjectStats = {
+  __typename?: 'ProjectStats';
+  /** Количество расходов */
+  expenseCount: Scalars['Int']['output'];
+  /** Прибыль (budget - totalExpenses) */
+  profit: Scalars['Float']['output'];
+  /** Количество фотоотчётов */
+  reportCount: Scalars['Int']['output'];
+  /** Количество задач */
+  taskCount: Scalars['Int']['output'];
+  /** Общая сумма расходов */
+  totalExpenses: Scalars['Float']['output'];
+};
+
+/** Статус проекта */
+export enum ProjectStatus {
+  /** Активный проект */
+  Active = 'ACTIVE',
+  /** Архивный проект */
+  Archived = 'ARCHIVED',
+  /** Завершённый проект */
+  Completed = 'COMPLETED'
+}
 
 export type Query = {
   __typename?: 'Query';
@@ -157,7 +268,29 @@ export type Query = {
   me: Maybe<User>;
   /** Получение всех команд, в которых состоит пользователь */
   myTeams: Array<Team>;
+  /** Получить проект по ID */
+  project: Project;
+  /** Статистика проекта */
+  projectStats: ProjectStats;
+  /** Получить проекты команды */
+  projectsByTeam: Array<Project>;
   sessions: Array<Session>;
+};
+
+
+export type QueryProjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryProjectStatsArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type QueryProjectsByTeamArgs = {
+  filter: InputMaybe<ProjectFilterInput>;
+  teamId: Scalars['ID']['input'];
 };
 
 export type RegisterInput = {
@@ -200,6 +333,29 @@ export type Team = {
   ownerId: Scalars['ID']['output'];
   /** Дата последнего обновления */
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type UpdateProjectInput = {
+  /** Адрес объекта */
+  address: InputMaybe<Scalars['String']['input']>;
+  /** Бюджет проекта */
+  budget: InputMaybe<Scalars['Float']['input']>;
+  /** Телефон клиента */
+  clientPhone: InputMaybe<Scalars['String']['input']>;
+  /** Описание проекта */
+  description: InputMaybe<Scalars['String']['input']>;
+  /** Дата завершения проекта */
+  endDate: InputMaybe<Scalars['DateTime']['input']>;
+  /** Название проекта */
+  name: InputMaybe<Scalars['String']['input']>;
+  /** Заметки о проекте */
+  notes: InputMaybe<Scalars['String']['input']>;
+  /** URL фотографии проекта */
+  photoUrl: InputMaybe<Scalars['String']['input']>;
+  /** Прогресс выполнения (0-100) */
+  progress: InputMaybe<Scalars['Int']['input']>;
+  /** Дата начала проекта */
+  startDate: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 export type User = {
@@ -298,6 +454,65 @@ export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SessionsQuery = { __typename?: 'Query', sessions: Array<{ __typename?: 'Session', id: string, userAgent: string | null, ip: string | null, createdAt: string, current: boolean }> };
 
+export type ProjectQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ProjectQuery = { __typename?: 'Query', project: { __typename?: 'Project', id: string, teamId: string, name: string, address: string | null, description: string | null, budget: number | null, clientPhone: string | null, startDate: string | null, endDate: string | null, photoUrl: string | null, progress: number, notes: string | null, status: ProjectStatus, createdById: string, createdAt: string, updatedAt: string, archivedAt: string | null, completedAt: string | null } };
+
+export type ProjectsByTeamQueryVariables = Exact<{
+  teamId: Scalars['ID']['input'];
+  filter: InputMaybe<ProjectFilterInput>;
+}>;
+
+
+export type ProjectsByTeamQuery = { __typename?: 'Query', projectsByTeam: Array<{ __typename?: 'Project', id: string, teamId: string, name: string, address: string | null, budget: number | null, progress: number, status: ProjectStatus, startDate: string | null, endDate: string | null, photoUrl: string | null, createdAt: string }> };
+
+export type ProjectStatsQueryVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type ProjectStatsQuery = { __typename?: 'Query', projectStats: { __typename?: 'ProjectStats', totalExpenses: number, profit: number, expenseCount: number, taskCount: number, reportCount: number } };
+
+export type CreateProjectMutationVariables = Exact<{
+  input: CreateProjectInput;
+}>;
+
+
+export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename?: 'Project', id: string, teamId: string, name: string, address: string | null, description: string | null, budget: number | null, clientPhone: string | null, startDate: string | null, endDate: string | null, notes: string | null, progress: number, status: ProjectStatus, createdAt: string } };
+
+export type UpdateProjectMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateProjectInput;
+}>;
+
+
+export type UpdateProjectMutation = { __typename?: 'Mutation', updateProject: { __typename?: 'Project', id: string, teamId: string, name: string, address: string | null, description: string | null, budget: number | null, clientPhone: string | null, startDate: string | null, endDate: string | null, photoUrl: string | null, progress: number, notes: string | null, status: ProjectStatus, updatedAt: string } };
+
+export type ArchiveProjectMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ArchiveProjectMutation = { __typename?: 'Mutation', archiveProject: { __typename?: 'Project', id: string, status: ProjectStatus, archivedAt: string | null } };
+
+export type RestoreProjectMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RestoreProjectMutation = { __typename?: 'Mutation', restoreProject: { __typename?: 'Project', id: string, status: ProjectStatus, archivedAt: string | null } };
+
+export type UpdateProjectProgressMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  progress: Scalars['Int']['input'];
+}>;
+
+
+export type UpdateProjectProgressMutation = { __typename?: 'Mutation', updateProjectProgress: { __typename?: 'Project', id: string, progress: number, status: ProjectStatus, completedAt: string | null } };
+
 export type MyTeamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -308,7 +523,7 @@ export type CompleteOnboardingMutationVariables = Exact<{
 }>;
 
 
-export type CompleteOnboardingMutation = { __typename?: 'Mutation', completeOnboarding: { __typename?: 'OnboardingResult', success: boolean, message: string, team: { __typename?: 'Team', id: string, name: string, logoType: LogoType, logoUrl: string | null, iconId: string | null, colorId: string | null, createdAt: string }, project: { __typename?: 'Project', id: string, name: string, address: string | null, description: string | null, isActive: boolean, createdAt: string } } };
+export type CompleteOnboardingMutation = { __typename?: 'Mutation', completeOnboarding: { __typename?: 'OnboardingResult', success: boolean, message: string, team: { __typename?: 'Team', id: string, name: string, logoType: LogoType, logoUrl: string | null, iconId: string | null, colorId: string | null, createdAt: string }, project: { __typename?: 'Project', id: string, name: string, address: string | null, description: string | null, status: ProjectStatus, progress: number, createdAt: string } } };
 
 
 export const RegisterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Register"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"register"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>;
@@ -325,5 +540,13 @@ export const RevokeAllSessionsDocument = {"kind":"Document","definitions":[{"kin
 export const RevokeAllSessionsIncludingCurrentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeAllSessionsIncludingCurrent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeAllSessionsIncludingCurrent"}}]}}]} as unknown as DocumentNode<RevokeAllSessionsIncludingCurrentMutation, RevokeAllSessionsIncludingCurrentMutationVariables>;
 export const MeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
 export const SessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"ip"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"current"}}]}}]}}]} as unknown as DocumentNode<SessionsQuery, SessionsQueryVariables>;
+export const ProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Project"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"project"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"clientPhone"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"archivedAt"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}}]}}]}}]} as unknown as DocumentNode<ProjectQuery, ProjectQueryVariables>;
+export const ProjectsByTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProjectsByTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectFilterInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectsByTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}},{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<ProjectsByTeamQuery, ProjectsByTeamQueryVariables>;
+export const ProjectStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProjectStats"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectStats"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"profit"}},{"kind":"Field","name":{"kind":"Name","value":"expenseCount"}},{"kind":"Field","name":{"kind":"Name","value":"taskCount"}},{"kind":"Field","name":{"kind":"Name","value":"reportCount"}}]}}]}}]} as unknown as DocumentNode<ProjectStatsQuery, ProjectStatsQueryVariables>;
+export const CreateProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"clientPhone"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CreateProjectMutation, CreateProjectMutationVariables>;
+export const UpdateProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProjectInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"clientPhone"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const ArchiveProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ArchiveProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"archiveProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"archivedAt"}}]}}]}}]} as unknown as DocumentNode<ArchiveProjectMutation, ArchiveProjectMutationVariables>;
+export const RestoreProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestoreProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restoreProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"archivedAt"}}]}}]}}]} as unknown as DocumentNode<RestoreProjectMutation, RestoreProjectMutationVariables>;
+export const UpdateProjectProgressDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProjectProgress"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"progress"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProjectProgress"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"progress"},"value":{"kind":"Variable","name":{"kind":"Name","value":"progress"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateProjectProgressMutation, UpdateProjectProgressMutationVariables>;
 export const MyTeamsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MyTeams"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myTeams"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoType"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"iconId"}},{"kind":"Field","name":{"kind":"Name","value":"colorId"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<MyTeamsQuery, MyTeamsQueryVariables>;
-export const CompleteOnboardingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CompleteOnboarding"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CompleteOnboardingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completeOnboarding"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoType"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"iconId"}},{"kind":"Field","name":{"kind":"Name","value":"colorId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"project"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>;
+export const CompleteOnboardingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CompleteOnboarding"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CompleteOnboardingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completeOnboarding"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoType"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"iconId"}},{"kind":"Field","name":{"kind":"Name","value":"colorId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"project"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"progress"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>;

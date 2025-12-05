@@ -224,11 +224,127 @@
 - [ ] Страница настроек бригады (редактирование, передача владения)
 - [ ] E2E тесты (Playwright)
 
-## Этап 3. Проекты (недели 6–7)
-- [ ] Entity `Project` (название, описание, бюджет, статус, сроки).
-- [ ] Связь Project ↔ Team.
-- [ ] API: `createProject`, `myProjects`, `updateProject`, `archiveProject`.
-- [ ] Frontend: список/детали проектов, фильтры по статусу/участникам/датам, создание/архивация.
+## Этап 3. Проекты (недели 10–11) - 🔄 В ПРОЦЕССЕ
+**Приоритет:** 🔴 Критический (MVP)
+**Статус:** 🔄 В процессе (Фаза 1: Backend ✅ Завершена, Фаза 2: Frontend ✅ Завершена, Фаза 3: Pages 📋 Запланировано)
+**Начало:** 2025-12-05
+**План:** `docs/analisys/stage-3-projects-implementation-plan.md`
+
+### Фаза 1: Backend Foundation - ✅ ЗАВЕРШЕНО (2025-12-05)
+
+**День 1: Database & Models**
+- [x] Удалена неправильная Project model из `projects/models/project.model.ts`
+- [x] Создан enum ProjectStatus (ACTIVE, ARCHIVED, COMPLETED)
+- [x] Добавлены 9 новых полей в Project model:
+  - [x] budget (Decimal), clientPhone (String)
+  - [x] startDate, endDate (DateTime)
+  - [x] photoUrl, progress (0-100), notes (Text)
+  - [x] status (ProjectStatus), archivedAt, completedAt
+- [x] Применена миграция: `prisma db push`
+- [x] Сгенерирован Prisma Client
+
+**День 2: GraphQL Schema & DTOs**
+- [x] Создан ProjectStatus enum для GraphQL
+- [x] Обновлена Project GraphQL model со всеми полями
+- [x] Создан UpdateProjectInput DTO
+- [x] Создан ProjectFilterInput DTO (status, searchQuery, take, skip)
+- [x] Создан ProjectStats model (заглушка для Этапа 4)
+- [x] Обновлен CreateProjectInput с новыми полями и валидацией
+
+**День 3: Service & Resolver**
+- [x] Расширен ProjectsService с методами:
+  - [x] Queries: `findById`, `findByTeam`, `getProjectStats`
+  - [x] Mutations: `create`, `update`, `archive`, `restore`, `updateProgress`
+  - [x] Helpers: `validateTeamAccess`, `validateProjectAccess`, `checkProjectLimit`
+- [x] Расширен ProjectsResolver с GraphQL операциями (3 queries + 5 mutations)
+- [x] ProjectsModule обновлён (импорт AuthModule)
+- [x] ProjectsModule включён в app.module.ts
+- [x] Backend успешно компилируется и запускается
+- [x] Исправлена ошибка в teams.service.ts (isActive → status + progress)
+
+### Фаза 2: Frontend Foundation - ✅ ЗАВЕРШЕНО (2025-12-05)
+
+**Dependencies & GraphQL**
+- [x] Установлены пакеты: `react-day-picker@^9.4.3`, `date-fns@^4.1.0`
+- [x] Создан `projects.graphql` с queries и mutations
+- [x] Исправлена `teams.graphql` (isActive → status + progress)
+- [x] Запущен codegen - TypeScript типы сгенерированы
+
+**Zod Validation Schemas**
+- [x] Создана структура `schemas/projects/`
+- [x] Создан `project.schema.ts` с полной валидацией:
+  - [x] `createProjectSchema` - валидация создания проекта
+  - [x] `updateProjectSchema` - валидация обновления (все поля optional)
+  - [x] `projectFilterSchema` - валидация фильтров и пагинации
+  - [x] `updateProgressSchema` - валидация прогресса (0-100)
+  - [x] Валидация дат: endDate >= startDate
+  - [x] Валидация телефона: regex `/^\+?[1-9]\d{1,14}$/`
+  - [x] Экспорт TypeScript типов
+
+**UI Components**
+- [x] Создан DatePicker component (shadcn/ui стиль + react-day-picker)
+  - [x] Русская локализация (date-fns/locale/ru)
+  - [x] Dropdown calendar с автозакрытием
+  - [x] Поддержка minDate/maxDate
+  - [x] Интеграция с React Hook Form
+- [x] Создан Badge component
+  - [x] 5 вариантов: default, success, warning, danger, secondary
+- [x] Создан ProgressBar component
+  - [x] Автоматический выбор цвета на основе прогресса
+  - [x] 3 размера: sm, md, lg
+  - [x] Опциональный label с процентами
+- [x] Создан ProjectCard component
+  - [x] Отображение всех полей проекта (бюджет, адрес, даты, фото)
+  - [x] Badge со статусом (ACTIVE/ARCHIVED/COMPLETED)
+  - [x] Встроенный ProgressBar
+  - [x] Link на детальную страницу проекта
+  - [x] Hover эффекты и адаптивная вёрстка
+- [x] Создан ProjectForm component
+  - [x] Режимы: create и edit
+  - [x] React Hook Form + Zod resolver
+  - [x] Все поля проекта с валидацией
+  - [x] DatePicker интеграция для startDate/endDate
+  - [x] Автоматическая синхронизация minDate для endDate
+  - [x] Состояние loading с спиннером
+  - [x] Кастомизируемые labels кнопок
+
+**Обновления инфраструктуры**
+- [x] Экспортированы новые компоненты в `components/ui/index.ts`
+- [x] Создан `components/projects/` для специализированных компонентов
+- [x] Экспортированы schemas в `schemas/index.ts`
+
+### Фаза 3: Pages Implementation - 📋 ЗАПЛАНИРОВАНО
+
+**Dashboard Page**
+- [ ] Обновить `/teams/[teamId]/page.tsx` (ProjectList)
+- [ ] Добавить фильтры (Active/Archived tabs)
+- [ ] Добавить FAB кнопку "Новый проект"
+- [ ] Реализовать empty state и loading state
+
+**Create Page**
+- [ ] Создать `/teams/[teamId]/projects/new/page.tsx`
+- [ ] Интегрировать ProjectForm
+- [ ] Реализовать CreateProject mutation
+- [ ] Добавить success toast + redirect
+
+**Details Page**
+- [ ] Создать `/teams/[teamId]/projects/[projectId]/page.tsx`
+- [ ] Реализовать Tabs (Инфо, Расходы, Задачи, Фотоотчеты)
+- [ ] Кнопки "Редактировать" и "В архив"
+
+**Edit Page**
+- [ ] Создать `/teams/[teamId]/projects/[projectId]/edit/page.tsx`
+- [ ] Интегрировать ProjectForm с defaultValues
+- [ ] Реализовать UpdateProject mutation
+
+### Фаза 4: Polish & Testing - 📋 ЗАПЛАНИРОВАНО
+
+- [ ] Оптимизация loading states (skeleton loaders)
+- [ ] Error boundaries для страниц
+- [ ] Toast notifications для всех операций
+- [ ] Mobile responsive проверка
+- [ ] E2E тестирование
+- [ ] Обновить changelog.md
 
 ## Этап 4. Файлы и расходы (недели 8–9)
 - [ ] Интеграция хранилища (Cloudflare R2/S3) + upload для GraphQL.

@@ -1,13 +1,16 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Field, Float, InputType, Int } from '@nestjs/graphql';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
+/**
+ * Input DTO для обновления проекта
+ */
 @InputType()
-export class CreateProjectInput {
-  @Field(() => String, { description: 'Название проекта' })
-  @IsNotEmpty({ message: 'Название проекта обязательно' })
+export class UpdateProjectInput {
+  @Field(() => String, { nullable: true, description: 'Название проекта' })
+  @IsOptional()
   @IsString()
   @MaxLength(200, { message: 'Название проекта не может быть длиннее 200 символов' })
-  name: string;
+  name?: string;
 
   @Field(() => String, { nullable: true, description: 'Адрес объекта' })
   @IsOptional()
@@ -40,13 +43,20 @@ export class CreateProjectInput {
   @IsOptional()
   endDate?: Date;
 
+  @Field(() => String, { nullable: true, description: 'URL фотографии проекта' })
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+
+  @Field(() => Int, { nullable: true, description: 'Прогресс выполнения (0-100)' })
+  @IsOptional()
+  @IsInt()
+  @Min(0, { message: 'Прогресс не может быть меньше 0' })
+  @Max(100, { message: 'Прогресс не может быть больше 100' })
+  progress?: number;
+
   @Field(() => String, { nullable: true, description: 'Заметки о проекте' })
   @IsOptional()
   @IsString()
   notes?: string;
-
-  @Field(() => String, { description: 'ID команды' })
-  @IsNotEmpty({ message: 'ID команды обязателен' })
-  @IsString()
-  teamId: string;
 }

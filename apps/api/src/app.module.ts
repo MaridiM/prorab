@@ -14,7 +14,7 @@ import { AuthGuard } from './shared/guards/auth.guard'
 @Module({
 	imports: [
 		CoreModule,
-		// ProjectsModule, // Временно отключён - конфликт GraphQL типов с TeamsModule
+		ProjectsModule, // ✅ Включён обратно - конфликт типов решён
 		AuthModule,
 		UsersModule,
 		TeamsModule,

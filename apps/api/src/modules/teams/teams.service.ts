@@ -96,7 +96,8 @@ export class TeamsService extends CoreService {
           description: input.projectDescription,
           teamId: team.id,
           createdById: userId,
-          isActive: true,
+          status: 'ACTIVE', // Используем status вместо isActive
+          progress: 0,
         },
       });
 

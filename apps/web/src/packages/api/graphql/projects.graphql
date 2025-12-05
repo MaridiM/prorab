@@ -1,0 +1,114 @@
+# ========== QUERIES ==========
+
+query Project($id: ID!) {
+  project(id: $id) {
+    id
+    teamId
+    name
+    address
+    description
+    budget
+    clientPhone
+    startDate
+    endDate
+    photoUrl
+    progress
+    notes
+    status
+    createdById
+    createdAt
+    updatedAt
+    archivedAt
+    completedAt
+  }
+}
+
+query ProjectsByTeam($teamId: ID!, $filter: ProjectFilterInput) {
+  projectsByTeam(teamId: $teamId, filter: $filter) {
+    id
+    teamId
+    name
+    address
+    budget
+    progress
+    status
+    startDate
+    endDate
+    photoUrl
+    createdAt
+  }
+}
+
+query ProjectStats($projectId: ID!) {
+  projectStats(projectId: $projectId) {
+    totalExpenses
+    profit
+    expenseCount
+    taskCount
+    reportCount
+  }
+}
+
+# ========== MUTATIONS ==========
+
+mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
+    id
+    teamId
+    name
+    address
+    description
+    budget
+    clientPhone
+    startDate
+    endDate
+    notes
+    progress
+    status
+    createdAt
+  }
+}
+
+mutation UpdateProject($id: ID!, $input: UpdateProjectInput!) {
+  updateProject(id: $id, input: $input) {
+    id
+    teamId
+    name
+    address
+    description
+    budget
+    clientPhone
+    startDate
+    endDate
+    photoUrl
+    progress
+    notes
+    status
+    updatedAt
+  }
+}
+
+mutation ArchiveProject($id: ID!) {
+  archiveProject(id: $id) {
+    id
+    status
+    archivedAt
+  }
+}
+
+mutation RestoreProject($id: ID!) {
+  restoreProject(id: $id) {
+    id
+    status
+    archivedAt
+  }
+}
+
+mutation UpdateProjectProgress($id: ID!, $progress: Int!) {
+  updateProjectProgress(id: $id, progress: $progress) {
+    id
+    progress
+    status
+    completedAt
+  }
+}
