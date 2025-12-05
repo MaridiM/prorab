@@ -1042,3 +1042,94 @@
 - [x] Документация обновлена
 
 **Результат**: Профессиональный лендинг с точными текстами из спецификации, улучшенной адаптивностью и modern animations для лучшего UX
+
+### UI/UX Redesign - All Application Pages (2025-01-04) - ✅ ЗАВЕРШЕНО
+
+**Контекст**: Полное обновление дизайна всех основных страниц приложения для соответствия спецификации продукта и единому стилю дизайн-системы
+
+**Цели**:
+- [x] Привести все страницы к единому дизайну
+- [x] Соответствие спецификации продукта
+- [x] Mobile-first responsive design
+- [x] Рабочий функционал на всех страницах
+- [x] Владелец видит финансы, участник - нет
+
+#### Обновлённые страницы (6)
+
+**Dashboard Page (`/dashboard`)**
+- [x] TeamSwitcher для переключения команд
+- [x] FinancialSummary для владельца
+- [x] ProjectCardDashboard с прибылью
+- [x] FabMenu для быстрых действий
+- [x] Поиск проектов
+- [x] Collapsible архив
+
+**Teams List Page (`/teams`)**
+- [x] Sticky header с backdrop-blur
+- [x] Карточки команд с hover-эффектами
+- [x] Crown badge для владельца
+- [x] Empty state с CTA
+
+**Team Details Page (`/teams/[teamId]`)**
+- [x] Header с информацией о команде
+- [x] FinancialSummary для владельца
+- [x] Фильтрация по статусу
+- [x] ProjectCardDashboard с финансами
+- [x] FAB для создания проекта
+
+**Project Details Page (`/teams/[teamId]/projects/[projectId]`)**
+- [x] Sticky header с прогресс-баром
+- [x] Tab-навигация (Инфо, Расходы, Фотоотчёты, Задачи)
+- [x] Financial summary cards для владельца
+- [x] FinancialDashboard на вкладке Расходы
+- [x] Полная интеграция ExpenseForm/ExpenseList
+- [x] Полная интеграция PhotoReportForm/PhotoReportCard
+- [x] FAB для добавления расхода
+
+**Project Create/Edit Pages**
+- [x] Sticky header с информацией о команде
+- [x] Card с градиентной иконкой
+- [x] ProjectForm с полной валидацией
+- [x] Success toast и redirect
+
+#### Design Patterns использованные
+
+**Header Pattern:**
+- Sticky с backdrop-blur-xl
+- Back button с hover state
+- Gradient logo/icon
+- Action buttons справа
+
+**Card Pattern:**
+- rounded-2xl, border-border/30
+- Hover: border-primary/30, shadow-xl
+- Gradient overlay при hover
+
+**Animation Pattern:**
+- Framer Motion fadeIn variants
+- Stagger children animation
+- Hover lift effect (y: -4)
+- AnimatePresence для переходов
+
+#### GraphQL Integration
+
+**Queries использованные:**
+- MyTeamsDocument
+- ProjectsByTeamDocument
+- ProjectDocument
+- ProjectStatsDocument
+- ExpensesByProjectDocument
+- ProjectPhotoReportsDocument
+
+**Mutations интегрированные:**
+- CreateProject, UpdateProject, ArchiveProject, RestoreProject
+- CreateExpense, UpdateExpense, DeleteExpense
+- CreatePhotoReport, UpdatePhotoReport, DeletePhotoReport
+
+#### Проверки
+- [x] TypeScript: 0 ошибок
+- [x] Linter: 0 ошибок
+- [x] Все GraphQL интеграции работают
+- [x] Responsive design на всех breakpoints
+
+**Результат**: Все основные страницы приложения (кроме Landing, Auth, Onboarding) обновлены с единым дизайном, соответствующим спецификации продукта ProRab.space. Весь существующий функционал работает корректно.

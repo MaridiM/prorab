@@ -1,5 +1,173 @@
 # Changelog (frontend)
 
+## UI/UX Redesign - All Application Pages
+
+### Feature: Unified Design System Implementation 🎨
+
+:calendar: `2025-01-04`
+
+**Полное обновление дизайна всех основных страниц приложения (кроме Landing, Auth, Onboarding) для соответствия спецификации продукта и единому стилю дизайн-системы ProRab.space.**
+
+---
+
+### 1. Обновлённые страницы
+
+#### Dashboard Page (`/dashboard`)
+- ✅ Интегрирован TeamSwitcher для переключения между командами
+- ✅ FinancialSummary показывает финансовые метрики только для владельца
+- ✅ ProjectCardDashboard с прибылью и статусом
+- ✅ FabMenu для быстрых действий (создать проект, расход, фотоотчёт)
+- ✅ Поиск проектов по названию и адресу
+- ✅ Collapsible секция архивных проектов
+- ✅ Skeleton loaders и empty states
+- ✅ Framer Motion анимации
+
+#### Teams List Page (`/teams`)
+- ✅ Sticky header с backdrop-blur
+- ✅ Карточки команд с hover-эффектами и градиентами
+- ✅ Crown badge для владельца команды
+- ✅ Dashed card для создания новой команды
+- ✅ Empty state с CTA
+- ✅ Back navigation к Dashboard
+
+#### Team Details Page (`/teams/[teamId]`)
+- ✅ Sticky header с информацией о команде
+- ✅ FinancialSummary для владельца (бюджет, расходы, прибыль)
+- ✅ Фильтрация по статусу (Все/Активные/Завершённые/Архив)
+- ✅ Поиск проектов
+- ✅ ProjectCardDashboard с финансами
+- ✅ Collapsible архив
+- ✅ FAB для создания проекта
+- ✅ Settings button для владельца
+
+#### Project Details Page (`/teams/[teamId]/projects/[projectId]`)
+- ✅ Sticky header с прогресс-баром
+- ✅ Tab-навигация: Информация, Расходы, Фотоотчёты, Задачи
+- ✅ Financial summary cards (4 метрики) для владельца
+- ✅ FinancialDashboard на вкладке Расходы
+- ✅ Полная интеграция ExpenseForm/ExpenseList
+- ✅ Полная интеграция PhotoReportForm/PhotoReportCard
+- ✅ FAB для добавления расхода (на вкладке Расходы)
+- ✅ AnimatePresence для переключения табов
+- ✅ Плейсхолдер для Задач (Kanban)
+
+#### Project Create Page (`/teams/[teamId]/projects/new`)
+- ✅ Sticky header с информацией о команде
+- ✅ Card с градиентной иконкой
+- ✅ ProjectForm с полной валидацией
+- ✅ Success toast и redirect на проект
+
+#### Project Edit Page (`/teams/[teamId]/projects/[projectId]/edit`)
+- ✅ Sticky header с названием проекта
+- ✅ Card с градиентной иконкой
+- ✅ ProjectForm с предзаполненными данными
+- ✅ Success toast и redirect на проект
+
+---
+
+### 2. Общие улучшения дизайна
+
+**Header Pattern:**
+- Sticky header с `backdrop-blur-xl`
+- Back button с hover state
+- Gradient logo/icon для команды
+- Action buttons справа
+
+**Card Pattern:**
+- `rounded-2xl` border radius
+- `border-border/30` тонкая граница
+- Hover: `border-primary/30`, `shadow-xl`, `shadow-primary/5`
+- Gradient overlay при hover
+
+**Animation Pattern:**
+- Framer Motion fadeIn variants
+- Stagger children animation
+- Hover lift effect (y: -4)
+- AnimatePresence для переходов
+
+**Color Pattern:**
+- Gradient icons (blue→indigo, emerald→teal, amber→orange)
+- Status badges с соответствующими цветами
+- Financial indicators (green = profit, red = loss)
+
+**Mobile-first:**
+- Responsive grids (1 → 2 → 3 cols)
+- Adaptive text sizes
+- Touch-friendly buttons
+- Collapsible sections
+
+---
+
+### 3. GraphQL Integration
+
+**Все страницы используют:**
+- `MyTeamsDocument` - список команд пользователя
+- `ProjectsByTeamDocument` - проекты команды
+- `ProjectDocument` - детали проекта
+- `ProjectStatsDocument` - финансовые метрики
+- `ExpensesByProjectDocument` - расходы проекта
+- `ProjectPhotoReportsDocument` - фотоотчёты
+
+**Mutations интегрированы:**
+- CreateProject, UpdateProject, ArchiveProject, RestoreProject
+- CreateExpense, UpdateExpense, DeleteExpense
+- CreatePhotoReport, UpdatePhotoReport, DeletePhotoReport
+- UploadPhotoToReport
+
+---
+
+### 4. Компоненты использованные
+
+**Dashboard Components:**
+- TeamSwitcher
+- FinancialSummary
+- ProjectCardDashboard
+- FabMenu
+
+**UI Components:**
+- Button, Badge, Card, Skeleton, ProgressBar
+- Input (search)
+- AnimatePresence (Framer Motion)
+
+**Feature Components:**
+- ExpenseForm, ExpenseList, ExpenseCard
+- FinancialDashboard
+- PhotoReportForm, PhotoReportCard, PhotoUploader
+- ProjectForm, ProjectCard
+
+---
+
+### 5. Hooks использованные
+
+- `useAuth` - контекст авторизации
+- `useToast` - toast уведомления
+- `useQuery` / `useMutation` - Apollo Client
+
+---
+
+### 6. Files Modified (6 страниц)
+
+1. `apps/web/src/app/(root)/(protected)/teams/page.tsx` - Teams list
+2. `apps/web/src/app/(root)/(protected)/teams/[teamId]/page.tsx` - Team details
+3. `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/page.tsx` - Project details
+4. `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/new/page.tsx` - Create project
+5. `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/edit/page.tsx` - Edit project
+6. `apps/web/src/app/(root)/(protected)/dashboard/page.tsx` - Dashboard (уже обновлён ранее)
+
+---
+
+### 7. Результат
+
+- ✅ Единый стиль дизайна на всех страницах
+- ✅ Соответствие спецификации продукта
+- ✅ Mobile-first responsive design
+- ✅ Владелец видит финансы, участник - нет
+- ✅ Весь существующий функционал работает
+- ✅ 0 ошибок линтера
+- ✅ Плавные анимации и переходы
+
+---
+
 ## Module: Expenses Management - Frontend Integration (Stage 4)
 
 ### Feature: Expenses Components & Integration 💰

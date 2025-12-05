@@ -1,194 +1,484 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@apollo/client/react'
-import { ProjectsByTeamDocument, MyTeamsDocument } from '@/packages/api/graphql'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+	ProjectsByTeamDocument,
+	MyTeamsDocument,
+	ProjectStatsDocument,
+} from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
-import { ProjectCard } from '@/packages/components/projects'
-import { Button, Skeleton } from '@/packages/components/ui'
-import { Plus, Search } from 'lucide-react'
+import { ProjectCardDashboard } from '@/packages/components/dashboard'
+import { FinancialSummary } from '@/packages/components/dashboard'
+import { Button, Skeleton, Badge } from '@/packages/components/ui'
+import { useAuth } from '@/packages/libs/auth'
+import {
+	Plus,
+	Search,
+	ArrowLeft,
+	FolderKanban,
+	ChevronDown,
+	ChevronUp,
+	Users,
+	Crown,
+	Settings,
+} from 'lucide-react'
 
-type ProjectStatusFilter = 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'COMPLETED'
+const fadeIn = {
+	hidden: { opacity: 0, y: 20 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] },
+	},
+}
+
+const stagger = {
+	hidden: {},
+	visible: {
+		transition: { staggerChildren: 0.08 },
+	},
+}
+
+type StatusFilter = 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'COMPLETED'
 
 export default function TeamDashboardPage() {
 	const params = useParams()
 	const router = useRouter()
+	const { user } = useAuth()
 	const teamId = params.teamId as string
 
-	const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('ALL')
+	const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
 	const [searchQuery, setSearchQuery] = useState('')
+	const [showArchived, setShowArchived] = useState(false)
 
-	// Загрузка команды для отображения названия
-	const { data: teamsData } = useQuery(MyTeamsDocument)
-	const team = teamsData?.myTeams.find(t => t.id === teamId)
+	// Загрузка команды
+	const { data: teamsData, loading: teamsLoading } = useQuery(MyTeamsDocument)
+	const team = teamsData?.myTeams?.find(t => t.id === teamId)
+	const isOwner = team?.ownerId === user?.id
 
-	// Загрузка проектов с фильтрацией
-	const { data, loading, error } = useQuery(ProjectsByTeamDocument, {
-		variables: {
-			teamId,
-			filter: (statusFilter === 'ALL' && !searchQuery
-				? null
-				: {
-					status: statusFilter === 'ALL' ? null : (statusFilter as any),
-					searchQuery: searchQuery || null,
-				}) as any,
-		},
-		fetchPolicy: 'cache-and-network',
-	})
+	// Загрузка проектов
+	const { data: projectsData, loading: projectsLoading } = useQuery(
+		ProjectsByTeamDocument,
+		{
+			variables: {
+				teamId,
+				filter: null,
+			},
+			fetchPolicy: 'cache-and-network',
+		}
+	)
 
-	const projects = data?.projectsByTeam || []
+	const allProjects = projectsData?.projectsByTeam || []
+
+	// Фильтрация проектов
+	const filteredProjects = useMemo(() => {
+		let projects = [...allProjects]
+
+		// Фильтрация по статусу
+		if (statusFilter !== 'ALL') {
+			projects = projects.filter(p => p?.status === statusFilter)
+		}
+
+		// Фильтрация по поиску
+		if (searchQuery) {
+			const query = searchQuery.toLowerCase()
+			projects = projects.filter(
+				p =>
+					p?.name?.toLowerCase().includes(query) ||
+					p?.address?.toLowerCase().includes(query)
+			)
+		}
+
+		return projects
+	}, [allProjects, statusFilter, searchQuery])
+
+	// Разделение на активные и архивные
+	const activeProjects = filteredProjects.filter(
+		p =>
+			p?.status === ProjectStatus.ACTIVE ||
+			p?.status === ProjectStatus.COMPLETED
+	)
+	const archivedProjects = filteredProjects.filter(
+		p => p?.status === ProjectStatus.ARCHIVED
+	)
+
+	// Финансовые метрики
+	const financialMetrics = useMemo(() => {
+		const active = allProjects.filter(
+			p =>
+				p?.status === ProjectStatus.ACTIVE ||
+				p?.status === ProjectStatus.COMPLETED
+		)
+
+		const totalBudget = active.reduce((sum, p) => sum + (p?.budget || 0), 0)
+		// TODO: Получить реальные расходы из API
+		const totalExpenses = totalBudget * 0.65
+
+		return {
+			totalBudget,
+			totalExpenses,
+			activeProjectsCount: active.length,
+			membersCount: 1, // TODO: Получить из API
+		}
+	}, [allProjects])
 
 	const handleCreateProject = () => {
 		router.push(`/teams/${teamId}/projects/new`)
 	}
 
-	// Loading skeleton
-	if (loading && !data) {
-		return (
-			<div className="container mx-auto p-6 max-w-7xl">
-				<div className="mb-8">
-					<Skeleton className="h-10 w-64 mb-2" />
-					<Skeleton className="h-6 w-96" />
-				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{[1, 2, 3, 4, 5, 6].map(i => (
-						<Skeleton key={i} className="h-64 rounded-lg" />
-					))}
-				</div>
-			</div>
-		)
+	const handleBack = () => {
+		router.push('/dashboard')
 	}
 
-	// Error state
-	if (error) {
+	// Loading state
+	if ((teamsLoading || projectsLoading) && !projectsData) {
 		return (
-			<div className="container mx-auto p-6 max-w-7xl">
-				<div className="flex items-center justify-center min-h-[400px]">
-					<div className="text-center">
-						<h3 className="text-lg font-semibold text-destructive mb-2">
-							Ошибка загрузки проектов
-						</h3>
-						<p className="text-muted-foreground">{error.message}</p>
+			<div className="min-h-screen bg-background">
+				{/* Header Skeleton */}
+				<div className="border-b border-border/30 bg-card/50">
+					<div className="container mx-auto px-4 py-4">
+						<Skeleton className="h-8 w-48 mb-2" />
+						<Skeleton className="h-5 w-64" />
+					</div>
+				</div>
+
+				{/* Content Skeleton */}
+				<div className="container mx-auto px-4 py-8">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+						<Skeleton className="h-32 rounded-2xl" />
+						<Skeleton className="h-32 rounded-2xl" />
+						<Skeleton className="h-32 rounded-2xl" />
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{[1, 2, 3, 4, 5, 6].map(i => (
+							<Skeleton key={i} className="h-48 rounded-2xl" />
+						))}
 					</div>
 				</div>
 			</div>
 		)
 	}
 
-	// Empty state
-	const isEmpty = projects.length === 0
+	// Team not found
+	if (!team) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<div className="text-center">
+					<h2 className="text-2xl font-bold mb-3">Команда не найдена</h2>
+					<p className="text-muted-foreground mb-6">
+						Возможно, команда была удалена или у вас нет к ней доступа
+					</p>
+					<Button onClick={() => router.push('/dashboard')}>
+						Вернуться на главную
+					</Button>
+				</div>
+			</div>
+		)
+	}
 
 	return (
-		<div className="container mx-auto p-6 max-w-7xl">
+		<div className="min-h-screen bg-background pb-24">
 			{/* Header */}
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold mb-2">{team?.name || 'Команда'}</h1>
-				<p className="text-muted-foreground">
-					Управляйте вашими строительными объектами
-				</p>
-			</div>
-
-			{/* Filters */}
-			<div className="mb-6 space-y-4">
-				{/* Status Tabs */}
-				<div className="flex flex-wrap gap-2">
-					{[
-						{ value: 'ALL' as const, label: 'Все проекты' },
-						{ value: 'ACTIVE' as const, label: 'Активные' },
-						{ value: 'COMPLETED' as const, label: 'Завершённые' },
-						{ value: 'ARCHIVED' as const, label: 'Архив' },
-					].map(tab => (
-						<Button
-							key={tab.value}
-							variant={statusFilter === tab.value ? 'default' : 'outline'}
-							onClick={() => setStatusFilter(tab.value)}
-							size="sm"
-						>
-							{tab.label}
-						</Button>
-					))}
-				</div>
-
-				{/* Search */}
-				<div className="relative max-w-md">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-					<input
-						type="text"
-						placeholder="Поиск по названию или адресу..."
-						value={searchQuery}
-						onChange={e => setSearchQuery(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-					/>
-				</div>
-			</div>
-
-			{/* Projects Grid */}
-			{isEmpty ? (
-				<div className="flex items-center justify-center min-h-[400px]">
-					<div className="text-center max-w-md">
-						<div className="mb-4">
-							<svg
-								className="mx-auto h-24 w-24 text-muted-foreground/40"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-								aria-hidden="true"
+			<motion.header
+				initial={{ opacity: 0, y: -20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5 }}
+				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
+			>
+				<div className="container mx-auto px-4 py-4">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-4">
+							{/* Back Button */}
+							<button
+								onClick={handleBack}
+								className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
 							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={1.5}
-									d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-								/>
-							</svg>
+								<ArrowLeft className="w-5 h-5" />
+							</button>
+
+							{/* Team Info */}
+							<div className="flex items-center gap-3">
+								{team.logoUrl ? (
+									<div className="w-12 h-12 rounded-xl overflow-hidden">
+										<img
+											src={team.logoUrl}
+											alt={team.name}
+											className="w-full h-full object-cover"
+										/>
+									</div>
+								) : (
+									<div className="w-12 h-12 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-indigo-500">
+										<Users className="w-6 h-6" />
+									</div>
+								)}
+								<div>
+									<div className="flex items-center gap-2">
+										<h1 className="text-xl font-bold">{team.name}</h1>
+										{isOwner && (
+											<Crown className="w-4 h-4 text-amber-500" />
+										)}
+									</div>
+									<p className="text-sm text-muted-foreground">
+										{activeProjects.length}{' '}
+										{activeProjects.length === 1
+											? 'активный проект'
+											: activeProjects.length >= 2 &&
+											  activeProjects.length <= 4
+											? 'активных проекта'
+											: 'активных проектов'}
+									</p>
+								</div>
+							</div>
 						</div>
-						<h3 className="text-lg font-semibold mb-2">
-							{searchQuery || statusFilter !== 'ALL'
-								? 'Проекты не найдены'
-								: 'Пока нет проектов'}
-						</h3>
-						<p className="text-muted-foreground mb-6">
-							{searchQuery || statusFilter !== 'ALL'
-								? 'Попробуйте изменить параметры поиска или фильтры'
-								: 'Создайте свой первый строительный проект'}
-						</p>
-						{!searchQuery && statusFilter === 'ALL' && (
+
+						{/* Actions */}
+						<div className="flex items-center gap-2">
+							{isOwner && (
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => router.push(`/teams/${teamId}/settings`)}
+								>
+									<Settings className="w-5 h-5" />
+								</Button>
+							)}
 							<Button onClick={handleCreateProject}>
-								<Plus className="h-4 w-4 mr-2" />
-								Создать проект
+								<Plus className="w-4 h-4 mr-2" />
+								Новый проект
 							</Button>
-						)}
+						</div>
 					</div>
 				</div>
-			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{projects.map(project => {
-						if (!project?.id) return null
-						return (
-							<ProjectCard
-								key={project.id}
-								{...project as any}
-								id={project.id}
-								name={project.name || ''}
-								teamId={project.teamId || teamId}
-								status={project.status as any}
+			</motion.header>
+
+			{/* Main Content */}
+			<main className="container mx-auto px-4 py-6">
+				<motion.div initial="hidden" animate="visible" variants={stagger}>
+					{/* Financial Summary (только для владельца) */}
+					{isOwner && financialMetrics.totalBudget > 0 && (
+						<motion.div variants={fadeIn} className="mb-8">
+							<FinancialSummary
+								totalBudget={financialMetrics.totalBudget}
+								totalExpenses={financialMetrics.totalExpenses}
+								activeProjectsCount={financialMetrics.activeProjectsCount}
+								membersCount={financialMetrics.membersCount}
+								showFinancials={isOwner}
 							/>
-						)
-					})}
-				</div>
-			)}
+						</motion.div>
+					)}
+
+					{/* Filters */}
+					<motion.div variants={fadeIn} className="mb-6 space-y-4">
+						{/* Status Tabs */}
+						<div className="flex flex-wrap gap-2">
+							{[
+								{ value: 'ALL' as const, label: 'Все проекты' },
+								{ value: 'ACTIVE' as const, label: 'Активные' },
+								{ value: 'COMPLETED' as const, label: 'Завершённые' },
+								{ value: 'ARCHIVED' as const, label: 'Архив' },
+							].map(tab => (
+								<Button
+									key={tab.value}
+									variant={statusFilter === tab.value ? 'default' : 'outline'}
+									onClick={() => setStatusFilter(tab.value)}
+									size="sm"
+									className="rounded-xl"
+								>
+									{tab.label}
+								</Button>
+							))}
+						</div>
+
+						{/* Search */}
+						<div className="relative max-w-md">
+							<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<input
+								type="text"
+								placeholder="Поиск по названию или адресу..."
+								value={searchQuery}
+								onChange={e => setSearchQuery(e.target.value)}
+								className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border/50 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+							/>
+						</div>
+					</motion.div>
+
+					{/* Active Projects */}
+					{statusFilter !== 'ARCHIVED' && (
+						<motion.section variants={fadeIn} className="mb-8">
+							<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+								<span className="w-2 h-2 rounded-full bg-emerald-500" />
+								{statusFilter === 'COMPLETED'
+									? 'Завершённые проекты'
+									: 'Активные проекты'}
+								{activeProjects.length > 0 && (
+									<span className="text-sm font-normal text-muted-foreground">
+										({activeProjects.length})
+									</span>
+								)}
+							</h2>
+
+							{activeProjects.length > 0 ? (
+								<motion.div
+									variants={stagger}
+									className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+								>
+									{activeProjects.map(project =>
+										project?.id ? (
+											<motion.div key={project.id} variants={fadeIn}>
+												<ProjectCardDashboard
+													id={project.id}
+													teamId={teamId}
+													name={project.name || ''}
+													address={project.address}
+													photoUrl={project.photoUrl}
+													budget={project.budget}
+													progress={project.progress || 0}
+													status={project.status as any}
+													startDate={project.startDate}
+													endDate={project.endDate}
+													profit={
+														project.budget
+															? project.budget * 0.35
+															: null
+													}
+													showFinancials={isOwner}
+												/>
+											</motion.div>
+										) : null
+									)}
+								</motion.div>
+							) : (
+								<motion.div
+									variants={fadeIn}
+									className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-secondary/20"
+								>
+									<FolderKanban className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+									<h3 className="text-lg font-medium mb-2">
+										{searchQuery
+											? 'Проекты не найдены'
+											: 'Пока нет проектов'}
+									</h3>
+									<p className="text-muted-foreground mb-4">
+										{searchQuery
+											? 'Попробуйте изменить поисковый запрос'
+											: 'Создайте свой первый строительный проект'}
+									</p>
+									{!searchQuery && (
+										<Button onClick={handleCreateProject}>
+											<Plus className="w-4 h-4 mr-2" />
+											Создать проект
+										</Button>
+									)}
+								</motion.div>
+							)}
+						</motion.section>
+					)}
+
+					{/* Archived Projects */}
+					{(statusFilter === 'ALL' || statusFilter === 'ARCHIVED') &&
+						archivedProjects.length > 0 && (
+							<motion.section variants={fadeIn}>
+								{statusFilter === 'ALL' ? (
+									<>
+										<button
+											onClick={() => setShowArchived(!showArchived)}
+											className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 transition-colors mb-4"
+										>
+											<div className="flex items-center gap-2">
+												<span className="w-2 h-2 rounded-full bg-muted-foreground" />
+												<span className="font-medium">Архив</span>
+												<span className="text-sm text-muted-foreground">
+													({archivedProjects.length})
+												</span>
+											</div>
+											{showArchived ? (
+												<ChevronUp className="w-5 h-5 text-muted-foreground" />
+											) : (
+												<ChevronDown className="w-5 h-5 text-muted-foreground" />
+											)}
+										</button>
+
+										<AnimatePresence>
+											{showArchived && (
+												<motion.div
+													initial={{ opacity: 0, height: 0 }}
+													animate={{ opacity: 1, height: 'auto' }}
+													exit={{ opacity: 0, height: 0 }}
+													transition={{ duration: 0.3 }}
+													className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+												>
+													{archivedProjects.map(project =>
+														project?.id ? (
+															<ProjectCardDashboard
+																key={project.id}
+																id={project.id}
+																teamId={teamId}
+																name={project.name || ''}
+																address={project.address}
+																photoUrl={project.photoUrl}
+																budget={project.budget}
+																progress={project.progress || 0}
+																status={project.status as any}
+																startDate={project.startDate}
+																endDate={project.endDate}
+																showFinancials={isOwner}
+															/>
+														) : null
+													)}
+												</motion.div>
+											)}
+										</AnimatePresence>
+									</>
+								) : (
+									<>
+										<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+											<span className="w-2 h-2 rounded-full bg-muted-foreground" />
+											Архивные проекты
+											<span className="text-sm font-normal text-muted-foreground">
+												({archivedProjects.length})
+											</span>
+										</h2>
+										<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+											{archivedProjects.map(project =>
+												project?.id ? (
+													<ProjectCardDashboard
+														key={project.id}
+														id={project.id}
+														teamId={teamId}
+														name={project.name || ''}
+														address={project.address}
+														photoUrl={project.photoUrl}
+														budget={project.budget}
+														progress={project.progress || 0}
+														status={project.status as any}
+														startDate={project.startDate}
+														endDate={project.endDate}
+														showFinancials={isOwner}
+													/>
+												) : null
+											)}
+										</div>
+									</>
+								)}
+							</motion.section>
+						)}
+				</motion.div>
+			</main>
 
 			{/* FAB Button */}
-			{!isEmpty && (
-				<button
-					onClick={handleCreateProject}
-					className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center z-50"
-					aria-label="Создать проект"
-				>
-					<Plus className="h-6 w-6" />
-				</button>
-			)}
+			<motion.button
+				initial={{ scale: 0, opacity: 0 }}
+				animate={{ scale: 1, opacity: 1 }}
+				transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+				onClick={handleCreateProject}
+				className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all hover:scale-105 flex items-center justify-center z-50"
+				aria-label="Создать проект"
+			>
+				<Plus className="h-6 w-6" />
+			</motion.button>
 		</div>
 	)
 }

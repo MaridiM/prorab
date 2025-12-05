@@ -30,7 +30,9 @@
       "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=да)",
       "Bash(mkdir:*)",
       "Bash(npm run codegen:web:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dir /b /ad \"G:\\Projects\\prorab\\v-1\\apps\\web\\src\\app\\components\")",
+      "Bash(cmd /c \"dir /b /ad G:\\Projects\\prorab\\v-1\\apps\\web\\src\\packages\\components\")"
     ],
     "deny": [],
     "ask": []

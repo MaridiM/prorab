@@ -1,20 +1,20 @@
 # 📊 Project Dashboard - ProRab.space MVP
 
-**Последнее обновление:** 2025-12-06
-**Версия:** 0.1.3
-**Статус:** MVP Development - Stage 5 Phase 3 Complete ✅
+**Последнее обновление:** 2025-01-04
+**Версия:** 0.1.4
+**Статус:** MVP Development - UI/UX Redesign Complete ✅
 
 ---
 
 ## 🎯 Общий прогресс MVP
 
 ```
-██████████████░░░░░░ 70% Complete
+███████████████░░░░░ 75% Complete
 ```
 
-**Завершено:** 4.6 из 7 этапов MVP
-**В работе:** Этап 5 - Phase 1-3 Complete ✅ (60% Stage 5)
-**Осталось:** 2.4 этапа
+**Завершено:** 5.0 из 7 этапов MVP
+**В работе:** Этап 5 - Фотоотчёты (Phase 4 - Public Page)
+**Осталось:** 2.0 этапа
 
 ---
 
@@ -25,11 +25,11 @@
 | Метрика | Значение |
 |---------|----------|
 | **Backend API** | 11 модулей |
-| **GraphQL Endpoints** | 49 операций (9 новых) |
-| **Frontend Pages** | 14 страниц |
-| **React Components** | 51+ компонентов (6 новых) |
-| **Database Tables** | 12 таблиц (2 новых) |
-| **TypeScript Files** | 225+ файлов (15 новых) |
+| **GraphQL Endpoints** | 49 операций |
+| **Frontend Pages** | 14 страниц (6 redesigned) |
+| **React Components** | 55+ компонентов |
+| **Database Tables** | 12 таблиц |
+| **TypeScript Files** | 230+ файлов |
 
 ### Покрытие функционала
 
@@ -40,9 +40,20 @@
 | **Команды** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
 | **Проекты** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
 | **Расходы** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
-| **Фотоотчёты** | ✅ 100% | 🔄 60% | 🔄 60% | **In Progress 🚀** |
+| **Фотоотчёты** | ✅ 100% | 🔄 80% | 🔄 80% | **In Progress 🚀** |
 | **Задачи** | ❌ 0% | ❌ 0% | ❌ 0% | Planned |
 | **Финансы/Зарплата** | ❌ 0% | ❌ 0% | ❌ 0% | Planned |
+
+### UI/UX Redesign (2025-01-04) ✅
+
+| Страница | Статус | Описание |
+|----------|--------|----------|
+| Dashboard | ✅ Complete | TeamSwitcher, FinancialSummary, ProjectCards, FabMenu |
+| Teams List | ✅ Complete | Карточки команд, Crown badge, Empty state |
+| Team Details | ✅ Complete | Фильтры, Финансы для владельца, FAB |
+| Project Details | ✅ Complete | Табы, Расходы, Фотоотчёты, Financial cards |
+| Project Create | ✅ Complete | Градиентные иконки, Валидация |
+| Project Edit | ✅ Complete | Предзаполненные данные |
 
 ---
 
@@ -309,24 +320,40 @@ User ──┬── Team ──┬── Project ──┬── Expense
 
 ## 🔄 Текущие задачи
 
-### ✅ Завершено: Этап 5 - Phase 1 (2025-12-06)
+### ✅ Завершено: Этап 5 - Phases 1-3 (2025-12-06)
 
-**Backend Foundation для фотоотчётов:**
-- ✅ Database schema (PhotoReport + ReportPhoto)
-- ✅ PhotoReportsModule (10 файлов)
-- ✅ 8 GraphQL endpoints (5 mutations + 3 queries)
-- ✅ Slug generation с nanoid
-- ✅ Public endpoint без auth
-- ✅ TypeScript компиляция успешна
+**Phase 1 - Backend Foundation:**
+- ✅ Database schema (PhotoReport + ReportPhoto + indexes)
+- ✅ PhotoReportsModule (10 backend файлов)
+- ✅ 9 GraphQL endpoints (6 mutations + 3 queries)
+- ✅ Slug generation с nanoid (7 chars)
+- ✅ Public endpoint без auth (viewCount tracking)
 
-### 🔄 В разработке: Этап 5 - Phase 2
+**Phase 2 - Storage Integration:**
+- ✅ @aws-sdk/client-s3 + sharp установлены (97 packages)
+- ✅ StorageService.uploadReportPhoto() с image processing
+- ✅ Resize 1920x1920 + thumbnail 400x400 + WebP conversion
+- ✅ UploadPhotoInput DTO с GraphQL Upload scalar
+- ✅ uploadPhotoToReport mutation
 
-**Storage Integration (Следующий шаг):**
-- [ ] Cloudflare R2 bucket setup
-- [ ] StorageService.uploadReportPhoto()
-- [ ] Image processing (Sharp: resize, thumbnail, WebP)
-- [ ] GraphQL Upload scalar
-- [ ] Update AddPhotoInput для file upload
+**Phase 3 - Frontend Components:**
+- ✅ photo-reports.graphql (9 операций, 3 фрагмента)
+- ✅ Zod schemas (4 validation schemas)
+- ✅ PhotoUploader (drag & drop, multiple, preview)
+- ✅ PhotoReportForm (create/edit, React Hook Form)
+- ✅ PhotoReportCard (grid view, menu, public link)
+- ✅ Интеграция в Project Details Page (tab enabled)
+
+**TypeScript Compilation:** ✅ 0 errors
+
+### 🔄 В разработке: Этап 5 - Phase 4
+
+**Public SSR Page (Следующий шаг):**
+- [ ] Create /r/[slug] SSR page
+- [ ] OpenGraph meta tags для соцсетей
+- [ ] PhotoGallery component (masonry grid)
+- [ ] ISR configuration (revalidate strategy)
+- [ ] Public link sharing UI
 
 ---
 
@@ -392,10 +419,16 @@ User ──┬── Team ──┬── Project ──┬── Expense
 | Этап 2.1 | 3 недели | 3 недели | 100% |
 | Этап 3 | 2 недели | **1 день** | 🚀 1400% |
 | Этап 4 | 2 недели | **1 день** | 🚀 1400% |
-| Этап 5 (Phase 1) | 3-4 дня | **1 день** | 🚀 300%+ |
+| Этап 5 (Phases 1-3) | 1 неделя | **1 день** | 🚀 700% |
 
 **Общее время:** 11 недель + 1 день
-**Оптимизация:** Этапы 3-5 Phase 1 выполнены в 10+ раз быстрее благодаря отработанной архитектуре
+**Оптимизация:** Этапы 3-5 Phase 1-3 выполнены в 10+ раз быстрее благодаря отработанной архитектуре
+
+**Этап 5 детально:**
+- Phase 1 (Backend): ~4 часа
+- Phase 2 (Storage): ~2 часа
+- Phase 3 (Frontend): ~2 часа
+- **Итого:** 8 часов (60% Stage 5 complete)
 
 ### Velocity (скорость разработки)
 
@@ -414,11 +447,12 @@ User ──┬── Team ──┬── Project ──┬── Expense
 
 ### Компоненты библиотека
 
-**45+ компонентов реализовано:**
+**51+ компонентов реализовано:**
 
 **Forms:**
 - ✅ ProjectForm
 - ✅ ExpenseForm
+- ✅ PhotoReportForm ✨ (NEW)
 - ✅ ImageUpload
 - ✅ IconPicker
 - ✅ DatePicker
@@ -426,6 +460,7 @@ User ──┬── Team ──┬── Project ──┬── Expense
 **Display:**
 - ✅ ProjectCard
 - ✅ ExpenseCard
+- ✅ PhotoReportCard ✨ (NEW)
 - ✅ TeamLogo
 - ✅ Badge
 - ✅ ProgressBar
@@ -434,6 +469,9 @@ User ──┬── Team ──┬── Project ──┬── Expense
 - ✅ FinancialDashboard
 - ✅ ExpenseList
 - ✅ ProjectList
+
+**File Upload:**
+- ✅ PhotoUploader ✨ (NEW - drag & drop, multiple files)
 
 **UI Primitives:**
 - ✅ Button, Input, Select, Card
@@ -598,9 +636,9 @@ User ──┬── Team ──┬── Project ──┬── Expense
 
 ---
 
-**Last Updated:** 2025-12-06 00:10 UTC
-**Next Review:** После завершения Этапа 5
+**Last Updated:** 2025-12-06 (Phase 3 Complete)
+**Next Review:** После завершения Phase 4 (Public SSR Page)
 
 ---
 
-_Сгенерировано автоматически. Для обновления см. roadmap.md и changelogs._
+_Обновлено автоматически. Для обновления см. roadmap.md и changelogs._
