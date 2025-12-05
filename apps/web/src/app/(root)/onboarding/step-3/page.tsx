@@ -189,36 +189,54 @@ export default function OnboardingStep3Page() {
 				input.colorId = step2Data.colorId
 			}
 
-			// Call GraphQL mutation
-			const result = await completeOnboarding({
-				variables: { input },
-			})
+		// Call GraphQL mutation
+		const result = await completeOnboarding({
+			variables: { input },
+		})
 
-			if (result.data?.completeOnboarding.success) {
-				// Trigger completion animation
-				setIsCompleted(true)
+		// Handle GraphQL errors (errorPolicy: 'all' returns errors in result.error)
+		if (result.error) {
+			const errorMessage = result.error.message || 'Не удалось завершить онбординг'
+			setError(errorMessage)
+			setIsSubmitting(false)
+			return
+		}
 
-				// Trigger confetti effect
-				triggerConfetti()
+		// Handle successful response
+		if (result.data?.completeOnboarding.success) {
+			// Trigger completion animation
+			setIsCompleted(true)
 
-				// Wait for animation to complete before redirect
-				setTimeout(() => {
-					// Clear sessionStorage
-					sessionStorage.removeItem('onboarding_step1')
-					sessionStorage.removeItem('onboarding_step2')
-					sessionStorage.removeItem('onboarding_step3')
+			// Trigger confetti effect
+			triggerConfetti()
 
-					// Redirect to dashboard
-					router.push('/')
-				}, 2000)
-			} else {
-				throw new Error(result.data?.completeOnboarding.message || 'Не удалось завершить онбординг')
-			}
-		} catch (err: any) {
-			console.error('Failed to complete onboarding:', err)
-			setError(err?.message || 'Произошла ошибка при завершении онбординга')
+			// Wait for animation to complete before redirect
+			setTimeout(() => {
+				// Clear sessionStorage
+				sessionStorage.removeItem('onboarding_step1')
+				sessionStorage.removeItem('onboarding_step2')
+				sessionStorage.removeItem('onboarding_step3')
+
+				// Redirect to team dashboard
+				const teamId = result.data?.completeOnboarding.team.id
+				if (teamId) {
+					router.push(`/teams/${teamId}`)
+				} else {
+					router.push('/dashboard')
+				}
+			}, 2000)
+		} else {
+			// Handle business logic error (success: false)
+			const errorMessage = result.data?.completeOnboarding.message || 'Не удалось завершить онбординг'
+			setError(errorMessage)
 			setIsSubmitting(false)
 		}
+	} catch (err: any) {
+		// Handle network or other unexpected errors
+		console.error('Failed to complete onboarding:', err)
+		setError(err?.message || 'Произошла ошибка при завершении онбординга')
+		setIsSubmitting(false)
+	}
 	}
 
 	// Show loader while validating

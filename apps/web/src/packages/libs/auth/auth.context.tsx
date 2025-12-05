@@ -18,6 +18,7 @@ interface User {
   name?: string | null
   phone?: string | null
   emailVerified: boolean
+  hasCompletedOnboarding: boolean
 }
 
 interface AuthContextType {
@@ -67,7 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshUser = useCallback(async () => {
     try {
       const { data, error } = await fetchMe()
-      
+
       if (error || !data?.me) {
         setUser(null)
       } else {
@@ -76,7 +77,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email: data.me.email,
           name: data.me.name,
           phone: data.me.phone,
-          emailVerified: data.me.emailVerified
+          emailVerified: data.me.emailVerified,
+          hasCompletedOnboarding: data.me.hasCompletedOnboarding
         })
       }
     } catch {
@@ -90,9 +92,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser()
   }, [refreshUser])
 
+  // Auto-redirect based on onboarding status
+  useEffect(() => {
+    if (isLoading || !user) return
+
+    const pathname = window.location.pathname
+
+    // If on /onboarding and already completed - redirect to dashboard
+    if (pathname.startsWith('/onboarding') && user.hasCompletedOnboarding) {
+      router.push('/dashboard')
+    }
+
+    // If on protected pages without onboarding - redirect to /onboarding
+    if (
+      (pathname.startsWith('/dashboard') || pathname.startsWith('/teams')) &&
+      !user.hasCompletedOnboarding
+    ) {
+      router.push('/onboarding')
+    }
+  }, [user, isLoading, router])
+
   const login = useCallback(async (email: string, password: string) => {
-    const response = await loginMutation({ 
-      variables: { input: { email, password } } 
+    const response = await loginMutation({
+      variables: { input: { email, password } }
     })
 
     if (response.error) {
@@ -101,13 +123,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const userData = response.data?.login?.user
     if (userData) {
+      console.log('[AuthContext] Login success, user data:', {
+        hasCompletedOnboarding: userData.hasCompletedOnboarding,
+        email: userData.email
+      })
+
       setUser({
         id: userData.id,
         email: userData.email,
         name: userData.name,
-        emailVerified: userData.emailVerified
+        phone: userData.phone,
+        emailVerified: userData.emailVerified,
+        hasCompletedOnboarding: userData.hasCompletedOnboarding
       })
-      router.push('/dashboard')
+
+      // Redirect based on onboarding status (with small delay for state update)
+      const redirectPath = !userData.hasCompletedOnboarding ? '/onboarding' : '/dashboard'
+      console.log('[AuthContext] Redirecting to:', redirectPath)
+
+      setTimeout(() => {
+        console.log('[AuthContext] Executing router.push to:', redirectPath)
+        router.push(redirectPath)
+      }, 100)
+    } else {
+      console.error('[AuthContext] No user data in response')
     }
   }, [loginMutation, router])
 
@@ -129,13 +168,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const userData = response.data?.register?.user
     if (userData) {
+      console.log('[AuthContext] Register success, user data:', {
+        hasCompletedOnboarding: userData.hasCompletedOnboarding,
+        email: userData.email
+      })
+
       setUser({
         id: userData.id,
         email: userData.email,
         name: userData.name,
-        emailVerified: userData.emailVerified
+        phone: userData.phone,
+        emailVerified: userData.emailVerified,
+        hasCompletedOnboarding: userData.hasCompletedOnboarding
       })
-      router.push('/dashboard')
+
+      // Redirect based on onboarding status (with small delay for state update)
+      const redirectPath = !userData.hasCompletedOnboarding ? '/onboarding' : '/dashboard'
+      console.log('[AuthContext] Redirecting to:', redirectPath)
+
+      setTimeout(() => {
+        console.log('[AuthContext] Executing router.push to:', redirectPath)
+        router.push(redirectPath)
+      }, 100)
+    } else {
+      console.error('[AuthContext] No user data in response')
     }
   }, [registerMutation, router])
 

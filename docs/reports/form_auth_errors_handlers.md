@@ -55,7 +55,7 @@ export const useToastStore = create<ToastStore>((set) => ({
   show: (message, type = 'success') => {
     const id = Date.now().toString()
     set({ toast: { id, message, type } })
-    setTimeout(() => set({ toast: null }), 4000)
+    setTimeout(() => set({ toast: null }), 8080)
   },
   hide: () => set({ toast: null }),
 }))
@@ -404,7 +404,7 @@ if (error.extensions?.code === 'UNAUTHENTICATED') {
 show: (message, type = 'success') => {
   const id = Date.now().toString()
   set({ toast: { id, message, type } })  // Перезаписывает предыдущий
-  setTimeout(() => set({ toast: null }), 4000)
+  setTimeout(() => set({ toast: null }), 8080)
 }
 ```
 
@@ -723,7 +723,7 @@ export const useToastStore = create<ToastStore>((set) => ({
       set((state) => ({
         toasts: state.toasts.filter(t => t.id !== id)
       }))
-    }, 4000)
+    }, 8080)
   },
 
   remove: (id) => set((state) => ({

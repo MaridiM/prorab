@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./styles/globals.css";
 import { ApolloClientProvider } from "@/packages/libs";
+import { AuthProvider } from "@/packages/libs/auth";
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { sanitizeForRSC } from "@/packages/utils";
@@ -37,9 +38,11 @@ export default async function RootLayout({
       >
         <Providers>
           <ApolloClientProvider>
-            <NextIntlClientProvider messages={messages}>
-              {children}
-            </NextIntlClientProvider>
+            <AuthProvider>
+              <NextIntlClientProvider messages={messages}>
+                {children}
+              </NextIntlClientProvider>
+            </AuthProvider>
           </ApolloClientProvider>
         </Providers>
       </body>

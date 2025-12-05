@@ -10,7 +10,18 @@
       "Bash(ping:*)",
       "Bash(curl:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(npx prisma migrate status)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"да делай. но обясни что  делает email_normalized для чего оно и зачем он делает некоректный емаил\" npx prisma migrate reset --force)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm run dev:api:*)",
+      "Bash(npm run dev:web:*)",
+      "Bash(npx prisma db execute:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, Variants } from "framer-motion"
 import { ArrowRight, Loader2, Mail, Lock } from "lucide-react"
-import { useMutation } from "@apollo/client/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Button, Card, Input, PasswordInput, Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/packages/components"
-import { LoginDocument } from "@/packages/api/graphql"
 import { loginSchema, TLoginSchema } from "@/packages/schemas"
 import { useAutoValidateForm, useToast } from "@/packages/hooks"
+import { useAuth } from "@/packages/libs/auth/auth.context"
 
 const fadeIn: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -29,6 +28,7 @@ const fadeIn: Variants = {
 export default function LoginPage() {
     const router = useRouter()
     const { success, error } = useToast()
+    const { login: authLogin, isLoading } = useAuth()
 
     // React Hook Form with Zod validation
     const form = useForm<TLoginSchema>({
@@ -41,45 +41,12 @@ export default function LoginPage() {
     // Auto-validate form with debounce
     useAutoValidateForm(form, ['email', 'password'])
 
-    // Apollo mutation with typed document and error handling
-    const [login, { loading: isLoading }] = useMutation(LoginDocument, {
-        errorPolicy: 'all',
-        onError: (apolloError) => {
-            // Handle errors that don't make it to response.errors
-            const errorMessage = apolloError.message || 'Ошибка входа'
-            error(errorMessage)
-        }
-    })
-
     const onSubmit = async (data: TLoginSchema) => {
         try {
-            const response = await login({
-                variables: { input: data }
-            })
-
-            // Handle GraphQL errors (errorPolicy: 'all' returns errors in response.errors)
-            if (response.error) {
-                const errorMessage = response.error.message || 'Ошибка входа'
-                error(errorMessage)
-                return
-            }
-
-            // Handle successful login
-            const user = response.data?.login?.user
-            if (user) {
-                success("Вход выполнен успешно")
-                setTimeout(() => {
-                    router.push("/dashboard")
-                }, 800)
-            } else if (response.data === null || response.data === undefined) {
-                // No data at all - this shouldn't happen with errorPolicy: 'all', but handle it
-                error('Ошибка соединения с сервером. Попробуйте еще раз.')
-            } else {
-                // Unexpected response: no errors but no user data
-                error('Неожиданный ответ от сервера. Попробуйте еще раз.')
-            }
+            await authLogin(data.email, data.password)
+            success("Вход выполнен успешно")
+            // AuthContext handles redirect automatically based on hasCompletedOnboarding
         } catch (err: any) {
-            // Handle network or other errors
             const errorMessage = err?.message || 'Ошибка входа'
             error(errorMessage)
         }
