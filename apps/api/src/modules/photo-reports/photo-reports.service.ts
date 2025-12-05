@@ -1,13 +1,19 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { StorageService } from '../../core/storage/storage.service';
 import { CreatePhotoReportInput } from './dto/create-photo-report.input';
 import { UpdatePhotoReportInput } from './dto/update-photo-report.input';
 import { AddPhotoInput } from './dto/add-photo.input';
+import { UploadPhotoInput } from './dto/upload-photo.input';
 import { nanoid } from 'nanoid';
+import type { FileUpload } from 'graphql-upload-minimal';
 
 @Injectable()
 export class PhotoReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   /**
    * Генерирует уникальный slug для фотоотчёта
@@ -372,5 +378,64 @@ export class PhotoReportsService {
     });
 
     return true;
+  }
+
+  /**
+   * Загрузить фото в фотоотчёт (с обработкой файла)
+   */
+  async uploadPhotoToReport(userId: string, input: UploadPhotoInput) {
+    // Проверяем доступ к отчёту
+    const report = await this.prisma.photoReport.findUnique({
+      where: { id: input.reportId },
+      include: {
+        project: {
+          include: {
+            team: {
+              include: {
+                members: {
+                  where: { userId },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!report) {
+      throw new NotFoundException('Фотоотчёт не найден');
+    }
+
+    if (report.project.team.members.length === 0) {
+      throw new BadRequestException('У вас нет доступа к этому фотоотчёту');
+    }
+
+    // Загружаем файл через StorageService
+    const file = await input.file;
+    const uploadResult = await this.storageService.uploadReportPhoto(file);
+
+    // Создаём запись в БД
+    const photo = await this.prisma.reportPhoto.create({
+      data: {
+        reportId: input.reportId,
+        photoUrl: uploadResult.photoUrl,
+        thumbnailUrl: uploadResult.thumbnailUrl,
+        caption: input.caption,
+        orderIndex: input.orderIndex ?? 0,
+        width: uploadResult.width,
+        height: uploadResult.height,
+        fileSize: uploadResult.fileSize,
+      },
+    });
+
+    // Обновляем coverPhotoUrl если это первое фото
+    if (!report.coverPhotoUrl) {
+      await this.prisma.photoReport.update({
+        where: { id: input.reportId },
+        data: { coverPhotoUrl: uploadResult.thumbnailUrl },
+      });
+    }
+
+    return photo;
   }
 }

@@ -32,7 +32,7 @@ export class StorageService {
    */
   async uploadTeamLogo(file: FileUpload): Promise<string> {
     // Читаем файл
-    const { createReadStream, filename, mimetype } = await file;
+    const { createReadStream, filename, mimetype } = file;
 
     // Валидация MIME type
     if (!this.allowedMimeTypes.includes(mimetype)) {
@@ -66,7 +66,7 @@ export class StorageService {
     const uniqueName = this.generateUniqueFilename(fileExt);
 
     // Сохраняем файл
-    const filePath = await this.saveFile(
+    await this.saveFile(
       processedBuffer,
       'team-logos',
       uniqueName,
@@ -115,6 +115,87 @@ export class StorageService {
     const timestamp = Date.now();
     const randomString = crypto.randomBytes(8).toString('hex');
     return `${timestamp}-${randomString}${extension === '.jpg' ? '.webp' : '.webp'}`;
+  }
+
+  /**
+   * Загрузка фото для фотоотчёта
+   * @param file - Загружаемый файл
+   * @returns Object с URL оригинала, thumbnail, и метаданными
+   */
+  async uploadReportPhoto(file: FileUpload): Promise<{
+    photoUrl: string;
+    thumbnailUrl: string;
+    width: number;
+    height: number;
+    fileSize: number;
+  }> {
+    // Читаем файл
+    const { createReadStream, mimetype } = file;
+
+    // Валидация MIME type
+    if (!this.allowedMimeTypes.includes(mimetype)) {
+      throw new BadRequestException(
+        `Недопустимый формат файла. Разрешены: PNG, JPG, JPEG, WEBP`,
+      );
+    }
+
+    // Читаем содержимое файла
+    const stream = createReadStream();
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+
+    const buffer = Buffer.concat(chunks);
+
+    // Проверка размера файла (5MB)
+    if (buffer.length > this.maxFileSize) {
+      throw new BadRequestException(
+        `Размер файла превышает ${this.maxFileSize / 1024 / 1024}MB`,
+      );
+    }
+
+    // Генерируем уникальное имя
+    const uniqueBasename = this.generateUniqueFilename('');
+
+    // Обработка оригинала (max 1920x1920, WebP)
+    const originalImage = sharp(buffer);
+    const metadata = await originalImage.metadata();
+
+    const processedOriginal = await originalImage
+      .resize(1920, 1920, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 85 })
+      .toBuffer();
+
+    // Обработка thumbnail (400x400, WebP)
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(400, 400, {
+        fit: 'cover',
+      })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    // Сохраняем оба файла
+    const originalFilename = `${uniqueBasename}.webp`;
+    const thumbnailFilename = `${uniqueBasename}-thumb.webp`;
+
+    await this.saveFile(processedOriginal, 'report-photos', originalFilename);
+    await this.saveFile(thumbnailBuffer, 'report-photos', thumbnailFilename);
+
+    // Получаем финальные размеры после обработки
+    const finalMetadata = await sharp(processedOriginal).metadata();
+
+    return {
+      photoUrl: `/uploads/report-photos/${originalFilename}`,
+      thumbnailUrl: `/uploads/report-photos/${thumbnailFilename}`,
+      width: finalMetadata.width || metadata.width || 0,
+      height: finalMetadata.height || metadata.height || 0,
+      fileSize: processedOriginal.length,
+    };
   }
 
   /**

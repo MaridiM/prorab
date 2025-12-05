@@ -1,5 +1,131 @@
 # Changelog (backend)
 
+## Module: Photo Reports - Phase 2: Storage Integration (Stage 5)
+
+### Feature: Photo Upload with Image Processing 📤
+
+:calendar: `2025-12-06`
+
+**Summary**
+
+Реализована интеграция с StorageService для загрузки фотографий в фотоотчёты. Добавлена обработка изображений с Sharp: автоматический resize оригинала (1920x1920), генерация thumbnails (400x400), конвертация в WebP формат. Создана новая GraphQL mutation `uploadPhotoToReport` с поддержкой multipart/form-data upload.
+
+---
+
+### 1. Dependencies
+
+**New Packages:**
+```bash
+pnpm add @aws-sdk/client-s3 sharp --filter api
+```
+- `@aws-sdk/client-s3` - S3-compatible клиент (готово для Cloudflare R2)
+- `sharp` v0.33+ - Высокопроизводительная обработка изображений
+- +97 packages installed (51.8s)
+
+**Already configured:**
+- `graphql-upload-minimal` - GraphQL file upload
+- `graphqlUploadExpress` middleware в main.ts (maxFileSize: 10MB, maxFiles: 10)
+
+---
+
+### 2. StorageService Enhancement
+
+**New Method:** `uploadReportPhoto(file: FileUpload)`
+
+**Features:**
+- ✅ MIME type validation (PNG, JPG, JPEG, WebP)
+- ✅ File size limit (5MB max)
+- ✅ Original resize: 1920x1920 (fit: inside, качество 85%)
+- ✅ Thumbnail generation: 400x400 (fit: cover, качество 80%)
+- ✅ WebP conversion для оптимизации
+- ✅ Metadata extraction (width, height, fileSize)
+- ✅ Unique filename generation (timestamp + crypto random)
+
+**Processing Pipeline:**
+1. Read file stream → Buffer
+2. Validate MIME type & size
+3. Process original with Sharp (resize + WebP)
+4. Generate thumbnail with Sharp (crop + WebP)
+5. Save both files to `uploads/report-photos/`
+6. Return URLs + metadata
+
+---
+
+### 3. PhotoReportsModule Updates
+
+**New DTO:** `UploadPhotoInput`
+- reportId: UUID (required)
+- file: Promise<FileUpload> (GraphQL Upload scalar)
+- caption: string max 1000 chars (optional)
+- orderIndex: int >= 0 (default: 0)
+
+**PhotoReportsService - New Method:**
+```typescript
+async uploadPhotoToReport(userId, input) {
+  // 1. Access control check (TeamMember)
+  // 2. Upload via StorageService
+  // 3. Create ReportPhoto в БД
+  // 4. Auto-update coverPhotoUrl if first photo
+}
+```
+
+**PhotoReportsResolver - New Mutation:**
+```typescript
+@Mutation(() => ReportPhoto)
+uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
+```
+
+**Module Integration:**
+- StorageModule added to imports
+- StorageService injected в PhotoReportsService
+
+---
+
+### 4. Security & Validation
+
+- MIME type whitelist enforcement
+- File size limit (5MB)
+- Access control via TeamMember check
+- Unique filename generation
+- UUID/String/Int validation
+
+---
+
+### 5. Files Created (1)
+
+1. `apps/api/src/modules/photo-reports/dto/upload-photo.input.ts`
+
+---
+
+### 6. Files Modified (4)
+
+1. `apps/api/src/core/storage/storage.service.ts` - Added uploadReportPhoto()
+2. `apps/api/src/modules/photo-reports/photo-reports.service.ts` - Added upload method
+3. `apps/api/src/modules/photo-reports/photo-reports.resolver.ts` - Added mutation
+4. `apps/api/src/modules/photo-reports/photo-reports.module.ts` - Added StorageModule
+
+---
+
+### 7. Testing & Validation
+
+- ✅ TypeScript: 0 errors
+- ✅ Build: Success
+- ✅ API: Running on :8080
+- ✅ GraphQL schema: Regenerated with uploadPhotoToReport mutation
+- ✅ Total operations: 9 mutations + 3 queries
+
+---
+
+### 8. Next Steps
+
+**Phase 3 - Frontend:**
+- Zod schemas
+- GraphQL operations
+- PhotoUploader component
+- Integration в Project Details Page
+
+---
+
 ## Module: Photo Reports - Phase 1: Backend Foundation (Stage 5)
 
 ### Feature: Photo Reports Module - Backend API & Database 📸

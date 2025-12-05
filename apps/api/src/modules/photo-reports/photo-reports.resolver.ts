@@ -8,6 +8,7 @@ import { ReportPhoto } from './models/report-photo.model';
 import { CreatePhotoReportInput } from './dto/create-photo-report.input';
 import { UpdatePhotoReportInput } from './dto/update-photo-report.input';
 import { AddPhotoInput } from './dto/add-photo.input';
+import { UploadPhotoInput } from './dto/upload-photo.input';
 
 @Resolver(() => PhotoReport)
 export class PhotoReportsResolver {
@@ -65,6 +66,15 @@ export class PhotoReportsResolver {
     @Args('input') input: AddPhotoInput,
   ) {
     return this.photoReportsService.addPhoto(user.id, input);
+  }
+
+  @Mutation(() => ReportPhoto, { description: 'Загрузить фото в фотоотчёт (с обработкой)' })
+  @UseGuards(AuthGuard)
+  async uploadPhotoToReport(
+    @CurrentUser() user: { id: string },
+    @Args('input') input: UploadPhotoInput,
+  ) {
+    return this.photoReportsService.uploadPhotoToReport(user.id, input);
   }
 
   @Mutation(() => Boolean, { description: 'Удалить фото из фотоотчёта' })

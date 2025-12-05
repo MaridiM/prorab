@@ -463,18 +463,32 @@
 - ✅ GraphQL schema обновлена
 - ✅ Готово к Phase 2 (Storage Integration)
 
-### Фаза 2: Storage Integration (Планируется)
+### Фаза 2: Storage Integration ✅ (Завершено 2025-12-06)
 
-**Cloudflare R2:**
-- [ ] Создать R2 bucket
-- [ ] Настроить CORS и public access
-- [ ] Добавить env variables (R2_ENDPOINT, R2_ACCESS_KEY_ID, etc)
-- [ ] Установить @aws-sdk/client-s3
+**Dependencies:**
+- [x] Установить @aws-sdk/client-s3 и sharp (97 packages)
 
 **StorageService:**
-- [ ] Метод uploadReportPhoto (resize, thumbnail, WebP)
-- [ ] Upload to R2
-- [ ] Return URLs
+- [x] Метод uploadReportPhoto (resize 1920x1920, thumbnail 400x400, WebP)
+- [x] Image processing с Sharp (quality 85%/80%)
+- [x] Return URLs с metadata (width, height, fileSize)
+- [x] Local storage (uploads/report-photos/) - готово для R2 миграции
+
+**PhotoReportsModule:**
+- [x] UploadPhotoInput DTO с GraphQL Upload scalar
+- [x] uploadPhotoToReport method в Service
+- [x] uploadPhotoToReport mutation в Resolver
+- [x] StorageModule импортирован
+
+**Результаты:**
+- ✅ 1 новый DTO, 1 новый метод в Service, 1 новая mutation
+- ✅ File upload функционал с обработкой изображений
+- ✅ API компиляция успешна, запущен на :8080
+- ✅ Готово к Phase 3 (Frontend Components)
+
+**Отложено (Post-MVP):**
+- [ ] Cloudflare R2 bucket (сейчас локальное хранилище)
+- [ ] CORS и public access настройка
 
 ### Фаза 3: Frontend Components (Планируется)
 

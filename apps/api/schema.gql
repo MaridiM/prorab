@@ -202,6 +202,9 @@ type Mutation {
 
   """Обновить прогресс проекта"""
   updateProjectProgress(id: ID!, progress: Int!): Project!
+
+  """Загрузить фото в фотоотчёт (с обработкой)"""
+  uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
   verifyEmail(token: String!): Boolean!
 }
 
@@ -501,6 +504,13 @@ input UpdateProjectInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input UploadPhotoInput {
+  caption: String
+  file: Upload!
+  orderIndex: Int = 0
+  reportId: String!
+}
 
 type User {
   createdAt: DateTime!

@@ -4,9 +4,10 @@ import { PhotoReportsResolver } from './photo-reports.resolver';
 import { PublicPhotoReportsResolver } from './public-photo-reports.resolver';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { StorageModule } from '../../core/storage/storage.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, StorageModule],
   providers: [
     PhotoReportsService,
     PhotoReportsResolver,
