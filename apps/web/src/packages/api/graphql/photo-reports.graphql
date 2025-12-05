@@ -1,0 +1,98 @@
+# Fragments
+fragment PhotoReportFields on PhotoReport {
+  id
+  slug
+  projectId
+  title
+  description
+  coverPhotoUrl
+  isPublic
+  viewCount
+  createdById
+  createdAt
+  updatedAt
+  publishedAt
+}
+
+fragment PublicPhotoReportFields on PublicPhotoReport {
+  slug
+  title
+  description
+  coverPhotoUrl
+  viewCount
+  createdAt
+  publishedAt
+}
+
+fragment ReportPhotoFields on ReportPhoto {
+  id
+  photoUrl
+  thumbnailUrl
+  caption
+  orderIndex
+  width
+  height
+  fileSize
+  createdAt
+}
+
+# Mutations
+mutation CreatePhotoReport($input: CreatePhotoReportInput!) {
+  createPhotoReport(input: $input) {
+    ...PhotoReportFields
+  }
+}
+
+mutation UpdatePhotoReport($input: UpdatePhotoReportInput!) {
+  updatePhotoReport(input: $input) {
+    ...PhotoReportFields
+  }
+}
+
+mutation DeletePhotoReport($id: String!) {
+  deletePhotoReport(id: $id)
+}
+
+mutation UploadPhotoToReport($input: UploadPhotoInput!) {
+  uploadPhotoToReport(input: $input) {
+    ...ReportPhotoFields
+  }
+}
+
+mutation AddPhotoToReport($input: AddPhotoInput!) {
+  addPhotoToReport(input: $input) {
+    ...ReportPhotoFields
+  }
+}
+
+mutation DeletePhotoFromReport($photoId: String!) {
+  deletePhotoFromReport(photoId: $photoId)
+}
+
+# Queries
+query ProjectPhotoReports($projectId: String!) {
+  projectPhotoReports(projectId: $projectId) {
+    ...PhotoReportFields
+    photos {
+      ...ReportPhotoFields
+    }
+  }
+}
+
+query PhotoReport($id: String!) {
+  photoReport(id: $id) {
+    ...PhotoReportFields
+    photos {
+      ...ReportPhotoFields
+    }
+  }
+}
+
+query PublicPhotoReport($slug: String!) {
+  publicPhotoReport(slug: $slug) {
+    ...PublicPhotoReportFields
+    photos {
+      ...ReportPhotoFields
+    }
+  }
+}

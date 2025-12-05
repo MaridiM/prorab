@@ -432,9 +432,9 @@
 ## Этап 5. Фотоотчёты (Wow #1, недели 10–12) - 🔄 В ПРОЦЕССЕ
 
 **Приоритет:** 🔴🔴🔴 Критический (Killer Feature #1)
-**Статус:** 🔄 Phase 1 Complete, Phase 2 In Progress
+**Статус:** 🔄 Phase 1-3 Complete, Phase 4-5 Planned
 **Начало:** 2025-12-06
-**Прогресс:** Phase 1 ✅ (1 день), Phase 2–5 ⏳
+**Прогресс:** Phase 1 ✅ Phase 2 ✅ Phase 3 ✅ (3/5 - 60%)
 **Оценка:** 2-3 недели
 **План:** `docs/analisys/stage-5-photo-reports-implementation-plan.md`
 
@@ -490,23 +490,37 @@
 - [ ] Cloudflare R2 bucket (сейчас локальное хранилище)
 - [ ] CORS и public access настройка
 
-### Фаза 3: Frontend Components (Планируется)
+### Фаза 3: Frontend Components ✅ (Завершено 2025-12-06)
 
 **Schemas & GraphQL:**
-- [ ] photo-report.schema.ts (Zod validation)
-- [ ] photo-reports.graphql (queries + mutations)
-- [ ] Codegen
+
+- [x] photo-reports/index.ts (Zod validation schemas - 4 schemas)
+- [x] photo-reports.graphql (queries + mutations - 9 операций)
+- [x] Codegen успешно выполнен
 
 **UI Components:**
-- [ ] PhotoReportForm (создание отчёта)
-- [ ] PhotoUploader (drag & drop, multiple files)
-- [ ] PhotoGallery (masonry grid)
-- [ ] Lightbox (fullscreen, navigation, zoom)
+
+- [x] PhotoReportForm (создание/редактирование, React Hook Form + Zod)
+- [x] PhotoUploader (drag & drop, multiple files, preview, captions)
+- [x] PhotoReportCard (grid view, menu, public link)
+- [ ] PhotoGallery (masonry grid) - отложено на Phase 5
+- [ ] Lightbox (fullscreen, navigation, zoom) - отложено на Phase 5
 
 **Integration:**
-- [ ] Вкладка "Фотоотчёты" в Project Details Page
-- [ ] Список отчётов проекта
-- [ ] Modal с формой создания
+
+- [x] Вкладка "Фотоотчёты" в Project Details Page (enabled)
+- [x] Список отчётов проекта (grid 3 columns)
+- [x] Create/Edit form в Card компоненте
+- [x] Photo uploader при выборе отчёта
+
+**Результаты:**
+
+- ✅ 5 файлов создано (3 компонента + schemas + operations)
+- ✅ GraphQL codegen успешен
+- ✅ Полная интеграция в Project Details Page
+- ✅ CRUD операции для фотоотчётов
+- ✅ File upload с drag & drop интерфейсом
+- ✅ Готово к Phase 4 (Public SSR Page)
 
 ### Фаза 4: Public Page (Планируется)
 

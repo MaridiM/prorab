@@ -1,5 +1,202 @@
 # Changelog (backend)
 
+## Module: Photo Reports - Phase 3: Frontend Components (Stage 5)
+
+### Feature: Photo Reports UI Integration 🎨
+
+:calendar: `2025-12-06`
+
+**Summary**
+
+Реализованы фронтенд компоненты для работы с фотоотчётами. Созданы GraphQL операции, Zod schemas, три React компонента (PhotoUploader, PhotoReportForm, PhotoReportCard), и интегрированы в Project Details Page. Пользователи теперь могут создавать фотоотчёты, загружать фото через drag & drop интерфейс, редактировать отчёты и управлять публичностью.
+
+---
+
+### 1. GraphQL Operations
+
+**File:** `apps/web/src/packages/api/graphql/photo-reports.graphql`
+
+**Fragments:**
+- PhotoReportFields - полная информация о фотоотчёте (13 полей)
+- PublicPhotoReportFields - публичная версия без createdById (7 полей)
+- ReportPhotoFields - информация о фото (9 полей)
+
+**Mutations:** (6 операций)
+- createPhotoReport(input!) → PhotoReport
+- updatePhotoReport(input!) → PhotoReport
+- deletePhotoReport(id!) → Boolean
+- uploadPhotoToReport(input!) → ReportPhoto
+- addPhotoToReport(input!) → ReportPhoto
+- deletePhotoFromReport(photoId!) → Boolean
+
+**Queries:** (3 операции)
+- projectPhotoReports(projectId!) → [PhotoReport]
+- photoReport(id!) → PhotoReport
+- publicPhotoReport(slug!) → PublicPhotoReport
+
+**Codegen:** Successfully generated TypeScript types
+
+---
+
+### 2. Zod Validation Schemas
+
+**File:** `apps/web/src/packages/schemas/photo-reports/index.ts`
+
+**Schemas:**
+1. `createPhotoReportSchema` - создание фотоотчёта
+   - title: 3-200 символов (required)
+   - description: макс 2000 символов
+   - isPublic: boolean (default: true)
+
+2. `updatePhotoReportSchema` - обновление фотоотчёта
+   - все поля optional кроме id (UUID)
+
+3. `uploadPhotoSchema` - клиентская валидация файлов
+   - file: File макс 5MB
+   - MIME types: PNG, JPG, JPEG, WebP
+   - caption: макс 1000 символов
+
+**Helper:** `validatePhotoFile(file)` - клиентская проверка
+
+---
+
+### 3. React Components
+
+#### PhotoUploader Component
+
+**File:** `apps/web/src/app/components/photo-reports/PhotoUploader.tsx`
+
+**Features:**
+- ✅ Drag & drop интерфейс с визуальной индикацией
+- ✅ Multiple file selection (макс 10 файлов)
+- ✅ Preview для каждого выбранного файла
+- ✅ Поля для caption на каждое фото
+- ✅ Индивидуальная загрузка или "Загрузить всё"
+- ✅ Валидация на клиенте перед upload
+- ✅ Loading состояния с spinner overlay
+- ✅ Error handling с отображением ошибок
+- ✅ Автоматическая очистка preview после upload
+
+**Props:**
+- reportId: string (required)
+- onUpload: (file, caption?) => Promise<void>
+- maxFiles?: number (default: 10)
+- disabled?: boolean
+
+#### PhotoReportForm Component
+
+**File:** `apps/web/src/app/components/photo-reports/PhotoReportForm.tsx`
+
+**Features:**
+- ✅ Create/Edit режимы
+- ✅ React Hook Form + Zod resolver
+- ✅ Form validation с русскими сообщениями
+- ✅ Checkbox "Сделать публичным"
+- ✅ Dirty state detection
+- ✅ Error handling с user feedback
+- ✅ Loading states
+- ✅ Auto-reset после создания
+
+**Props:**
+- projectId: string (required для create)
+- report?: PhotoReportFieldsFragment (для edit)
+- onSubmit: (data) => Promise<void>
+- onCancel?: () => void
+- isLoading?: boolean
+
+#### PhotoReportCard Component
+
+**File:** `apps/web/src/app/components/photo-reports/PhotoReportCard.tsx`
+
+**Features:**
+- ✅ Cover image с fallback на ImageIcon
+- ✅ "Публичный" badge для публичных отчётов
+- ✅ Dropdown menu (Edit/Delete)
+- ✅ Метаданные: кол-во фото, просмотры, дата
+- ✅ Link на публичную страницу (`/r/[slug]`)
+- ✅ line-clamp для title/description
+- ✅ Hover effects
+
+**Props:**
+- report: PhotoReportFieldsFragment (required)
+- onEdit?: () => void
+- onDelete?: () => void
+- apiUrl?: string
+
+---
+
+### 4. Project Details Page Integration
+
+**File:** `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/page.tsx`
+
+**Changes:**
+
+1. **New Imports:**
+   - ProjectPhotoReportsDocument
+   - CreatePhotoReportDocument
+   - UpdatePhotoReportDocument
+   - DeletePhotoReportDocument
+   - UploadPhotoToReportDocument
+   - DeletePhotoFromReportDocument
+   - PhotoUploader, PhotoReportForm, PhotoReportCard components
+
+2. **New State:**
+   - showReportForm: boolean
+   - editingReport: PhotoReportFieldsFragment | null
+   - selectedReportId: string | null
+
+3. **New Queries:**
+   - ProjectPhotoReportsDocument (skip when tab !== 'reports')
+
+4. **New Mutations:**
+   - createPhotoReport → refetch ProjectPhotoReportsDocument
+   - updatePhotoReport → refetch ProjectPhotoReportsDocument
+   - deletePhotoReport → refetch ProjectPhotoReportsDocument
+   - uploadPhotoToReport
+   - deletePhotoFromReport
+
+5. **New Handlers:**
+   - handleCreateReport(data)
+   - handleUpdateReport(data)
+   - handleDeleteReport(id)
+   - handleUploadPhoto(file, caption?)
+
+6. **Tab Updates:**
+   - "Фотоотчёты" tab enabled (removed "скоро")
+   - Moved before "Задачи" tab
+
+7. **UI Flow:**
+   - Empty state → "Создать первый фотоотчёт" button
+   - Photo reports grid (3 columns on lg)
+   - Create/Edit form in Card
+   - Photo uploader показывается при selectedReportId
+   - Loading states с Skeleton components
+
+---
+
+### 5. Technical Details
+
+**Access Control:**
+- Все mutations проверяют TeamMember membership
+- Public queries доступны без авторизации
+
+**Auto-behaviors:**
+- Первое загруженное фото → auto coverPhotoUrl
+- После create → auto-select новый report
+- После delete → clear selection если был выбран
+
+**Form UX:**
+- isDirty detection → disable submit если нет изменений
+- Error messages с русским текстом
+- Confirm dialogs перед delete операциями
+
+**Performance:**
+- Conditional query skip (tab !== 'reports')
+- Optimistic refetch после upload
+- Image lazy loading в PhotoReportCard
+
+---
+
 ## Module: Photo Reports - Phase 2: Storage Integration (Stage 5)
 
 ### Feature: Photo Upload with Image Processing 📤

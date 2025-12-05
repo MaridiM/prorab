@@ -13,6 +13,12 @@ import {
 	CreateExpenseDocument,
 	UpdateExpenseDocument,
 	DeleteExpenseDocument,
+	ProjectPhotoReportsDocument,
+	CreatePhotoReportDocument,
+	UpdatePhotoReportDocument,
+	DeletePhotoReportDocument,
+	UploadPhotoToReportDocument,
+	DeletePhotoFromReportDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
 import {
@@ -28,8 +34,9 @@ import {
 import { ExpenseList } from '@/packages/components/expenses'
 import { FinancialDashboard } from '@/packages/components/financial'
 import { ExpenseForm } from '@/packages/components/expenses'
+import { PhotoUploader, PhotoReportForm, PhotoReportCard } from '@/app/components/photo-reports'
 import { useToast } from '@/packages/hooks'
-import { ArrowLeft, Edit, Archive, ArchiveRestore, MapPin, Calendar, Phone, Wallet } from 'lucide-react'
+import { ArrowLeft, Edit, Archive, ArchiveRestore, MapPin, Calendar, Phone, Wallet, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -43,6 +50,9 @@ export default function ProjectDetailsPage() {
 	const [activeTab, setActiveTab] = useState<'info' | 'expenses' | 'tasks' | 'reports'>('info')
 	const [showExpenseForm, setShowExpenseForm] = useState(false)
 	const [editingExpense, setEditingExpense] = useState<any>(null)
+	const [showReportForm, setShowReportForm] = useState(false)
+	const [editingReport, setEditingReport] = useState<any>(null)
+	const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
 
 	const { data, loading, error } = useQuery(ProjectDocument, {
 		variables: { id: projectId },
@@ -56,6 +66,11 @@ export default function ProjectDetailsPage() {
 	const { data: statsData, loading: statsLoading } = useQuery(ProjectStatsDocument, {
 		variables: { projectId },
 		skip: activeTab !== 'expenses',
+	})
+
+	const { data: reportsData, loading: reportsLoading, refetch: refetchReports } = useQuery(ProjectPhotoReportsDocument, {
+		variables: { projectId },
+		skip: activeTab !== 'reports',
 	})
 
 	const [archiveProject, { loading: archiving }] = useMutation(ArchiveProjectDocument, {
@@ -93,9 +108,32 @@ export default function ProjectDetailsPage() {
 		],
 	})
 
+	const [createPhotoReport] = useMutation(CreatePhotoReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
+
+	const [updatePhotoReport] = useMutation(UpdatePhotoReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
+
+	const [deletePhotoReport] = useMutation(DeletePhotoReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
+
+	const [uploadPhotoToReport] = useMutation(UploadPhotoToReportDocument)
+
+	const [deletePhotoFromReport] = useMutation(DeletePhotoFromReportDocument)
+
 	const project = data?.project
 	const expenses = expensesData?.expensesByProject || []
 	const stats = statsData?.projectStats
+	const reports = reportsData?.projectPhotoReports || []
 
 	const handleEdit = () => {
 		router.push(`/teams/${teamId}/projects/${projectId}/edit`)
@@ -195,6 +233,102 @@ export default function ProjectDetailsPage() {
 				type: 'error',
 				message: error.message || 'Не удалось удалить расход',
 			})
+		}
+	}
+
+	const handleCreateReport = async (data: any) => {
+		try {
+			const result = await createPhotoReport({
+				variables: {
+					input: {
+						projectId,
+						...data,
+					},
+				},
+			})
+			showToast({
+				type: 'success',
+				message: 'Фотоотчёт успешно создан',
+			})
+			setShowReportForm(false)
+			// Auto-select the new report
+			if (result.data?.createPhotoReport) {
+				setSelectedReportId(result.data.createPhotoReport.id)
+			}
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось создать фотоотчёт',
+			})
+		}
+	}
+
+	const handleUpdateReport = async (data: any) => {
+		if (!editingReport) return
+
+		try {
+			await updatePhotoReport({
+				variables: {
+					input: {
+						id: editingReport.id,
+						...data,
+					},
+				},
+			})
+			showToast({
+				type: 'success',
+				message: 'Фотоотчёт успешно обновлён',
+			})
+			setEditingReport(null)
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось обновить фотоотчёт',
+			})
+		}
+	}
+
+	const handleDeleteReport = async (id: string) => {
+		if (!confirm('Вы уверены, что хотите удалить этот фотоотчёт?')) return
+
+		try {
+			await deletePhotoReport({ variables: { id } })
+			showToast({
+				type: 'success',
+				message: 'Фотоотчёт успешно удалён',
+			})
+			if (selectedReportId === id) {
+				setSelectedReportId(null)
+			}
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось удалить фотоотчёт',
+			})
+		}
+	}
+
+	const handleUploadPhoto = async (file: File, caption?: string) => {
+		if (!selectedReportId) return
+
+		try {
+			await uploadPhotoToReport({
+				variables: {
+					input: {
+						reportId: selectedReportId,
+						file,
+						caption,
+					},
+				},
+			})
+			showToast({
+				type: 'success',
+				message: 'Фото успешно загружено',
+			})
+			// Refetch to update photo list
+			await refetchReports()
+		} catch (error: any) {
+			throw new Error(error.message || 'Не удалось загрузить фото')
 		}
 	}
 
@@ -316,8 +450,8 @@ export default function ProjectDetailsPage() {
 				{[
 					{ id: 'info' as const, label: 'Информация' },
 					{ id: 'expenses' as const, label: 'Расходы', disabled: false },
+					{ id: 'reports' as const, label: 'Фотоотчёты', disabled: false },
 					{ id: 'tasks' as const, label: 'Задачи', disabled: true },
-					{ id: 'reports' as const, label: 'Фотоотчёты', disabled: true },
 				].map(tab => (
 					<button
 						key={tab.id}
@@ -489,13 +623,92 @@ export default function ProjectDetailsPage() {
 			)}
 
 			{activeTab === 'reports' && (
-				<Card>
-					<CardContent className="py-12">
-						<div className="text-center text-muted-foreground">
-							<p>Раздел фотоотчётов будет доступен в следующих версиях</p>
-						</div>
-					</CardContent>
-				</Card>
+				<div className="space-y-6">
+					{/* Report Form */}
+					{(showReportForm || editingReport) && (
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									{editingReport ? 'Редактировать фотоотчёт' : 'Создать фотоотчёт'}
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<PhotoReportForm
+									projectId={projectId}
+									report={editingReport}
+									onSubmit={editingReport ? handleUpdateReport : handleCreateReport}
+									onCancel={() => {
+										setShowReportForm(false)
+										setEditingReport(null)
+									}}
+								/>
+							</CardContent>
+						</Card>
+					)}
+
+					{/* Photo Reports List */}
+					{!showReportForm && !editingReport && (
+						<>
+							<div className="flex items-center justify-between">
+								<h2 className="text-xl font-semibold">
+									Фотоотчёты ({reports.length})
+								</h2>
+								<Button onClick={() => setShowReportForm(true)}>
+									<Plus className="h-4 w-4 mr-2" />
+									Создать фотоотчёт
+								</Button>
+							</div>
+
+							{reportsLoading ? (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+									{[1, 2, 3].map(i => (
+										<Skeleton key={i} className="h-80" />
+									))}
+								</div>
+							) : reports.length === 0 ? (
+								<Card>
+									<CardContent className="py-12">
+										<div className="text-center text-muted-foreground">
+											<p className="mb-4">Нет фотоотчётов</p>
+											<Button onClick={() => setShowReportForm(true)}>
+												<Plus className="h-4 w-4 mr-2" />
+												Создать первый фотоотчёт
+											</Button>
+										</div>
+									</CardContent>
+								</Card>
+							) : (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+									{reports.map((report: any) => (
+										<PhotoReportCard
+											key={report.id}
+											report={report}
+											onEdit={() => setEditingReport(report)}
+											onDelete={() => handleDeleteReport(report.id)}
+										/>
+									))}
+								</div>
+							)}
+						</>
+					)}
+
+					{/* Photo Uploader for selected report */}
+					{selectedReportId && !showReportForm && !editingReport && (
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									Загрузить фото в отчёт
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<PhotoUploader
+									reportId={selectedReportId}
+									onUpload={handleUploadPhoto}
+								/>
+							</CardContent>
+						</Card>
+					)}
+				</div>
 			)}
 		</div>
 	)

@@ -1,20 +1,20 @@
 # 📊 Project Dashboard - ProRab.space MVP
 
 **Последнее обновление:** 2025-12-06
-**Версия:** 0.1.2
-**Статус:** MVP Development - Phase 1 Complete ✅
+**Версия:** 0.1.3
+**Статус:** MVP Development - Stage 5 Phase 3 Complete ✅
 
 ---
 
 ## 🎯 Общий прогресс MVP
 
 ```
-█████████████░░░░░░░ 65% Complete
+██████████████░░░░░░ 70% Complete
 ```
 
-**Завершено:** 4.2 из 7 этапов MVP (Phase 1 из 5)
-**В работе:** Этап 5 - Phase 1 Complete ✅, Phase 2 Starting
-**Осталось:** 2.8 этапа
+**Завершено:** 4.6 из 7 этапов MVP
+**В работе:** Этап 5 - Phase 1-3 Complete ✅ (60% Stage 5)
+**Осталось:** 2.4 этапа
 
 ---
 
@@ -24,12 +24,12 @@
 
 | Метрика | Значение |
 |---------|----------|
-| **Backend API** | 10 модулей |
-| **GraphQL Endpoints** | 40 операций |
+| **Backend API** | 11 модулей |
+| **GraphQL Endpoints** | 49 операций (9 новых) |
 | **Frontend Pages** | 14 страниц |
-| **React Components** | 45+ компонентов |
-| **Database Tables** | 10 таблиц |
-| **TypeScript Files** | 210+ файлов |
+| **React Components** | 51+ компонентов (6 новых) |
+| **Database Tables** | 12 таблиц (2 новых) |
+| **TypeScript Files** | 225+ файлов (15 новых) |
 
 ### Покрытие функционала
 
@@ -40,7 +40,7 @@
 | **Команды** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
 | **Проекты** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
 | **Расходы** | ✅ 100% | ✅ 100% | ✅ 100% | Complete |
-| **Фотоотчёты** | 🔄 40% | ❌ 0% | ❌ 0% | **In Progress 🚀** |
+| **Фотоотчёты** | ✅ 100% | 🔄 60% | 🔄 60% | **In Progress 🚀** |
 | **Задачи** | ❌ 0% | ❌ 0% | ❌ 0% | Planned |
 | **Финансы/Зарплата** | ❌ 0% | ❌ 0% | ❌ 0% | Planned |
 
@@ -84,17 +84,20 @@ User ──┬── Team ──┬── Project ──┬── Expense
        └── Sessions (Redis)
 ```
 
-**10 Tables:**
+**12 Tables:**
+
 1. ✅ users
 2. ✅ teams
 3. ✅ team_members
 4. ✅ projects
 5. ✅ expenses
-6. ✅ photo_reports (**NEW ✨**)
-7. ✅ report_photos (**NEW ✨**)
-8. ❌ tasks (planned)
-9. ❌ verification_tokens
-10. ❌ password_reset_tokens
+6. ✅ photo_reports ✨
+7. ✅ report_photos ✨
+8. ✅ verification_tokens
+9. ✅ password_reset_tokens
+10. ✅ invite_codes
+11. ❌ tasks (planned)
+12. ❌ salaries (planned)
 
 ---
 
@@ -215,12 +218,14 @@ User ──┬── Team ──┬── Project ──┬── Expense
 - ✅ Roadmap updated
 - ✅ Implementation summary created
 
-### Этап 5: Фотоотчёты - Phase 1 ✅ **NEW!**
+### Этап 5: Фотоотчёты - Phases 1-3 ✅ **NEW!**
 
 **Дата:** 2025-12-06
-**Статус:** ✅ Phase 1 Complete (Backend Foundation)
-**Время:** ~4 часа
-**Прогресс общий:** 40% (2/5 phases)
+**Статус:** ✅ Phases 1-3 Complete (Backend + Storage + Frontend)
+**Время:** ~8 часов (1 день)
+**Прогресс общий:** 60% (3/5 phases)
+
+#### Phase 1: Backend Foundation ✅
 
 **Database:**
 - ✅ PhotoReport model (slug, title, description, viewCount, isPublic)
@@ -233,34 +238,72 @@ User ──┬── Team ──┬── Project ──┬── Expense
 - ✅ PhotoReportsModule (10 новых файлов)
 - ✅ 3 DTOs (CreatePhotoReport, UpdatePhotoReport, AddPhoto)
 - ✅ 3 GraphQL Models (PhotoReport, PublicPhotoReport, ReportPhoto)
-- ✅ PhotoReportsService - 8 методов с business logic
+- ✅ PhotoReportsService - 9 методов с business logic
 - ✅ PhotoReportsResolver - 7 authenticated endpoints
 - ✅ PublicPhotoReportsResolver - 1 public endpoint (no auth)
 
-**GraphQL Operations (8):**
-- ✅ Mutations: createPhotoReport, updatePhotoReport, deletePhotoReport, addPhotoToReport, deletePhotoFromReport
+**GraphQL Operations (9):**
+- ✅ Mutations: createPhotoReport, updatePhotoReport, deletePhotoReport, addPhotoToReport, deletePhotoFromReport, uploadPhotoToReport
 - ✅ Queries: projectPhotoReports, photoReport, publicPhotoReport
+
+#### Phase 2: Storage Integration ✅
+
+**Dependencies:**
+- ✅ @aws-sdk/client-s3 и sharp (97 packages installed)
+
+**StorageService Enhancement:**
+- ✅ uploadReportPhoto() method
+- ✅ Image processing: resize 1920x1920, thumbnail 400x400
+- ✅ WebP conversion (quality 85%/80%)
+- ✅ Metadata extraction (width, height, fileSize)
+- ✅ Local storage (uploads/report-photos/) - готово для R2
+
+**PhotoReportsModule Updates:**
+- ✅ UploadPhotoInput DTO с GraphQL Upload scalar
+- ✅ uploadPhotoToReport() в Service
+- ✅ uploadPhotoToReport mutation в Resolver
+- ✅ StorageModule интегрирован
+
+#### Phase 3: Frontend Components ✅
+
+**GraphQL & Validation:**
+- ✅ photo-reports.graphql (9 операций, 3 фрагмента)
+- ✅ Zod schemas (4 схемы валидации)
+- ✅ GraphQL codegen успешен
+
+**React Components (3):**
+- ✅ PhotoUploader - drag & drop, multiple files, preview, captions
+- ✅ PhotoReportForm - create/edit, React Hook Form + Zod
+- ✅ PhotoReportCard - grid view, menu, public link
+
+**Project Details Integration:**
+- ✅ Вкладка "Фотоотчёты" активирована
+- ✅ CRUD операции подключены
+- ✅ Photo upload интегрирован
+- ✅ Empty states, loading, error handling
 
 **Key Features:**
 - ✅ Криптостойкая генерация slug с nanoid
 - ✅ Auto-update coverPhotoUrl при первом фото
 - ✅ View count tracking для публичных отчётов
 - ✅ Access control через TeamMember validation
-- ✅ Public endpoint готов для SSR страницы
+- ✅ Drag & drop с client-side validation
+- ✅ Image processing (Sharp) на сервере
 
 **Technical:**
 - ✅ TypeScript компиляция успешна (0 errors)
 - ✅ GraphQL schema обновлена автоматически
 - ✅ Database migration applied (db push)
-- ✅ nanoid package установлен
+- ✅ 15 новых файлов создано
 
 **Documentation:**
-- ✅ Backend changelog updated
-- ✅ Roadmap updated (Phase 1 marked complete)
-- ✅ PROJECT_DASHBOARD updated
+- ✅ Backend changelog updated (Phase 3 section)
+- ✅ Roadmap updated (60% Stage 5)
+- ✅ PROJECT_DASHBOARD updating now
 
-**Next Phase:**
-- 🔄 Phase 2: Storage Integration (Cloudflare R2 + Sharp)
+**Next Phases:**
+- 🔄 Phase 4: Public SSR Page (/r/[slug], OpenGraph)
+- 🔄 Phase 5: Polish & Testing (Gallery, Lightbox, ISR)
 
 ---
 
