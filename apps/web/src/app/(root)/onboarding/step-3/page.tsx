@@ -217,13 +217,8 @@ export default function OnboardingStep3Page() {
 				sessionStorage.removeItem('onboarding_step2')
 				sessionStorage.removeItem('onboarding_step3')
 
-				// Redirect to team dashboard
-				const teamId = result.data?.completeOnboarding.team.id
-				if (teamId) {
-					router.push(`/teams/${teamId}`)
-				} else {
-					router.push('/dashboard')
-				}
+				// Redirect to dashboard
+				router.push('/dashboard')
 			}, 2000)
 		} else {
 			// Handle business logic error (success: false)

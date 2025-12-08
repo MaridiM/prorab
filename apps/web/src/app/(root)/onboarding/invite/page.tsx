@@ -56,8 +56,7 @@ export default function OnboardingInvitePage() {
 			console.log('Joining team with code:', data.code)
 
 			// Redirect to dashboard
-			// TODO: Replace with actual dashboard route
-			router.push('/')
+			router.push('/dashboard')
 		} catch (error) {
 			console.error('Failed to join team:', error)
 			setIsSubmitting(false)

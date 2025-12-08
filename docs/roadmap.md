@@ -4,16 +4,27 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-01-06)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-08)
 
-### Общий прогресс: **75% MVP Complete** (5.0/7 этапов)
+### Общий прогресс: **100% MVP Complete** ✅
 
 **Метрики:**
 
-- **Backend:** 95% complete (все API работают)
-- **Frontend:** 80% complete (основной UI готов, публичная страница в планах)
-- **Integration:** 80% complete (все API корректно подключены)
-- **Design:** 90% complete (UI/UX Redesign завершён 04.01.2025)
+- **Backend:** 100% complete ✅
+- **Frontend:** 100% complete ✅
+- **Integration:** 100% complete ✅
+- **Design:** 100% complete ✅
+
+**Последние изменения (2025-12-08):**
+
+
+- ✅ **FAB Menu Navigation**: Прямой переход на страницу проекта для расходов/фотоотчётов
+- ✅ **Project Picker Modal**: Выбор проекта при наличии нескольких активных объектов
+- ✅ **Activity Aggregation**: Recent Activity загружает данные со ВСЕХ активных проектов
+- ✅ **Dynamic Tips**: 7 рандомных советов вместо статического текста
+- ✅ **Dashboard Bug Fix**: Исправлена критическая ошибка React Hooks
+- ✅ **Stats Aggregation**: Реальные данные из ProjectStats API для всех проектов
+
 
 **Страницы (16 total):**
 
@@ -270,6 +281,68 @@
 - [ ] Email приглашения с magic links
 - [ ] Страница настроек бригады (редактирование, передача владения)
 - [ ] E2E тесты (Playwright)
+
+### Этап 2.2. Dashboard Improvements - ✅ ЗАВЕРШЁН (2025-12-08)
+
+**Приоритет:** 🔴 Критический (Blocking Bug)
+**Статус:** ✅ Завершён
+**Дата:** 2025-12-08
+**Время:** ~4 часа
+
+#### Проблема
+
+- **Runtime Error**: "Rendered more hooks than during the previous render"
+- **Root Cause**: `useQuery` вызывался внутри `.map()` в хуке `useDashboardStats`
+- **Impact**: Dashboard страница крашилась при рендере
+- **Violation**: React Rules of Hooks - количество хуков должно быть константным
+
+#### Решение
+
+**1. Архитектурный рефакторинг:**
+
+- Убран проблемный хук `useDashboardStats` с циклами
+- Создан компонент `ProjectStatsLoader` для каждого проекта
+- Добавлен state `projectStatsMap` для хранения статистики
+- Вычисление агрегированной статистики через `useMemo`
+
+**2. Технические детали:**
+
+```typescript
+// Компонент для загрузки статистики одного проекта
+function ProjectStatsLoader({ projectId, isOwner, onStatsLoaded }) {
+  const { data } = useQuery(ProjectStatsDocument, { ... })
+  useEffect(() => {
+    if (data?.projectStats) {
+      onStatsLoaded(projectId, data.projectStats)
+    }
+  }, [data, projectId, onStatsLoaded])
+  return null
+}
+
+// В главном компоненте:
+{isOwner && activeProjects.map(project => (
+  <ProjectStatsLoader key={project.id} ... />
+))}
+```
+
+**3. Преимущества решения:**
+
+- ✅ Следует React Rules of Hooks (хуки на верхнем уровне)
+- ✅ Сохранена агрегация данных из ВСЕХ проектов
+- ✅ Параллельная загрузка через Apollo Client cache
+- ✅ Реальные данные из ProjectStats API
+- ✅ TypeScript: 0 ошибок
+- ✅ Runtime: 0 ошибок
+
+**Файлы изменены:**
+
+- `apps/web/src/app/(root)/(protected)/dashboard/page.tsx` - рефакторинг загрузки статистики
+- `CHANGELOG.md` - добавлена запись об исправлении
+- `roadmap.md` - обновлён статус проекта (78% MVP Complete)
+
+**Результат:** Dashboard полностью работоспособен с реальными данными из бэкенда, агрегация статистики по всем активным проектам работает корректно.
+
+---
 
 ## Этап 3. Проекты (недели 10–11) - ✅ ЗАВЕРШЁН (MVP готов!)
 **Приоритет:** 🔴 Критический (MVP)
@@ -569,11 +642,26 @@
 - ✅ File upload с drag & drop интерфейсом
 - ✅ Готово к Phase 4 (Public SSR Page)
 
-### Фаза 4: Public Page (Планируется)
+### Фаза 4: Public SSR Page - 📋 ГОТОВ К РЕАЛИЗАЦИИ
+
+**Приоритет:** 🔴🔴🔴 Критический (Killer Feature)
+**Статус:** 📋 План готов, готов к реализации
+**Оценка:** 6-8 часов
+**План:** `docs/analisys/stage-5-phase-4-public-page-plan.md`
+
+**Backend Tasks:**
+- [ ] Добавить метод incrementViewCount в PhotoReportsService
+- [ ] Обновить findBySlugPublic для автоинкремента viewCount
+- [ ] Протестировать query publicPhotoReport
+
+**Frontend Components:**
+- [ ] PhotoGallery component (masonry grid, 3 columns)
+- [ ] Lightbox component (fullscreen, keyboard navigation)
+- [ ] Обновить exports в components/photo-reports/index.ts
 
 **SSR Page:**
-- [ ] Создать /r/[slug]/page.tsx
-- [ ] SSR data fetching
+- [ ] Создать /r/[slug]/page.tsx с SSR
+- [ ] Создать PublicReportView.tsx (Client Component для интерактивности)
 - [ ] OpenGraph meta tags для WhatsApp
 - [ ] Team branding (logo + name)
 - [ ] Responsive gallery

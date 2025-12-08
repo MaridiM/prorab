@@ -81,7 +81,7 @@ export default function RegisterPage() {
             if (responseData?.user) {
                 success(responseData.message || "Аккаунт создан!")
                 setTimeout(() => {
-                    router.push("/dashboard")
+                    router.push("/onboarding")
                 }, 1000)
             } else if (response.data === null || response.data === undefined) {
                 // No data at all - this shouldn't happen with errorPolicy: 'all', but handle it

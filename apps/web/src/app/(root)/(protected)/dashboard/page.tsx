@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@apollo/client/react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,9 +9,7 @@ import {
 	Plus,
 	Search,
 	ChevronDown,
-	ChevronUp,
 	LogOut,
-	Settings,
 	MapPin,
 	TrendingUp,
 	TrendingDown,
@@ -20,17 +18,28 @@ import {
 	FolderKanban,
 	Wallet,
 	Camera,
-	MessageCircle,
 	Calendar,
 	Building2,
 	ArrowRight,
 	Check,
+	Sparkles,
+	Receipt,
+	X,
+	Clock,
+	ImageIcon,
+	MoreHorizontal,
+	Eye,
+	Settings,
+	AlertCircle,
+	CheckCircle2,
 } from 'lucide-react'
 
 import {
 	MyTeamsDocument,
 	ProjectsByTeamDocument,
 	ProjectStatsDocument,
+	ExpensesByProjectDocument,
+	ProjectPhotoReportsDocument,
 } from '@/packages/api/graphql'
 import { useAuth } from '@/packages/libs/auth'
 import { Button, Skeleton, Badge, ProgressBar } from '@/packages/components'
@@ -44,14 +53,32 @@ const fadeIn = {
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.4 },
+		transition: { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] as const },
 	},
 }
 
 const stagger = {
 	hidden: {},
 	visible: {
-		transition: { staggerChildren: 0.08 },
+		transition: { staggerChildren: 0.06 },
+	},
+}
+
+const scaleIn = {
+	hidden: { opacity: 0, scale: 0.95 },
+	visible: {
+		opacity: 1,
+		scale: 1,
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as const },
+	},
+}
+
+const slideIn = {
+	hidden: { opacity: 0, x: -20 },
+	visible: {
+		opacity: 1,
+		x: 0,
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as const },
 	},
 }
 
@@ -70,6 +97,14 @@ const formatCurrency = (amount: number) => {
 	}).format(amount)
 }
 
+const formatFullCurrency = (amount: number) => {
+	return new Intl.NumberFormat('ru-RU', {
+		style: 'currency',
+		currency: 'RUB',
+		maximumFractionDigits: 0,
+	}).format(amount)
+}
+
 const formatDate = (date: string | null | undefined) => {
 	if (!date) return null
 	return new Date(date).toLocaleDateString('ru-RU', {
@@ -78,7 +113,19 @@ const formatDate = (date: string | null | undefined) => {
 	})
 }
 
-// ============ Team Switcher Component ============
+const formatRelativeDate = (date: string) => {
+	const now = new Date()
+	const d = new Date(date)
+	const diff = now.getTime() - d.getTime()
+	const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+	
+	if (days === 0) return 'Сегодня'
+	if (days === 1) return 'Вчера'
+	if (days < 7) return `${days} дн. назад`
+	return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+}
+
+// ============ Types ============
 interface Team {
 	id: string
 	name: string
@@ -88,6 +135,28 @@ interface Team {
 	ownerId: string
 }
 
+interface Expense {
+	id: string
+	projectId: string
+	amount: number
+	category: string
+	comment?: string | null
+	photos: string[]
+	createdAt: string
+}
+
+interface PhotoReport {
+	id: string
+	projectId: string
+	title: string
+	description?: string | null
+	coverPhotoUrl?: string | null
+	viewCount: number
+	createdAt: string
+	photos?: { id: string; thumbnailUrl?: string | null }[] | null
+}
+
+// ============ Constants ============
 const COLORS: Record<string, string> = {
 	orange: 'hsl(25, 40%, 90%)',
 	blue: 'hsl(217, 35%, 88%)',
@@ -112,12 +181,32 @@ const ICONS: Record<string, string> = {
 	bolt: '🔩',
 }
 
-function TeamLogo({ team, size = 'md' }: { team: Team; size?: 'sm' | 'md' }) {
-	const sizeClass = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10'
+const EXPENSE_CATEGORIES: Record<string, { label: string; icon: string; color: string }> = {
+	materials: { label: 'Материалы', icon: '🧱', color: 'from-amber-500 to-orange-600' },
+	labor: { label: 'Работа', icon: '👷', color: 'from-blue-500 to-indigo-600' },
+	equipment: { label: 'Инструмент', icon: '🔧', color: 'from-emerald-500 to-teal-600' },
+	transport: { label: 'Транспорт', icon: '🚛', color: 'from-violet-500 to-purple-600' },
+	other: { label: 'Другое', icon: '📦', color: 'from-gray-500 to-slate-600' },
+}
+
+const QUICK_TIPS = [
+	'Регулярно фотографируйте этапы работ — это поможет вести отчётность и избежать споров с заказчиком.',
+	'Записывайте расходы сразу на месте — так вы ничего не забудете и сэкономите время на бухгалтерии.',
+	'Делитесь фотоотчётами с клиентами через удобные ссылки — они оценят вашу открытость.',
+	'Указывайте реалистичный бюджет — это поможет точнее рассчитать прибыль по каждому объекту.',
+	'Используйте категории расходов — так легче понять, куда уходят деньги на объекте.',
+	'Архивируйте завершённые объекты — так ваш дашборд останется чистым и понятным.',
+	'Приглашайте участников бригады — они смогут добавлять расходы и фотоотчёты вместе с вами.',
+]
+
+// ============ Team Logo Component ============
+function TeamLogo({ team, size = 'md' }: { team: Team; size?: 'sm' | 'md' | 'lg' }) {
+	const sizeClass = size === 'sm' ? 'w-8 h-8' : size === 'lg' ? 'w-14 h-14' : 'w-10 h-10'
+	const textSize = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-2xl' : 'text-lg'
 
 	if (team.logoUrl) {
 		return (
-			<div className={cn(sizeClass, 'rounded-xl overflow-hidden')}>
+			<div className={cn(sizeClass, 'rounded-xl overflow-hidden ring-2 ring-white/20 shadow-lg')}>
 				<img
 					src={team.logoUrl}
 					alt={team.name}
@@ -132,11 +221,77 @@ function TeamLogo({ team, size = 'md' }: { team: Team; size?: 'sm' | 'md' }) {
 
 	return (
 		<div
-			className={cn(sizeClass, 'rounded-xl flex items-center justify-center')}
+			className={cn(sizeClass, 'rounded-xl flex items-center justify-center ring-2 ring-white/20 shadow-lg')}
 			style={{ backgroundColor: bgColor }}
 		>
-			<span className={size === 'sm' ? 'text-base' : 'text-lg'}>{emoji}</span>
+			<span className={textSize}>{emoji}</span>
 		</div>
+	)
+}
+
+// ============ Stats Card Component ============
+interface StatsCardProps {
+	icon: React.ElementType
+	label: string
+	value: string
+	subValue?: string
+	gradient: string
+	iconBg: string
+	valueColor?: string
+	trend?: 'up' | 'down' | null
+}
+
+function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, valueColor, trend }: StatsCardProps) {
+	return (
+		<motion.div
+			variants={scaleIn}
+			className={cn(
+				'relative p-5 rounded-2xl border border-border/30 overflow-hidden',
+				'bg-card/80 backdrop-blur-xl',
+				'hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group'
+			)}
+		>
+			{/* Gradient background */}
+			<div className={cn(
+				'absolute inset-0 opacity-40 bg-gradient-to-br',
+				gradient
+			)} />
+			
+			{/* Decorative circle */}
+			<div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-gradient-to-br from-white/5 to-transparent" />
+
+			<div className="relative z-10">
+				<div className="flex items-center justify-between mb-3">
+					<div className={cn(
+						'w-11 h-11 rounded-xl flex items-center justify-center',
+						'text-white shadow-lg',
+						iconBg
+					)}>
+						<Icon className="w-5 h-5" />
+					</div>
+					{trend && (
+						<div className={cn(
+							'flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full',
+							trend === 'up' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'
+						)}>
+							{trend === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+						</div>
+					)}
+				</div>
+
+				<div className="space-y-1">
+					<p className="text-sm text-muted-foreground font-medium">{label}</p>
+					<p className={cn('text-2xl font-bold tracking-tight', valueColor)}>
+						{value}
+					</p>
+					{subValue && (
+						<p className="text-xs text-muted-foreground opacity-80">
+							{subValue}
+						</p>
+					)}
+				</div>
+			</div>
+		</motion.div>
 	)
 }
 
@@ -153,37 +308,8 @@ interface ProjectCardProps {
 	startDate?: string | null
 	endDate?: string | null
 	showFinancials?: boolean
-	profit?: number | null
-}
-
-// ============ Project Card With Stats Wrapper ============
-interface ProjectCardWithStatsProps extends ProjectCardProps {
-	isOwner: boolean
-}
-
-function ProjectCardWithStats({
-	id,
-	isOwner,
-	showFinancials,
-	...projectCardProps
-}: ProjectCardWithStatsProps) {
-	// Fetch stats only if owner and financials are shown
-	const { data: statsData } = useQuery(ProjectStatsDocument, {
-		variables: { projectId: id },
-		skip: !isOwner || !showFinancials || !id,
-		fetchPolicy: 'cache-and-network',
-	})
-
-	const profit = statsData?.projectStats?.profit
-
-	return (
-		<ProjectCard
-			{...projectCardProps}
-			id={id}
-			showFinancials={showFinancials}
-			profit={profit}
-		/>
-	)
+	totalExpenses?: number
+	profit?: number
 }
 
 function ProjectCard({
@@ -198,42 +324,49 @@ function ProjectCard({
 	startDate,
 	endDate,
 	showFinancials = false,
-	profit: providedProfit,
+	totalExpenses = 0,
+	profit = 0,
 }: ProjectCardProps) {
-	// Используем реальную прибыль из API или fallback к 35% от бюджета
-	const profit = providedProfit !== undefined && providedProfit !== null
-		? providedProfit
-		: (budget ? budget * 0.35 : 0)
 	const isProfitable = profit >= 0
 	const isArchived = status === ProjectStatus.ARCHIVED
+	const isCompleted = status === ProjectStatus.COMPLETED
 
-	const statusConfig: Record<string, { label: string; variant: 'success' | 'secondary' }> = {
-		[ProjectStatus.ACTIVE]: { label: 'Активный', variant: 'success' },
-		[ProjectStatus.ARCHIVED]: { label: 'Архив', variant: 'secondary' },
-		[ProjectStatus.COMPLETED]: { label: 'Завершён', variant: 'success' },
+	const statusConfig: Record<string, { label: string; variant: 'success' | 'secondary' | 'warning'; icon: React.ElementType }> = {
+		[ProjectStatus.ACTIVE]: { label: 'Активный', variant: 'success', icon: CheckCircle2 },
+		[ProjectStatus.ARCHIVED]: { label: 'Архив', variant: 'secondary', icon: FolderKanban },
+		[ProjectStatus.COMPLETED]: { label: 'Завершён', variant: 'warning', icon: Check },
 	}
 
-	const statusInfo = statusConfig[status] || { label: status, variant: 'secondary' }
+	const statusInfo = statusConfig[status] || { label: status, variant: 'secondary', icon: FolderKanban }
 
 	return (
 		<Link href={`/teams/${teamId}/projects/${id}`}>
 			<motion.div
 				whileHover={{ y: -4, transition: { duration: 0.2 } }}
 				className={cn(
-					'relative rounded-2xl border border-border/30 bg-card overflow-hidden',
-					'hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5',
+					'relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl overflow-hidden',
+					'hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10',
 					'transition-all duration-300 group cursor-pointer',
 					isArchived && 'opacity-60'
 				)}
 			>
-				{/* Hover gradient */}
-				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-linear-to-br from-primary/5 to-transparent" />
+				{/* Gradient overlay on hover */}
+				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+				
+				{/* Shimmer effect */}
+				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+					<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
+				</div>
 
 				<div className="relative z-10 p-5">
 					{/* Header: Photo + Info */}
 					<div className="flex gap-4 mb-4">
 						{/* Project Photo */}
-						<div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0 bg-linear-to-br from-secondary to-muted">
+						<div className={cn(
+							'w-16 h-16 rounded-2xl overflow-hidden shrink-0',
+							'bg-gradient-to-br from-secondary to-muted',
+							'ring-2 ring-border/30 shadow-lg'
+						)}>
 							{photoUrl ? (
 								<img
 									src={photoUrl}
@@ -241,7 +374,7 @@ function ProjectCard({
 									className="w-full h-full object-cover"
 								/>
 							) : (
-								<div className="w-full h-full flex items-center justify-center text-2xl">
+								<div className="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-primary/10 to-primary/5">
 									🏗️
 								</div>
 							)}
@@ -261,7 +394,7 @@ function ProjectCard({
 							{/* Address */}
 							{address && (
 								<div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-									<MapPin className="w-3.5 h-3.5 shrink-0" />
+									<MapPin className="w-3.5 h-3.5 shrink-0 text-primary/60" />
 									<span className="line-clamp-1">{address}</span>
 								</div>
 							)}
@@ -269,7 +402,7 @@ function ProjectCard({
 							{/* Dates */}
 							{(startDate || endDate) && (
 								<div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
-									<Calendar className="w-3.5 h-3.5 shrink-0" />
+									<Calendar className="w-3.5 h-3.5 shrink-0 text-primary/60" />
 									<span>
 										{formatDate(startDate) || '—'} — {formatDate(endDate) || '—'}
 									</span>
@@ -280,44 +413,70 @@ function ProjectCard({
 
 					{/* Progress Bar */}
 					<div className="mb-4">
-						<ProgressBar value={progress} showLabel size="md" />
+						<div className="flex items-center justify-between mb-1.5">
+							<span className="text-xs text-muted-foreground font-medium">Прогресс</span>
+							<span className={cn(
+								"text-xs font-semibold",
+								progress >= 75 ? "text-emerald-500" : 
+								progress >= 50 ? "text-amber-500" : "text-primary"
+							)}>
+								{progress}%
+							</span>
+						</div>
+						<ProgressBar value={progress} size="sm" />
 					</div>
 
-					{/* Footer: Profit + Arrow */}
-					<div className="flex items-center justify-between">
-						{/* Profit (only for owner) */}
+					{/* Footer: Financials */}
+					<div className="flex items-center justify-between pt-3 border-t border-border/30">
 						{showFinancials && budget ? (
-							<div className="flex items-center gap-2">
-								{isProfitable ? (
-									<TrendingUp className="w-4 h-4 text-emerald-500" />
-								) : (
-									<TrendingDown className="w-4 h-4 text-red-500" />
-								)}
-								<span
-									className={cn(
-										'font-semibold',
-										isProfitable
-											? 'text-emerald-600 dark:text-emerald-400'
-											: 'text-red-600 dark:text-red-400'
+							<div className="flex items-center gap-3">
+								<div className={cn(
+									"w-9 h-9 rounded-xl flex items-center justify-center shadow-sm",
+									isProfitable 
+										? "bg-emerald-500/10 text-emerald-500" 
+										: "bg-red-500/10 text-red-500"
+								)}>
+									{isProfitable ? (
+										<TrendingUp className="w-4 h-4" />
+									) : (
+										<TrendingDown className="w-4 h-4" />
 									)}
-								>
-									{isProfitable ? '+' : ''}
-									{formatCurrency(profit)}
-								</span>
+								</div>
+								<div>
+									<span
+										className={cn(
+											'font-bold text-sm',
+											isProfitable
+												? 'text-emerald-600 dark:text-emerald-400'
+												: 'text-red-600 dark:text-red-400'
+										)}
+									>
+										{isProfitable ? '+' : ''}
+										{formatCurrency(profit)}
+									</span>
+									<p className="text-[10px] text-muted-foreground">
+										{isCompleted ? 'итоговая прибыль' : 'текущая прибыль'}
+									</p>
+								</div>
 							</div>
 						) : budget ? (
-							<div className="text-sm text-muted-foreground">
-								Бюджет:{' '}
-								<span className="font-medium text-foreground">
-									{formatCurrency(budget)}
-								</span>
+							<div className="flex items-center gap-3">
+								<div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shadow-sm">
+									<Wallet className="w-4 h-4" />
+								</div>
+								<div>
+									<span className="font-semibold text-sm">{formatCurrency(budget)}</span>
+									<p className="text-[10px] text-muted-foreground">бюджет</p>
+								</div>
 							</div>
 						) : (
 							<div />
 						)}
 
 						{/* Arrow */}
-						<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+						<div className="w-9 h-9 rounded-full flex items-center justify-center bg-secondary/50 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+							<ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+						</div>
 					</div>
 				</div>
 			</motion.div>
@@ -325,139 +484,299 @@ function ProjectCard({
 	)
 }
 
-// ============ Financial Summary Component ============
-interface FinancialSummaryProps {
-	totalBudget: number
-	totalExpenses: number
-	activeCount: number
-}
-
-function FinancialSummary({ totalBudget, totalExpenses, activeCount }: FinancialSummaryProps) {
-	const profit = totalBudget - totalExpenses
-	const profitPercent = totalBudget > 0 ? (profit / totalBudget) * 100 : 0
-	const isProfitable = profit >= 0
+// ============ Recent Expense Card ============
+function RecentExpenseCard({ expense, projectName }: { expense: Expense; projectName: string }) {
+	const category = EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other
 
 	return (
-		<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-			{/* Total Budget */}
-			<motion.div
-				variants={fadeIn}
-				className="p-4 rounded-2xl border border-border/30 bg-linear-to-br from-blue-500/10 to-indigo-500/10"
-			>
-				<div className="flex items-center gap-2 mb-2">
-					<div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500 text-white">
-						<Wallet className="w-4 h-4" />
-					</div>
-					<span className="text-sm text-muted-foreground">Сумма договоров</span>
-				</div>
-				<p className="text-xl font-bold">{formatCurrency(totalBudget)}</p>
-			</motion.div>
-
-			{/* Total Expenses */}
-			<motion.div
-				variants={fadeIn}
-				className="p-4 rounded-2xl border border-border/30 bg-linear-to-br from-amber-500/10 to-orange-500/10"
-			>
-				<div className="flex items-center gap-2 mb-2">
-					<div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500 text-white">
-						<TrendingDown className="w-4 h-4" />
-					</div>
-					<span className="text-sm text-muted-foreground">Потрачено</span>
-				</div>
-				<p className="text-xl font-bold text-amber-600 dark:text-amber-400">
-					{formatCurrency(totalExpenses)}
-				</p>
-			</motion.div>
-
-			{/* Profit */}
-			<motion.div
-				variants={fadeIn}
-				className={cn(
-					'p-4 rounded-2xl border border-border/30',
-					isProfitable
-						? 'bg-linear-to-br from-emerald-500/10 to-teal-500/10'
-						: 'bg-linear-to-br from-red-500/10 to-rose-500/10'
-				)}
-			>
-				<div className="flex items-center gap-2 mb-2">
-					<div
-						className={cn(
-							'w-8 h-8 rounded-lg flex items-center justify-center text-white',
-							isProfitable ? 'bg-emerald-500' : 'bg-red-500'
-						)}
-					>
-						{isProfitable ? (
-							<TrendingUp className="w-4 h-4" />
-						) : (
-							<TrendingDown className="w-4 h-4" />
-						)}
-					</div>
-					<span className="text-sm text-muted-foreground">
-						{isProfitable ? 'Прибыль' : 'Убыток'}
+		<motion.div
+			variants={slideIn}
+			className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+		>
+			<div className={cn(
+				'w-10 h-10 rounded-xl flex items-center justify-center text-lg',
+				'bg-gradient-to-br shadow-sm',
+				category.color,
+				'text-white'
+			)}>
+				{category.icon}
+			</div>
+			<div className="flex-1 min-w-0">
+				<div className="flex items-center justify-between gap-2">
+					<span className="font-semibold text-sm truncate">{category.label}</span>
+					<span className="font-bold text-sm text-red-600 dark:text-red-400">
+						-{formatCurrency(expense.amount)}
 					</span>
 				</div>
-				<p
-					className={cn(
-						'text-xl font-bold',
-						isProfitable
-							? 'text-emerald-600 dark:text-emerald-400'
-							: 'text-red-600 dark:text-red-400'
-					)}
-				>
-					{formatCurrency(Math.abs(profit))}
-				</p>
-				<p className="text-xs text-muted-foreground">
-					{Math.abs(profitPercent).toFixed(1)}% от бюджета
-				</p>
-			</motion.div>
-
-			{/* Active Projects */}
-			<motion.div
-				variants={fadeIn}
-				className="p-4 rounded-2xl border border-border/30 bg-linear-to-br from-violet-500/10 to-purple-500/10"
-			>
-				<div className="flex items-center gap-2 mb-2">
-					<div className="w-8 h-8 rounded-lg flex items-center justify-center bg-violet-500 text-white">
-						<Building2 className="w-4 h-4" />
-					</div>
-					<span className="text-sm text-muted-foreground">Активных объектов</span>
+				<div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+					<span className="truncate">{projectName}</span>
+					<span>•</span>
+					<span className="shrink-0">{formatRelativeDate(expense.createdAt)}</span>
 				</div>
-				<p className="text-xl font-bold">{activeCount}</p>
+			</div>
+		</motion.div>
+	)
+}
+
+// ============ Recent Photo Report Card ============
+function RecentPhotoReportCard({ report, projectName }: { report: PhotoReport; projectName: string }) {
+	const photosCount = report.photos?.length || 0
+
+	return (
+		<motion.div
+			variants={slideIn}
+			className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group cursor-pointer"
+		>
+			<div className={cn(
+				'w-12 h-12 rounded-xl overflow-hidden',
+				'bg-gradient-to-br from-violet-500/10 to-purple-500/5',
+				'flex items-center justify-center shadow-sm ring-1 ring-border/30'
+			)}>
+				{report.coverPhotoUrl ? (
+					<img
+						src={report.coverPhotoUrl}
+						alt={report.title}
+						className="w-full h-full object-cover"
+					/>
+				) : (
+					<ImageIcon className="w-5 h-5 text-violet-500" />
+				)}
+			</div>
+			<div className="flex-1 min-w-0">
+				<div className="flex items-center justify-between gap-2">
+					<span className="font-semibold text-sm truncate">{report.title}</span>
+					<div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+						<Camera className="w-3 h-3" />
+						{photosCount}
+					</div>
+				</div>
+				<div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+					<span className="truncate">{projectName}</span>
+					<span>•</span>
+					<span className="shrink-0">{formatRelativeDate(report.createdAt)}</span>
+				</div>
+			</div>
+		</motion.div>
+	)
+}
+
+// ============ Welcome Header Component ============
+function WelcomeHeader({ userName, greeting }: { userName: string; greeting: string }) {
+	return (
+		<motion.div
+			variants={fadeIn}
+			className="mb-8"
+		>
+			<div className="flex items-center gap-3 mb-2">
+				<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-accent/20 to-amber-500/10 border border-accent/20">
+					<Sparkles className="w-4 h-4 text-accent" />
+					<span className="text-sm font-medium text-accent">ProRab.space</span>
+				</div>
+			</div>
+			
+			<h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+				{greeting}, <span className="text-primary">{userName}</span>! 👋
+			</h1>
+			<p className="text-muted-foreground text-lg">
+				Вот актуальная сводка по вашим объектам
+			</p>
+		</motion.div>
+	)
+}
+
+// ============ Empty State Component ============
+function EmptyState({ 
+	icon: Icon, 
+	title, 
+	description, 
+	action 
+}: { 
+	icon: React.ElementType
+	title: string
+	description: string
+	action?: { label: string; onClick: () => void }
+}) {
+	return (
+		<motion.div
+			variants={fadeIn}
+			className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-gradient-to-br from-secondary/20 to-secondary/5"
+		>
+			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
+				<Icon className="w-8 h-8 text-primary/60" />
+			</div>
+			<h3 className="text-lg font-semibold mb-1">{title}</h3>
+			<p className="text-muted-foreground text-sm mb-4 max-w-sm mx-auto">{description}</p>
+			{action && (
+				<Button onClick={action.onClick} size="sm" variant="outline">
+					<Plus className="w-4 h-4 mr-2" />
+					{action.label}
+				</Button>
+			)}
+		</motion.div>
+	)
+}
+
+// ============ Project Picker Modal ============
+function ProjectPickerModal({
+	projects,
+	teamId,
+	tab,
+	onClose,
+}: {
+	projects: any[]
+	teamId: string
+	tab: 'expenses' | 'reports'
+	onClose: () => void
+}) {
+	const router = useRouter()
+	const title = tab === 'expenses' ? 'Выберите объект для расхода' : 'Выберите объект для фотоотчёта'
+
+	return (
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+			onClick={onClose}
+		>
+			<motion.div
+				initial={{ scale: 0.95, opacity: 0 }}
+				animate={{ scale: 1, opacity: 1 }}
+				exit={{ scale: 0.95, opacity: 0 }}
+				onClick={(e) => e.stopPropagation()}
+				className="w-full max-w-md bg-card border border-border/50 rounded-2xl shadow-2xl overflow-hidden"
+			>
+				<div className="p-4 border-b border-border/30">
+					<div className="flex items-center justify-between">
+						<h3 className="font-semibold">{title}</h3>
+						<button onClick={onClose} className="p-1 hover:bg-secondary rounded-lg transition-colors">
+							<X className="w-5 h-5" />
+						</button>
+					</div>
+				</div>
+				<div className="p-2 max-h-80 overflow-y-auto">
+					{projects.map((project) => (
+						<button
+							key={project.id}
+							onClick={() => {
+								router.push(`/teams/${teamId}/projects/${project.id}?tab=${tab}`)
+								onClose()
+							}}
+							className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors text-left"
+						>
+							<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shrink-0">
+								{project.photoUrl ? (
+									<img src={project.photoUrl} alt={project.name} className="w-full h-full object-cover rounded-xl" />
+								) : (
+									<span className="text-lg">🏗️</span>
+								)}
+							</div>
+							<div className="flex-1 min-w-0">
+								<p className="font-medium truncate">{project.name}</p>
+								{project.address && (
+									<p className="text-xs text-muted-foreground truncate">{project.address}</p>
+								)}
+							</div>
+							<ArrowRight className="w-4 h-4 text-muted-foreground" />
+						</button>
+					))}
+				</div>
 			</motion.div>
-		</div>
+		</motion.div>
 	)
 }
 
 // ============ FAB Menu Component ============
-interface FabMenuProps {
+function FabMenu({ 
+	onCreateProject, 
+	activeProjects,
+	teamId,
+	onOpenProjectPicker,
+}: { 
 	onCreateProject: () => void
-	hasActiveProject: boolean
-}
-
-function FabMenu({ onCreateProject, hasActiveProject }: FabMenuProps) {
+	activeProjects: any[]
+	teamId: string | null
+	onOpenProjectPicker: (tab: 'expenses' | 'reports') => void
+}) {
 	const [isOpen, setIsOpen] = useState(false)
+	const menuRef = useRef<HTMLDivElement>(null)
+	const router = useRouter()
 	const { error: showError } = useToast()
+	const hasActiveProject = activeProjects.length > 0
 
-	const handleCreateExpense = () => {
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+				setIsOpen(false)
+			}
+		}
+
+		if (isOpen) {
+			document.addEventListener('mousedown', handleClickOutside)
+		}
+		return () => document.removeEventListener('mousedown', handleClickOutside)
+	}, [isOpen])
+
+	const handleNavigateToProject = (tab: 'expenses' | 'reports') => {
 		if (!hasActiveProject) {
 			showError('Сначала создайте объект')
 			return
 		}
-		showError('Перейдите в объект для добавления расхода')
+		
+		if (activeProjects.length === 1 && teamId) {
+			// Один проект — переходим сразу
+			router.push(`/teams/${teamId}/projects/${activeProjects[0].id}?tab=${tab}`)
+		} else {
+			// Несколько проектов — открываем модальное окно выбора
+			onOpenProjectPicker(tab)
+		}
 		setIsOpen(false)
 	}
 
-	const handleCreateReport = () => {
-		if (!hasActiveProject) {
-			showError('Сначала создайте объект')
-			return
-		}
-		showError('Перейдите в объект для создания фотоотчёта')
-		setIsOpen(false)
-	}
+	const actions = [
+		{
+			id: 'project',
+			icon: FolderKanban,
+			label: 'Новый объект',
+			gradient: 'from-blue-500 to-indigo-600',
+			onClick: () => {
+				onCreateProject()
+				setIsOpen(false)
+			},
+		},
+		{
+			id: 'expense',
+			icon: Wallet,
+			label: 'Добавить расход',
+			gradient: 'from-amber-500 to-orange-600',
+			onClick: () => handleNavigateToProject('expenses'),
+			disabled: !hasActiveProject,
+		},
+		{
+			id: 'report',
+			icon: Camera,
+			label: 'Фотоотчёт',
+			gradient: 'from-violet-500 to-purple-600',
+			onClick: () => handleNavigateToProject('reports'),
+			disabled: !hasActiveProject,
+		},
+	]
 
 	return (
-		<div className="fixed bottom-6 right-6 z-50">
+		<div ref={menuRef} className="fixed bottom-6 right-6 z-50">
+			{/* Backdrop */}
+			<AnimatePresence>
+				{isOpen && (
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="fixed inset-0 bg-background/60 backdrop-blur-sm"
+						onClick={() => setIsOpen(false)}
+					/>
+				)}
+			</AnimatePresence>
+
 			{/* Actions */}
 			<AnimatePresence>
 				{isOpen && (
@@ -465,61 +784,37 @@ function FabMenu({ onCreateProject, hasActiveProject }: FabMenuProps) {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
+						transition={{ duration: 0.15 }}
 						className="absolute bottom-16 right-0 flex flex-col gap-3 items-end mb-2"
 					>
-						{/* Create Project */}
-						<motion.button
-							initial={{ opacity: 0, y: 20, scale: 0.8 }}
-							animate={{ opacity: 1, y: 0, scale: 1 }}
-							exit={{ opacity: 0, y: 20, scale: 0.8 }}
-							transition={{ delay: 0, duration: 0.2 }}
-							onClick={() => {
-								onCreateProject()
-								setIsOpen(false)
-							}}
-							className="flex items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-card border border-border/50 shadow-xl hover:shadow-2xl transition-all"
-						>
-							<span className="text-sm font-medium whitespace-nowrap">Новый объект</span>
-							<div className="w-10 h-10 rounded-full flex items-center justify-center bg-linear-to-br from-blue-500 to-indigo-500 text-white shadow-lg">
-								<FolderKanban className="w-5 h-5" />
-							</div>
-						</motion.button>
-
-						{/* Create Expense */}
-						<motion.button
-							initial={{ opacity: 0, y: 20, scale: 0.8 }}
-							animate={{ opacity: 1, y: 0, scale: 1 }}
-							exit={{ opacity: 0, y: 20, scale: 0.8 }}
-							transition={{ delay: 0.05, duration: 0.2 }}
-							onClick={handleCreateExpense}
-							className={cn(
-								'flex items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-card border border-border/50 shadow-xl hover:shadow-2xl transition-all',
-								!hasActiveProject && 'opacity-50'
-							)}
-						>
-							<span className="text-sm font-medium whitespace-nowrap">Добавить расход</span>
-							<div className="w-10 h-10 rounded-full flex items-center justify-center bg-linear-to-br from-amber-500 to-orange-500 text-white shadow-lg">
-								<Wallet className="w-5 h-5" />
-							</div>
-						</motion.button>
-
-						{/* Create Report */}
-						<motion.button
-							initial={{ opacity: 0, y: 20, scale: 0.8 }}
-							animate={{ opacity: 1, y: 0, scale: 1 }}
-							exit={{ opacity: 0, y: 20, scale: 0.8 }}
-							transition={{ delay: 0.1, duration: 0.2 }}
-							onClick={handleCreateReport}
-							className={cn(
-								'flex items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-card border border-border/50 shadow-xl hover:shadow-2xl transition-all',
-								!hasActiveProject && 'opacity-50'
-							)}
-						>
-							<span className="text-sm font-medium whitespace-nowrap">Фотоотчёт</span>
-							<div className="w-10 h-10 rounded-full flex items-center justify-center bg-linear-to-br from-violet-500 to-purple-500 text-white shadow-lg">
-								<Camera className="w-5 h-5" />
-							</div>
-						</motion.button>
+						{actions.map((action, index) => (
+							<motion.button
+								key={action.id}
+								initial={{ opacity: 0, x: 20, scale: 0.8 }}
+								animate={{ opacity: 1, x: 0, scale: 1 }}
+								exit={{ opacity: 0, x: 20, scale: 0.8 }}
+								transition={{ delay: index * 0.05, duration: 0.2 }}
+								onClick={action.onClick}
+								disabled={action.disabled}
+								className={cn(
+									'flex items-center gap-3 pl-4 pr-2 py-2 rounded-full',
+									'bg-card border border-border/50 shadow-xl shadow-black/10',
+									'hover:shadow-2xl hover:border-primary/30 transition-all duration-200',
+									action.disabled && 'opacity-50 cursor-not-allowed'
+								)}
+							>
+								<span className="text-sm font-medium whitespace-nowrap">
+									{action.label}
+								</span>
+								<div className={cn(
+									'w-10 h-10 rounded-full flex items-center justify-center',
+									'text-white shadow-lg bg-gradient-to-br',
+									action.gradient
+								)}>
+									<action.icon className="w-5 h-5" />
+								</div>
+							</motion.button>
+						))}
 					</motion.div>
 				)}
 			</AnimatePresence>
@@ -528,31 +823,167 @@ function FabMenu({ onCreateProject, hasActiveProject }: FabMenuProps) {
 			<motion.button
 				onClick={() => setIsOpen(!isOpen)}
 				className={cn(
-					'w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300',
+					'relative w-14 h-14 rounded-full flex items-center justify-center shadow-xl',
+					'transition-all duration-300',
 					isOpen
-						? 'bg-secondary text-foreground rotate-45'
-						: 'bg-linear-to-br from-primary to-blue-600 text-white hover:scale-105'
+						? 'bg-secondary text-foreground'
+						: 'bg-gradient-to-br from-primary to-blue-600 text-white hover:shadow-2xl hover:shadow-primary/25 hover:scale-105'
 				)}
 				whileTap={{ scale: 0.95 }}
 			>
-				<Plus className="w-6 h-6" />
+				<motion.div
+					animate={{ rotate: isOpen ? 45 : 0 }}
+					transition={{ duration: 0.2 }}
+				>
+					{isOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+				</motion.div>
+				
+				{/* Pulse effect when closed */}
+				{!isOpen && (
+					<motion.div
+						className="absolute inset-0 rounded-full bg-primary/30"
+						animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+						transition={{ duration: 2, repeat: Infinity }}
+					/>
+				)}
 			</motion.button>
 		</div>
 	)
+}
+
+// ============ Project Card with Real Stats ============
+function ProjectCardWithStats({
+	project,
+	teamId,
+	isOwner,
+	showFinancials,
+}: {
+	project: any
+	teamId: string
+	isOwner: boolean
+	showFinancials: boolean
+}) {
+	const { data: statsData } = useQuery(ProjectStatsDocument, {
+		variables: { projectId: project.id },
+		skip: !isOwner || !showFinancials || !project.id,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const stats = statsData?.projectStats
+
+	return (
+		<ProjectCard
+			id={project.id}
+			teamId={teamId}
+			name={project.name}
+			address={project.address}
+			photoUrl={project.photoUrl}
+			budget={project.budget}
+			progress={project.progress || 0}
+			status={project.status}
+			startDate={project.startDate}
+			endDate={project.endDate}
+			showFinancials={showFinancials && isOwner}
+			totalExpenses={stats?.totalExpenses || 0}
+			profit={stats?.profit || (project.budget ? project.budget * 0.35 : 0)}
+		/>
+	)
+}
+
+// ============ Dashboard Aggregate Stats Component ============
+// This component fetches stats for a single project and passes them up via callback
+function ProjectStatsLoader({
+	projectId,
+	isOwner,
+	onStatsLoaded
+}: {
+	projectId: string
+	isOwner: boolean
+	onStatsLoaded: (projectId: string, stats: any) => void
+}) {
+	const { data } = useQuery(ProjectStatsDocument, {
+		variables: { projectId },
+		skip: !isOwner || !projectId,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	useEffect(() => {
+		if (data?.projectStats) {
+			onStatsLoaded(projectId, data.projectStats)
+		}
+	}, [data, projectId, onStatsLoaded])
+
+	return null
+}
+
+// ============ Activity Loader Component ============
+// Loads expenses and photo reports for a single project and passes them up
+function ActivityLoader({
+	projectId,
+	onExpensesLoaded,
+	onReportsLoaded,
+}: {
+	projectId: string
+	onExpensesLoaded: (projectId: string, expenses: Expense[]) => void
+	onReportsLoaded: (projectId: string, reports: PhotoReport[]) => void
+}) {
+	const { data: expensesData } = useQuery(ExpensesByProjectDocument, {
+		variables: { projectId },
+		skip: !projectId,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const { data: reportsData } = useQuery(ProjectPhotoReportsDocument, {
+		variables: { projectId },
+		skip: !projectId,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	useEffect(() => {
+		if (expensesData?.expensesByProject) {
+			onExpensesLoaded(projectId, expensesData.expensesByProject as Expense[])
+		}
+	}, [expensesData, projectId, onExpensesLoaded])
+
+	useEffect(() => {
+		if (reportsData?.projectPhotoReports) {
+			onReportsLoaded(projectId, reportsData.projectPhotoReports as PhotoReport[])
+		}
+	}, [reportsData, projectId, onReportsLoaded])
+
+	return null
 }
 
 // ============ Main Dashboard Component ============
 export default function DashboardPage() {
 	const router = useRouter()
 	const { user, logout } = useAuth()
-	const { error: showError, success: showSuccess } = useToast()
+	const { error: showError } = useToast()
 
 	// State
 	const [currentTeamId, setCurrentTeamId] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [showArchived, setShowArchived] = useState(false)
 	const [teamDropdownOpen, setTeamDropdownOpen] = useState(false)
+	const [projectStatsMap, setProjectStatsMap] = useState<Map<string, any>>(new Map())
+	const [projectPickerTab, setProjectPickerTab] = useState<'expenses' | 'reports' | null>(null)
+	const [allExpenses, setAllExpenses] = useState<Map<string, Expense[]>>(new Map())
+	const [allReports, setAllReports] = useState<Map<string, PhotoReport[]>>(new Map())
 	const dropdownRef = useRef<HTMLDivElement>(null)
+
+	// Random tip (selected once on mount)
+	const dailyTip = useMemo(() => {
+		return QUICK_TIPS[Math.floor(Math.random() * QUICK_TIPS.length)]
+	}, [])
+
+	// Get greeting based on time
+	const greeting = useMemo(() => {
+		const hour = new Date().getHours()
+		if (hour < 6) return 'Доброй ночи'
+		if (hour < 12) return 'Доброе утро'
+		if (hour < 18) return 'Добрый день'
+		return 'Добрый вечер'
+	}, [])
 
 	// Load teams
 	const {
@@ -594,7 +1025,6 @@ export default function DashboardPage() {
 	const {
 		data: projectsData,
 		loading: projectsLoading,
-		error: projectsError,
 	} = useQuery(ProjectsByTeamDocument, {
 		variables: { teamId: currentTeamId || '', filter: null },
 		skip: !currentTeamId,
@@ -623,23 +1053,97 @@ export default function DashboardPage() {
 		p => p?.status === ProjectStatus.ARCHIVED
 	)
 
-	// Financial metrics (simplified - stats will be fetched per-card)
-	const financialMetrics = useMemo(() => {
-		const active = allProjects.filter(
-			p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
-		)
+	// Callback to handle activity data from individual projects
+	const handleExpensesLoaded = useCallback((projectId: string, expenses: Expense[]) => {
+		setAllExpenses(prev => {
+			const newMap = new Map(prev)
+			newMap.set(projectId, expenses)
+			return newMap
+		})
+	}, [])
 
-		const totalBudget = active.reduce((sum, p) => sum + (p?.budget || 0), 0)
+	const handleReportsLoaded = useCallback((projectId: string, reports: PhotoReport[]) => {
+		setAllReports(prev => {
+			const newMap = new Map(prev)
+			newMap.set(projectId, reports)
+			return newMap
+		})
+	}, [])
 
-		// Fallback calculation (stats will be fetched per-card)
-		const totalExpenses = totalBudget * 0.65
+	// Aggregate and sort recent expenses from all projects (last 5)
+	const recentExpenses = useMemo(() => {
+		const allExpensesList: Expense[] = []
+		allExpenses.forEach((expenses) => {
+			allExpensesList.push(...expenses)
+		})
+		return allExpensesList
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+			.slice(0, 5)
+	}, [allExpenses])
+
+	// Aggregate and sort recent photo reports from all projects (last 3)
+	const recentReports = useMemo(() => {
+		const allReportsList: PhotoReport[] = []
+		allReports.forEach((reports) => {
+			allReportsList.push(...reports)
+		})
+		return allReportsList
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+			.slice(0, 3)
+	}, [allReports])
+
+	// Create a map of projectId -> projectName for displaying in recent cards
+	const projectNameMap = useMemo(() => {
+		const map = new Map<string, string>()
+		allProjects.forEach(project => {
+			if (project?.id && project?.name) {
+				map.set(project.id, project.name)
+			}
+		})
+		return map
+	}, [allProjects])
+
+	// Callback to handle stats loaded from individual projects
+	const handleStatsLoaded = useCallback((projectId: string, stats: any) => {
+		setProjectStatsMap(prev => {
+			const newMap = new Map(prev)
+			newMap.set(projectId, stats)
+			return newMap
+		})
+	}, [])
+
+	// Calculate aggregate stats from all loaded project stats
+	const stats = useMemo(() => {
+		const totalBudget = activeProjects.reduce((sum, p) => sum + (p?.budget || 0), 0)
+
+		// Sum up expenses and profit from all project stats
+		let totalExpenses = 0
+		let totalProfit = 0
+
+		activeProjects.forEach(project => {
+			const projectStats = projectStatsMap.get(project.id)
+			if (projectStats) {
+				totalExpenses += projectStats.totalExpenses || 0
+				totalProfit += projectStats.profit || 0
+			}
+		})
+
+		// If no stats loaded yet (initial load), use estimation
+		const hasStats = projectStatsMap.size > 0
+		if (!hasStats && totalBudget > 0) {
+			totalExpenses = totalBudget * 0.65
+			totalProfit = totalBudget - totalExpenses
+		}
 
 		return {
 			totalBudget,
 			totalExpenses,
-			activeCount: active.length,
+			profit: totalProfit,
+			activeCount: activeProjects.length,
+			isProfitable: totalProfit >= 0,
+			loading: false,
 		}
-	}, [allProjects, isOwner])
+	}, [activeProjects, projectStatsMap])
 
 	// Handlers
 	const handleTeamChange = (teamId: string) => {
@@ -669,7 +1173,7 @@ export default function DashboardPage() {
 	if (teamsLoading && !teamsData) {
 		return (
 			<div className="min-h-screen bg-background">
-				<div className="border-b border-border/30 bg-card/50">
+				<div className="border-b border-border/30 bg-card/50 backdrop-blur-xl">
 					<div className="container mx-auto px-4 py-4">
 						<div className="flex items-center justify-between">
 							<Skeleton className="h-12 w-48" />
@@ -678,16 +1182,15 @@ export default function DashboardPage() {
 					</div>
 				</div>
 				<div className="container mx-auto px-4 py-8">
-					<Skeleton className="h-8 w-64 mb-2" />
-					<Skeleton className="h-5 w-48 mb-8" />
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+					<Skeleton className="h-24 w-96 mb-8" />
+					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 						{[1, 2, 3, 4].map(i => (
-							<Skeleton key={i} className="h-28 rounded-2xl" />
+							<Skeleton key={i} className="h-36 rounded-2xl" />
 						))}
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{[1, 2, 3, 4, 5, 6].map(i => (
-							<Skeleton key={i} className="h-48 rounded-2xl" />
+							<Skeleton key={i} className="h-56 rounded-2xl" />
 						))}
 					</div>
 				</div>
@@ -699,14 +1202,20 @@ export default function DashboardPage() {
 	if (teamsError) {
 		return (
 			<div className="min-h-screen bg-background flex items-center justify-center">
-				<div className="text-center max-w-md px-4">
-					<div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-						<FolderKanban className="w-8 h-8 text-red-500" />
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="text-center max-w-md px-4"
+				>
+					<div className="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-6">
+						<AlertCircle className="w-10 h-10 text-red-500" />
 					</div>
-					<h2 className="text-xl font-bold mb-2">Ошибка загрузки</h2>
-					<p className="text-muted-foreground mb-4">{teamsError.message}</p>
-					<Button onClick={() => window.location.reload()}>Попробовать снова</Button>
-				</div>
+					<h2 className="text-2xl font-bold mb-3">Ошибка загрузки</h2>
+					<p className="text-muted-foreground mb-6">{teamsError.message}</p>
+					<Button onClick={() => window.location.reload()} size="lg">
+						Попробовать снова
+					</Button>
+				</motion.div>
 			</div>
 		)
 	}
@@ -720,17 +1229,20 @@ export default function DashboardPage() {
 					animate={{ opacity: 1, y: 0 }}
 					className="text-center max-w-md px-4"
 				>
-					<div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-						<Building2 className="w-10 h-10 text-primary" />
+					<div className="relative w-24 h-24 mx-auto mb-8">
+						<div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-3xl rotate-6" />
+						<div className="absolute inset-0 bg-card rounded-3xl flex items-center justify-center shadow-xl">
+							<Building2 className="w-12 h-12 text-primary" />
+						</div>
 					</div>
-					<h2 className="text-2xl font-bold mb-3">Добро пожаловать в ProRab!</h2>
+					<h2 className="text-3xl font-bold mb-3">Добро пожаловать!</h2>
 					<p className="text-muted-foreground text-lg mb-8">
 						Создайте свою первую бригаду, чтобы начать вести учёт объектов и расходов
 					</p>
 					<Button
 						onClick={() => router.push('/onboarding')}
 						size="lg"
-						className="bg-primary hover:bg-primary/90"
+						className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25"
 					>
 						<Plus className="w-5 h-5 mr-2" />
 						Создать бригаду
@@ -742,6 +1254,38 @@ export default function DashboardPage() {
 
 	return (
 		<div className="min-h-screen bg-background pb-24">
+			{/* Hidden components to load stats for each active project */}
+			{isOwner && activeProjects.map(project => (
+				<ProjectStatsLoader
+					key={project.id}
+					projectId={project.id}
+					isOwner={isOwner}
+					onStatsLoaded={handleStatsLoaded}
+				/>
+			))}
+
+			{/* Hidden components to load activity (expenses, reports) for each active project */}
+			{activeProjects.map(project => (
+				<ActivityLoader
+					key={`activity-${project.id}`}
+					projectId={project.id}
+					onExpensesLoaded={handleExpensesLoaded}
+					onReportsLoaded={handleReportsLoaded}
+				/>
+			))}
+
+			{/* Project Picker Modal */}
+			<AnimatePresence>
+				{projectPickerTab && currentTeamId && (
+					<ProjectPickerModal
+						projects={activeProjects}
+						teamId={currentTeamId}
+						tab={projectPickerTab}
+						onClose={() => setProjectPickerTab(null)}
+					/>
+				)}
+			</AnimatePresence>
+
 			{/* Header */}
 			<motion.header
 				initial={{ opacity: 0, y: -20 }}
@@ -751,78 +1295,93 @@ export default function DashboardPage() {
 			>
 				<div className="container mx-auto px-4 py-3">
 					<div className="flex items-center justify-between">
-						{/* Team Switcher */}
-						<div className="relative" ref={dropdownRef}>
-							<button
-								onClick={() => setTeamDropdownOpen(!teamDropdownOpen)}
-								className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all"
-							>
-								{currentTeam && <TeamLogo team={currentTeam} />}
-								<div className="text-left">
-									<div className="flex items-center gap-2">
-										<span className="font-semibold">{currentTeam?.name || 'Выберите бригаду'}</span>
-										{isOwner && <Crown className="w-4 h-4 text-amber-500" />}
-									</div>
-									<span className="text-xs text-muted-foreground">
-										{isOwner ? 'Владелец' : 'Участник'}
-									</span>
+						{/* Logo + Team Switcher */}
+						<div className="flex items-center gap-4">
+							{/* App Logo */}
+							<Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+								<div className="h-10 w-10 rounded-xl bg-gradient-to-br from-accent to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-accent/30">
+									PR
 								</div>
-								{teams.length > 1 && (
-									<ChevronDown
-										className={cn(
-											'w-5 h-5 text-muted-foreground transition-transform',
-											teamDropdownOpen && 'rotate-180'
-										)}
-									/>
-								)}
-							</button>
+								<span className="font-bold text-lg hidden sm:block">ProRab</span>
+							</Link>
 
-							{/* Team Dropdown */}
-							<AnimatePresence>
-								{teamDropdownOpen && teams.length > 1 && (
-									<motion.div
-										initial={{ opacity: 0, y: -10, scale: 0.95 }}
-										animate={{ opacity: 1, y: 0, scale: 1 }}
-										exit={{ opacity: 0, y: -10, scale: 0.95 }}
-										transition={{ duration: 0.15 }}
-										className="absolute top-full left-0 mt-2 w-72 bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden z-50"
-									>
-										<div className="p-2">
-											<div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase">
-												Ваши бригады
-											</div>
-											{teams.map(team => (
-												<button
-													key={team.id}
-													onClick={() => handleTeamChange(team.id)}
-													className={cn(
-														'w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all',
-														team.id === currentTeamId
-															? 'bg-primary/10 text-primary'
-															: 'hover:bg-secondary/50'
-													)}
-												>
-													<TeamLogo team={team} size="sm" />
-													<div className="flex-1 text-left">
-														<div className="flex items-center gap-2">
-															<span className="font-medium">{team.name}</span>
-															{team.ownerId === user?.id && (
-																<Crown className="w-3.5 h-3.5 text-amber-500" />
-															)}
-														</div>
-														<span className="text-xs text-muted-foreground">
-															{team.ownerId === user?.id ? 'Владелец' : 'Участник'}
-														</span>
-													</div>
-													{team.id === currentTeamId && (
-														<Check className="w-5 h-5 text-primary" />
-													)}
-												</button>
-											))}
+							{/* Divider */}
+							<div className="h-8 w-px bg-border/50 hidden sm:block" />
+
+							{/* Team Switcher */}
+							<div className="relative" ref={dropdownRef}>
+								<button
+									onClick={() => setTeamDropdownOpen(!teamDropdownOpen)}
+									className={cn(
+										'flex items-center gap-3 px-3 py-2 rounded-xl',
+										'bg-secondary/50 border border-border/30',
+										'hover:border-primary/30 hover:bg-secondary/80 transition-all duration-200'
+									)}
+								>
+									{currentTeam && <TeamLogo team={currentTeam} size="sm" />}
+									<div className="text-left hidden sm:block">
+										<div className="flex items-center gap-1.5">
+											<span className="font-medium text-sm">{currentTeam?.name || 'Бригада'}</span>
+											{isOwner && <Crown className="w-3.5 h-3.5 text-amber-500" />}
 										</div>
-									</motion.div>
-								)}
-							</AnimatePresence>
+									</div>
+									{teams.length > 1 && (
+										<ChevronDown
+											className={cn(
+												'w-4 h-4 text-muted-foreground transition-transform',
+												teamDropdownOpen && 'rotate-180'
+											)}
+										/>
+									)}
+								</button>
+
+								{/* Team Dropdown */}
+								<AnimatePresence>
+									{teamDropdownOpen && teams.length > 1 && (
+										<motion.div
+											initial={{ opacity: 0, y: -10, scale: 0.95 }}
+											animate={{ opacity: 1, y: 0, scale: 1 }}
+											exit={{ opacity: 0, y: -10, scale: 0.95 }}
+											transition={{ duration: 0.15 }}
+											className="absolute top-full left-0 mt-2 w-72 bg-card border border-border/50 rounded-2xl shadow-xl shadow-black/10 overflow-hidden z-50"
+										>
+											<div className="p-2">
+												<div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+													Ваши бригады
+												</div>
+												{teams.map(team => (
+													<button
+														key={team.id}
+														onClick={() => handleTeamChange(team.id)}
+														className={cn(
+															'w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all',
+															team.id === currentTeamId
+																? 'bg-primary/10 text-primary'
+																: 'hover:bg-secondary/50'
+														)}
+													>
+														<TeamLogo team={team} size="sm" />
+														<div className="flex-1 text-left">
+															<div className="flex items-center gap-2">
+																<span className="font-medium">{team.name}</span>
+																{team.ownerId === user?.id && (
+																	<Crown className="w-3.5 h-3.5 text-amber-500" />
+																)}
+															</div>
+															<span className="text-xs text-muted-foreground">
+																{team.ownerId === user?.id ? 'Владелец' : 'Участник'}
+															</span>
+														</div>
+														{team.id === currentTeamId && (
+															<Check className="w-5 h-5 text-primary" />
+														)}
+													</button>
+												))}
+											</div>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
 						</div>
 
 						{/* Actions */}
@@ -846,176 +1405,298 @@ export default function DashboardPage() {
 			{/* Main Content */}
 			<main className="container mx-auto px-4 py-6">
 				<motion.div initial="hidden" animate="visible" variants={stagger}>
-					{/* Greeting */}
-					<motion.div variants={fadeIn} className="mb-6">
-						<h1 className="text-2xl md:text-3xl font-bold">
-							Привет, {user?.fullName?.split(' ')[0] || 'Прораб'}! 👋
-						</h1>
-						<p className="text-muted-foreground mt-1">
-							{activeProjects.length > 0
-								? `У вас ${activeProjects.length} ${
-										activeProjects.length === 1
-											? 'активный объект'
-											: activeProjects.length >= 2 && activeProjects.length <= 4
-											? 'активных объекта'
-											: 'активных объектов'
-								  }`
-								: 'Создайте свой первый объект'}
-						</p>
-					</motion.div>
+					{/* Welcome Header */}
+					<WelcomeHeader 
+						userName={user?.fullName?.split(' ')[0] || 'Прораб'} 
+						greeting={greeting}
+					/>
 
-					{/* Financial Summary (only for owner) */}
-					{isOwner && financialMetrics.totalBudget > 0 && (
+					{/* Financial Stats (only for owner with projects) */}
+					{isOwner && stats.totalBudget > 0 && (
 						<motion.div variants={fadeIn} className="mb-8">
-							<FinancialSummary {...financialMetrics} />
+							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+								<StatsCard
+									icon={Wallet}
+									label="Сумма договоров"
+									value={formatCurrency(stats.totalBudget)}
+									subValue={formatFullCurrency(stats.totalBudget)}
+									gradient="from-blue-500/10 to-indigo-500/5"
+									iconBg="bg-gradient-to-br from-blue-500 to-indigo-600"
+								/>
+								<StatsCard
+									icon={Receipt}
+									label="Потрачено"
+									value={formatCurrency(stats.totalExpenses)}
+									subValue={formatFullCurrency(stats.totalExpenses)}
+									gradient="from-amber-500/10 to-orange-500/5"
+									iconBg="bg-gradient-to-br from-amber-500 to-orange-600"
+									valueColor="text-amber-600 dark:text-amber-400"
+								/>
+								<StatsCard
+									icon={stats.isProfitable ? TrendingUp : TrendingDown}
+									label={stats.isProfitable ? 'Прибыль' : 'Убыток'}
+									value={formatCurrency(Math.abs(stats.profit))}
+									subValue={`${Math.abs((stats.profit / stats.totalBudget) * 100).toFixed(1)}% от бюджета`}
+									gradient={stats.isProfitable ? 'from-emerald-500/10 to-teal-500/5' : 'from-red-500/10 to-rose-500/5'}
+									iconBg={stats.isProfitable ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600'}
+									valueColor={stats.isProfitable ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
+									trend={stats.isProfitable ? 'up' : 'down'}
+								/>
+								<StatsCard
+									icon={Building2}
+									label="Активных объектов"
+									value={String(stats.activeCount)}
+									subValue={stats.activeCount === 1 ? '1 объект' : stats.activeCount >= 2 && stats.activeCount <= 4 ? `${stats.activeCount} объекта` : `${stats.activeCount} объектов`}
+									gradient="from-violet-500/10 to-purple-500/5"
+									iconBg="bg-gradient-to-br from-violet-500 to-purple-600"
+								/>
+							</div>
 						</motion.div>
 					)}
 
-					{/* Search */}
-					<motion.div variants={fadeIn} className="mb-6">
-						<div className="relative max-w-md">
-							<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-							<input
-								type="text"
-								placeholder="Поиск по названию или адресу..."
-								value={searchQuery}
-								onChange={e => setSearchQuery(e.target.value)}
-								className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border/50 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
-							/>
-						</div>
-					</motion.div>
-
-					{/* Active Projects */}
-					<motion.section variants={fadeIn} className="mb-8">
-						<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-							<span className="w-2 h-2 rounded-full bg-emerald-500" />
-							Активные объекты
-							{activeProjects.length > 0 && (
-								<span className="text-sm font-normal text-muted-foreground">
-									({activeProjects.length})
-								</span>
-							)}
-						</h2>
-
-						{projectsLoading && !projectsData ? (
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-								{[1, 2, 3].map(i => (
-									<Skeleton key={i} className="h-48 rounded-2xl" />
-								))}
-							</div>
-						) : activeProjects.length > 0 ? (
-							<motion.div
-								variants={stagger}
-								className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-							>
-								{activeProjects.map(
-									project =>
-										project?.id && (
-											<motion.div key={project.id} variants={fadeIn}>
-												<ProjectCardWithStats
-													id={project.id}
-													teamId={currentTeamId || ''}
-													name={project.name || ''}
-													address={project.address}
-													photoUrl={project.photoUrl}
-													budget={project.budget}
-													progress={project.progress || 0}
-													status={project.status}
-													startDate={project.startDate}
-													endDate={project.endDate}
-													showFinancials={isOwner}
-													isOwner={isOwner}
-												/>
-											</motion.div>
-										)
-								)}
-							</motion.div>
-						) : (
-							<motion.div
-								variants={fadeIn}
-								className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-secondary/20"
-							>
-								<FolderKanban className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-								<h3 className="text-lg font-medium mb-2">
-									{searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
-								</h3>
-								<p className="text-muted-foreground mb-4">
-									{searchQuery
-										? 'Попробуйте изменить поисковый запрос'
-										: 'Создайте свой первый строительный объект'}
-								</p>
-								{!searchQuery && (
-									<Button onClick={handleCreateProject}>
-										<Plus className="w-4 h-4 mr-2" />
-										Создать объект
-									</Button>
-								)}
-							</motion.div>
-						)}
-					</motion.section>
-
-					{/* Archived Projects */}
-					{archivedProjects.length > 0 && (
-						<motion.section variants={fadeIn}>
-							<button
-								onClick={() => setShowArchived(!showArchived)}
-								className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 transition-colors mb-4"
-							>
-								<div className="flex items-center gap-2">
-									<span className="w-2 h-2 rounded-full bg-muted-foreground" />
-									<span className="font-medium">Архив</span>
-									<span className="text-sm text-muted-foreground">
-										({archivedProjects.length})
-									</span>
-								</div>
-								{showArchived ? (
-									<ChevronUp className="w-5 h-5 text-muted-foreground" />
-								) : (
-									<ChevronDown className="w-5 h-5 text-muted-foreground" />
-								)}
-							</button>
-
-							<AnimatePresence>
-								{showArchived && (
-									<motion.div
-										initial={{ opacity: 0, height: 0 }}
-										animate={{ opacity: 1, height: 'auto' }}
-										exit={{ opacity: 0, height: 0 }}
-										transition={{ duration: 0.3 }}
-										className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-									>
-										{archivedProjects.map(
-											project =>
-												project?.id && (
-													<ProjectCardWithStats
-														key={project.id}
-														id={project.id}
-														teamId={currentTeamId || ''}
-														name={project.name || ''}
-														address={project.address}
-														photoUrl={project.photoUrl}
-														budget={project.budget}
-														progress={project.progress || 0}
-														status={project.status}
-														startDate={project.startDate}
-														endDate={project.endDate}
-														showFinancials={isOwner}
-														isOwner={isOwner}
-													/>
-												)
+					{/* Two Column Layout: Projects + Sidebar */}
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+						{/* Main Column: Projects */}
+						<div className="lg:col-span-2">
+							{/* Search */}
+							<motion.div variants={fadeIn} className="mb-6">
+								<div className="relative">
+									<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+									<input
+										type="text"
+										placeholder="Поиск по названию или адресу..."
+										value={searchQuery}
+										onChange={e => setSearchQuery(e.target.value)}
+										className={cn(
+											'w-full h-12 pl-11 pr-4 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-xl text-sm',
+											'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all',
+											'placeholder:text-muted-foreground/60'
 										)}
-									</motion.div>
+									/>
+								</div>
+							</motion.div>
+
+							{/* Active Projects */}
+							<motion.section variants={fadeIn} className="mb-8">
+								<div className="flex items-center justify-between mb-4">
+									<h2 className="text-lg font-semibold flex items-center gap-2">
+										<span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+										Активные объекты
+										{activeProjects.length > 0 && (
+											<span className="text-sm font-normal text-muted-foreground">
+												({activeProjects.length})
+											</span>
+										)}
+									</h2>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={handleCreateProject}
+										className="text-primary hover:text-primary/80"
+									>
+										<Plus className="w-4 h-4 mr-1" />
+										Добавить
+									</Button>
+								</div>
+
+								{projectsLoading && !projectsData ? (
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										{[1, 2, 3, 4].map(i => (
+											<Skeleton key={i} className="h-56 rounded-2xl" />
+										))}
+									</div>
+								) : activeProjects.length > 0 ? (
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										{activeProjects.map(project => {
+											if (!project?.id) return null
+											return (
+												<ProjectCardWithStats
+													key={project.id}
+													project={project}
+													teamId={currentTeamId || ''}
+													isOwner={isOwner}
+													showFinancials={isOwner}
+												/>
+											)
+										})}
+									</div>
+								) : (
+									<EmptyState
+										icon={FolderKanban}
+										title={searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
+										description={searchQuery 
+											? 'Попробуйте изменить поисковый запрос'
+											: 'Создайте свой первый строительный объект и начните вести учёт'
+										}
+										action={!searchQuery ? { label: 'Создать объект', onClick: handleCreateProject } : undefined}
+									/>
 								)}
-							</AnimatePresence>
-						</motion.section>
-					)}
+							</motion.section>
+
+							{/* Archived Projects */}
+							{archivedProjects.length > 0 && (
+								<motion.section variants={fadeIn}>
+									<button
+										onClick={() => setShowArchived(!showArchived)}
+										className={cn(
+											'w-full flex items-center justify-between p-4 rounded-2xl',
+											'bg-secondary/30 border border-border/30',
+											'hover:bg-secondary/50 transition-colors mb-4'
+										)}
+									>
+										<div className="flex items-center gap-2">
+											<span className="w-2 h-2 rounded-full bg-muted-foreground" />
+											<span className="font-medium">Архив</span>
+											<span className="text-sm text-muted-foreground">
+												({archivedProjects.length})
+											</span>
+										</div>
+										<motion.div
+											animate={{ rotate: showArchived ? 180 : 0 }}
+											transition={{ duration: 0.2 }}
+										>
+											<ChevronDown className="w-5 h-5 text-muted-foreground" />
+										</motion.div>
+									</button>
+
+									<AnimatePresence>
+										{showArchived && (
+											<motion.div
+												initial={{ opacity: 0, height: 0 }}
+												animate={{ opacity: 1, height: 'auto' }}
+												exit={{ opacity: 0, height: 0 }}
+												transition={{ duration: 0.3 }}
+											>
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													{archivedProjects.map(project => {
+														if (!project?.id) return null
+														return (
+															<ProjectCardWithStats
+																key={project.id}
+																project={project}
+																teamId={currentTeamId || ''}
+																isOwner={isOwner}
+																showFinancials={isOwner}
+															/>
+														)
+													})}
+												</div>
+											</motion.div>
+										)}
+									</AnimatePresence>
+								</motion.section>
+							)}
+						</div>
+
+						{/* Sidebar: Recent Activity */}
+						<div className="lg:col-span-1 space-y-6">
+							{/* Recent Expenses */}
+							<motion.section variants={fadeIn}>
+								<div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-xl overflow-hidden">
+									<div className="p-4 border-b border-border/30">
+										<div className="flex items-center justify-between">
+											<h3 className="font-semibold flex items-center gap-2">
+												<Receipt className="w-4 h-4 text-amber-500" />
+												Последние расходы
+											</h3>
+											{recentExpenses.length > 0 && (
+												<span className="text-xs text-muted-foreground">
+													{recentExpenses.length} записей
+												</span>
+											)}
+										</div>
+									</div>
+									<div className="p-3">
+										{recentExpenses.length > 0 ? (
+											<motion.div variants={stagger} className="space-y-2">
+												{recentExpenses.map(expense => (
+													<RecentExpenseCard
+														key={expense.id}
+														expense={expense}
+														projectName={projectNameMap.get(expense.projectId) || 'Проект'}
+													/>
+												))}
+											</motion.div>
+										) : (
+											<div className="text-center py-8">
+												<Receipt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+												<p className="text-sm text-muted-foreground">Нет расходов</p>
+												<p className="text-xs text-muted-foreground/60 mt-1">
+													Добавьте расход в проекте
+												</p>
+											</div>
+										)}
+									</div>
+								</div>
+							</motion.section>
+
+							{/* Recent Photo Reports */}
+							<motion.section variants={fadeIn}>
+								<div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-xl overflow-hidden">
+									<div className="p-4 border-b border-border/30">
+										<div className="flex items-center justify-between">
+											<h3 className="font-semibold flex items-center gap-2">
+												<Camera className="w-4 h-4 text-violet-500" />
+												Фотоотчёты
+											</h3>
+											{recentReports.length > 0 && (
+												<span className="text-xs text-muted-foreground">
+													{recentReports.length} отчётов
+												</span>
+											)}
+										</div>
+									</div>
+									<div className="p-3">
+										{recentReports.length > 0 ? (
+											<motion.div variants={stagger} className="space-y-2">
+												{recentReports.map(report => (
+													<RecentPhotoReportCard
+														key={report.id}
+														report={report}
+														projectName={projectNameMap.get(report.projectId) || 'Проект'}
+													/>
+												))}
+											</motion.div>
+										) : (
+											<div className="text-center py-8">
+												<Camera className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+												<p className="text-sm text-muted-foreground">Нет фотоотчётов</p>
+												<p className="text-xs text-muted-foreground/60 mt-1">
+													Создайте отчёт в проекте
+												</p>
+											</div>
+										)}
+									</div>
+								</div>
+							</motion.section>
+
+							{/* Quick Tips */}
+							<motion.section variants={fadeIn}>
+								<div className="rounded-2xl border border-border/30 bg-gradient-to-br from-primary/5 to-blue-500/5 p-4">
+									<div className="flex items-start gap-3">
+										<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+											<Sparkles className="w-5 h-5 text-primary" />
+										</div>
+										<div>
+											<h4 className="font-semibold text-sm mb-1">Совет дня</h4>
+											<p className="text-xs text-muted-foreground leading-relaxed">
+												{dailyTip}
+											</p>
+										</div>
+									</div>
+								</div>
+							</motion.section>
+						</div>
+					</div>
 				</motion.div>
 			</main>
 
 			{/* FAB Menu */}
 			<FabMenu
 				onCreateProject={handleCreateProject}
-				hasActiveProject={activeProjects.length > 0}
+				activeProjects={activeProjects}
+				teamId={currentTeamId}
+				onOpenProjectPicker={setProjectPickerTab}
 			/>
 		</div>
 	)
