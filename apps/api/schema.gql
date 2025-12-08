@@ -340,10 +340,16 @@ type PublicPhotoReport {
   createdAt: DateTime!
   description: String
   photos: [ReportPhoto!]!
+  project: PublicProject!
   publishedAt: DateTime
   slug: String!
   title: String!
   viewCount: Int!
+}
+
+type PublicProject {
+  address: String
+  name: String!
 }
 
 type Query {

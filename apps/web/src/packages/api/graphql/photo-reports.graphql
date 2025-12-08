@@ -22,6 +22,10 @@ fragment PublicPhotoReportFields on PublicPhotoReport {
   viewCount
   createdAt
   publishedAt
+  project {
+    name
+    address
+  }
 }
 
 fragment ReportPhotoFields on ReportPhoto {

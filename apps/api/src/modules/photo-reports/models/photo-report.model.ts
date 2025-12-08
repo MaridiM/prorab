@@ -2,6 +2,15 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ReportPhoto } from './report-photo.model';
 
 @ObjectType()
+export class PublicProject {
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  address?: string;
+}
+
+@ObjectType()
 export class PhotoReport {
   @Field()
   id: string;
@@ -65,6 +74,9 @@ export class PublicPhotoReport {
 
   @Field({ nullable: true })
   publishedAt?: Date;
+
+  @Field(() => PublicProject)
+  project: PublicProject;
 
   @Field(() => [ReportPhoto])
   photos: ReportPhoto[];

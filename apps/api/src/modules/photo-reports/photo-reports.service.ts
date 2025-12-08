@@ -252,6 +252,24 @@ export class PhotoReportsService {
   }
 
   /**
+   * Увеличить счётчик просмотров фотоотчёта
+   * Вызывается асинхронно, ошибки не блокируют основной запрос
+   */
+  async incrementViewCount(reportId: string): Promise<void> {
+    try {
+      await this.prisma.photoReport.update({
+        where: { id: reportId },
+        data: {
+          viewCount: { increment: 1 },
+        },
+      });
+    } catch (error) {
+      // Логируем ошибку, но не пробрасываем её дальше
+      console.error(`Failed to increment view count for report ${reportId}:`, error);
+    }
+  }
+
+  /**
    * PUBLIC: Получить фотоотчёт по slug (без аутентификации)
    */
   async getPublicPhotoReportBySlug(slug: string) {
@@ -260,6 +278,12 @@ export class PhotoReportsService {
       include: {
         photos: {
           orderBy: { orderIndex: 'asc' },
+        },
+        project: {
+          select: {
+            name: true,
+            address: true,
+          },
         },
       },
     });
@@ -272,12 +296,10 @@ export class PhotoReportsService {
       throw new BadRequestException('Этот фотоотчёт недоступен публично');
     }
 
-    // Увеличиваем счётчик просмотров
-    await this.prisma.photoReport.update({
-      where: { id: report.id },
-      data: {
-        viewCount: { increment: 1 },
-      },
+    // Увеличиваем счётчик просмотров асинхронно (не ждём завершения)
+    // Это не должно блокировать ответ пользователю
+    this.incrementViewCount(report.id).catch((err) => {
+      console.error('Error incrementing view count:', err);
     });
 
     return report;

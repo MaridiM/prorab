@@ -73,3 +73,11 @@ export const apolloClient = new ApolloClient({
     mutate: { errorPolicy: 'all' },
   },
 });
+
+/**
+ * Get Apollo Client instance for Server Components
+ * Use this in Server Components for SSR/SSG data fetching
+ */
+export function getClient() {
+  return apolloClient;
+}
