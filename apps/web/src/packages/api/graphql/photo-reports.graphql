@@ -83,6 +83,12 @@ mutation ReorderReportPhotos($reportId: String!, $photoIds: [String!]!) {
   reorderReportPhotos(reportId: $reportId, photoIds: $photoIds)
 }
 
+mutation UpdatePhotoCaption($photoId: String!, $caption: String!) {
+  updatePhotoCaption(photoId: $photoId, caption: $caption) {
+    ...ReportPhotoFields
+  }
+}
+
 # Queries
 query ProjectPhotoReports($projectId: String!) {
   projectPhotoReports(projectId: $projectId) {

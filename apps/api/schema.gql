@@ -197,6 +197,9 @@ type Mutation {
   """Обновить расход"""
   updateExpense(input: UpdateExpenseInput!): Expense!
 
+  """Обновить подпись фото"""
+  updatePhotoCaption(caption: String!, photoId: String!): ReportPhoto!
+
   """Обновить фотоотчёт"""
   updatePhotoReport(input: UpdatePhotoReportInput!): PhotoReport!
 

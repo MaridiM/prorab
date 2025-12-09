@@ -1388,11 +1388,11 @@ export default function DashboardPage() {
 						<div className="flex items-center gap-2">
 							<Button
 								variant="ghost"
-								size="icon"
-								className="hidden md:flex"
 								onClick={() => router.push('/teams')}
+								className="hidden md:flex items-center gap-2"
 							>
 								<Users className="w-5 h-5" />
+								<span>Мои команды</span>
 							</Button>
 							<Button variant="ghost" size="icon" onClick={handleLogout}>
 								<LogOut className="w-5 h-5" />

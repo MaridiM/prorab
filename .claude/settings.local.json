@@ -32,7 +32,8 @@
       "Bash(npm run codegen:web:*)",
       "Bash(cat:*)",
       "Bash(dir /b /ad \"G:\\Projects\\prorab\\v-1\\apps\\web\\src\\app\\components\")",
-      "Bash(cmd /c \"dir /b /ad G:\\Projects\\prorab\\v-1\\apps\\web\\src\\packages\\components\")"
+      "Bash(cmd /c \"dir /b /ad G:\\Projects\\prorab\\v-1\\apps\\web\\src\\packages\\components\")",
+      "Bash(pnpm add:concurrently:*)"
     ],
     "deny": [],
     "ask": []

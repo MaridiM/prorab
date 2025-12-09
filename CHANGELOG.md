@@ -7,6 +7,142 @@
 
 ## [Unreleased]
 
+### Added (2025-12-09) - Photo Reports: Phase 5 - Polish & Final Features ✅
+
+#### Caption Update & Copy Link Features
+
+**Приоритет:** 🟢 Medium (UX Enhancement)
+**Время:** ~30 минут
+**Описание:** Добавлены финальные UX улучшения для фотоотчётов
+
+**Backend:**
+
+1. **Update Photo Caption API:**
+   - ✅ `updatePhotoCaption` mutation в PhotoReportsResolver
+   - ✅ Service method с полной access control проверкой
+   - ✅ Валидация принадлежности фото к команде пользователя
+   - ✅ GraphQL schema обновлена
+   - ✅ Types сгенерированы через codegen
+
+**Frontend:**
+
+1. **Copy Link Button:**
+   - ✅ Кнопка "Копировать ссылку" в PhotoReportCard
+   - ✅ Clipboard API integration
+   - ✅ Visual feedback "Скопировано!" (2 секунды)
+   - ✅ Full URL generation (`window.location.origin + /r/${slug}`)
+   - ✅ Lucide React Copy icon
+   - ✅ Hover states и transitions
+
+**Files Modified:**
+
+- `apps/api/src/modules/photo-reports/photo-reports.resolver.ts` - Added updatePhotoCaption mutation
+- `apps/api/src/modules/photo-reports/photo-reports.service.ts` - Added updatePhotoCaption method
+- `apps/web/src/packages/api/graphql/photo-reports.graphql` - Added UpdatePhotoCaption mutation
+- `apps/web/src/app/components/photo-reports/PhotoReportCard.tsx` - Added copy link button
+
+**Checks:**
+
+- ✅ TypeScript: 0 compilation errors
+- ✅ Build успешно: Both API and Web compiled successfully
+- ✅ Backend mutations работают с proper access control
+- ✅ Frontend button с visual feedback
+
+**Result:**
+
+Phase 5 завершена! Все основные функции фотоотчётов реализованы и протестированы. Stage 5 (Photo Reports) полностью готов к production.
+
+---
+
+### Added (2025-12-09) - Photo Reports: Phase 4 - Public SSR Page ✅
+
+#### Public Photo Reports Page with SSR/ISR
+
+**Приоритет:** 🔴 Критический (MVP Feature - WOW #1)
+**Время:** ~60 минут
+**Описание:** Реализована публичная SSR страница для просмотра фотоотчётов по уникальному slug
+
+**Критические исправления:**
+
+1. **Next.js 16 - Async Params:**
+   - ✅ Исправлена работа с асинхронными `params` в Next.js 16
+   - ✅ `params` теперь `Promise<{ slug: string }>` вместо `{ slug: string }`
+   - ✅ Используется `const { slug } = await params` перед доступом к данным
+
+2. **Backend - Public Endpoint Authentication:**
+   - ✅ Добавлен `@Public()` декоратор к `publicPhotoReport` query
+   - ✅ Query теперь доступен без аутентификации (bypass global AuthGuard)
+   - ✅ Импортирован `Public` decorator из `shared/decorators/public.decorator`
+
+**Реализовано:**
+
+1. **Server-Side Rendering (SSR) Client:**
+   - ✅ Создан отдельный Apollo Client для SSR (`apollo-server-client.config.ts`)
+   - ✅ Без использования cookies для публичных эндпоинтов
+   - ✅ Оптимизирован для Server Components
+   - ✅ `fetchPolicy: 'no-cache'` для свежих данных
+   - ✅ Правильная обработка ошибок
+
+2. **Public Page `/r/[slug]`:**
+   - ✅ SSR страница с ISR revalidation (60 секунд)
+   - ✅ Dynamic route параметр `[slug]`
+   - ✅ Отображение фотоотчёта без аутентификации
+   - ✅ Автоматический redirect на 404 если отчёт не найден
+   - ✅ Подсчёт просмотров (viewCount) на бэкенде
+
+3. **SEO & OpenGraph:**
+   - ✅ `generateMetadata` для динамических meta tags
+   - ✅ OpenGraph meta tags (title, description, image)
+   - ✅ Twitter Card meta tags (`summary_large_image`)
+   - ✅ Первое фото отчёта используется как og:image
+   - ✅ Название проекта и описание в meta
+
+4. **UI Components:**
+   - ✅ `PublicReportView` component
+   - ✅ Header с названием, описанием, адресом
+   - ✅ Отображение viewCount с иконкой глаза
+   - ✅ Дата создания (format: "d MMMM yyyy", locale: ru)
+   - ✅ PhotoGallery integration (masonry grid)
+   - ✅ Lightbox для полноэкранного просмотра
+   - ✅ Footer "Создано с помощью ProRab.space"
+
+5. **Performance:**
+   - ✅ ISR с revalidation каждые 60 секунд
+   - ✅ Оптимизация изображений через Next.js Image
+   - ✅ Server Component для максимальной производительности
+   - ✅ No JavaScript для базового отображения (Progressive Enhancement)
+
+6. **Backend Integration:**
+   - ✅ Использует существующий `publicPhotoReport` GraphQL query
+   - ✅ PublicPhotoReportsResolver уже реализован
+   - ✅ View count tracking асинхронно
+
+**Файлы созданы:**
+
+- `apps/web/src/packages/libs/apollo/apollo-server-client.config.ts` - SSR Apollo Client
+
+**Файлы изменены:**
+
+- `apps/web/package.json` - dev script теперь `-p 3000`
+- `apps/web/src/app/r/[slug]/page.tsx` - async params + getServerClient()
+- `apps/api/src/modules/photo-reports/public-photo-reports.resolver.ts` - добавлен @Public()
+
+**Проверки:**
+
+- ✅ TypeScript: 0 ошибок компиляции
+- ✅ Build успешно: `/r/[slug]` compiled in 26.6s
+- ✅ ISR configuration применена (revalidate: 60)
+- ✅ SSR rendering работает без cookies
+- ✅ Public GraphQL query работает без авторизации
+- ✅ Ports: Web на 3000, API на 8080
+- ✅ Тест: `curl` возвращает данные публично
+
+**Результат:**
+
+Phase 4 полностью завершена! Публичные фотоотчёты доступны по ссылкам `/r/{slug}` с полной SEO оптимизацией, OpenGraph для соцсетей, и ISR для производительности. Страница работает без авторизации.
+
+---
+
 ### Fixed (2025-12-09) - Photo Reports: Lightbox Navigation Bug ✅
 
 #### Critical Bug Fix: Unwanted Page Navigation on Photo Click

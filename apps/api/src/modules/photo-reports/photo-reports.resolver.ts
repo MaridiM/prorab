@@ -94,4 +94,14 @@ export class PhotoReportsResolver {
   ) {
     return this.photoReportsService.reorderReportPhotos(reportId, photoIds, user.id);
   }
+
+  @Mutation(() => ReportPhoto, { description: 'Обновить подпись фото' })
+  @UseGuards(AuthGuard)
+  async updatePhotoCaption(
+    @CurrentUser() user: { id: string },
+    @Args('photoId') photoId: string,
+    @Args('caption') caption: string,
+  ) {
+    return this.photoReportsService.updatePhotoCaption(photoId, caption, user.id);
+  }
 }

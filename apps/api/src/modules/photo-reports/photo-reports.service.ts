@@ -521,4 +521,49 @@ export class PhotoReportsService {
 
     return true;
   }
+
+  /**
+   * Обновить подпись фото
+   */
+  async updatePhotoCaption(
+    photoId: string,
+    caption: string,
+    userId: string
+  ) {
+    // Находим фото с проверкой доступа
+    const photo = await this.prisma.reportPhoto.findUnique({
+      where: { id: photoId },
+      include: {
+        report: {
+          include: {
+            project: {
+              include: {
+                team: {
+                  include: {
+                    members: {
+                      where: { userId },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!photo) {
+      throw new NotFoundException('Фото не найдено');
+    }
+
+    if (photo.report.project.team.members.length === 0) {
+      throw new BadRequestException('У вас нет доступа к этому фото');
+    }
+
+    // Обновляем подпись
+    return this.prisma.reportPhoto.update({
+      where: { id: photoId },
+      data: { caption },
+    });
+  }
 }

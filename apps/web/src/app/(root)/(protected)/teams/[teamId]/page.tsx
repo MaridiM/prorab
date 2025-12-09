@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState, useMemo, useEffect } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@apollo/client/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -47,12 +47,19 @@ type StatusFilter = 'ALL' | 'ACTIVE' | 'ARCHIVED' | 'COMPLETED'
 export default function TeamDashboardPage() {
 	const params = useParams()
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const { user } = useAuth()
 	const teamId = params.teamId as string
 
-	const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL')
+	const statusFilter = (searchParams.get('filter') as StatusFilter) || 'ALL'
 	const [searchQuery, setSearchQuery] = useState('')
 	const [showArchived, setShowArchived] = useState(false)
+
+	const setStatusFilter = (filter: StatusFilter) => {
+		const newParams = new URLSearchParams(searchParams.toString())
+		newParams.set('filter', filter)
+		router.replace(`?${newParams.toString()}`, { scroll: false })
+	}
 
 	// Загрузка команды
 	const { data: teamsData, loading: teamsLoading } = useQuery(MyTeamsDocument)

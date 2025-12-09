@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Calendar, Eye, Image as ImageIcon, MoreVertical, Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { Calendar, Eye, Image as ImageIcon, MoreVertical, Pencil, Trash2, ExternalLink, Copy } from 'lucide-react';
 import type { PhotoReportFieldsFragment } from '@/packages/api/graphql/__generated__/output';
 
 interface PhotoReportCardProps {
@@ -21,6 +21,7 @@ export function PhotoReportCard({
   apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
 }: PhotoReportCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const photoCount = report.photos?.length || 0;
   const coverUrl = report.coverPhotoUrl
@@ -28,6 +29,19 @@ export function PhotoReportCard({
     : null;
 
   const publicUrl = `/r/${report.slug}`;
+  const fullPublicUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}${publicUrl}`
+    : publicUrl;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(fullPublicUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString('ru-RU', {
@@ -145,14 +159,24 @@ export function PhotoReportCard({
 
         {/* Public link */}
         {report.isPublic && (
-          <Link
-            href={publicUrl}
-            target="_blank"
-            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 hover:underline"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Открыть публичную ссылку
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={publicUrl}
+              target="_blank"
+              className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Открыть публичную ссылку
+            </Link>
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              title="Копировать ссылку"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {copySuccess ? 'Скопировано!' : 'Копировать'}
+            </button>
+          </div>
         )}
       </div>
     </div>

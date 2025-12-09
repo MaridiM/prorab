@@ -1,21 +1,22 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { PublicPhotoReportDocument } from '@/packages/api/graphql/__generated__/output'
-import { getClient } from '@/packages/libs/apollo/apollo-client.config'
+import { getServerClient } from '@/packages/libs/apollo/apollo-server-client.config'
 import { PublicReportView } from './PublicReportView'
 
 interface PageProps {
-	params: { slug: string }
+	params: Promise<{ slug: string }>
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-	const client = getClient()
+	const { slug } = await params
+	const client = getServerClient()
 
 	try {
 		const { data } = await client.query({
 			query: PublicPhotoReportDocument,
-			variables: { slug: params.slug },
+			variables: { slug },
 		})
 
 		if (!data) {
@@ -50,22 +51,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 	}
 }
 
+// ISR configuration: revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function PublicPhotoReportPage({ params }: PageProps) {
-	const client = getClient()
+	const { slug } = await params
+	const client = getServerClient()
 
 	try {
 		const { data } = await client.query({
 			query: PublicPhotoReportDocument,
-			variables: { slug: params.slug },
-			fetchPolicy: 'no-cache', // Always fetch fresh data for view count
+			variables: { slug },
 		})
 
-		if (!data) {
+		if (!data || !data.publicPhotoReport) {
 			notFound()
 		}
 
 		return <PublicReportView report={data.publicPhotoReport as any} />
 	} catch (error) {
+		console.error('[PublicPhotoReportPage] Error fetching report:', error);
 		notFound()
 	}
 }
