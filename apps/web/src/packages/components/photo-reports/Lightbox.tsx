@@ -57,11 +57,19 @@ export function Lightbox({ photos, currentIndex, isOpen, onClose, onNext, onPrev
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
 					className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
-					onClick={onClose}
+					onClick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						onClose();
+					}}
 				>
 					{/* Close button */}
 					<button
-						onClick={onClose}
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							onClose();
+						}}
 						className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
 						aria-label="Закрыть"
 					>
@@ -73,8 +81,9 @@ export function Lightbox({ photos, currentIndex, isOpen, onClose, onNext, onPrev
 						<>
 							<button
 								onClick={(e) => {
-									e.stopPropagation()
-									onPrev()
+									e.preventDefault();
+									e.stopPropagation();
+									onPrev();
 								}}
 								className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
 								aria-label="Предыдущее фото"
@@ -84,8 +93,9 @@ export function Lightbox({ photos, currentIndex, isOpen, onClose, onNext, onPrev
 
 							<button
 								onClick={(e) => {
-									e.stopPropagation()
-									onNext()
+									e.preventDefault();
+									e.stopPropagation();
+									onNext();
 								}}
 								className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
 								aria-label="Следующее фото"
@@ -98,7 +108,10 @@ export function Lightbox({ photos, currentIndex, isOpen, onClose, onNext, onPrev
 					{/* Image */}
 					<div
 						className="absolute inset-0 flex items-center justify-center p-4 md:p-8"
-						onClick={(e) => e.stopPropagation()}
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
 					>
 						<motion.div
 							key={currentIndex}

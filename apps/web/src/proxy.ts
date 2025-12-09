@@ -18,11 +18,19 @@ const protectedPaths = [
   '/teams',
 ]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Get sessionToken from cookies
   const sessionToken = request.cookies.get('session_token')?.value
+
+  // If user is authenticated and trying to access auth pages - redirect to dashboard
+  // Note: We can't check onboarding status here, so we redirect to dashboard
+  // AuthProvider on client side will handle onboarding redirect if needed
+  if (sessionToken && (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register'))) {
+    const dashboardUrl = new URL('/dashboard', request.url)
+    return NextResponse.redirect(dashboardUrl)
+  }
 
   // Check if route is public
   const isPublic = publicPaths.some(path =>
@@ -69,3 +77,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+

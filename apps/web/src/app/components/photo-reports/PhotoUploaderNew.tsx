@@ -1,9 +1,30 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Upload, X, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, X, Loader2, AlertCircle, Maximize2, GripVertical } from 'lucide-react';
 import { validatePhotoFile } from '@/packages/schemas/photo-reports';
 import type { ProjectPhotoReportsQuery } from '@/packages/api/graphql/__generated__/output';
+import { Lightbox } from '@/packages/components/photo-reports/Lightbox';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  DragStartEvent,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type PhotoReportWithPhotos = ProjectPhotoReportsQuery['projectPhotoReports'][0];
 
@@ -11,6 +32,8 @@ interface PhotoUploaderNewProps {
   report: PhotoReportWithPhotos;
   onUpload: (file: File, caption?: string) => Promise<void>;
   onDeletePhoto: (photoId: string) => Promise<void>;
+  onReorder: (newOrder: string[]) => void;
+  onCaptionChange: (photoId: string, caption: string) => void;
   maxFiles?: number;
   disabled?: boolean;
 }
@@ -24,89 +47,222 @@ interface PendingPhoto {
   uploading: boolean;
 }
 
+// --- Sortable Item Component ---
+interface SortablePhotoProps {
+  photo: any;
+  isPending?: boolean;
+  disabled?: boolean;
+  onDelete: (e: React.MouseEvent, id: string) => void;
+  onClick: (id: string) => void;
+  onCaptionChange?: (id: string, caption: string) => void;
+}
+
+function SortablePhoto({ photo, isPending, disabled, onDelete, onClick, onCaptionChange }: SortablePhotoProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: photo.id, disabled: disabled || isPending });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative group bg-secondary rounded-lg border border-border overflow-hidden flex flex-col ${
+        isPending ? 'border-dashed border-2' : ''
+      }`}
+    >
+      {/* Image Container */}
+      <div className="relative aspect-square w-full bg-black/5">
+        <img
+          src={isPending ? photo.preview : photo.thumbnailUrl || photo.photoUrl}
+          alt={photo.caption || ''}
+          className={`w-full h-full object-contain ${!isPending ? 'cursor-pointer' : ''} ${isPending && photo.uploading ? 'opacity-50' : ''}`}
+          onClick={(e) => { if (!isPending) { e.preventDefault(); e.stopPropagation(); onClick(photo.id); } }}
+        />
+        
+        {/* Pending Overlay */}
+        {isPending && photo.uploading && (
+           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
+             <Loader2 className="h-6 w-6 text-primary animate-spin" />
+             <span className="text-xs font-medium mt-1">Загрузка...</span>
+           </div>
+        )}
+
+        {isPending && photo.error && (
+           <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/10 backdrop-blur-sm p-2">
+             <AlertCircle className="h-5 w-5 text-destructive mb-1" />
+             <p className="text-xs text-destructive text-center line-clamp-2">{photo.error}</p>
+           </div>
+        )}
+
+        {/* Drag Handle */}
+        {!disabled && !isPending && (
+          <div 
+            {...attributes} 
+            {...listeners} 
+            className="absolute top-2 left-2 p-1.5 bg-black/40 hover:bg-black/60 text-white rounded cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <GripVertical className="h-4 w-4" />
+          </div>
+        )}
+
+        {/* Delete Button */}
+        {!disabled && (
+          <button
+            onClick={(e) => onDelete(e, photo.id)}
+            className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 shadow-lg"
+            title={isPending ? "Отменить" : "Удалить"}
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+
+        {/* View Button */}
+        {!isPending && (
+          <button
+             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(photo.id); }}
+             className="absolute bottom-2 right-2 p-1.5 bg-black/40 hover:bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+             title="Просмотр в полноэкранном режиме"
+          >
+             <Maximize2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Caption Input */}
+      <div className="p-2 bg-background border-t border-border">
+        <input
+          type="text"
+          placeholder="Подпись..."
+          value={photo.caption || ''}
+          onChange={(e) => onCaptionChange && onCaptionChange(photo.id, e.target.value)}
+          disabled={disabled}
+          className="w-full text-xs px-2 py-1 rounded border border-border bg-muted/50 focus:bg-background focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+          onKeyDown={(e) => e.stopPropagation()} // Allow typing space without triggering drag/nav
+        />
+      </div>
+    </div>
+  );
+}
+
+// --- Main Component ---
+
 export function PhotoUploaderNew({
   report,
   onUpload,
   onDeletePhoto,
+  onReorder,
+  onCaptionChange,
   maxFiles = 20,
   disabled = false,
 }: PhotoUploaderNewProps) {
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Calculate how many more photos can be added
-  const reportPhotos = report.photos || [];
-  const currentCount = reportPhotos.length + pendingPhotos.length;
-  const remainingSlots = maxFiles - currentCount;
-  const canAddMore = remainingSlots > 0 && !disabled;
+  // Combine uploaded and pending photos for unified display
+  const uploadedPhotos = report.photos || [];
+  
+  // Only uploaded photos are sortable via dnd-kit context
+  // Pending photos are displayed at the end
+  const allPhotos = [...uploadedPhotos];
+  const itemIds = allPhotos.map(p => p.id);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), // Requires movement for drag
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // --- Handlers ---
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (active.id !== over?.id) {
+       const oldIndex = itemIds.indexOf(active.id as string);
+       const newIndex = itemIds.indexOf(over?.id as string);
+       
+       if (oldIndex !== -1 && newIndex !== -1) {
+         // Create new sorted array of IDs
+         const newOrder = arrayMove(itemIds, oldIndex, newIndex);
+         onReorder(newOrder);
+       }
+    }
+  };
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
-      if (!files || !canAddMore) return;
+       if (!files || disabled) return;
+       const remainingSlots = maxFiles - (uploadedPhotos.length + pendingPhotos.length);
+       if (remainingSlots <= 0) return;
 
-      const fileArray = Array.from(files).slice(0, remainingSlots);
-      const newPending: PendingPhoto[] = [];
+       const fileArray = Array.from(files).slice(0, remainingSlots);
+       const newPending: PendingPhoto[] = [];
 
-      fileArray.forEach((file) => {
-        const validation = validatePhotoFile(file);
-        const preview = validation.valid ? URL.createObjectURL(file) : '';
+       fileArray.forEach((file) => {
+         const validation = validatePhotoFile(file);
+         const preview = validation.valid ? URL.createObjectURL(file) : '';
+         newPending.push({
+           id: `pending-${Date.now()}-${Math.random()}`,
+           file,
+           preview,
+           caption: '',
+           error: validation.error,
+           uploading: false,
+         });
+       });
 
-        newPending.push({
-          id: `pending-${Date.now()}-${Math.random()}`,
-          file,
-          preview,
-          caption: '',
-          error: validation.error,
-          uploading: false,
-        });
-      });
+       setPendingPhotos((prev) => [...prev, ...newPending]);
+       if (fileInputRef.current) fileInputRef.current.value = '';
 
-      setPendingPhotos((prev) => [...prev, ...newPending]);
-
-      // Reset file input so the same file can be selected again
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      // Auto-upload valid photos
-      newPending.forEach((photo) => {
-        if (!photo.error) {
-          handleUploadPhoto(photo.id, photo.file);
-        }
-      });
+       // Auto-upload valid photos
+       newPending.forEach((photo) => {
+         if (!photo.error) {
+           handleUploadPhoto(photo.id, photo.file);
+         }
+       });
     },
-    [canAddMore, remainingSlots]
+    [disabled, maxFiles, uploadedPhotos.length, pendingPhotos.length]
   );
 
   const handleUploadPhoto = useCallback(
     async (pendingId: string, file: File) => {
-      // Set uploading state
       setPendingPhotos((prev) =>
         prev.map((p) => (p.id === pendingId ? { ...p, uploading: true, error: undefined } : p))
       );
 
       try {
-        await onUpload(file); // Use the file passed directly
-
-        // Remove from pending after successful upload
+        await onUpload(file); // Parent handles API call
+        
+        // Remove from pending on success
         setPendingPhotos((prev) => {
           const photo = prev.find((p) => p.id === pendingId);
-          // Cleanup preview URL
-          if (photo?.preview) {
-            URL.revokeObjectURL(photo.preview);
-          }
+          if (photo?.preview) URL.revokeObjectURL(photo.preview);
           return prev.filter((p) => p.id !== pendingId);
         });
       } catch (error) {
         setPendingPhotos((prev) =>
           prev.map((p) =>
             p.id === pendingId
-              ? {
-                  ...p,
-                  uploading: false,
-                  error: error instanceof Error ? error.message : 'Ошибка загрузки',
-                }
+              ? { ...p, uploading: false, error: error instanceof Error ? error.message : 'Ошибка' }
               : p
           )
         );
@@ -115,178 +271,136 @@ export function PhotoUploaderNew({
     [onUpload]
   );
 
-  const handleRemovePending = useCallback((pendingId: string) => {
-    setPendingPhotos((prev) => {
-      const photo = prev.find((p) => p.id === pendingId);
-      if (photo?.preview) {
-        URL.revokeObjectURL(photo.preview);
-      }
-      return prev.filter((p) => p.id !== pendingId);
-    });
+  const handleRemovePending = useCallback((id: string) => {
+     setPendingPhotos(prev => {
+        const p = prev.find(item => item.id === id);
+        if (p?.preview) URL.revokeObjectURL(p.preview);
+        return prev.filter(item => item.id !== id);
+     });
   }, []);
 
   const handleDeleteUploaded = useCallback(
-    async (e: React.MouseEvent, photoId: string) => {
+    async (e: React.MouseEvent, id: string) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!confirm('Удалить это фото?')) return;
-      try {
-        await onDeletePhoto(photoId);
-      } catch (error) {
-        alert(error instanceof Error ? error.message : 'Ошибка удаления');
+      if(confirm('Удалить фото?')) {
+        await onDeletePhoto(id);
       }
     },
     [onDeletePhoto]
   );
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      if (canAddMore) {
-        handleFiles(e.dataTransfer.files);
-      }
-    },
-    [canAddMore, handleFiles]
-  );
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  // File Drop Zone
+  const onFileDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
-  }, []);
+    setIsDraggingFile(false);
+    handleFiles(e.dataTransfer.files);
+  };
 
-  const handleDragLeave = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  const handleClick = useCallback(() => {
-    if (canAddMore) {
-      fileInputRef.current?.click();
-    }
-  }, [canAddMore]);
+  const activePhoto = activeId ? allPhotos.find(p => p.id === activeId) : null;
 
   return (
     <div className="space-y-4">
-      {/* Upload Zone */}
-      {canAddMore && (
+      {/* Upload Area */}
+      {!disabled && (
         <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={handleClick}
+          onDrop={onFileDrop}
+          onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+          onDragLeave={() => setIsDraggingFile(false)}
+          onClick={() => fileInputRef.current?.click()}
           className={`
             relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer
-            transition-all duration-200
-            ${
-              isDragging
-                ? 'border-primary bg-primary/5 scale-[1.01]'
-                : 'border-border hover:border-primary/50 hover:bg-secondary/30'
-            }
-            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            transition-all duration-200 group
+            ${isDraggingFile ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-border hover:border-primary/50 hover:bg-secondary/30'}
           `}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => handleFiles(e.target.files)}
-            className="hidden"
-            disabled={disabled}
-          />
-          <div className="flex flex-col items-center gap-2">
-            <div className="p-2 rounded-full bg-primary/10">
+          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFiles(e.target.files)} className="hidden" />
+          <div className="flex flex-col items-center gap-2 pointer-events-none">
+            <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
               <Upload className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Перетащите фото или кликните для выбора
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                PNG, JPG, WEBP до 5MB • Осталось мест: {remainingSlots}
-              </p>
+              <p className="text-sm font-medium">Нажмите или перетащите фото</p>
+              <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP до 5MB</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Photos Grid */}
-      {(reportPhotos.length > 0 || pendingPhotos.length > 0) && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {/* Uploaded Photos */}
-          {reportPhotos.map((photo) => (
-            <div
-              key={photo.id}
-              className="relative aspect-square rounded-lg overflow-hidden bg-secondary border border-border group"
-            >
-              <img
-                src={photo.thumbnailUrl || photo.photoUrl}
-                alt={photo.caption || ''}
-                className="w-full h-full object-contain"
-                loading="lazy"
+      {/* Helper Text */}
+      {uploadedPhotos.length > 0 && (
+         <p className="text-xs text-muted-foreground flex items-center justify-between">
+            <span>Всего фото: {uploadedPhotos.length + pendingPhotos.length} / {maxFiles}</span>
+            <span>Перетаскивайте фото для сортировки</span>
+         </p>
+      )}
+
+      {/* Grid */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={itemIds} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            
+            {/* Uploaded Photos (Sortable) */}
+            {uploadedPhotos.map((photo) => (
+              <SortablePhoto
+                key={photo.id}
+                photo={photo}
+                disabled={disabled}
+                onDelete={handleDeleteUploaded}
+                onClick={(id) => {
+                   const idx = uploadedPhotos.findIndex(p => p.id === id);
+                   if(idx !== -1) setLightboxIndex(idx);
+                }}
+                onCaptionChange={onCaptionChange}
               />
-              {photo.caption && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                  <p className="text-xs text-white line-clamp-2">{photo.caption}</p>
-                </div>
-              )}
-              <button
-                onClick={(e) => handleDeleteUploaded(e, photo.id)}
-                className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:scale-110"
-                title="Удалить"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
+            ))}
 
-          {/* Pending Photos */}
-          {pendingPhotos.map((photo) => (
-            <div
-              key={photo.id}
-              className="relative aspect-square rounded-lg overflow-hidden bg-secondary border-2 border-dashed border-border"
-            >
-              {photo.preview && (
-                <img
-                  src={photo.preview}
-                  alt="Preview"
-                  className={`w-full h-full object-contain ${photo.uploading ? 'opacity-50' : ''}`}
-                />
-              )}
+            {/* Pending Photos (Not sortable yet) */}
+            {pendingPhotos.map((photo) => (
+              <SortablePhoto
+                 key={photo.id}
+                 photo={photo}
+                 isPending
+                 disabled={true} // Can't sort pending
+                 onDelete={(e) => { e.preventDefault(); handleRemovePending(photo.id); }}
+                 onClick={() => {}} 
+              />
+            ))}
+            
+          </div>
+        </SortableContext>
+            
+        {/* Drag Overlay */}
+        <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }) }}>
+           {activePhoto ? (
+             <SortablePhoto 
+                photo={activePhoto} 
+                disabled 
+                onDelete={()=>{}} 
+                onClick={()=>{}} 
+                onCaptionChange={undefined}
+             />
+           ) : null}
+        </DragOverlay>
+      </DndContext>
 
-              {photo.uploading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-                  <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                </div>
-              )}
-
-              {photo.error && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/10 backdrop-blur-sm p-2">
-                  <AlertCircle className="h-5 w-5 text-destructive mb-1" />
-                  <p className="text-xs text-destructive text-center line-clamp-2">{photo.error}</p>
-                </div>
-              )}
-
-              {!photo.uploading && (
-                <button
-                  onClick={() => handleRemovePending(photo.id)}
-                  className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full shadow-lg hover:scale-110 transition-transform"
-                  title="Отменить"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Empty State */}
-      {reportPhotos.length === 0 && pendingPhotos.length === 0 && !canAddMore && (
-        <div className="text-center py-8 text-muted-foreground">
-          <p className="text-sm">Достигнут лимит фотографий</p>
-        </div>
-      )}
+      {/* Lightbox */}
+      <Lightbox
+        isOpen={lightboxIndex !== null}
+        photos={uploadedPhotos.map(p => ({
+            ...p,
+            createdAt: p.createdAt || new Date().toISOString()
+        } as any))} // Type cast for compatibility
+        currentIndex={lightboxIndex ?? 0}
+        onClose={() => setLightboxIndex(null)}
+        onNext={() => setLightboxIndex(prev => (prev !== null && prev < uploadedPhotos.length - 1 ? prev + 1 : prev))}
+        onPrev={() => setLightboxIndex(prev => (prev !== null && prev > 0 ? prev - 1 : prev))}
+      />
     </div>
   );
 }

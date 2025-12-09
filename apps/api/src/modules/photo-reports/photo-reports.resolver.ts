@@ -85,4 +85,13 @@ export class PhotoReportsResolver {
   ) {
     return this.photoReportsService.deletePhoto(user.id, photoId);
   }
+  @Mutation(() => Boolean, { description: 'Изменить порядок фотографий' })
+  @UseGuards(AuthGuard)
+  async reorderReportPhotos(
+    @CurrentUser() user: { id: string },
+    @Args('reportId') reportId: string,
+    @Args('photoIds', { type: () => [String] }) photoIds: string[],
+  ) {
+    return this.photoReportsService.reorderReportPhotos(reportId, photoIds, user.id);
+  }
 }

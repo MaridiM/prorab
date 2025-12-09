@@ -20,6 +20,7 @@ import {
 	DeletePhotoReportDocument,
 	UploadPhotoToReportDocument,
 	DeletePhotoFromReportDocument,
+	ReorderReportPhotosDocument,
 	MyTeamsDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
@@ -195,6 +196,12 @@ export default function ProjectDetailsPage() {
 	})
 
 	const [deletePhotoFromReport] = useMutation(DeletePhotoFromReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
+
+	const [reorderReportPhotos] = useMutation(ReorderReportPhotosDocument, {
 		refetchQueries: [
 			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
 		],
@@ -408,6 +415,7 @@ export default function ProjectDetailsPage() {
 					type: 'success',
 					message: 'Фото успешно загружено',
 				})
+				return newPhoto
 			} else {
 				throw new Error('Не удалось загрузить фото: нет данных')
 			}
@@ -442,6 +450,53 @@ export default function ProjectDetailsPage() {
 			})
 			throw error
 		}
+	}
+
+	const handleReorderPhotos = async (newOrder: string[]) => {
+		if (!editingReport) return
+
+		try {
+			// Optimistic update
+			setEditingReport((prev: any) => {
+				if (!prev?.photos) return prev
+				const photoMap = new Map(prev.photos.map((p: any) => [p.id, p]))
+				const reorderedPhotos = newOrder.map(id => photoMap.get(id)).filter(Boolean)
+				return { ...prev, photos: reorderedPhotos }
+			})
+
+			await reorderReportPhotos({
+				variables: {
+					reportId: editingReport.id,
+					photoIds: newOrder,
+				},
+			})
+
+			showToast({
+				type: 'success',
+				message: 'Порядок фото обновлён',
+			})
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось изменить порядок фото',
+			})
+			// Refetch to restore correct order
+			await refetchReports()
+		}
+	}
+
+	const handleCaptionChange = async (photoId: string, caption: string) => {
+		// For now, just update local state
+		// Caption updates will be persisted on form submit or via separate mutation if needed
+		setEditingReport((prev: any) => {
+			if (!prev?.photos) return prev
+			return {
+				...prev,
+				photos: prev.photos.map((p: any) =>
+					p.id === photoId ? { ...p, caption } : p
+				),
+			}
+		})
 	}
 
 	const formatDate = (date: string | null | undefined) => {
@@ -939,6 +994,8 @@ export default function ProjectDetailsPage() {
 											}}
 											onUploadPhoto={handleUploadPhoto}
 											onDeletePhoto={handleDeletePhoto}
+											onReorderPhotos={handleReorderPhotos}
+											onCaptionChange={handleCaptionChange}
 										/>
 									</CardContent>
 								</Card>

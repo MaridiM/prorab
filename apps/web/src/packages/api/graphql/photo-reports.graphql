@@ -79,6 +79,10 @@ mutation DeletePhotoFromReport($photoId: String!) {
   deletePhotoFromReport(photoId: $photoId)
 }
 
+mutation ReorderReportPhotos($reportId: String!, $photoIds: [String!]!) {
+  reorderReportPhotos(reportId: $reportId, photoIds: $photoIds)
+}
+
 # Queries
 query ProjectPhotoReports($projectId: String!) {
   projectPhotoReports(projectId: $projectId) {

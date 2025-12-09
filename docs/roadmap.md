@@ -4,7 +4,7 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-08)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-09)
 
 ### Общий прогресс: **100% MVP Complete** ✅
 
@@ -14,9 +14,19 @@
 - **Frontend:** 100% complete ✅
 - **Integration:** 100% complete ✅
 - **Design:** 100% complete ✅
+- **Bug Fixes:** 100% critical bugs resolved ✅
 
-**Последние изменения (2025-12-08):**
+**Последние изменения (2025-12-09):**
 
+- ✅ **Photo Reports Lightbox Fix**: Исправлена навигация при просмотре фото в полноэкранном режиме
+- ✅ **Build Errors Fix**: Исправлены ошибки компиляции (ReorderReportPhotosDocument, useMutation импорты)
+- ✅ **Event Handling**: Добавлен `e.preventDefault()` во все интерактивные элементы Lightbox
+- ✅ **Next.js Migration**: Миграция `middleware.ts` → `proxy.ts` (Next.js 16 deprecation)
+- ✅ **Route Protection Fix**: Исправлена защита роутов - авторизованные пользователи редиректятся с auth страниц
+- ✅ **Photo Reports Stability**: Исправлен критический баг загрузки (middleware conflict)
+- ✅ **Infrastructure Fixes**: Проксирование картинок через Next.js rewrites, статика через NestJS
+- ✅ **Transactional Editing**: Отложенное сохранение фотоотчётов (Draft mode)
+- ✅ **UX Polish**: Улучшенное отображение, защита от случайного удаления, re-upload flow
 - ✅ **FAB Menu Navigation**: Прямой переход на страницу проекта для расходов/фотоотчётов
 - ✅ **Project Picker Modal**: Выбор проекта при наличии нескольких активных объектов
 - ✅ **Activity Aggregation**: Recent Activity загружает данные со ВСЕХ активных проектов
@@ -25,6 +35,9 @@
 - ✅ **Stats Aggregation**: Реальные данные из ProjectStats API для всех проектов
 
 **Последний завершённый этап:**
+
+✅ **Stage 5 Phase 4.5: Stability & UX Polish** (завершено 2025-12-09, ~3 часа)
+- 📋 Результаты: `CHANGELOG.md` (Fixed section 2025-12-09)
 
 ✅ **Stage 5 Phase 4: Public Photo Reports Page** (завершено 2025-12-08, ~4 часа)
 
@@ -80,7 +93,7 @@
 - ✅ Анимации (Framer Motion fadeIn, stagger, hover)
 - ✅ Mobile-first responsive design
 
-**Следующий этап: Photo Reports Phase 4** (Public SSR Page)
+**Следующий этап: Stage 5 Phase 5: Sharing & Polish**
 
 ---
 

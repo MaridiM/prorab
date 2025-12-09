@@ -460,4 +460,65 @@ export class PhotoReportsService {
 
     return photo;
   }
+  /**
+   * Изменить порядок фотографий
+   */
+  async reorderReportPhotos(
+    reportId: string,
+    photoIds: string[],
+    userId: string
+  ): Promise<boolean> {
+    const report = await this.prisma.photoReport.findUnique({
+      where: { id: reportId },
+      include: {
+        project: {
+          include: {
+            team: {
+              include: {
+                members: {
+                  where: { userId },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!report) {
+      throw new NotFoundException('Отчёт не найден');
+    }
+
+    if (report.project.team.members.length === 0) {
+      throw new BadRequestException('У вас нет доступа к этому отчёту');
+    }
+
+    // Verify all photos belong to this report
+    const count = await this.prisma.reportPhoto.count({
+      where: {
+        id: { in: photoIds },
+        reportId: reportId,
+      },
+    });
+
+    if (count !== photoIds.length) {
+      // This might happen if some photos were deleted concurrently, 
+      // or if frontend sent IDs that don't belong here.
+      // We can either throw or just update the ones that match.
+      // Let's be strict for now.
+      throw new BadRequestException('Некоторые фото не принадлежат этому отчёту или не найдены');
+    }
+
+    // Update order in transaction
+    await this.prisma.$transaction(
+      photoIds.map((id, index) =>
+        this.prisma.reportPhoto.update({
+          where: { id },
+          data: { orderIndex: index },
+        })
+      )
+    );
+
+    return true;
+  }
 }

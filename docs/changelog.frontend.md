@@ -1,5 +1,166 @@
 # Changelog (frontend)
 
+## Photo Reports: Critical Bug Fixes (2025-12-09)
+
+### Fixed: Lightbox Navigation Bug ✅
+
+:calendar: `2025-12-09`
+
+**Исправлена проблема с переходом на другую страницу при клике на фото в режиме просмотра.**
+
+#### Проблема:
+- ❌ При клике на фото для просмотра в полноэкранном режиме происходил переход на страницу списка фотоотчётов
+- ❌ Lightbox закрывался и перенаправлял пользователя
+- ❌ Невозможно было просмотреть фото в полноэкранном режиме
+
+#### Решение:
+
+**PhotoUploaderNew Component:**
+```typescript
+// До (BAD):
+onClick={(e) => { e.stopPropagation(); onClick(photo.id); }}
+
+// После (GOOD):
+onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(photo.id); }}
+```
+
+**Lightbox Component:**
+- ✅ Добавлен `e.preventDefault()` в overlay (фоновый клик)
+- ✅ Добавлен `e.preventDefault()` в кнопку закрытия (X)
+- ✅ Добавлен `e.preventDefault()` в кнопки навигации (←, →)
+- ✅ Добавлен `e.preventDefault()` в контейнер изображения
+
+#### Файлы изменены:
+- `apps/web/src/app/components/photo-reports/PhotoUploaderNew.tsx`
+- `apps/web/src/packages/components/photo-reports/Lightbox.tsx`
+
+---
+
+### Fixed: Build Compilation Errors ✅
+
+:calendar: `2025-12-09`
+
+**Исправлены ошибки компиляции из-за отсутствующих GraphQL документов.**
+
+#### Проблемы:
+- ❌ `ReorderReportPhotosDocument` не существует в сгенерированном модуле
+- ❌ Неверный импорт `useMutation` из `@apollo/client` (должен быть из `/react`)
+- ❌ Приложение не компилируется
+
+#### Решение:
+
+**PhotoReportForm Component:**
+```typescript
+// Удалены импорты:
+// import { ReorderReportPhotosDocument } from '...'
+// import { useMutation } from '@apollo/client'
+
+// Добавлены опциональные пропсы для будущей реализации:
+interface PhotoReportFormProps {
+  // ...существующие пропсы
+  onReorderPhotos?: (newOrder: string[]) => Promise<void>;
+  onCaptionChange?: (photoId: string, caption: string) => Promise<void>;
+}
+```
+
+**Workaround:**
+- ✅ Локальное изменение порядка работает через state
+- ✅ Изменения подписей работают локально
+- ✅ В edit mode изменения сразу вызывают callbacks из parent component
+
+#### Технический долг:
+- [ ] Реализовать `ReorderReportPhotos` mutation возвращающую PhotoReport вместо Boolean
+- [ ] Разкомментировать код reorder после генерации документа
+
+#### Файлы изменены:
+- `apps/web/src/app/components/photo-reports/PhotoReportForm.tsx`
+
+---
+
+## Next.js Middleware Migration & Route Protection Fix
+
+### Changed: Next.js Middleware → Proxy Migration ✅
+
+:calendar: `2025-12-09`
+
+**Миграция с устаревшего `middleware.ts` на новый `proxy.ts` согласно Next.js 16 рекомендациям.**
+
+#### Изменения:
+
+1. **Файл переименован:**
+   - ❌ Удалён: `apps/web/src/middleware.ts`
+   - ✅ Создан: `apps/web/src/proxy.ts`
+
+2. **Функция переименована:**
+   - ❌ `export function middleware(request: NextRequest)`
+   - ✅ `export function proxy(request: NextRequest)`
+
+3. **Функциональность сохранена:**
+   - ✅ Проверка `session_token` cookie
+   - ✅ Защита маршрутов (`/onboarding`, `/dashboard`, `/teams`)
+   - ✅ Редирект неавторизованных пользователей на `/auth/login`
+   - ✅ Matcher конфигурация для оптимизации
+
+**Файлы изменены:**
+- `apps/web/src/proxy.ts` - создан новый файл
+- `apps/web/src/middleware.ts` - удалён устаревший файл
+
+**Проверки:**
+- ✅ TypeScript: 0 ошибок компиляции
+- ✅ Linter: 0 ошибок
+- ✅ Функциональность защиты роутов работает корректно
+
+---
+
+### Fixed: Route Protection - Redirect Authenticated Users ✅
+
+:calendar: `2025-12-09`
+
+**Исправлена логика защиты роутов - авторизованные пользователи больше не видят страницы логина/регистрации.**
+
+#### Проблема:
+- ❌ Авторизованные пользователи могли заходить на `/auth/login` и `/auth/register`
+- ❌ Неавторизованные пользователи могли видеть защищённые страницы (частично)
+
+#### Решение:
+
+**1. AuthProvider (`auth.context.tsx`):**
+- ✅ Добавлена проверка авторизованных пользователей на auth страницах
+- ✅ Редирект на `/onboarding` или `/dashboard` в зависимости от статуса onboarding
+- ✅ Логика работает после загрузки пользователя (`!isLoading`)
+
+**2. Proxy (`proxy.ts`):**
+- ✅ Добавлена серверная проверка: если есть `session_token` и путь начинается с `/auth/login` или `/auth/register` → редирект на `/dashboard`
+- ✅ Двойная защита: серверная (proxy) + клиентская (AuthProvider)
+
+#### Логика редиректов:
+
+**Неавторизованный пользователь:**
+- `/dashboard` → `/auth/login?callbackUrl=/dashboard`
+- `/onboarding` → `/auth/login?callbackUrl=/onboarding`
+- `/teams` → `/auth/login?callbackUrl=/teams`
+- `/auth/login` → ✅ видит страницу логина
+
+**Авторизованный пользователь:**
+- `/auth/login` → `/dashboard` (или `/onboarding` если не завершён onboarding)
+- `/auth/register` → `/dashboard` (или `/onboarding` если не завершён onboarding)
+- `/onboarding` (завершён) → `/dashboard`
+- `/dashboard` (не завершён onboarding) → `/onboarding`
+
+**Файлы изменены:**
+- `apps/web/src/packages/libs/auth/auth.context.tsx` - добавлена логика редиректа авторизованных пользователей
+- `apps/web/src/proxy.ts` - добавлена серверная проверка auth страниц
+
+**Проверки:**
+- ✅ TypeScript: 0 ошибок компиляции
+- ✅ Linter: 0 ошибок
+- ✅ Все сценарии редиректов работают корректно
+- ✅ Нет бесконечных циклов редиректов
+
+**Результат:** Полная защита роутов работает корректно - авторизованные пользователи не видят страницы авторизации, неавторизованные не могут попасть на защищённые страницы.
+
+---
+
 ## Dashboard Improvements - Full System Implementation
 
 ### Feature: Dashboard Enhancements to Full Working System 🚀

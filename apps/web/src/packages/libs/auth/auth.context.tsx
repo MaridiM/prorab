@@ -92,23 +92,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser()
   }, [refreshUser])
 
-  // Auto-redirect based on onboarding status
+  // Auto-redirect based on onboarding status and auth pages
   useEffect(() => {
-    if (isLoading || !user) return
+    if (isLoading) return
 
     const pathname = window.location.pathname
 
-    // If on /onboarding and already completed - redirect to dashboard
-    if (pathname.startsWith('/onboarding') && user.hasCompletedOnboarding) {
-      router.push('/dashboard')
-    }
+    // If user is authenticated and on auth pages - redirect to appropriate page
+    if (user) {
+      // Redirect from auth pages if already authenticated
+      if (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) {
+        const redirectPath = !user.hasCompletedOnboarding ? '/onboarding' : '/dashboard'
+        router.push(redirectPath)
+        return
+      }
 
-    // If on protected pages without onboarding - redirect to /onboarding
-    if (
-      (pathname.startsWith('/dashboard') || pathname.startsWith('/teams')) &&
-      !user.hasCompletedOnboarding
-    ) {
-      router.push('/onboarding')
+      // If on /onboarding and already completed - redirect to dashboard
+      if (pathname.startsWith('/onboarding') && user.hasCompletedOnboarding) {
+        router.push('/dashboard')
+        return
+      }
+
+      // If on protected pages without onboarding - redirect to /onboarding
+      if (
+        (pathname.startsWith('/dashboard') || pathname.startsWith('/teams')) &&
+        !user.hasCompletedOnboarding
+      ) {
+        router.push('/onboarding')
+        return
+      }
     }
   }, [user, isLoading, router])
 
