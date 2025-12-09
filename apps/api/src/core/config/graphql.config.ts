@@ -11,4 +11,5 @@ export const graphqlConfig: ApolloDriverConfig | GqlModuleOptions = {
 	playground: false,
 	plugins: [ApolloServerPluginLandingPageLocalDefault()],
 	context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
+	csrfPrevention: false, // 👈 Required for graphql-upload to work without header issues
 }

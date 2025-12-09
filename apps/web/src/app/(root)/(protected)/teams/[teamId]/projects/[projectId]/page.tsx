@@ -19,6 +19,7 @@ import {
 	UpdatePhotoReportDocument,
 	DeletePhotoReportDocument,
 	UploadPhotoToReportDocument,
+	DeletePhotoFromReportDocument,
 	MyTeamsDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
@@ -35,7 +36,6 @@ import {
 import { ExpenseList, ExpenseForm } from '@/packages/components/expenses'
 import { FinancialDashboard } from '@/packages/components/financial'
 import {
-	PhotoUploader,
 	PhotoReportForm,
 	PhotoReportCard,
 } from '@/app/components/photo-reports'
@@ -188,7 +188,17 @@ export default function ProjectDetailsPage() {
 		],
 	})
 
-	const [uploadPhotoToReport] = useMutation(UploadPhotoToReportDocument)
+	const [uploadPhotoToReport] = useMutation(UploadPhotoToReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
+
+	const [deletePhotoFromReport] = useMutation(DeletePhotoFromReportDocument, {
+		refetchQueries: [
+			{ query: ProjectPhotoReportsDocument, variables: { projectId } },
+		],
+	})
 
 	const project = data?.project
 	const expenses = expensesData?.expensesByProject || []
@@ -311,8 +321,9 @@ export default function ProjectDetailsPage() {
 				message: 'Фотоотчёт успешно создан',
 			})
 			setShowReportForm(false)
+			// Автоматически переходим в режим редактирования для загрузки фото
 			if (result.data?.createPhotoReport) {
-				setSelectedReportId(result.data.createPhotoReport.id)
+				setEditingReport(result.data.createPhotoReport)
 			}
 		} catch (error: any) {
 			showToast({
@@ -368,26 +379,68 @@ export default function ProjectDetailsPage() {
 	}
 
 	const handleUploadPhoto = async (file: File, caption?: string) => {
-		if (!selectedReportId) return
+		if (!editingReport) return
 
 		try {
-			await uploadPhotoToReport({
+			const result = await uploadPhotoToReport({
 				variables: {
 					input: {
-						reportId: selectedReportId,
+						reportId: editingReport.id,
 						file,
 						caption: caption || null,
 						orderIndex: 0,
 					},
 				},
 			})
+			
+			if (result.error) {
+				throw new Error(result.error.message)
+			}
+
+			if (result.data?.uploadPhotoToReport) {
+				const newPhoto = result.data.uploadPhotoToReport
+				setEditingReport((prev: any) => ({
+					...prev,
+					photos: [...(prev?.photos || []), newPhoto],
+				}))
+				
+				showToast({
+					type: 'success',
+					message: 'Фото успешно загружено',
+				})
+			} else {
+				throw new Error('Не удалось загрузить фото: нет данных')
+			}
+		} catch (error: any) {
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось загрузить фото',
+			})
+			throw error
+		}
+	}
+
+	const handleDeletePhoto = async (photoId: string) => {
+		try {
+			await deletePhotoFromReport({
+				variables: { photoId },
+			})
+			
+			setEditingReport((prev: any) => ({
+				...prev,
+				photos: (prev?.photos || []).filter((p: any) => p.id !== photoId),
+			}))
+
 			showToast({
 				type: 'success',
-				message: 'Фото успешно загружено',
+				message: 'Фото успешно удалено',
 			})
-			await refetchReports()
 		} catch (error: any) {
-			throw new Error(error.message || 'Не удалось загрузить фото')
+			showToast({
+				type: 'error',
+				message: error.message || 'Не удалось удалить фото',
+			})
+			throw error
 		}
 	}
 
@@ -882,7 +935,10 @@ export default function ProjectDetailsPage() {
 											onCancel={() => {
 												setShowReportForm(false)
 												setEditingReport(null)
+												setSelectedReportId(null)
 											}}
+											onUploadPhoto={handleUploadPhoto}
+											onDeletePhoto={handleDeletePhoto}
 										/>
 									</CardContent>
 								</Card>
@@ -938,21 +994,6 @@ export default function ProjectDetailsPage() {
 										</div>
 									)}
 								</>
-							)}
-
-							{/* Photo Uploader for selected report */}
-							{selectedReportId && !showReportForm && !editingReport && (
-								<Card>
-									<CardHeader>
-										<CardTitle>Загрузить фото в отчёт</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<PhotoUploader
-											reportId={selectedReportId}
-											onUpload={handleUploadPhoto}
-										/>
-									</CardContent>
-								</Card>
 							)}
 						</motion.div>
 					)}

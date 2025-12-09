@@ -63,7 +63,12 @@ export class StorageService {
 
     // Генерируем уникальное имя файла
     const fileExt = path.extname(filename);
-    const uniqueName = this.generateUniqueFilename(fileExt);
+    const uniqueBasename = this.generateUniqueBasename();
+    // For team logos, we might want to keep the extension or just use .webp if we process it
+    // But logically, generateUniqueBasename returns just unique base.
+    // Let's assume we want to keep the extension but process to webp regardless? 
+    // Wait, processImage converts to webp. So the extension should be .webp.
+    const uniqueName = `${uniqueBasename}.webp`;
 
     // Сохраняем файл
     await this.saveFile(
@@ -108,13 +113,13 @@ export class StorageService {
     return filePath;
   }
 
-  /**
-   * Генерация уникального имени файла
+  /*
+   * Генерация уникального имени файла (без расширения)
    */
-  private generateUniqueFilename(extension: string): string {
+  private generateUniqueBasename(): string {
     const timestamp = Date.now();
     const randomString = crypto.randomBytes(8).toString('hex');
-    return `${timestamp}-${randomString}${extension === '.jpg' ? '.webp' : '.webp'}`;
+    return `${timestamp}-${randomString}`;
   }
 
   /**
@@ -156,8 +161,8 @@ export class StorageService {
       );
     }
 
-    // Генерируем уникальное имя
-    const uniqueBasename = this.generateUniqueFilename('');
+    // Генерируем уникальное базовое имя
+    const uniqueBasename = this.generateUniqueBasename();
 
     // Обработка оригинала (max 1920x1920, WebP)
     const originalImage = sharp(buffer);

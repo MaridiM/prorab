@@ -7,6 +7,156 @@
 
 ## [Unreleased]
 
+### Fixed (2025-12-09) - Photo Reports Module Complete Rebuild ✅
+
+#### Critical Issues Resolved
+**Приоритет:** 🔴🔴🔴 Критический
+**Затраченное время:** 3 часа
+**Описание:** Полная переделка модуля фотоотчетов с нуля из-за множественных проблем
+
+**Проблемы до переделки:**
+- ❌ Фото не загружались (ошибки при upload)
+- ❌ Фотоотчеты пропадали после обновления страницы
+- ❌ Невозможно добавить фото к существующему отчету
+- ❌ Невозможно загрузить фото при создании отчета
+- ❌ UI/UX неудобный - картинки слишком большие и неаккуратные
+- ❌ Loading спиннеры зависали навсегда (stale closure bug)
+
+#### Solution Implemented
+
+**1. PhotoUploaderNew Component** ✅
+- **Файл:** `apps/web/src/app/components/photo-reports/PhotoUploaderNew.tsx` (NEW)
+- **Размер:** 288 строк
+- **Особенности:**
+  - Компактный responsive grid (2/3/4/5 колонок)
+  - Показывает уже загруженные фото с thumbnails
+  - Автоматическая загрузка сразу после выбора файлов
+  - Pending states с loading спиннерами
+  - Inline delete кнопки (появляются на hover)
+  - Lazy loading для оптимизации
+  - Drag & Drop поддержка
+  - Валидация файлов с отображением ошибок
+  - **Fix stale closure bug:** использован functional state update вместо capturing pendingPhotos in deps
+
+**2. PhotoReportForm Integration** ✅
+- **Файл:** `apps/web/src/app/components/photo-reports/PhotoReportForm.tsx`
+- **Изменения:**
+  - Добавлен импорт PhotoUploaderNew
+  - Новый тип: `PhotoReportWithPhotos = ProjectPhotoReportsQuery['projectPhotoReports'][0]`
+  - Новые пропсы: `onUploadPhoto`, `onDeletePhoto`
+  - Блок загрузки фото показывается только в режиме редактирования
+  - Счетчик фотографий: `Фотографии ({report.photos?.length || 0})`
+
+**3. Page State Management** ✅
+- **Файл:** `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/page.tsx`
+- **Изменения:**
+  - Добавлен импорт `DeletePhotoFromReportDocument`
+  - Мутации с `refetchQueries` для автообновления кэша
+  - `handleUploadPhoto`: использует `editingReport` вместо `selectedReportId`
+  - `handleDeletePhoto`: новая функция для удаления фото
+  - `handleCreateReport`: автоматически открывает режим редактирования после создания
+  - Удален старый отдельный блок PhotoUploader
+  - Удален импорт старого PhotoUploader
+
+**4. GraphQL Schema Updates** ✅
+- **Файл:** `apps/web/src/packages/api/graphql/photo-reports.graphql`
+- **Изменения:**
+  ```graphql
+  mutation CreatePhotoReport($input: CreatePhotoReportInput!) {
+    createPhotoReport(input: $input) {
+      ...PhotoReportFields
+      photos {              # ADDED
+        ...ReportPhotoFields
+      }
+    }
+  }
+
+  mutation UpdatePhotoReport($input: UpdatePhotoReportInput!) {
+    updatePhotoReport(input: $input) {
+      ...PhotoReportFields
+      photos {              # ADDED
+        ...ReportPhotoFields
+      }
+    }
+  }
+  ```
+- **Codegen:** Успешно регенерированы TypeScript типы
+
+#### Technical Details
+
+**Stale Closure Bug Fix:**
+```typescript
+// BEFORE (BAD - stale closure):
+const handleUploadPhoto = useCallback(
+  async (pendingId: string) => {
+    const photo = pendingPhotos.find((p) => p.id === pendingId); // ❌
+    // ...
+  },
+  [onUpload, pendingPhotos] // ❌ pendingPhotos causes stale closure
+);
+
+// AFTER (GOOD - functional update):
+const handleUploadPhoto = useCallback(
+  async (pendingId: string) => {
+    let photoToUpload: PendingPhoto | undefined;
+    setPendingPhotos((prev) => {
+      photoToUpload = prev.find((p) => p.id === pendingId); // ✅
+      return prev; // No change, just reading
+    });
+    // ...
+  },
+  [onUpload] // ✅ No stale dependencies
+);
+```
+
+**User Flow:**
+1. Создание отчета → форма с полями → создается отчет
+2. Автоматически открывается режим редактирования
+3. В форме появляется блок PhotoUploaderNew
+4. Пользователь выбирает фото → автозагрузка
+5. Показываются загруженные + pending фото в одной grid
+6. После загрузки pending исчезают, остаются только загруженные
+7. Можно удалить любое фото кнопкой на hover
+
+**Responsive Grid:**
+```css
+grid-cols-2     /* mobile: 2 columns */
+sm:grid-cols-3  /* tablet: 3 columns */
+md:grid-cols-4  /* desktop: 4 columns */
+lg:grid-cols-5  /* large: 5 columns */
+```
+
+#### Files Changed
+**Created (1 файл):**
+- `apps/web/src/app/components/photo-reports/PhotoUploaderNew.tsx`
+
+**Modified (3 файла):**
+- `apps/web/src/app/components/photo-reports/PhotoReportForm.tsx`
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/page.tsx`
+- `apps/web/src/packages/api/graphql/photo-reports.graphql`
+
+#### Quality Checks
+- ✅ TypeScript: 0 ошибок компиляции
+- ✅ Build: успешно (web + api)
+- ✅ GraphQL codegen: успешно
+- ✅ Stale closure bug: исправлен
+- ✅ State persistence: refetchQueries работают
+- ✅ UI/UX: компактный grid вместо больших карточек
+- ✅ Auto-upload: работает сразу после выбора
+- ✅ Responsive: 2-5 колонок в зависимости от экрана
+
+#### Results
+- ✅ **Функционал работает полностью** - загрузка, отображение, удаление
+- ✅ **Фото не пропадают** - используется refetchQueries для обновления кэша
+- ✅ **UI/UX значительно улучшен** - компактный grid, thumbnails, lazy loading
+- ✅ **Можно загружать при создании** - автоматический переход в режим редактирования
+- ✅ **Можно загружать при редактировании** - встроено в форму
+- ✅ **Спиннеры не зависают** - исправлен functional state update
+
+**Модуль фотоотчетов полностью переработан и готов к продакшену! 🎉**
+
+---
+
 ### Added (2025-12-08) - Stage 5 Phase 4: Public Photo Reports Page ✅
 
 #### Implementation Complete

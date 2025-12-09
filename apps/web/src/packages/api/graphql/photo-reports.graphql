@@ -44,12 +44,18 @@ fragment ReportPhotoFields on ReportPhoto {
 mutation CreatePhotoReport($input: CreatePhotoReportInput!) {
   createPhotoReport(input: $input) {
     ...PhotoReportFields
+    photos {
+      ...ReportPhotoFields
+    }
   }
 }
 
 mutation UpdatePhotoReport($input: UpdatePhotoReportInput!) {
   updatePhotoReport(input: $input) {
     ...PhotoReportFields
+    photos {
+      ...ReportPhotoFields
+    }
   }
 }
 
