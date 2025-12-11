@@ -7,17 +7,46 @@
 
 ## [Unreleased]
 
+### Added
+- **Telegram Support Bot - FAQ Database:**
+  - ✅ Создан TypeScript seed script `apps/api/prisma/seed-faq.ts`
+  - ✅ 8 FAQ entries в 5 категориях (projects, expenses, photo_reports, technical, general)
+  - ✅ Smart keyword matching для автоматических ответов
+  - ✅ Успешно выполнен: `npx tsx prisma/seed-faq.ts`
+  - **Категории:**
+    - Проекты и команды (3 статьи)
+    - Расходы и финансы (2 статьи)
+    - Фотоотчёты (2 статьи)
+    - Технические проблемы (1 статья)
+  - **Результат:** Support Bot может автоматически отвечать на 8 типов вопросов
+
+- **Comprehensive Project Documentation:**
+  - ✅ `TELEGRAM_BOTS_STATUS.md` - Полный статус обоих Telegram ботов
+  - ✅ `TELEGRAM_TODO.md` - Пошаговая инструкция deployment (15 минут)
+  - ✅ `WHATS_NOT_DONE.md` - Анализ проекта: 95% MVP Complete
+  - ✅ `STAGE_SETTINGS_IMPROVEMENTS.md` - План улучшения Settings page
+
 ### Fixed
-- **Telegram Support Bot (ProRabSupportBot) - Критическое исправление маршрутизации:**
+- **Telegram Support Bot (ProRabSupportBot) - Критическое исправление архитектуры:**
   - ✅ Исправлена основная проблема: команды от `ProRabSupportBot` попадали в `TelegramBot` (OAuth бот) вместо `TelegramSupportBot`
-  - ✅ Добавлена проверка `botInfo.username` в начале каждого обработчика для правильной изоляции ботов
-  - ✅ Проверка добавлена во все обработчики: `/start`, `/help`, `/status`, `/cancel`, `@On('text')`, `@On('callback_query')`
-  - ✅ OAuth бот (`TelegramBot`) проверяет `botInfo.username === 'ProRabSpaceBot'` и пропускает команды от других ботов
-  - ✅ Support бот (`TelegramSupportBot`) проверяет `botInfo.username === 'ProRabSupportBot'` и пропускает команды от других ботов
+  - ✅ **Решение:** Созданы отдельные модули для каждого бота:
+    - `TelegramOAuthBotModule` - только для OAuth бота (`TelegramBot` handler)
+    - `TelegramSupportBotModule` - только для Support бота (`TelegramSupportBot` handler)
+  - ✅ Каждый бот теперь включает только свой модуль через `include: [TelegramOAuthBotModule]` и `include: [TelegramSupportBotModule]`
+  - ✅ Обработчики полностью изолированы - каждый бот получает события только для своих обработчиков
+  - ✅ Добавлена проверка `botInfo.username` через `ctx.telegram.getMe()` для дополнительной защиты
   - ✅ Улучшено логирование с префиксами `[ProRabSpaceBot]` и `[ProRabSupportBot]` для отладки
   - ✅ Добавлена детальная обработка ошибок во всех командах с логированием
   - ✅ TypeScript компиляция успешна (0 ошибок)
   - **Результат:** Support Bot теперь корректно обрабатывает все команды `/start`, `/help`, `/status`, `/cancel` без попадания в OAuth бот
+- **FAQ Categories - Единый стиль отображения:**
+  - ✅ Исправлено отображение категорий FAQ - все категории теперь в едином стиле с номерами и эмодзи
+  - ✅ Добавлен маппинг для всех категорий: `expenses` → `3️⃣ Расходы и финансы`, `photo_reports` → `4️⃣ Фотоотчёты`
+  - ✅ Добавлена сортировка категорий для единообразного порядка отображения
+  - ✅ Все категории отображаются в формате: `1️⃣ Проекты и команды`, `3️⃣ Расходы и финансы`, `4️⃣ Фотоотчёты`, `5️⃣ Технические проблемы`
+- **WorkLogsModule - Исправлена ошибка зависимостей:**
+  - ✅ Добавлен импорт `AuthModule` в `WorkLogsModule` для корректной работы `AuthGuard`
+  - ✅ Исправлена ошибка `UnknownDependenciesException` при запуске приложения
 
 ### Added
 - **Telegram Menu Commands (кнопки для ботов):**
@@ -70,6 +99,63 @@
 ### [0.3.0] - In Development (Started 2025-12-11)
 
 ### Added
+
+**Stage 9 Phase 2 Day 8: Time Tracking Backend (2025-12-12)**
+
+**Backend (5 files, ~400 строк):**
+- `apps/api/prisma/schema.prisma` - WorkLog model добавлена
+  - Fields: id, projectId, memberId, date, hours (Decimal 5,2), description
+  - Relations: Project (workLogs), TeamMember (workLogs)
+  - Indexes: projectId, memberId, date, composite (projectId+memberId+date)
+  - Validation: hours max 999.99 (макс 24 часа через DTO)
+- `apps/api/src/modules/work-logs/models/work-log.model.ts` - GraphQL model (40 lines)
+  - Fields с типами GraphQL (ID, Float для hours, Date)
+  - Relations к Project и TeamMember
+- `apps/api/src/modules/work-logs/dto/create-work-log.input.ts` - Input DTO (30 lines)
+  - Validation: UUID для IDs, DateString для date, Number 0.01-24 для hours
+  - Optional description (max 2000 chars)
+- `apps/api/src/modules/work-logs/dto/update-work-log.input.ts` - Update DTO (30 lines)
+  - Partial update с validation
+- `apps/api/src/modules/work-logs/work-logs.service.ts` - Business logic (290 lines)
+  - **Queries (3):**
+    - `getProjectWorkLogs(projectId, userId)` - все записи проекта (owner или team member)
+    - `getMemberWorkLogs(memberId, userId)` - записи участника (owner или self)
+    - `getWorkLogsByDateRange(projectId, startDate, endDate, userId)` - фильтр по датам
+  - **Mutations (3):**
+    - `createWorkLog(input, userId)` - создание записи (owner или self)
+    - `updateWorkLog(input, userId)` - редактирование (owner или creator)
+    - `deleteWorkLog(id, userId)` - удаление (owner или creator)
+  - **Helper:**
+    - `getTotalHours(projectId, memberId?)` - подсчёт общих часов
+  - Access control на каждый метод (ForbiddenException)
+- `apps/api/src/modules/work-logs/work-logs.resolver.ts` - GraphQL resolver (90 lines)
+  - 3 queries: projectWorkLogs, memberWorkLogs, workLogsByDateRange
+  - 3 mutations: createWorkLog, updateWorkLog, deleteWorkLog
+  - Все с @UseGuards(AuthGuard) и @CurrentUser()
+- `apps/api/src/modules/work-logs/work-logs.module.ts` - NestJS module
+  - Imports: PrismaModule, AuthModule
+  - Exports: WorkLogsService
+  - Зарегистрирован в AppModule
+
+**Database:**
+- ✅ Prisma migration applied (`pnpm prisma db push`)
+- ✅ Prisma client generated
+- ✅ Table `work_logs` created with indexes
+
+**Features:**
+- ✅ Учёт рабочего времени по проектам
+- ✅ Связь с участниками команды
+- ✅ Валидация (0.01-24 часа в день)
+- ✅ Access control (owner + self для создания, owner + creator для редактирования)
+- ✅ Фильтрация по датам
+- ✅ Подсчёт общих часов
+- ✅ Cascade delete (при удалении проекта/участника)
+
+**TypeScript:**
+- ✅ Компиляция успешна (0 errors)
+- ✅ Полная типизация GraphQL operations
+
+---
 
 **Stage 9 Phase 1 Day 7: Testing and Bug Fixes (2025-12-12)**
 

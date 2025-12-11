@@ -108,11 +108,24 @@
 ---
 
 **Phase 2 (P1 - High) - 1 неделя (7 дней):**
-- [ ] День 8-10: Учёт рабочего времени
-  - [ ] Модель `WorkLog` в Prisma
-  - [ ] GraphQL API (CRUD операции)
+- [x] День 8: Учёт рабочего времени - Backend ✅ (2025-12-12)
+  - [x] Модель `WorkLog` в Prisma (id, projectId, memberId, date, hours, description)
+  - [x] Relations: Project.workLogs, TeamMember.workLogs
+  - [x] GraphQL API (CRUD операции):
+    - [x] Queries: projectWorkLogs, memberWorkLogs, workLogsByDateRange
+    - [x] Mutations: createWorkLog, updateWorkLog, deleteWorkLog
+    - [x] Helper: getTotalHours (aggregate)
+  - [x] Access control (owner + self для создания, owner + creator для редактирования)
+  - [x] Validation (0.01-24 hours, max 2000 chars description)
+  - [x] WorkLogsModule зарегистрирован в AppModule
+  - [x] TypeScript компиляция успешна
+- [ ] День 9-10: Учёт рабочего времени - Frontend
+  - [ ] GraphQL operations (fragments, queries, mutations)
   - [ ] Страница `/teams/[teamId]/projects/[projectId]/time-tracking`
-  - [ ] Компонент `<TimeTrackingCalendar />`
+  - [ ] Компонент `<TimeTrackingCalendar />` или `<TimeTrackingTable />`
+  - [ ] Форма создания/редактирования записей
+  - [ ] Фильтры по датам и участникам
+  - [ ] Display total hours
 - [ ] День 11-12: Отчёты по персоналу
   - [ ] Страница `/teams/[teamId]/analytics/personnel`
   - [ ] KPI cards + графики (recharts)
@@ -2258,3 +2271,189 @@ model User {
 - [x] Responsive design на всех breakpoints
 
 **Результат**: Все основные страницы приложения (кроме Landing, Auth, Onboarding) обновлены с единым дизайном, соответствующим спецификации продукта ProRab.space. Весь существующий функционал работает корректно.
+
+---
+
+## Stage 11: Settings Page - Complete Implementation
+
+**Статус:** 📋 Planned | 75% Complete → 100% Target
+**Приоритет:** P1 - High (Important for MVP)
+**Оценка времени:** 5-7 дней
+**Документация:** `docs/stages/stage-11-settings-implementation-plan.md`
+
+### Текущее состояние (75% Complete)
+
+**Settings Page:** `apps/web/src/app/(root)/(protected)/settings/page.tsx` (2088 строк)
+
+**Что работает:**
+- ✅ **Appearance Tab** - 100% Complete (theme, colors, fonts)
+- ✅ **Help Tab** - 100% Complete (FAQ, contact form)
+- ✅ **About Tab** - 100% Complete (version, changelog, legal)
+- ✅ **Profile Tab** - 80% Complete (name, email, phone editing)
+- ✅ **Security Tab** - 90% Complete (password change)
+- ✅ **Notifications Tab** - 70% Complete (basic toggles)
+- ✅ **Subscription Tab** - 85% Complete (plan display, usage)
+
+**Что нужно доделать (25%):**
+- ❌ Avatar upload & management (Profile Tab)
+- ❌ Telegram integration UI (Notifications Tab)
+- ❌ Subscription management (change plan, cancel, reactivate)
+- ❌ Two-Factor Authentication (Security Tab)
+- ❌ Detailed notification settings (events, frequency, quiet hours)
+- ❌ Account deletion (Security Tab)
+- ❌ Activity log (Security Tab)
+- ❌ Active sessions management (Security Tab)
+
+### Implementation Plan (3 Phases)
+
+#### Phase 1: Critical Features (P0) - 3 дня
+
+**Day 1: Avatar Upload & Management**
+- [ ] **Backend** (4 часа):
+  - File upload module (multer + S3/local storage)
+  - `uploadAvatar` mutation
+  - `deleteAvatar` mutation
+  - User model update (avatarUrl field)
+- [ ] **Frontend** (4 часа):
+  - AvatarUpload component (drag & drop, preview, crop)
+  - Integration with Settings page
+  - Update cache after upload/delete
+- [ ] **Files**: 4 backend, 3 frontend (~500 строк)
+
+**Day 2: Telegram Integration UI**
+- [ ] **Backend** (2 часа):
+  - `telegramConnectionStatus` query
+  - `disconnectTelegram` mutation
+- [ ] **Frontend** (6 часов):
+  - TelegramIntegration component
+  - Connection status display
+  - Connect/Disconnect buttons
+  - Deep link to @ProRabSpaceBot
+- [ ] **Files**: 2 backend, 4 frontend (~400 строк)
+
+**Day 3: Subscription Management**
+- [ ] **Backend** (3 часа):
+  - `changePlan` mutation (проверить существующую)
+  - `cancelSubscription` mutation (проверить)
+  - `reactivateSubscription` mutation (новая)
+- [ ] **Frontend** (5 часов):
+  - ChangePlanDialog component
+  - CancelSubscriptionDialog component
+  - Update Subscription Tab UI
+  - Add "View Payment History" link
+- [ ] **Files**: 3 backend, 5 frontend (~600 строк)
+
+**Phase 1 Deliverables:**
+- ✅ Avatar upload works (with crop and preview)
+- ✅ Telegram integration visible in UI
+- ✅ Users can change/cancel subscription
+- **Total:** ~1500 строк кода
+
+---
+
+#### Phase 2: Important Features (P1) - 2.5 дня
+
+**Day 4: Two-Factor Authentication**
+- [ ] **Backend** (1 день):
+  - Install speakeasy + qrcode
+  - TwoFactorService (generate secret, verify token)
+  - User model update (twoFactorEnabled, twoFactorSecret)
+  - `setup2FA`, `enable2FA`, `disable2FA` mutations
+  - Update AuthGuard for 2FA check
+- [ ] **Frontend** (0.5 дня):
+  - TwoFactorSetup component (QR code, verification)
+  - TwoFactorDisable component
+  - Add to Security Tab
+- [ ] **Files**: 6 backend, 3 frontend (~700 строк)
+
+**Day 5-5.5: Detailed Notification Settings**
+- [ ] **Backend** (4 часа):
+  - NotificationSettings model update (event types, frequency, quiet hours)
+  - `updateNotificationSettings` mutation extended
+- [ ] **Frontend** (4 часа):
+  - NotificationEvents component (individual toggles)
+  - NotificationFrequency component (instant/daily/weekly)
+  - QuietHours component (time pickers)
+  - TestNotification component (send test)
+- [ ] **Files**: 2 backend, 5 frontend (~600 строк)
+
+**Phase 2 Deliverables:**
+- ✅ 2FA fully functional (QR code, backup codes)
+- ✅ Detailed notification settings available
+- ✅ Quiet hours and frequency configurable
+- **Total:** ~1300 строк кода
+
+---
+
+#### Phase 3: Nice to Have (P2) - 1.5 дня
+
+**Day 6: Account Deletion**
+- [ ] **Backend** (2 часа):
+  - `deleteAccount` service (check owned teams, cancel subscriptions)
+  - `deleteAccount` mutation (requires password)
+- [ ] **Frontend** (2 часа):
+  - DeleteAccountDialog component (warnings, password confirm)
+  - Add Danger Zone to Security Tab
+- [ ] **Files**: 2 backend, 2 frontend (~300 строк)
+
+**Day 6.5: Activity Log**
+- [ ] **Backend** (2 часа):
+  - ActivityLog model (action, details, ipAddress, userAgent)
+  - ActivityLoggerService (auto-log all settings changes)
+  - `myActivityLog` query
+- [ ] **Frontend** (2 часа):
+  - ActivityLogList component
+  - Add to Security Tab (last 10 activities)
+  - Full activity log page link
+- [ ] **Files**: 3 backend, 2 frontend (~400 строк)
+
+**Day 7: Active Sessions Management**
+- [ ] **Backend** (2 часа):
+  - Session model (if not exists)
+  - `mySessions` query
+  - `revokeSession`, `revokeAllSessions` mutations
+- [ ] **Frontend** (2 часа):
+  - ActiveSessions component
+  - Add to Security Tab
+  - Revoke buttons for each session
+- [ ] **Files**: 3 backend, 2 frontend (~400 строк)
+
+**Phase 3 Deliverables:**
+- ✅ Users can delete their account safely
+- ✅ Activity log shows all settings changes
+- ✅ Active sessions can be managed and revoked
+- **Total:** ~1100 строк кода
+
+---
+
+### Summary
+
+**Total Implementation:**
+- **Time:** 5-7 дней
+- **Backend Files:** ~15 файлов (~1200 строк)
+- **Frontend Files:** ~12 файлов (~1500 строк)
+- **Total Code:** ~2700 строк
+- **Dependencies:** multer, speakeasy, qrcode, react-image-crop, react-dropzone
+
+**Completion Criteria:**
+- ✅ All 7 tabs 100% functional
+- ✅ No "В разработке" toasts remaining
+- ✅ All GraphQL mutations tested
+- ✅ Unit tests coverage > 80%
+- ✅ E2E tests passing
+- ✅ Performance targets met
+- ✅ Documentation updated
+
+**Priority:**
+- P0 (Critical): Phase 1 - Must have for production
+- P1 (Important): Phase 2 - Recommended for MVP
+- P2 (Nice to Have): Phase 3 - Can be added post-launch
+
+**Rollout:**
+- Version 0.4.0-beta.1 after Phase 1 (Day 3)
+- Version 0.4.0-beta.2 after Phase 2 (Day 5.5)
+- Version 0.4.0 after Phase 3 (Day 7)
+
+**Детальный план:** `docs/stages/stage-11-settings-implementation-plan.md` (~350 строк спецификации)
+
+---
