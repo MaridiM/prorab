@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/VerificationToken'
 export type * from './models/PasswordResetToken'
+export type * from './models/TelegramAuthToken'
 export type * from './models/Team'
 export type * from './models/ProjectPayout'
 export type * from './models/TeamMember'

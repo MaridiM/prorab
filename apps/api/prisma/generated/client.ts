@@ -53,6 +53,11 @@ export type VerificationToken = Prisma.VerificationTokenModel
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
 /**
+ * Model TelegramAuthToken
+ * 
+ */
+export type TelegramAuthToken = Prisma.TelegramAuthTokenModel
+/**
  * Model Team
  * 
  */

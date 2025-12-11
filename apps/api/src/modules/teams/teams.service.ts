@@ -141,8 +141,9 @@ export class TeamsService extends CoreService {
     if (input.logoFile) {
       this.logger.log('Processing uploaded logo file');
 
+      const logoFile = await input.logoFile;
       const logoUrl = await this.storageService.uploadTeamLogo(
-        input.logoFile,
+        logoFile,
       );
 
       return {
@@ -301,7 +302,8 @@ export class TeamsService extends CoreService {
     // 4. Обрабатываем логотип
     if (input.logoFile) {
       this.logger.log('Processing uploaded logo file for team update');
-      const logoUrl = await this.storageService.uploadTeamLogo(input.logoFile);
+      const logoFile = await input.logoFile;
+      const logoUrl = await this.storageService.uploadTeamLogo(logoFile);
       updateData.logoType = LogoType.UPLOADED;
       updateData.logoUrl = logoUrl;
       updateData.iconId = null;

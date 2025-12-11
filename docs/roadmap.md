@@ -4,7 +4,7 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-11)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-11, 17:50)
 
 ### Общий прогресс: **90% MVP Complete** 🔄
 
@@ -65,9 +65,14 @@
 - ✅ **Testing Strategy**: Unit (50+ tests) + Integration + E2E (20+ scenarios) для 60% coverage
 
 **🛠️ Technical Fixes:**
-- ✅ **Apollo Client Imports**: Fixed useMutation import path
+- ✅ **Apollo Client Imports**: Fixed useMutation import path в subscription/page.tsx (с @apollo/client на @apollo/client/react)
+- ✅ **File Upload Promise**: Исправлена ошибка TypeScript в teams.service.ts - добавлен await перед input.logoFile
 - ✅ **IP Address Formatting**: ::1, 127.0.0.1 → "Локальный"
 - ✅ **Trust Proxy**: Корректное определение IP за прокси
+- ✅ **Dashboard Photo Reports**: Добавлен рендеринг ProjectDataFetcher для загрузки фотоотчетов
+- ✅ **Settings Layout**: Убрано ограничение max-w-4xl, добавлена sidebar навигация
+- ✅ **UserMenu**: Убран пункт "Профиль" из dropdown
+- ✅ **Prisma Seed**: Исправлен и успешно запущен (7 проектов, 27 расходов, 6 фотоотчетов)
 
 **📊 Рейтинги качества (из анализа):**
 

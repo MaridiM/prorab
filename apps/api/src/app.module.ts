@@ -12,6 +12,7 @@ import { PhotoReportsModule } from './modules/photo-reports/photo-reports.module
 import { PayoutsModule } from './modules/payouts/payouts.module'
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module'
 import { PaymentsModule } from './modules/payments/payments.module'
+import { TelegramModule } from './modules/telegram/telegram.module'
 import { MailModule } from './core/mail/mail.module'
 import { StorageModule } from './core/storage/storage.module'
 import { AuthGuard } from './shared/guards/auth.guard'
@@ -28,6 +29,7 @@ import { AuthGuard } from './shared/guards/auth.guard'
 		PayoutsModule,
 		SubscriptionsModule,
 		PaymentsModule,
+		TelegramModule,
 		MailModule,
 		StorageModule,
 	],

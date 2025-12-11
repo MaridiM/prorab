@@ -18,6 +18,12 @@ import {
 	UserAgent,
 } from '../../shared/decorators/current-user.decorator'
 import { AuthPayload, Session } from './models/auth.model'
+import { TelegramAuthService } from '../telegram/telegram-auth.service'
+import {
+	TelegramAuthPayload,
+	TelegramAuthStatusPayload,
+} from '../telegram/models/telegram-auth.model'
+import { CheckTelegramAuthInput } from '../telegram/dto/telegram-auth.dto'
 
 const COOKIE_OPTIONS = {
 	httpOnly: true,
@@ -28,7 +34,10 @@ const COOKIE_OPTIONS = {
 
 @Resolver()
 export class AuthResolver {
-	constructor(private readonly authService: AuthService) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly telegramAuthService: TelegramAuthService,
+	) {}
 
 	// ==================== Registration ====================
 
@@ -215,6 +224,71 @@ export class AuthResolver {
 			input.newPassword,
 			sessionToken,
 		)
+	}
+
+	// ==================== Telegram OAuth ====================
+
+	@Public()
+	@Mutation(() => TelegramAuthPayload)
+	async initTelegramAuth(): Promise<TelegramAuthPayload> {
+		const { token, deepLink } = await this.telegramAuthService.generateAuthToken()
+		const authTokenTtl = 600000 // 10 minutes
+		const expiresAt = new Date(Date.now() + authTokenTtl)
+
+		return {
+			token,
+			deepLink,
+			expiresAt,
+		}
+	}
+
+	@Public()
+	@Mutation(() => TelegramAuthStatusPayload)
+	async checkTelegramAuth(
+		@Args('input') input: CheckTelegramAuthInput,
+		@Context() ctx: { res: Response },
+		@UserAgent() userAgent?: string,
+		@ClientIp() ip?: string,
+	): Promise<TelegramAuthStatusPayload> {
+		const { completed, chatId } = await this.telegramAuthService.checkAuthToken(
+			input.token,
+		)
+
+		if (!completed || !chatId) {
+			return { completed: false }
+		}
+
+		// Получить Telegram user data из бота (chat_id уже есть)
+		// Для упрощения используем mock данные, в реальности нужно получить из Telegram API
+		const telegramUser = {
+			id: parseInt(chatId), // В реальности получим из Telegram
+			first_name: 'Telegram User',
+			username: undefined as string | undefined,
+			photo_url: undefined as string | undefined,
+		}
+
+		// Создать или найти пользователя
+		const user = await this.telegramAuthService.authenticateWithTelegram(
+			chatId,
+			telegramUser,
+		)
+
+		// Создать сессию (используем тот же AuthService.createSession)
+		const { sessionToken, refreshToken } = await this.authService.createSession(
+			user.id,
+			userAgent,
+			ip,
+		)
+
+		// Установить cookies
+		this.setAuthCookies(ctx.res, sessionToken, refreshToken)
+
+		return {
+			completed: true,
+			user,
+			sessionToken,
+			refreshToken,
+		}
 	}
 
 	// ==================== Helpers ====================

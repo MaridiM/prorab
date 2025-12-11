@@ -35,4 +35,11 @@ export const appConfig = () => ({
 		maxFileSize: parseInt(process.env.MAX_FILE_SIZE ?? '10000000', 10), // 10MB
 		maxFiles: parseInt(process.env.MAX_FILES ?? '10', 10),
 	},
+
+	// Telegram
+	telegram: {
+		botToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
+		botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabBot',
+		authTokenTtl: parseInt(process.env.TELEGRAM_AUTH_TOKEN_TTL ?? '600000', 10), // 10 minutes
+	},
 })

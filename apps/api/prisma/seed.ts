@@ -1,7 +1,22 @@
 import { PrismaClient, ProjectStatus, LogoType } from './generated/client'
 import * as argon2 from 'argon2'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
+import * as dotenv from 'dotenv'
 
-const prisma = new PrismaClient()
+// Load environment variables
+dotenv.config({ path: '../../.env' })
+dotenv.config()
+
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+	console.error('❌ DATABASE_URL is not set')
+	process.exit(1)
+}
+
+const pool = new Pool({ connectionString: databaseUrl })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter })
 
 // Демо пользователь
 const DEMO_USER = {

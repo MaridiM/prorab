@@ -87,6 +87,32 @@ mutation RevokeAllSessionsIncludingCurrent {
   revokeAllSessionsIncludingCurrent
 }
 
+# ==================== Telegram OAuth ====================
+
+mutation InitTelegramAuth {
+  initTelegramAuth {
+    token
+    deepLink
+    expiresAt
+  }
+}
+
+mutation CheckTelegramAuth($input: CheckTelegramAuthInput!) {
+  checkTelegramAuth(input: $input) {
+    completed
+    user {
+      id
+      email
+      fullName
+      phone
+      emailVerified
+      hasCompletedOnboarding
+    }
+    sessionToken
+    refreshToken
+  }
+}
+
 # ==================== Queries ====================
 
 query Me {

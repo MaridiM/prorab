@@ -23,6 +23,16 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+input ChangePlanInput {
+  immediate: Boolean! = false
+  newPlan: String!
+  subscriptionId: String!
+}
+
+input CheckTelegramAuthInput {
+  token: String!
+}
+
 input CompleteOnboardingInput {
   """ID выбранного цвета (orange, blue, etc)"""
   colorId: String
@@ -116,6 +126,12 @@ input CreateProjectInput {
   teamId: String!
 }
 
+input CreateSubscriptionInput {
+  plan: String!
+  teamId: String!
+  useEarlyBird: Boolean
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -185,7 +201,10 @@ type Mutation {
 
   """Архивировать проект"""
   archiveProject(id: ID!): Project!
+  cancelSubscription(subscriptionId: String!): Subscription!
   changePassword(input: ChangePasswordInput!): Boolean!
+  changePlan(input: ChangePlanInput!): Subscription!
+  checkTelegramAuth(input: CheckTelegramAuthInput!): TelegramAuthStatusPayload!
 
   """Close project with final calculations (owner only)"""
   closeProject(projectId: ID!): Project!
@@ -204,6 +223,7 @@ type Mutation {
 
   """Создать проект"""
   createProject(input: CreateProjectInput!): Project!
+  createSubscription(input: CreateSubscriptionInput!): Subscription!
 
   """Удалить расход"""
   deleteExpense(id: ID!): Expense!
@@ -214,10 +234,16 @@ type Mutation {
   """Удалить фотоотчёт"""
   deletePhotoReport(id: String!): Boolean!
   forgotPassword(email: String!): Boolean!
+  initTelegramAuth: TelegramAuthPayload!
+  initializePayment(subscriptionId: String!): PaymentUrl!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
+  reactivateSubscription(subscriptionId: String!): Subscription!
   refreshSession: AuthPayload
   register(input: RegisterInput!): AuthPayload!
+
+  """Удаление участника из команды (только для владельца)"""
+  removeTeamMember(memberId: ID!, teamId: ID!): Boolean!
 
   """Изменить порядок фотографий"""
   reorderReportPhotos(photoIds: [String!]!, reportId: String!): Boolean!
@@ -242,11 +268,17 @@ type Mutation {
   """Обновить фотоотчёт"""
   updatePhotoReport(input: UpdatePhotoReportInput!): PhotoReport!
 
+  """Обновление профиля пользователя"""
+  updateProfile(input: UpdateProfileInput!): User!
+
   """Обновить проект"""
   updateProject(id: ID!, input: UpdateProjectInput!): Project!
 
   """Обновить прогресс проекта"""
   updateProjectProgress(id: ID!, progress: Int!): Project!
+
+  """Обновление настроек команды (только для владельца)"""
+  updateTeam(input: UpdateTeamInput!): Team!
 
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
@@ -265,6 +297,36 @@ type OnboardingResult {
 
   """Созданная команда"""
   team: Team!
+}
+
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  description: String
+  failureReason: String
+  id: ID!
+  paidAt: DateTime
+  paymentMethod: String
+  refundedAt: DateTime
+  status: PaymentStatus!
+  subscriptionId: String!
+  teamId: String!
+  updatedAt: DateTime!
+  yookassaPaymentId: String!
+}
+
+enum PaymentStatus {
+  CANCELLED
+  FAILED
+  PENDING
+  REFUNDED
+  SUCCEEDED
+}
+
+type PaymentUrl {
+  paymentId: String!
+  url: String!
 }
 
 type PayoutSummary {
@@ -303,6 +365,15 @@ type PhotoReport {
   title: String!
   updatedAt: DateTime!
   viewCount: Int!
+}
+
+type PlanLimits {
+  features: [String!]!
+  maxActiveProjects: Float
+  maxMembers: Float!
+  name: String!
+  price: Float!
+  storageGB: Float!
 }
 
 type Project {
@@ -454,6 +525,10 @@ type PublicProject {
 }
 
 type Query {
+  availablePlans: [PlanLimits!]!
+  canAddProject(teamId: String!): Boolean!
+  currentPlanLimits(teamId: String!): PlanLimits!
+
   """Получить расход по ID"""
   expense(id: ID!): Expense!
 
@@ -469,9 +544,11 @@ type Query {
 
   """Get all payouts for a team member (owner or member themselves)"""
   memberPayouts(memberId: ID!): [ProjectPayout!]!
+  mySubscription: Subscription
 
   """Получение всех команд, в которых состоит пользователь"""
   myTeams: [Team!]!
+  paymentsBySubscription(subscriptionId: String!): [Payment!]!
 
   """Calculate payout summary for a project (owner only)"""
   payoutSummary(projectId: ID!): PayoutSummary!
@@ -497,6 +574,14 @@ type Query {
   """Публичный эндпоинт: получить фотоотчёт по slug (без аутентификации)"""
   publicPhotoReport(slug: String!): PublicPhotoReport!
   sessions: [Session!]!
+  subscription(id: String!): Subscription!
+
+  """Получение команды по ID"""
+  team(id: ID!): Team
+
+  """Получение участников команды"""
+  teamMembers(teamId: ID!): [TeamMember!]!
+  usageStats(teamId: String!): UsageStats!
 }
 
 input RegisterInput {
@@ -530,6 +615,37 @@ type Session {
   id: String!
   ip: String
   userAgent: String
+}
+
+type Subscription {
+  cancelAtPeriodEnd: Boolean!
+  cancelledAt: DateTime
+  createdAt: DateTime!
+  currentPeriodEnd: DateTime!
+  currentPeriodStart: DateTime!
+  id: ID!
+  isEarlyBird: Boolean!
+  limits: PlanLimits!
+  plan: SubscriptionPlan!
+  status: SubscriptionStatus!
+  teamId: String!
+  trialEndsAt: DateTime
+  updatedAt: DateTime!
+  yookassaSubscriptionId: String
+}
+
+enum SubscriptionPlan {
+  BRIGADE
+  FOREMAN
+  LITE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+  TRIALING
 }
 
 type Team {
@@ -583,6 +699,19 @@ type TeamMember {
   userId: ID!
 }
 
+type TelegramAuthPayload {
+  deepLink: String!
+  expiresAt: DateTime!
+  token: String!
+}
+
+type TelegramAuthStatusPayload {
+  completed: Boolean!
+  refreshToken: String
+  sessionToken: String
+  user: User
+}
+
 input UpdateExpenseInput {
   """Сумма расхода"""
   amount: Float
@@ -621,6 +750,11 @@ input UpdatePhotoReportInput {
   title: String
 }
 
+input UpdateProfileInput {
+  fullName: String
+  phone: String
+}
+
 input UpdateProjectInput {
   """Адрес объекта"""
   address: String
@@ -653,6 +787,14 @@ input UpdateProjectInput {
   startDate: DateTime
 }
 
+input UpdateTeamInput {
+  colorId: String
+  iconId: String
+  logoFile: Upload
+  name: String
+  teamId: ID!
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -663,7 +805,16 @@ input UploadPhotoInput {
   reportId: String!
 }
 
+type UsageStats {
+  activeProjects: Float!
+  limits: PlanLimits!
+  storageUsedGB: Float!
+  totalMembers: Float!
+}
+
 type User {
+  """URL аватарки пользователя"""
+  avatarUrl: String
   createdAt: DateTime!
   email: String!
   emailVerified: Boolean!

@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { format } from 'date-fns'

@@ -387,6 +387,7 @@ export const ModelName = {
   User: 'User',
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
+  TelegramAuthToken: 'TelegramAuthToken',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   TeamMember: 'TeamMember',
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "verificationToken" | "passwordResetToken" | "team" | "projectPayout" | "teamMember" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "subscription" | "payment"
+    modelProps: "user" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "teamMember" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "subscription" | "payment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -635,6 +636,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PasswordResetTokenCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PasswordResetTokenCountAggregateOutputType> | number
+        }
+      }
+    }
+    TelegramAuthToken: {
+      payload: Prisma.$TelegramAuthTokenPayload<ExtArgs>
+      fields: Prisma.TelegramAuthTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelegramAuthTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelegramAuthTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.TelegramAuthTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelegramAuthTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        findMany: {
+          args: Prisma.TelegramAuthTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>[]
+        }
+        create: {
+          args: Prisma.TelegramAuthTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        createMany: {
+          args: Prisma.TelegramAuthTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelegramAuthTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.TelegramAuthTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        update: {
+          args: Prisma.TelegramAuthTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.TelegramAuthTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelegramAuthTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelegramAuthTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.TelegramAuthTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramAuthTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.TelegramAuthTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelegramAuthToken>
+        }
+        groupBy: {
+          args: Prisma.TelegramAuthTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramAuthTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelegramAuthTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramAuthTokenCountAggregateOutputType> | number
         }
       }
     }
@@ -1425,9 +1500,15 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   fullName: 'fullName',
   phone: 'phone',
+  avatarUrl: 'avatarUrl',
   hasCompletedOnboarding: 'hasCompletedOnboarding',
   onboardingCompletedAt: 'onboardingCompletedAt',
   currentTeamId: 'currentTeamId',
+  oauthProvider: 'oauthProvider',
+  oauthProviderId: 'oauthProviderId',
+  telegramChatId: 'telegramChatId',
+  telegramUsername: 'telegramUsername',
+  telegramPhotoUrl: 'telegramPhotoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1456,6 +1537,18 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const TelegramAuthTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  chatId: 'chatId',
+  used: 'used',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TelegramAuthTokenScalarFieldEnum = (typeof TelegramAuthTokenScalarFieldEnum)[keyof typeof TelegramAuthTokenScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {
@@ -1904,6 +1997,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   verificationToken?: Prisma.VerificationTokenOmit
   passwordResetToken?: Prisma.PasswordResetTokenOmit
+  telegramAuthToken?: Prisma.TelegramAuthTokenOmit
   team?: Prisma.TeamOmit
   projectPayout?: Prisma.ProjectPayoutOmit
   teamMember?: Prisma.TeamMemberOmit

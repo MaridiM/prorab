@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
+  TelegramAuthToken: 'TelegramAuthToken',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   TeamMember: 'TeamMember',
@@ -90,9 +91,15 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   fullName: 'fullName',
   phone: 'phone',
+  avatarUrl: 'avatarUrl',
   hasCompletedOnboarding: 'hasCompletedOnboarding',
   onboardingCompletedAt: 'onboardingCompletedAt',
   currentTeamId: 'currentTeamId',
+  oauthProvider: 'oauthProvider',
+  oauthProviderId: 'oauthProviderId',
+  telegramChatId: 'telegramChatId',
+  telegramUsername: 'telegramUsername',
+  telegramPhotoUrl: 'telegramPhotoUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -121,6 +128,18 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const TelegramAuthTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  chatId: 'chatId',
+  used: 'used',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type TelegramAuthTokenScalarFieldEnum = (typeof TelegramAuthTokenScalarFieldEnum)[keyof typeof TelegramAuthTokenScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {

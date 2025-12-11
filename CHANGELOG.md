@@ -7,6 +7,167 @@
 
 ## [Unreleased]
 
+### Fixed (2025-12-11) - Apollo Client Imports & File Upload Promise ✅
+
+**Приоритет:** 🔴 Critical Bug Fix
+**Статус:** ✅ Завершено
+**Время:** ~15 минут
+
+**1. Apollo Client useMutation Import Fix**
+- ✅ Исправлен импорт `useMutation` в `subscription/page.tsx` с `@apollo/client` на `@apollo/client/react`
+- ✅ Все файлы теперь используют правильный путь импорта для React hooks
+- ✅ Исправлена ошибка компиляции: "Export useMutation doesn't exist in target module"
+
+**2. File Upload Promise Resolution**
+- ✅ Исправлена ошибка TypeScript в `teams.service.ts`: `Promise<FileUpload>` не awaited
+- ✅ Добавлен `await` перед `input.logoFile` в методах `processLogo` и `updateTeam`
+- ✅ Теперь `FileUpload` объект корректно извлекается из Promise перед передачей в `storageService`
+- ✅ Исправлена ошибка компиляции: "Argument of type 'Promise<FileUpload>' is not assignable to parameter of type 'FileUpload'"
+
+**Файлы изменены:**
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/subscription/page.tsx` - исправлен импорт
+- `apps/api/src/modules/teams/teams.service.ts` - добавлен await для logoFile
+
+---
+
+### Fixed (2025-12-11) - Dashboard & UI Polish ✅
+
+**Приоритет:** 🟢 UX Improvement
+**Статус:** ✅ Завершено
+**Время:** ~30 минут
+
+**1. Dashboard Photo Reports Fix**
+- ✅ Исправлено отображение фотоотчетов на дашборде
+- ✅ Добавлен рендеринг `ProjectDataFetcher` для каждого проекта
+- ✅ Теперь фотоотчеты корректно загружаются и отображаются в боковой панели
+
+**2. Settings Page Layout Improvements**
+- ✅ Убрано ограничение `max-w-4xl` - теперь на всю ширину контейнера
+- ✅ Добавлена desktop-sidebar навигация (фиксированная боковая панель на lg+ экранах)
+- ✅ Улучшена mobile навигация с горизонтальным скроллом табов
+- ✅ Responsive layout: 2-колоночный на desktop, 1-колоночный на mobile
+
+**3. UserMenu Simplification**
+- ✅ Убран пункт "Профиль" из выпадающего меню
+- ✅ Оставлены только "Настройки" и "Выйти"
+- ✅ Упрощена навигация для пользователей
+
+**4. Prisma Seed Demo Data**
+- ✅ Исправлен seed.ts (добавлен PrismaAdapter, dotenv для DATABASE_URL)
+- ✅ Успешно выполнен seed с демо-данными:
+  - 1 демо пользователь (demo@prorab.app / demo123456)
+  - 1 команда "СтройМастер"
+  - 7 проектов (3 активных, 2 завершенных, 2 архивных)
+  - 27 расходов по проектам
+  - 6 фотоотчетов с фотографиями
+  - 2 выплаты сотрудникам
+
+---
+
+### Added (2025-12-11) - Telegram OAuth Integration: Core Implementation ✅
+
+**Приоритет:** 🟡 Medium (Future Enhancement)
+**Статус:** ✅ Phase 1-4 Завершены (Backend + Frontend готовы к тестированию)
+**Время:** ~4 часа
+**Описание:** Реализована passwordless авторизация через Telegram с использованием deep link flow
+
+#### 🎯 Implementation Complete (Phases 1-4)
+
+**✅ Phase 1: Database & Config** (завершено)
+- ✅ Updated Prisma schema with OAuth fields (oauthProvider, oauthProviderId, telegramChatId, telegramUsername, telegramPhotoUrl)
+- ✅ Added TelegramAuthToken model (token, chatId, used, expiresAt)
+- ✅ Made passwordHash nullable for OAuth users
+- ✅ Created indexes for OAuth fields
+- ✅ Pushed schema to database (prisma db push)
+- ✅ Generated Prisma client
+- ✅ Added Telegram config to app.config.ts (botToken, botUsername, authTokenTtl)
+- ✅ Installed nestjs-telegraf (^2.9.1) and telegraf (^4.16.3) packages
+
+**✅ Phase 2: Backend Core** (завершено)
+- ✅ Created telegram module structure (apps/api/src/modules/telegram/)
+- ✅ Implemented TelegramAuthService (5 methods):
+  - generateAuthToken() - генерация токена и deep link
+  - linkAuthToken() - связывание токена с chat_id
+  - checkAuthToken() - проверка статуса для polling
+  - authenticateWithTelegram() - создание/поиск пользователя
+  - cleanupExpiredTokens() - очистка устаревших токенов
+- ✅ Implemented TelegramBot handlers:
+  - @Start() - обработка /start с auth payload
+  - @Help() - справка по командам
+  - OAuth flow с подтверждением
+  - Markdown-formatted messages
+- ✅ Created TelegramModule with TelegrafModule.forRootAsync
+- ✅ Integrated with PrismaModule
+- ✅ Added to app.module.ts imports
+
+**✅ Phase 3: GraphQL Integration** (завершено)
+- ✅ Added mutations to auth.resolver.ts:
+  - initTelegramAuth: TelegramAuthPayload - инициализация OAuth
+  - checkTelegramAuth(token): TelegramAuthStatusPayload - polling endpoint
+- ✅ Created DTOs and models:
+  - CheckTelegramAuthInput (token validation)
+  - TelegramAuthPayload (token, deepLink, expiresAt)
+  - TelegramAuthStatusPayload (completed, user, sessionToken, refreshToken)
+- ✅ Integrated TelegramAuthService into AuthResolver
+- ✅ Added TelegramModule to AuthModule imports
+- ✅ Updated GraphQL schema (schema.gql) with new types and mutations
+- ✅ Session reuse (AuthService.createSession) - unified cookies
+
+**✅ Phase 4: Frontend** (завершено)
+- ✅ Added mutations to auth.graphql (InitTelegramAuth, CheckTelegramAuth)
+- ✅ Created TelegramLoginButton component (apps/web/src/packages/components/auth/):
+  - Polling logic (2 sec interval, 10 min timeout)
+  - Deep link opening in new window
+  - Loading states (генерация, ожидание подтверждения)
+  - Toast notifications (sonner)
+  - Error handling
+  - Telegram branded styling
+- ✅ Exported component from components/index.ts
+- ✅ Updated login page (apps/web/src/app/(root)/auth/login/page.tsx):
+  - Replaced placeholder button with TelegramLoginButton
+  - Added handleTelegramSuccess callback
+  - Redirect to dashboard/onboarding based on hasCompletedOnboarding
+
+**⏳ Phase 5-6: Testing & Deployment** (следующий этап)
+- [ ] Create Telegram bot via @BotFather
+- [ ] Add bot token to .env (TELEGRAM_BOT_TOKEN)
+- [ ] Test OAuth flow locally
+- [ ] Unit tests for TelegramAuthService
+- [ ] E2E tests for OAuth flow
+- [ ] Production bot setup + webhook
+- [ ] Monitoring и logging
+
+#### 📋 Setup Instructions (для разработчика)
+
+**Шаг 1: Создать Telegram бота**
+1. Открыть Telegram и найти [@BotFather](https://t.me/BotFather)
+2. Отправить `/newbot`
+3. Ввести имя бота: `ProRab Bot`
+4. Ввести username: `ProRabBot` (или другой доступный)
+5. Получить токен (формат: `123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ`)
+6. Сохранить токен в `.env`:
+   ```env
+   TELEGRAM_BOT_TOKEN=ваш_токен_от_BotFather
+   TELEGRAM_BOT_USERNAME=ProRabBot
+   TELEGRAM_AUTH_TOKEN_TTL=600000
+   ```
+
+**Шаг 2: Настроить команды бота (опционально)**
+1. Отправить `/setcommands` в @BotFather
+2. Выбрать своего бота
+3. Отправить:
+   ```
+   start - Начать работу с ботом
+   help - Справка по командам
+   ```
+
+**Шаг 3: Установить описание (опционально)**
+1. Отправить `/setdescription` в @BotFather
+2. Выбрать своего бота
+3. Отправить: `ProRab.space - управление строительными проектами`
+
+---
+
 ### Added (2025-12-11) - Stage 8: Monetization - Complete Implementation ✅
 
 **Приоритет:** 🔴 КРИТИЧНО
