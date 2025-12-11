@@ -3933,3 +3933,27 @@ Total height     ~580px    ~420px    -28%
 - N/A
 
 ---
+
+## Module: Settings Page
+
+### Feature: Full Implementation
+
+:calendar: `2025-12-11`
+
+**Added**
+
+- ✅ **Inline GraphQL**: Queries and mutations for Subscriptions, Profile, Account Deletion, and Notifications in `settings/page.tsx`.
+- ✅ **Profile Integration**: Connected `UPDATE_PROFILE` mutation to form.
+- ✅ **Security**: Connected `DELETE_ACCOUNT` mutation with confirmation flow.
+- ✅ **Notifications**: Connected UI toggles to backend `updateNotificationSettings` mutation.
+- ✅ **Subscriptions**: Real data fetching for current plan and payment history.
+
+**Changed**
+
+- ✅ Refactored `settings/page.tsx` to remove mock data and duplicate imports.
+
+**Fixed**
+
+- ✅ Duplicate Lucide icon imports (`Rocket`, `Camera`, etc.) in `settings/page.tsx`.
+
+---

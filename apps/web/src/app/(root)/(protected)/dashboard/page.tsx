@@ -237,16 +237,20 @@ interface StatsCardProps {
 	iconBg: string
 	valueColor?: string
 	trend?: 'up' | 'down' | null
+	delay?: number
 }
 
-function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, valueColor, trend }: StatsCardProps) {
+function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, valueColor, trend, delay = 0 }: StatsCardProps) {
 	return (
 		<motion.div
-			variants={scaleIn}
+			initial={{ opacity: 0, scale: 0.95 }}
+			animate={{ opacity: 1, scale: 1 }}
+			transition={{ duration: 0.4, delay }}
 			className={cn(
 				'relative p-5 rounded-2xl border border-border/30 overflow-hidden',
-				'bg-card/80 backdrop-blur-xl',
-				'hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group'
+				'bg-card backdrop-blur-xl min-h-[140px] w-full',
+				'hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group',
+				'flex flex-col'
 			)}
 		>
 			{/* Gradient background */}
@@ -258,7 +262,7 @@ function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, value
 			{/* Decorative circle */}
 			<div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-gradient-to-br from-white/5 to-transparent" />
 
-			<div className="relative z-10">
+			<div className="relative z-10 flex-1 flex flex-col">
 				<div className="flex items-center justify-between mb-3">
 					<div className={cn(
 						'w-11 h-11 rounded-xl flex items-center justify-center',
@@ -277,9 +281,9 @@ function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, value
 					)}
 				</div>
 
-				<div className="space-y-1">
+				<div className="space-y-1 mt-auto">
 					<p className="text-sm text-muted-foreground font-medium">{label}</p>
-					<p className={cn('text-2xl font-bold tracking-tight', valueColor)}>
+					<p className={cn('text-2xl font-bold tracking-tight', valueColor || 'text-foreground')}>
 						{value}
 					</p>
 					{subValue && (
@@ -487,8 +491,7 @@ function RecentExpenseCard({ expense, projectName }: { expense: Expense; project
 	const category = EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other
 
 	return (
-		<motion.div
-			variants={slideIn}
+		<div
 			className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group"
 		>
 			<div className={cn(
@@ -512,7 +515,7 @@ function RecentExpenseCard({ expense, projectName }: { expense: Expense; project
 					<span className="shrink-0">{formatRelativeDate(expense.createdAt)}</span>
 				</div>
 			</div>
-		</motion.div>
+		</div>
 	)
 }
 
@@ -521,8 +524,7 @@ function RecentPhotoReportCard({ report, projectName }: { report: PhotoReport; p
 	const photosCount = report.photos?.length || 0
 
 	return (
-		<motion.div
-			variants={slideIn}
+		<div
 			className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group cursor-pointer"
 		>
 			<div className={cn(
@@ -554,7 +556,7 @@ function RecentPhotoReportCard({ report, projectName }: { report: PhotoReport; p
 					<span className="shrink-0">{formatRelativeDate(report.createdAt)}</span>
 				</div>
 			</div>
-		</motion.div>
+		</div>
 	)
 }
 
@@ -562,7 +564,9 @@ function RecentPhotoReportCard({ report, projectName }: { report: PhotoReport; p
 function WelcomeHeader({ userName, greeting }: { userName: string; greeting: string }) {
 	return (
 		<motion.div
-			variants={fadeIn}
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.5 }}
 			className="mb-8"
 		>
 			<div className="flex items-center gap-3 mb-2">
@@ -629,6 +633,14 @@ function ProjectPickerModal({
 	const router = useRouter()
 	const title = tab === 'expenses' ? 'Выберите объект для расхода' : 'Выберите объект для фотоотчёта'
 
+	// Block page scroll when modal is open
+	useEffect(() => {
+		document.body.style.overflow = 'hidden'
+		return () => {
+			document.body.style.overflow = 'unset'
+		}
+	}, [])
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -642,7 +654,7 @@ function ProjectPickerModal({
 				animate={{ scale: 1, opacity: 1 }}
 				exit={{ scale: 0.95, opacity: 0 }}
 				onClick={(e) => e.stopPropagation()}
-				className="w-full max-w-md bg-card border border-border/50 rounded-2xl shadow-2xl overflow-hidden"
+				className="w-full max-w-2xl bg-card border border-border/50 rounded-2xl shadow-2xl overflow-hidden"
 			>
 				<div className="p-4 border-b border-border/30">
 					<div className="flex items-center justify-between">
@@ -652,7 +664,7 @@ function ProjectPickerModal({
 						</button>
 					</div>
 				</div>
-				<div className="p-2 max-h-80 overflow-y-auto">
+				<div className="p-2 max-h-[600px] overflow-y-auto">
 					{projects.map((project) => (
 						<button
 							key={project.id}
@@ -925,13 +937,13 @@ function ActivityLoader({
 	onExpensesLoaded: (projectId: string, expenses: Expense[]) => void
 	onReportsLoaded: (projectId: string, reports: PhotoReport[]) => void
 }) {
-	const { data: expensesData } = useQuery(ExpensesByProjectDocument, {
+	const { data: expensesData, error: expensesError, loading: expensesLoading } = useQuery(ExpensesByProjectDocument, {
 		variables: { projectId },
 		skip: !projectId,
 		fetchPolicy: 'cache-and-network',
 	})
 
-	const { data: reportsData } = useQuery(ProjectPhotoReportsDocument, {
+	const { data: reportsData, error: reportsError, loading: reportsLoading } = useQuery(ProjectPhotoReportsDocument, {
 		variables: { projectId },
 		skip: !projectId,
 		fetchPolicy: 'cache-and-network',
@@ -1051,6 +1063,9 @@ export default function DashboardPage() {
 		p => p?.status === ProjectStatus.ARCHIVED
 	)
 
+	// Track loaded projects for loading state
+	const [loadedProjects, setLoadedProjects] = useState<Set<string>>(new Set())
+
 	// Callback to handle activity data from individual projects
 	const handleExpensesLoaded = useCallback((projectId: string, expenses: Expense[]) => {
 		setAllExpenses(prev => {
@@ -1058,6 +1073,7 @@ export default function DashboardPage() {
 			newMap.set(projectId, expenses)
 			return newMap
 		})
+		setLoadedProjects(prev => new Set(prev).add(`${projectId}-expenses`))
 	}, [])
 
 	const handleReportsLoaded = useCallback((projectId: string, reports: PhotoReport[]) => {
@@ -1066,9 +1082,30 @@ export default function DashboardPage() {
 			newMap.set(projectId, reports)
 			return newMap
 		})
+		setLoadedProjects(prev => new Set(prev).add(`${projectId}-reports`))
 	}, [])
 
-	// Aggregate and sort recent expenses from all projects (last 5)
+	// Check if expenses and reports are loading
+	// Show loading if projects are still loading OR if we have projects but data is not loaded yet
+	const isLoadingExpenses = useMemo(() => {
+		// If projects are still loading, show skeleton
+		if (projectsLoading) return true
+		// If no projects, don't show loading
+		if (activeProjects.length === 0) return false
+		// If we have projects, check if all are loaded
+		return activeProjects.some(project => !loadedProjects.has(`${project.id}-expenses`))
+	}, [activeProjects, loadedProjects, projectsLoading])
+
+	const isLoadingReports = useMemo(() => {
+		// If projects are still loading, show skeleton
+		if (projectsLoading) return true
+		// If no projects, don't show loading
+		if (activeProjects.length === 0) return false
+		// If we have projects, check if all are loaded
+		return activeProjects.some(project => !loadedProjects.has(`${project.id}-reports`))
+	}, [activeProjects, loadedProjects, projectsLoading])
+
+	// Aggregate and sort recent expenses from all projects (last 3)
 	const recentExpenses = useMemo(() => {
 		const allExpensesList: Expense[] = []
 		allExpenses.forEach((expenses) => {
@@ -1076,7 +1113,7 @@ export default function DashboardPage() {
 		})
 		return allExpensesList
 			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-			.slice(0, 5)
+			.slice(0, 3)
 	}, [allExpenses])
 
 	// Aggregate and sort recent photo reports from all projects (last 3)
@@ -1142,6 +1179,13 @@ export default function DashboardPage() {
 			loading: false,
 		}
 	}, [activeProjects, projectStatsMap])
+
+	// Reset loading state when team or projects change
+	useEffect(() => {
+		setLoadedProjects(new Set())
+		setAllExpenses(new Map())
+		setAllReports(new Map())
+	}, [currentTeamId, activeProjects.length])
 
 	// Handlers
 	const handleTeamChange = (teamId: string) => {
@@ -1400,8 +1444,13 @@ export default function DashboardPage() {
 
 					{/* Financial Stats (only for owner with projects) */}
 					{isOwner && stats.totalBudget > 0 && (
-						<motion.div variants={fadeIn} className="mb-8">
-							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.5 }}
+							className="mb-8 w-full"
+						>
+							<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full auto-rows-fr">
 								<StatsCard
 									icon={Wallet}
 									label="Сумма договоров"
@@ -1409,6 +1458,7 @@ export default function DashboardPage() {
 									subValue={formatFullCurrency(stats.totalBudget)}
 									gradient="from-blue-500/10 to-indigo-500/5"
 									iconBg="bg-gradient-to-br from-blue-500 to-indigo-600"
+									delay={0.1}
 								/>
 								<StatsCard
 									icon={Receipt}
@@ -1418,6 +1468,7 @@ export default function DashboardPage() {
 									gradient="from-amber-500/10 to-orange-500/5"
 									iconBg="bg-gradient-to-br from-amber-500 to-orange-600"
 									valueColor="text-amber-600 dark:text-amber-400"
+									delay={0.2}
 								/>
 								<StatsCard
 									icon={stats.isProfitable ? TrendingUp : TrendingDown}
@@ -1428,6 +1479,7 @@ export default function DashboardPage() {
 									iconBg={stats.isProfitable ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-red-500 to-rose-600'}
 									valueColor={stats.isProfitable ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
 									trend={stats.isProfitable ? 'up' : 'down'}
+									delay={0.3}
 								/>
 								<StatsCard
 									icon={Building2}
@@ -1436,6 +1488,7 @@ export default function DashboardPage() {
 									subValue={stats.activeCount === 1 ? '1 объект' : stats.activeCount >= 2 && stats.activeCount <= 4 ? `${stats.activeCount} объекта` : `${stats.activeCount} объектов`}
 									gradient="from-violet-500/10 to-purple-500/5"
 									iconBg="bg-gradient-to-br from-violet-500 to-purple-600"
+									delay={0.4}
 								/>
 							</div>
 						</motion.div>
@@ -1446,7 +1499,12 @@ export default function DashboardPage() {
 						{/* Main Column: Projects */}
 						<div className="lg:col-span-2">
 							{/* Search */}
-							<motion.div variants={fadeIn} className="mb-6">
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.1 }}
+								className="mb-6"
+							>
 								<div className="relative">
 									<Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 									<input
@@ -1464,7 +1522,12 @@ export default function DashboardPage() {
 							</motion.div>
 
 							{/* Active Projects */}
-							<motion.section variants={fadeIn} className="mb-8">
+							<motion.section
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.2 }}
+								className="mb-8"
+							>
 								<div className="flex items-center justify-between mb-4">
 									<h2 className="text-lg font-semibold flex items-center gap-2">
 										<span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -1522,7 +1585,11 @@ export default function DashboardPage() {
 
 							{/* Archived Projects */}
 							{archivedProjects.length > 0 && (
-								<motion.section variants={fadeIn}>
+								<motion.section
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.5, delay: 0.3 }}
+								>
 									<button
 										onClick={() => setShowArchived(!showArchived)}
 										className={cn(
@@ -1578,7 +1645,7 @@ export default function DashboardPage() {
 						{/* Sidebar: Recent Activity */}
 						<div className="lg:col-span-1 space-y-6">
 							{/* Recent Expenses */}
-							<motion.section variants={fadeIn}>
+							<motion.section initial="hidden" animate="visible" variants={fadeIn}>
 								<div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-xl overflow-hidden">
 									<div className="p-4 border-b border-border/30">
 										<div className="flex items-center justify-between">
@@ -1586,24 +1653,77 @@ export default function DashboardPage() {
 												<Receipt className="w-4 h-4 text-amber-500" />
 												Последние расходы
 											</h3>
-											{recentExpenses.length > 0 && (
+											{!isLoadingExpenses && recentExpenses.length > 0 && (
 												<span className="text-xs text-muted-foreground">
 													{recentExpenses.length} записей
 												</span>
 											)}
 										</div>
 									</div>
-									<div className="p-3">
-										{recentExpenses.length > 0 ? (
-											<motion.div variants={stagger} className="space-y-2">
-												{recentExpenses.map(expense => (
-													<RecentExpenseCard
-														key={expense.id}
-														expense={expense}
-														projectName={projectNameMap.get(expense.projectId) || 'Проект'}
-													/>
+									<div className="p-3 min-h-[200px]">
+										{isLoadingExpenses ? (
+											<div className="space-y-2">
+												{[1, 2, 3].map((i) => (
+													<div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30">
+														<Skeleton className="w-10 h-10 rounded-xl" />
+														<div className="flex-1 space-y-2">
+															<Skeleton className="h-4 w-3/4" />
+															<Skeleton className="h-3 w-1/2" />
+														</div>
+													</div>
 												))}
-											</motion.div>
+											</div>
+										) : recentExpenses.length > 0 ? (
+											<>
+												<div className="space-y-2">
+													{recentExpenses.map((expense) => (
+														<div
+															key={expense.id}
+															onClick={() => currentTeamId && router.push(`/teams/${currentTeamId}/projects/${expense.projectId}?tab=expenses`)}
+															className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group"
+														>
+															<div className={cn(
+																'w-10 h-10 rounded-xl flex items-center justify-center text-lg',
+																'bg-gradient-to-br shadow-sm',
+																(EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other).color,
+																'text-white'
+															)}>
+																{(EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other).icon}
+															</div>
+															<div className="flex-1 min-w-0">
+																<div className="flex items-center justify-between gap-2">
+																	<span className="font-semibold text-sm truncate">
+																		{(EXPENSE_CATEGORIES[expense.category] || EXPENSE_CATEGORIES.other).label}
+																	</span>
+																	<span className="font-bold text-sm text-red-600 dark:text-red-400">
+																		-{formatCurrency(expense.amount)}
+																	</span>
+																</div>
+																<div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+																	<span className="truncate">{projectNameMap.get(expense.projectId) || 'Проект'}</span>
+																	<span>•</span>
+																	<span className="shrink-0">{formatRelativeDate(expense.createdAt)}</span>
+																</div>
+															</div>
+														</div>
+													))}
+												</div>
+												{currentTeamId && activeProjects.length > 0 && (
+													<button
+														onClick={() => {
+															if (activeProjects.length === 1) {
+																router.push(`/teams/${currentTeamId}/projects/${activeProjects[0].id}?tab=expenses`)
+															} else {
+																setProjectPickerTab('expenses')
+															}
+														}}
+														className="w-full mt-3 px-4 py-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-1.5"
+													>
+														<span>Все расходы</span>
+														<ArrowRight className="w-3 h-3" />
+													</button>
+												)}
+											</>
 										) : (
 											<div className="text-center py-8">
 												<Receipt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
@@ -1618,7 +1738,7 @@ export default function DashboardPage() {
 							</motion.section>
 
 							{/* Recent Photo Reports */}
-							<motion.section variants={fadeIn}>
+							<motion.section initial="hidden" animate="visible" variants={fadeIn}>
 								<div className="rounded-2xl border border-border/30 bg-card/80 backdrop-blur-xl overflow-hidden">
 									<div className="p-4 border-b border-border/30">
 										<div className="flex items-center justify-between">
@@ -1626,24 +1746,86 @@ export default function DashboardPage() {
 												<Camera className="w-4 h-4 text-violet-500" />
 												Фотоотчёты
 											</h3>
-											{recentReports.length > 0 && (
+											{!isLoadingReports && recentReports.length > 0 && (
 												<span className="text-xs text-muted-foreground">
 													{recentReports.length} отчётов
 												</span>
 											)}
 										</div>
 									</div>
-									<div className="p-3">
-										{recentReports.length > 0 ? (
-											<motion.div variants={stagger} className="space-y-2">
-												{recentReports.map(report => (
-													<RecentPhotoReportCard
-														key={report.id}
-														report={report}
-														projectName={projectNameMap.get(report.projectId) || 'Проект'}
-													/>
+									<div className="p-3 min-h-[200px]">
+										{isLoadingReports ? (
+											<div className="space-y-2">
+												{[1, 2, 3].map((i) => (
+													<div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30">
+														<Skeleton className="w-12 h-12 rounded-xl" />
+														<div className="flex-1 space-y-2">
+															<Skeleton className="h-4 w-3/4" />
+															<Skeleton className="h-3 w-1/2" />
+														</div>
+													</div>
 												))}
-											</motion.div>
+											</div>
+										) : recentReports.length > 0 ? (
+											<>
+												<div className="space-y-2">
+													{recentReports.map((report) => {
+														const photosCount = report.photos?.length || 0
+														return (
+															<div
+																key={report.id}
+																onClick={() => currentTeamId && router.push(`/teams/${currentTeamId}/projects/${report.projectId}?tab=reports&report=${report.slug}`)}
+																className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group cursor-pointer"
+															>
+																<div className={cn(
+																	'w-12 h-12 rounded-xl overflow-hidden',
+																	'bg-gradient-to-br from-violet-500/10 to-purple-500/5',
+																	'flex items-center justify-center shadow-sm ring-1 ring-border/30'
+																)}>
+																	{report.coverPhotoUrl ? (
+																		<img
+																			src={report.coverPhotoUrl}
+																			alt={report.title}
+																			className="w-full h-full object-cover"
+																		/>
+																	) : (
+																		<ImageIcon className="w-5 h-5 text-violet-500" />
+																	)}
+																</div>
+																<div className="flex-1 min-w-0">
+																	<div className="flex items-center justify-between gap-2">
+																		<span className="font-semibold text-sm truncate">{report.title}</span>
+																		<div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+																			<Camera className="w-3 h-3" />
+																			{photosCount}
+																		</div>
+																	</div>
+																	<div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+																		<span className="truncate">{projectNameMap.get(report.projectId) || 'Проект'}</span>
+																		<span>•</span>
+																		<span className="shrink-0">{formatRelativeDate(report.createdAt)}</span>
+																	</div>
+																</div>
+															</div>
+														)
+													})}
+												</div>
+												{currentTeamId && activeProjects.length > 0 && (
+													<button
+														onClick={() => {
+															if (activeProjects.length === 1) {
+																router.push(`/teams/${currentTeamId}/projects/${activeProjects[0].id}?tab=reports`)
+															} else {
+																setProjectPickerTab('reports')
+															}
+														}}
+														className="w-full mt-3 px-4 py-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-1.5"
+													>
+														<span>Все фотоотчёты</span>
+														<ArrowRight className="w-3 h-3" />
+													</button>
+												)}
+											</>
 										) : (
 											<div className="text-center py-8">
 												<Camera className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
@@ -1658,7 +1840,7 @@ export default function DashboardPage() {
 							</motion.section>
 
 							{/* Quick Tips */}
-							<motion.section variants={fadeIn}>
+							<motion.section initial="hidden" animate="visible" variants={fadeIn}>
 								<div className="rounded-2xl border border-border/30 bg-gradient-to-br from-primary/5 to-blue-500/5 p-4">
 									<div className="flex items-start gap-3">
 										<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">

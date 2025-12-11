@@ -36,10 +36,20 @@ export const appConfig = () => ({
 		maxFiles: parseInt(process.env.MAX_FILES ?? '10', 10),
 	},
 
-	// Telegram
+	// Telegram OAuth Bot
 	telegram: {
 		botToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
-		botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabBot',
-		authTokenTtl: parseInt(process.env.TELEGRAM_AUTH_TOKEN_TTL ?? '600000', 10), // 10 minutes
+		botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabSpaceBot',
+		authTokenTtl: parseInt(
+			process.env.TELEGRAM_AUTH_TOKEN_TTL ?? '600000',
+			10,
+		), // 10 minutes
+	},
+
+	// Telegram Support Bot
+	telegramSupport: {
+		botToken: process.env.TELEGRAM_SUPPORT_BOT_TOKEN ?? '',
+		botUsername: process.env.TELEGRAM_SUPPORT_BOT_USERNAME ?? 'ProRabSupportBot',
+		supportChatId: process.env.TELEGRAM_SUPPORT_CHAT_ID ?? '',
 	},
 })

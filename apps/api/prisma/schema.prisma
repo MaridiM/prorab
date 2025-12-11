@@ -33,16 +33,40 @@ model User {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  verificationTokens  VerificationToken[]
-  passwordResetTokens PasswordResetToken[]
-  ownedTeams          Team[]               @relation("TeamOwner")
-  teamMemberships     TeamMember[]
-  currentTeam         Team?                @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
+  verificationTokens   VerificationToken[]
+  passwordResetTokens  PasswordResetToken[]
+  notificationSettings NotificationSettings?
+  ownedTeams           Team[]               @relation("TeamOwner")
+  teamMemberships      TeamMember[]
+  currentTeam          Team?                @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
+  createdTasks         Task[]               @relation("CreatedTasks")
+  supportTickets       SupportTicket[]
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
   @@index([telegramChatId])
   @@map("users")
+}
+
+model NotificationSettings {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  
+  // App
+  appPush     Boolean @default(true) @map("app_push")
+  appEmail    Boolean @default(true) @map("app_email")
+  appSms      Boolean @default(false) @map("app_sms")
+  
+  // Marketing
+  marketingPush   Boolean @default(false) @map("marketing_push")
+  marketingEmail  Boolean @default(true) @map("marketing_email")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
 }
 
 model VerificationToken {
@@ -152,9 +176,10 @@ model TeamMember {
   salaryType   String   @default("none") @map("salary_type") // "fixed", "percentage", "none"
   salaryAmount Decimal? @map("salary_amount") @db.Decimal(12, 2)
 
-  team    Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payouts ProjectPayout[]
+  team          Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payouts       ProjectPayout[]
+  assignedTasks Task[]          @relation("AssignedTasks")
 
   @@unique([teamId, userId])
   @@index([userId])
@@ -214,6 +239,7 @@ model Project {
   expenses     Expense[]
   photoReports PhotoReport[]
   payouts      ProjectPayout[]
+  tasks        Task[]
 
   @@index([teamId])
   @@index([teamId, status])
@@ -286,6 +312,60 @@ model ReportPhoto {
 
   @@index([reportId, orderIndex])
   @@map("report_photos")
+}
+
+// ==================== TASKS ====================
+
+model Task {
+  id          String       @id @default(uuid())
+  projectId   String       @map("project_id")
+  title       String       @db.VarChar(200)
+  description String?      @db.Text
+  status      TaskStatus   @default(TODO)
+
+  // Assignment
+  assigneeId String? @map("assignee_id")
+
+  // Priority & Deadline
+  priority TaskPriority @default(MEDIUM)
+  dueDate  DateTime?    @map("due_date")
+
+  // Ordering (CRITICAL for drag & drop)
+  orderIndex Int @map("order_index")
+
+  // Checklist (optional for MVP)
+  checklist Json?
+
+  // Metadata
+  createdById String    @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  completedAt DateTime? @map("completed_at")
+
+  // Relations
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee  TeamMember? @relation("AssignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy User        @relation("CreatedTasks", fields: [createdById], references: [id])
+
+  // Indexes (CRITICAL for performance)
+  @@index([projectId, status, orderIndex]) // Main Kanban query
+  @@index([assigneeId])
+  @@index([dueDate])
+  @@index([projectId, status])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
 
 // ==================== SUBSCRIPTIONS & PAYMENTS ====================
@@ -361,4 +441,71 @@ enum PaymentStatus {
   CANCELLED
   FAILED
   REFUNDED
+}
+
+// ==================== TELEGRAM SUPPORT ====================
+
+model SupportTicket {
+  id             String                 @id @default(uuid())
+  userId         String                 @map("user_id")
+  telegramChatId String                 @map("telegram_chat_id")
+  subject        String?
+  status         SupportTicketStatus    @default(OPEN)
+  priority       SupportTicketPriority  @default(MEDIUM)
+  category       String?
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  closedAt       DateTime?              @map("closed_at")
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
+
+  @@index([userId])
+  @@index([telegramChatId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  ticketId  String   @map("ticket_id")
+  fromUser  Boolean  @default(true) @map("from_user") // true = from user, false = from support
+  message   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("support_messages")
+}
+
+model FAQEntry {
+  id         String   @id @default(uuid())
+  question   String
+  answer     String   @db.Text
+  category   String
+  keywords   String[] // Для keyword matching
+  views      Int      @default(0)
+  helpful    Int      @default(0)
+  notHelpful Int      @default(0) @map("not_helpful")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("faq_entries")
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_USER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }

@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
+ * Model NotificationSettings
+ * 
+ */
+export type NotificationSettings = Prisma.NotificationSettingsModel
+/**
  * Model VerificationToken
  * 
  */
@@ -78,6 +83,11 @@ export type PhotoReport = Prisma.PhotoReportModel
  */
 export type ReportPhoto = Prisma.ReportPhotoModel
 /**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
  * Model Subscription
  * 
  */
@@ -87,3 +97,18 @@ export type Subscription = Prisma.SubscriptionModel
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model SupportTicket
+ * 
+ */
+export type SupportTicket = Prisma.SupportTicketModel
+/**
+ * Model SupportMessage
+ * 
+ */
+export type SupportMessage = Prisma.SupportMessageModel
+/**
+ * Model FAQEntry
+ * 
+ */
+export type FAQEntry = Prisma.FAQEntryModel

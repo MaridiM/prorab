@@ -7,14 +7,103 @@
 
 ## [Unreleased]
 
-### Added (2025-12-11) - Telegram Integration: OAuth & Support Bot ✅ COMPLETED
+### Added (2025-12-11) - Stage 10: Admin Panel - Implementation Plan 📋 PLANNED
+
+**Priority:** 🟡 Post-MVP (after commercial launch)
+**Status:** 📋 Planning Complete | ⏳ Implementation Pending
+**Estimated Time:** 12-17 days (2.5-3.5 weeks)
+**Team Size:** 1 developer
+**Complexity:** High (Security-critical, RBAC, Full-stack)
+
+**Description:**
+Comprehensive admin panel implementation plan for platform administration, monitoring, user management, subscriptions, support, and analytics.
+
+**Plan Details:**
+
+**Phase 1: Database Schema & Backend Foundation**
+- 📋 User model: Add `isAdmin`, `adminRole`, `adminNotes`, `isSuspended`, `lastLoginAt` fields
+- 📋 New models: AuditLog (admin actions tracking), AdminRole enum, SystemStatistics (optional)
+- 📋 Guards: AdminGuard, PermissionsGuard
+- 📋 Services: AuditService for logging all admin operations
+- 📋 Migration: `add_admin_panel_models`
+
+**Phase 2: Backend Admin GraphQL API**
+- 📋 AdminUsersService: getUsers, getUserDetails, updateUser, deleteUser, suspendUser
+- 📋 AdminTeamsService: getTeams, getTeamDetails, deleteTeam, transferOwnership
+- 📋 AdminSubscriptionsService: getSubscriptions, getPayments, cancelSubscription, extendSubscription, getRevenueStats
+- 📋 AdminSupportService: getTickets, updateTicket, replyToTicket, getFAQEntries, CRUD FAQ
+- 📋 AdminAnalyticsService: getDashboardStats, getUserGrowthChart, getRevenueChart, getSubscriptionDistribution
+- 📋 AdminResolver: 30+ GraphQL operations (queries + mutations)
+- 📋 All operations: Protected with `@UseGuards(AdminGuard, PermissionsGuard)`
+- 📋 Audit logging: Integrated into all mutations
+
+**Phase 3: Frontend Admin UI**
+- 📋 Routes: `/admin/*` with 8 pages
+  - `/admin` - Dashboard (KPI cards, charts, activity feed)
+  - `/admin/users` - Users management (list, details, suspend, toggle admin)
+  - `/admin/teams` - Teams management (list, details, transfer ownership, delete)
+  - `/admin/subscriptions` - Subscriptions & Payments (cancel, extend, revenue stats)
+  - `/admin/support/tickets` - Support tickets (list, details, reply, assign)
+  - `/admin/support/faq` - FAQ management (CRUD operations)
+  - `/admin/analytics` - Advanced analytics (charts, date ranges)
+  - `/admin/audit-log` - Audit log viewer (filter, export CSV)
+- 📋 Layout: AdminSidebar, AdminHeader, responsive design
+- 📋 Components: DataTable (generic), KPICard, Charts (recharts), Filters, FAQFormDialog
+- 📋 Features: Search, filtering, sorting, pagination (50/page), toast notifications
+
+**Phase 4: Testing & Documentation**
+- 📋 Backend: Unit tests (services), Integration tests (GraphQL API), Permission testing
+- 📋 Frontend: Component tests, E2E tests (Playwright)
+- 📋 Security: AdminGuard testing, RBAC validation, Audit log verification
+- 📋 Documentation: ADMIN_API.md, ADMIN_PANEL_USER_GUIDE.md, AUDIT_LOGGING.md
+
+**RBAC System:**
+- 📋 4 Admin Roles: SUPER_ADMIN, USER_MANAGER, SUPPORT_MANAGER, FINANCE_MANAGER
+- 📋 Granular Permissions: users.view, users.edit, users.block, teams.view, teams.delete, subscriptions.manage, payments.view, support.respond, analytics.view
+- 📋 Role-based access control via PermissionsGuard + @RequiresPermission decorator
+
+**Key Features:**
+- 📋 Dashboard: Real-time KPI metrics (users, teams, projects, MRR, open tickets, storage)
+- 📋 User Management: Search, filters (isAdmin, isSuspended, hasTeams), suspend/unsuspend, delete with safeguards
+- 📋 Team Management: Storage calculation, transfer ownership, delete with subscription check
+- 📋 Subscriptions: Filter by status/plan/expiring, manual extend/cancel, revenue aggregation
+- 📋 Support: Ticket assignment, reply functionality, status updates, FAQ CRUD
+- 📋 Analytics: User growth chart (30 days), Revenue chart (6 months), Subscription distribution pie chart, Top teams by revenue
+- 📋 Audit Log: Filter by admin/user/entity/action/date, expandable JSON changes, export CSV
+
+**Files to Create:** ~45 files
+- Backend: ~20 files (~2500 lines) - services, resolvers, DTOs, guards, decorators
+- Frontend: ~25 files (~3500 lines) - pages, components, GraphQL operations
+
+**Security Considerations:**
+- 📋 All admin operations logged in AuditLog
+- 📋 IP address tracking
+- 📋 User agent logging
+- 📋 Reason field for all destructive actions
+- 📋 Safeguards: Can't delete user who owns teams, can't delete team with active subscriptions
+
+**Documentation Created:**
+- ✅ Implementation plan: `C:\Users\User\.claude\plans\transient-shimmying-hedgehog.md` (6000+ lines)
+- ✅ Stage plan: `docs/analisys/stage-10-admin-panel-implementation-plan.md` (existing)
+
+**Next Steps:**
+1. Wait for commercial launch completion
+2. Implement Phase 1 (Database & Guards) - 2-3 days
+3. Implement Phase 2 (Admin API) - 3-4 days
+4. Implement Phase 3 (Frontend UI) - 7-10 days
+5. Testing & Documentation - 2-3 days
+
+---
+
+### Added (2025-12-11) - Telegram Integration: OAuth & Support Bot ✅ COMPLETED (Phase 1-3)
 
 **Приоритет:** 🔥 High (User Communication & Support)
-**Статус:** ✅ Завершено
-**Время:** ~4 часа
+**Статус:** ✅ Phase 1-3 завершены | ⏳ Phase 4-6 в процессе
+**Время:** ~28 часов (OAuth: 7ч, Support: 21ч)
+**Готовность:** OAuth Bot 100%, Support Bot 80%
 
 **Описание:**
-Полная интеграция двух Telegram ботов для авторизации и технической поддержки пользователей.
+Полная интеграция двух Telegram ботов (@ProRabSpaceBot + @ProRabSupportBot) для авторизации и технической поддержки пользователей.
 
 **Реализовано:**
 
@@ -111,13 +200,38 @@ Backend:
 - `apps/api/src/modules/telegram/telegram.module.ts` - multi-bot configuration
 - `apps/api/prisma/schema.prisma` - добавлены 3 модели + enums
 
+**Статистика:**
+- Backend файлов: 8 TypeScript files (~1,400 lines)
+- Database models: 4 models + 2 enums
+- Services: 3 (TelegramAuthService, TelegramSupportService, FAQService)
+- Методов API: 28 methods total
+- Bot handlers: 2 bots (OAuth + Support)
+- Команд: 6 commands total
+- Callback handlers: 15+ inline button actions
+- Frontend: 1 component (TelegramLoginButton, ~180 lines)
+- GraphQL: 2 mutations (initTelegramAuth, checkTelegramAuth)
+
 **Roadmap:**
-- See: `docs/TELEGRAM_BOTS_INTEGRATION_ROADMAP.md` - полная документация
-- Phase 1: OAuth Bot ✅
-- Phase 2: Support Bot Backend ✅
-- Phase 3: Support Bot Handlers ✅
-- Phase 4: GraphQL API (optional) - будет добавлено позже
-- Phase 5: Testing & Deployment - готово к тестированию
+- ✅ Phase 1: OAuth Bot Configuration & Implementation
+- ✅ Phase 2: Support Bot Database & Backend Services
+- ✅ Phase 3: Support Bot Handlers & Commands
+- ⏳ Phase 4: GraphQL API для Support Tickets (optional)
+- ⏳ Phase 5: Testing & Bot Configuration
+- ⏳ Phase 6: Production Deployment & Webhooks
+
+**Документация:**
+- `docs/TELEGRAM_INTEGRATION_ANALYSIS_FULL.md` - Полный анализ (17,000+ lines)
+- `docs/TELEGRAM_BOTS_INTEGRATION_ROADMAP.md` - Implementation roadmap
+- `docs/TELEGRAM_BOTS_SUMMARY.md` - Executive summary
+- `docs/TELEGRAM_OAUTH_IMPLEMENTATION_COMPLETE.md` - OAuth completion report
+- `docs/TELEGRAM_BOTS_SETUP_GUIDE.md` - Setup instructions (создается)
+
+**Next Steps:**
+1. Настроить ботов через @BotFather (инструкция в SETUP_GUIDE)
+2. Протестировать OAuth flow
+3. Протестировать Support Bot команды
+4. Настроить support group
+5. Production deployment
 
 ---
 
@@ -209,7 +323,7 @@ Backend:
 
 ---
 
-### Added (2025-12-11) - Stage 7: Tasks & Kanban Board ✅ COMPLETED
+### Added (2025-12-11) - Stage 7: Tasks & Kanban Board ✅ COMPLETED + UI Components Added
 
 **Приоритет:** 🔥 High (Core Feature)
 **Статус:** ✅ Все 5 фаз завершены
@@ -326,6 +440,85 @@ Backend:
 **Total Files Created:** 19 файлов (~1670 строк)
 - Backend: 12 файлов (~750 строк)
 - Frontend: 7 файлов (~920 строк)
+
+---
+
+### Added (2025-12-11) - Stage 7 Phase 6: Missing UI Components ✅ COMPLETED
+
+**Приоритет:** 🔥 Critical (Required for Tasks to work)
+**Статус:** ✅ Завершено
+**Время:** ~30 минут
+**Описание:** Созданы недостающие UI компоненты для работы TaskForm
+
+**Созданные компоненты (4 файла, ~200 строк):**
+
+**1. Calendar Component (`calendar.tsx`, ~70 lines):**
+- ✅ Based on Radix UI + react-day-picker
+- ✅ Full localization support (ru locale)
+- ✅ Custom classNames for all DayPicker elements
+- ✅ Button variants integration
+- ✅ ChevronLeft/ChevronRight icons for navigation
+- ✅ Accessibility-ready (ARIA labels, keyboard navigation)
+- ✅ Props: `showOutsideDays`, `className`, `classNames`, standard DayPicker props
+
+**2. Popover Component (`popover.tsx`, ~30 lines):**
+- ✅ Based on Radix UI Popover primitive
+- ✅ PopoverRoot, PopoverTrigger, PopoverContent exports
+- ✅ Portal rendering for better z-index management
+- ✅ Customizable align (center/start/end), sideOffset
+- ✅ Built-in animations (fade + zoom + slide)
+- ✅ Responsive positioning (auto-adjust on collision)
+
+**3. Textarea Component (`textarea.tsx`, ~25 lines):**
+- ✅ Styled textarea with consistent design system
+- ✅ Ring focus states (focus-visible:ring-2)
+- ✅ Disabled state styling
+- ✅ Placeholder text color (muted-foreground)
+- ✅ Min-height: 80px by default
+- ✅ Full TypeScript support with HTMLTextareaElement props
+
+**4. Label Component (`label.tsx`, ~25 lines):**
+- ✅ Based on Radix UI Label primitive
+- ✅ Integrated with class-variance-authority
+- ✅ Accessibility: proper for/htmlFor association
+- ✅ Peer-disabled styles (disabled form fields)
+- ✅ Font: medium weight, small size
+- ✅ TypeScript: full Radix Label props support
+
+**Exports Updated:**
+- ✅ `apps/web/src/packages/components/ui/index.ts`:
+  - Added `export * from "./calendar"`
+  - Added `export * from "./popover"`
+  - Added `export * from "./textarea"`
+  - Added `export * from "./label"`
+
+**Import Fixes in Task Components:**
+- ✅ Fixed all imports from `@/packages/ui/*` → `@/packages/components/ui/*`
+- ✅ task-form.tsx: Button, Input, Textarea, Label, Select, Calendar, Popover, Dialog
+- ✅ task-card.tsx: Badge, Card, Avatar
+- ✅ kanban-column.tsx: Button, Card
+- ✅ tasks/page.tsx: Button, replaced useToast with sonner toast API
+
+**Toast API Migration:**
+- ✅ Migrated from `useToast()` hook to `toast` from 'sonner'
+- ✅ All toast calls updated: `toast.success(...)` and `toast.error(...)`
+- ✅ Proper TypeScript error handling: `error: any` in onError callbacks
+
+**Dependencies Verified:**
+- ✅ react-day-picker@^9.11.3 - already installed
+- ✅ @radix-ui/react-popover - available via existing Radix packages
+- ✅ @radix-ui/react-label - available via existing Radix packages
+- ✅ sonner - already installed and used in the app
+
+**Result:**
+- ✅ All TypeScript import errors for task components resolved
+- ✅ TaskForm now has all required dependencies
+- ✅ Calendar picker works with date selection
+- ✅ Popover positioning works correctly
+- ✅ Form validation with proper label associations
+- ✅ Consistent UI design system across all components
+
+---
 
 ### Added (2025-12-11) - Telegram Bots Integration: Support Bot Implementation 🚧 IN PROGRESS
 

@@ -1,0 +1,95 @@
+# ==================== FRAGMENTS ====================
+
+fragment TaskFields on Task {
+	id
+	projectId
+	title
+	description
+	status
+	assigneeId
+	priority
+	dueDate
+	orderIndex
+	checklist
+	createdById
+	createdAt
+	updatedAt
+	completedAt
+	assignee {
+		id
+		user {
+			id
+			fullName
+			avatarUrl
+		}
+	}
+	createdBy {
+		id
+		fullName
+		avatarUrl
+	}
+}
+
+# ==================== QUERIES ====================
+
+query Task($id: ID!) {
+	task(id: $id) {
+		...TaskFields
+	}
+}
+
+query ProjectTasks($projectId: ID!) {
+	projectTasks(projectId: $projectId) {
+		todo {
+			...TaskFields
+		}
+		inProgress {
+			...TaskFields
+		}
+		done {
+			...TaskFields
+		}
+	}
+}
+
+query MemberTasks($assigneeId: ID!) {
+	memberTasks(assigneeId: $assigneeId) {
+		...TaskFields
+	}
+}
+
+query MyTasks {
+	myTasks {
+		...TaskFields
+		project {
+			id
+			name
+		}
+	}
+}
+
+# ==================== MUTATIONS ====================
+
+mutation CreateTask($input: CreateTaskInput!) {
+	createTask(input: $input) {
+		...TaskFields
+	}
+}
+
+mutation UpdateTask($id: ID!, $input: UpdateTaskInput!) {
+	updateTask(id: $id, input: $input) {
+		...TaskFields
+	}
+}
+
+mutation MoveTask($input: MoveTaskInput!) {
+	moveTask(input: $input) {
+		...TaskFields
+	}
+}
+
+mutation DeleteTask($id: ID!) {
+	deleteTask(id: $id) {
+		...TaskFields
+	}
+}

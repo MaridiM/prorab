@@ -84,7 +84,7 @@ export function SalarySettingsForm({
               <FormLabel className="text-sm font-medium">Тип зарплаты</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger className="h-12 rounded-xl">
+                  <SelectTrigger className="h-12 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all">
                     <SelectValue placeholder="Выберите тип зарплаты" />
                   </SelectTrigger>
                 </FormControl>
@@ -141,7 +141,7 @@ export function SalarySettingsForm({
                       max={100}
                       step={0.1}
                       disabled={isLoading}
-                      className="h-12 px-4 pr-10 rounded-xl bg-secondary/30"
+                      className="h-12 px-4 pr-10 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
                       {...field}
                       value={field.value || ''}
                       onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}

@@ -2005,3 +2005,33 @@ this.logger.warn('No logo provided, using default')
 - `apps/api/src/app.resolver.ts`
 
 ---
+
+## Module: Users & Settings
+
+### Feature: Account Deletion & Notifications
+
+:calendar: `2025-12-11`
+
+**Added**
+
+- ✅ `NotificationSettings` model 1:1 with `User` in Prisma.
+- ✅ `UsersService` methods: `deleteAccount` (cascading), `getNotificationSettings`, `updateNotificationSettings`.
+- ✅ GraphQL mutations: `deleteAccount`, `updateNotificationSettings`.
+- ✅ `NotificationSettings` GraphQL type and DTO.
+
+**Changed**
+
+- ✅ Updated `UsersResolver` to include new mutations and field resolvers.
+
+**Files Modified**
+
+- `apps/api/src/modules/users/users.service.ts`
+- `apps/api/src/modules/users/users.resolver.ts`
+- `apps/api/prisma/schema.prisma`
+
+**Files Created**
+
+- `apps/api/src/modules/users/dto/update-notification-settings.input.ts`
+- `apps/api/src/modules/users/models/notification-settings.model.ts`
+
+---

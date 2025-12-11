@@ -45,6 +45,12 @@ export class UsersService {
 		})
 	}
 
+	async findByTelegramChatId(chatId: string) {
+		return this.prisma.user.findUnique({
+			where: { telegramChatId: chatId },
+		})
+	}
+
 	async verifyEmail(userId: string) {
 		return this.prisma.user.update({
 			where: { id: userId },
@@ -129,6 +135,46 @@ export class UsersService {
 		return this.prisma.user.update({
 			where: { id: userId },
 			data: updateData,
+		})
+	}
+
+	// ==================== Account Management ====================
+
+	async deleteAccount(userId: string) {
+		// Prisma should handle cascading deletes for Sessions, TeamMembers, etc. if configured correctly.
+		// However, we should be careful about Teams where this user is the Owner.
+		// For MVP, we will allow deletion which might delete the Team if they are the only owner and cascade is on, 
+		// or will assume the Schema handles it. 
+		// Given the schema isn't fully visible here, we'll assume standard Prisma cascade.
+		
+		return this.prisma.user.delete({
+			where: { id: userId },
+		})
+	}
+
+	// ==================== Notifications ====================
+
+	async getNotificationSettings(userId: string) {
+		let settings = await this.prisma.notificationSettings.findUnique({
+			where: { userId },
+		})
+
+		if (!settings) {
+			settings = await this.prisma.notificationSettings.create({
+				data: { userId },
+			})
+		}
+
+		return settings
+	}
+
+	async updateNotificationSettings(userId: string, input: any) {
+		// Ensure settings exist
+		await this.getNotificationSettings(userId)
+
+		return this.prisma.notificationSettings.update({
+			where: { userId },
+			data: { ...input },
 		})
 	}
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { gql } from '@apollo/client'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -110,14 +110,18 @@ const CLOSE_PROJECT_MUTATION = gql`
 export default function ProjectDetailsPage() {
 	const params = useParams()
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const { user } = useAuth()
 	const { showToast } = useToast()
 	const teamId = params.teamId as string
 	const projectId = params.projectId as string
 
+	// Get tab from URL or default to 'info'
+	const tabFromUrl = searchParams.get('tab') as 'info' | 'expenses' | 'tasks' | 'reports' | 'payouts' | null
+	const reportSlugFromUrl = searchParams.get('report')
 	const [activeTab, setActiveTab] = useState<
 		'info' | 'expenses' | 'tasks' | 'reports' | 'payouts'
-	>('info')
+	>(tabFromUrl || 'info')
 	const [showExpenseForm, setShowExpenseForm] = useState(false)
 	const [editingExpense, setEditingExpense] = useState<any>(null)
 	const [showReportForm, setShowReportForm] = useState(false)
@@ -155,8 +159,33 @@ export default function ProjectDetailsPage() {
 		refetch: refetchReports,
 	} = useQuery(ProjectPhotoReportsDocument, {
 		variables: { projectId },
-		skip: activeTab !== 'reports',
+		fetchPolicy: 'cache-and-network',
 	})
+
+	// Update tab when URL changes
+	useEffect(() => {
+		if (tabFromUrl && ['info', 'expenses', 'tasks', 'reports', 'payouts'].includes(tabFromUrl)) {
+			setActiveTab(tabFromUrl)
+		}
+	}, [tabFromUrl])
+
+	// Handle report slug from URL - find report by slug and set selectedReportId
+	useEffect(() => {
+		if (reportSlugFromUrl && activeTab === 'reports' && reportsData?.projectPhotoReports) {
+			const report = reportsData.projectPhotoReports.find((r: any) => r.slug === reportSlugFromUrl)
+			if (report) {
+				setSelectedReportId(report.id)
+			}
+		}
+	}, [reportSlugFromUrl, activeTab, reportsData])
+
+	// Update URL when tab changes
+	const handleTabChange = (tab: 'info' | 'expenses' | 'tasks' | 'reports' | 'payouts') => {
+		setActiveTab(tab)
+		const newParams = new URLSearchParams(searchParams.toString())
+		newParams.set('tab', tab)
+		router.replace(`/teams/${teamId}/projects/${projectId}?${newParams.toString()}`, { scroll: false })
+	}
 
     const { data: payoutData, loading: payoutLoading } = useQuery(PAYOUT_SUMMARY_QUERY, {
         variables: { projectId },
@@ -715,7 +744,7 @@ export default function ProjectDetailsPage() {
 						{tabs.map(tab => (
 							<button
 								key={tab.id}
-								onClick={() => !tab.disabled && setActiveTab(tab.id)}
+								onClick={() => !tab.disabled && handleTabChange(tab.id)}
 								disabled={tab.disabled}
 								className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
 									activeTab === tab.id

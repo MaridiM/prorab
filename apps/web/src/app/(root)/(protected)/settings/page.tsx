@@ -57,9 +57,125 @@ import {
 	CheckCircle,
 	Clock,
 	Rocket,
+
+	Plus,
+	X,
+	Check,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { gql } from '@apollo/client'
+
+// Inline GraphQL
+const GET_MY_SUBSCRIPTION_AND_PAYMENTS = gql`
+  query MySubscriptionAndPayments($id: String!) {
+    mySubscription {
+      id
+      plan
+      status
+      startDate
+      endDate
+      price
+      limits {
+        maxActiveProjects
+        maxMembers
+        storageGB
+      }
+    }
+    availablePlans {
+      name
+      price
+      maxActiveProjects
+      maxMembers
+      storageGB
+      features
+    }
+    paymentsBySubscription(subscriptionId: $id) {
+      id
+      amount
+      status
+      createdAt
+      description
+    }
+  }
+`
+
+const CHANGE_PLAN_MUTATION = gql`
+  mutation ChangePlan($input: ChangePlanInput!) {
+    changePlan(input: $input) {
+      id
+      plan
+      status
+    }
+  }
+`
+
+const CANCEL_SUBSCRIPTION_MUTATION = gql`
+  mutation CancelSubscription($subscriptionId: String!) {
+    cancelSubscription(subscriptionId: $subscriptionId) {
+      id
+      status
+      endDate
+    }
+  }
+`
+
+const GENERATE_PAYMENT_LINK_MUTATION = gql`
+  mutation InitializePayment($subscriptionId: String!) {
+    initializePayment(subscriptionId: $subscriptionId) {
+      url
+      paymentId
+    }
+  }
+`
+
+const UPDATE_PROFILE_MUTATION = gql`
+  mutation UpdateProfile($input: UpdateProfileInput!) {
+    updateProfile(input: $input) {
+      id
+      fullName
+      phone
+    }
+  }
+`
+
+const DELETE_ACCOUNT_MUTATION = gql`
+  mutation DeleteAccount {
+    deleteAccount
+  }
+`
+
+const UPDATE_NOTIFICATION_SETTINGS_MUTATION = gql`
+  mutation UpdateNotificationSettings($input: UpdateNotificationSettingsInput!) {
+    updateNotificationSettings(input: $input) {
+      appPush
+      appEmail
+      appSms
+      marketingPush
+      marketingEmail
+    }
+  }
+`
+
+// Update Me query to include notificationSettings
+const ME_QUERY_WITH_NOTIFICATIONS = gql`
+  query MeWithNotifications {
+    me {
+      id
+      email
+      fullName
+      phone
+      avatarUrl
+      notificationSettings {
+        appPush
+        appEmail
+        appSms
+        marketingPush
+        marketingEmail
+      }
+    }
+  }
+`
 
 import {
 	MeDocument,
@@ -169,16 +285,92 @@ export default function SettingsPage() {
 	const [emailCooldown, setEmailCooldown] = useState(0)
 
 	// Queries
-	const { data: meData, loading: meLoading, refetch: refetchMe } = useQuery(MeDocument)
+	const { data: meData, loading: meLoading, refetch: refetchMe } = useQuery(ME_QUERY_WITH_NOTIFICATIONS)
 	const { data: sessionsData, loading: sessionsLoading, refetch: refetchSessions } = useQuery(
 		SessionsDocument
 	)
 
 	const me = meData?.me
+	const notificationSettings = me?.notificationSettings
 	const sessions = sessionsData?.sessions || []
 
+	// Subscriptions & Payments Queries
+	// Note: We need a subscriptionId to fetch payments, but we only have it after mySubscription loads.
+	// For now, let's fetch mySubscription separately or use a composed query if the backend supports it.
+	// The `mySubscription` query on backend doesn't take arguments, so we can't easily fetch payments in one go 
+	// unless we use the subscription ID. 
+	// Let's modify the strategy: Fetch Subscription first, then enable Payment fetch.
+	
+	const { data: subData, loading: subLoading, refetch: refetchSub } = useQuery(
+		gql`
+			query MySubscriptionData {
+				mySubscription {
+					id
+					plan
+					status
+					startDate
+					endDate
+					price
+					limits {
+						maxActiveProjects
+						maxMembers
+						storageGB
+					}
+				}
+				availablePlans {
+					name
+					price
+					maxActiveProjects
+					maxMembers
+					storageGB
+					features
+				}
+			}
+		`
+	)
+
+	const mySubscription = subData?.mySubscription
+	const availablePlans = subData?.availablePlans || []
+
+	const { data: paymentsData, loading: paymentsLoading } = useQuery(
+		gql`
+			query MyPayments($subscriptionId: String!) {
+				paymentsBySubscription(subscriptionId: $subscriptionId) {
+					id
+					amount
+					status
+					createdAt
+					description
+				}
+			}
+		`, 
+		{
+			skip: !mySubscription?.id,
+			variables: { subscriptionId: mySubscription?.id },
+			fetchPolicy: 'network-only' // Always get fresh payments
+		}
+	)
+
+	const payments = paymentsData?.paymentsBySubscription || []
+
 	// Mutations
-	const updatingProfile = false // TODO: Add UpdateProfileDocument
+	const [updateProfile, { loading: updatingProfile }] = useMutation(UPDATE_PROFILE_MUTATION, {
+		onCompleted: () => {
+			showToast({
+				title: 'Профиль обновлён',
+				description: 'Ваши данные успешно сохранены',
+				type: 'success',
+			})
+			refetchMe()
+		},
+		onError: (error) => {
+			showToast({
+				title: 'Ошибка',
+				description: error.message,
+				type: 'error',
+			})
+		}
+	})
 
 	const [changePassword, { loading: changingPassword }] = useMutation(ChangePasswordDocument, {
 		onCompleted: () => {
@@ -256,6 +448,26 @@ export default function SettingsPage() {
 		},
 	})
 
+	// Notifications Mutation
+	const [updateNotifications] = useMutation(UPDATE_NOTIFICATION_SETTINGS_MUTATION, {
+		onError: (error) => {
+			showToast({
+				title: 'Ошибка обновления настроек',
+				description: error.message,
+				type: 'error',
+			})
+		}
+	})
+
+	const onNotificationChange = (key: string, value: boolean) => {
+		// Optimistic update logic could go here, but for now relying on refetch/cache update
+		updateNotifications({
+			variables: {
+				input: { [key]: value },
+			},
+		})
+	}
+
 	// Email cooldown timer
 	useEffect(() => {
 		if (emailCooldown > 0) {
@@ -292,11 +504,14 @@ export default function SettingsPage() {
 		}
 	}, [me, profileForm])
 
-	const onProfileSubmit = async (_data: ProfileForm) => {
-		showToast({
-			title: 'В разработке',
-			description: 'Обновление профиля будет доступно в следующей версии',
-			type: 'info',
+	const onProfileSubmit = async (data: ProfileForm) => {
+		await updateProfile({
+			variables: {
+				input: {
+					fullName: data.fullName,
+					phone: data.phone,
+				},
+			},
 		})
 	}
 
@@ -1140,10 +1355,8 @@ export default function SettingsPage() {
 
 										<div className="divide-y divide-border/30">
 											{[
-												{ id: 'email_expenses', label: 'Новые расходы', description: 'Уведомление о добавленных расходах в проекты', icon: Receipt },
-												{ id: 'email_reports', label: 'Фотоотчёты', description: 'Когда клиент просмотрел отчёт или оставил реакцию', icon: CameraIcon },
-												{ id: 'email_team', label: 'Изменения в команде', description: 'Новые участники, изменения в бригаде', icon: Users },
-												{ id: 'email_billing', label: 'Платежи и подписка', description: 'Счета, оплаты, изменения тарифа', icon: CreditCard },
+												{ id: 'appEmail', label: 'Системные уведомления', description: 'Важные обновления системы', icon: Receipt },
+												{ id: 'marketingEmail', label: 'Маркетинговые рассылки', description: 'Новости и специальные предложения', icon: CreditCard },
 											].map((item) => (
 												<div key={item.id} className="p-4 flex items-center justify-between">
 													<div className="flex items-center gap-4">
@@ -1155,24 +1368,11 @@ export default function SettingsPage() {
 															<p className="text-sm text-muted-foreground">{item.description}</p>
 														</div>
 													</div>
-													<button
-														onClick={() => {
-															showToast({
-																title: 'В разработке',
-																description: 'Настройки уведомлений будут доступны в следующей версии',
-																type: 'info',
-															})
-														}}
-														className={cn(
-															'relative w-12 h-7 rounded-full transition-colors',
-															'bg-primary'
-														)}
-													>
-														<span className={cn(
-															'absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform',
-															'translate-x-5'
-														)} />
-													</button>
+													<Switch
+														checked={notificationSettings ? notificationSettings[item.id] : false}
+														onCheckedChange={(checked) => onNotificationChange(item.id, checked)}
+														disabled={meLoading}
+													/>
 												</div>
 											))}
 										</div>
@@ -1195,34 +1395,28 @@ export default function SettingsPage() {
 											</div>
 										</div>
 
-										<div className="p-6">
-											<div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-												<div className="flex items-start gap-3">
-													<BellOff className="w-5 h-5 text-amber-500 mt-0.5" />
-													<div>
-														<p className="font-medium text-amber-600 dark:text-amber-400">
-															Push-уведомления отключены
-														</p>
-														<p className="text-sm text-muted-foreground mt-1">
-															Разрешите уведомления в браузере, чтобы получать мгновенные оповещения о важных событиях.
-														</p>
-														<Button
-															variant="outline"
-															size="sm"
-															className="mt-3 rounded-xl border-amber-500/30"
-															onClick={() => {
-																showToast({
-																	title: 'В разработке',
-																	description: 'Push-уведомления будут доступны в следующей версии',
-																	type: 'info',
-																})
-															}}
-														>
-															Включить уведомления
-														</Button>
+										<div className="divide-y divide-border/30">
+											{[
+												{ id: 'appPush', label: 'Push-уведомления приложения', description: 'Мгновенные оповещения о событиях', icon: Bell },
+												{ id: 'marketingPush', label: 'Маркетинговые Push', description: 'Новости и акции', icon: Info },
+											].map((item) => (
+												<div key={item.id} className="p-4 flex items-center justify-between">
+													<div className="flex items-center gap-4">
+														<div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+															<item.icon className="w-5 h-5 text-muted-foreground" />
+														</div>
+														<div>
+															<p className="font-medium">{item.label}</p>
+															<p className="text-sm text-muted-foreground">{item.description}</p>
+														</div>
 													</div>
+													<Switch
+														checked={notificationSettings ? notificationSettings[item.id] : false}
+														onCheckedChange={(checked) => onNotificationChange(item.id, checked)}
+														disabled={meLoading}
+													/>
 												</div>
-											</div>
+											))}
 										</div>
 									</motion.section>
 
@@ -1298,153 +1492,160 @@ export default function SettingsPage() {
 								variants={fadeIn}
 							>
 								<motion.div variants={stagger} className="space-y-6">
-									{/* Current Plan */}
+											{/* Current Plan */}
 									<motion.section
 										variants={fadeIn}
 										className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden"
 									>
 										<div className="p-6">
-											<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-												<div className="flex items-center gap-4">
-													<div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-														<Crown className="w-7 h-7 text-primary" />
-													</div>
-													<div>
-														<div className="flex items-center gap-2">
-															<h2 className="text-xl font-bold">Бригада</h2>
-															<Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
-																Активен
-															</Badge>
+											{subLoading ? (
+												<div className="space-y-4">
+													<Skeleton className="h-14 w-full" />
+													<Skeleton className="h-20 w-full" />
+												</div>
+											) : !mySubscription ? (
+												<div className="text-center py-6">
+													<p className="text-lg font-medium">Нет активной подписки</p>
+													<p className="text-muted-foreground">Выберите тарифный план ниже</p>
+												</div>
+											) : (
+												<>
+													<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+														<div className="flex items-center gap-4">
+															<div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
+																<Crown className="w-7 h-7 text-primary" />
+															</div>
+															<div>
+																<div className="flex items-center gap-2">
+																	<h2 className="text-xl font-bold capitalize">{mySubscription.plan.toLowerCase()}</h2>
+																	<Badge variant="default" className="bg-primary/20 text-primary border-primary/30 uppercase">
+																		{mySubscription.status}
+																	</Badge>
+																</div>
+																<p className="text-sm text-muted-foreground">
+																	До {mySubscription.limits?.maxActiveProjects === 9999 ? 'Безлимит' : mySubscription.limits?.maxActiveProjects} проектов • 
+																	До {mySubscription.limits?.maxMembers} участников
+																</p>
+															</div>
 														</div>
-														<p className="text-sm text-muted-foreground">Безлимитные проекты • До 10 участников</p>
+														<div className="text-right">
+															<p className="text-2xl font-bold">{mySubscription.price || 0} ₽<span className="text-sm font-normal text-muted-foreground">/мес</span></p>
+															{mySubscription.endDate && (
+																<p className="text-sm text-muted-foreground">
+																	Обновится: {new Date(mySubscription.endDate).toLocaleDateString()}
+																</p>
+															)}
+														</div>
 													</div>
-												</div>
-												<div className="text-right">
-													<p className="text-2xl font-bold">1 990 ₽<span className="text-sm font-normal text-muted-foreground">/мес</span></p>
-													<p className="text-sm text-muted-foreground">Следующее списание: 15 янв 2026</p>
-												</div>
-											</div>
 
-											{/* Usage Stats */}
-											<div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-												{[
-													{ label: 'Проектов', value: '12', max: '∞', icon: FolderKanban },
-													{ label: 'Участников', value: '5', max: '10', icon: Users },
-													{ label: 'Хранилище', value: '2.4 ГБ', max: '10 ГБ', icon: Building2 },
-													{ label: 'Расходов', value: '847', max: '∞', icon: Receipt },
-												].map((stat) => (
-													<div key={stat.label} className="p-3 rounded-xl bg-card/50 border border-border/30">
-														<div className="flex items-center gap-2 mb-2">
-															<stat.icon className="w-4 h-4 text-muted-foreground" />
-															<span className="text-xs text-muted-foreground">{stat.label}</span>
-														</div>
-														<p className="text-lg font-semibold">
-															{stat.value}<span className="text-sm font-normal text-muted-foreground">/{stat.max}</span>
-														</p>
+													{/* Usage Stats (Mock data for now as specific usage stats endpoint is separate, can be added later) */}
+													<div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+														{[
+															{ label: 'Проектов', value: '0', max: mySubscription.limits?.maxActiveProjects === 9999 ? '∞' : mySubscription.limits?.maxActiveProjects, icon: FolderKanban },
+															{ label: 'Участников', value: '1', max: mySubscription.limits?.maxMembers, icon: Users },
+															{ label: 'Хранилище', value: '0 ГБ', max: `${mySubscription.limits?.storageGB} ГБ`, icon: Building2 },
+															{ label: 'Расходов', value: '0', max: '∞', icon: Receipt },
+														].map((stat) => (
+															<div key={stat.label} className="p-3 rounded-xl bg-card/50 border border-border/30">
+																<div className="flex items-center gap-2 mb-2">
+																	<stat.icon className="w-4 h-4 text-muted-foreground" />
+																	<span className="text-xs text-muted-foreground">{stat.label}</span>
+																</div>
+																<p className="text-lg font-semibold">
+																	{stat.value}<span className="text-sm font-normal text-muted-foreground">/{stat.max}</span>
+																</p>
+															</div>
+														))}
 													</div>
-												))}
-											</div>
+												</>
+											)}
 										</div>
 									</motion.section>
 
 									{/* Available Plans */}
 									<motion.section variants={fadeIn}>
 										<h3 className="text-lg font-semibold mb-4">Доступные тарифы</h3>
-										<div className="grid gap-4">
-											{[
-												{
-													name: 'Лайт',
-													price: 490,
-													earlyPrice: 290,
-													features: ['1 активный проект', 'Только прораб', '500 МБ хранилище'],
-													icon: Zap,
-													color: 'blue',
-													current: false,
-												},
-												{
-													name: 'Прораб',
-													price: 990,
-													earlyPrice: 690,
-													features: ['До 4 проектов', 'До 3 участников', '2 ГБ хранилище'],
-													icon: Star,
-													color: 'amber',
-													current: false,
-												},
-												{
-													name: 'Бригада',
-													price: 1990,
-													earlyPrice: 1490,
-													features: ['Безлимит проектов', 'До 10 участников', '10 ГБ хранилище'],
-													icon: Crown,
-													color: 'primary',
-													current: true,
-													popular: true,
-												},
-											].map((plan) => (
-												<div
-													key={plan.name}
-													className={cn(
-														'p-4 rounded-2xl border transition-all',
-														plan.current
-															? 'border-primary bg-primary/5'
-															: 'border-border/50 bg-card hover:border-primary/30'
-													)}
-												>
-													<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-														<div className="flex items-center gap-4">
-															<div className={cn(
-																'w-12 h-12 rounded-xl flex items-center justify-center',
-																plan.color === 'blue' && 'bg-blue-500/10 text-blue-500',
-																plan.color === 'amber' && 'bg-amber-500/10 text-amber-500',
-																plan.color === 'primary' && 'bg-primary/10 text-primary'
-															)}>
-																<plan.icon className="w-6 h-6" />
-															</div>
-															<div>
-																<div className="flex items-center gap-2">
-																	<h4 className="font-semibold">{plan.name}</h4>
-																	{plan.popular && (
-																		<Badge variant="default" className="text-xs">Популярный</Badge>
-																	)}
-																	{plan.current && (
-																		<Badge variant="outline" className="text-xs border-primary text-primary">Текущий</Badge>
-																	)}
-																</div>
-																<div className="flex flex-wrap gap-2 mt-1">
-																	{plan.features.map((feature) => (
-																		<span key={feature} className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-																			{feature}
-																		</span>
-																	))}
-																</div>
-															</div>
-														</div>
-														<div className="flex items-center gap-4">
-															<div className="text-right">
-																<p className="font-bold">{plan.price} ₽<span className="text-xs font-normal text-muted-foreground">/мес</span></p>
-																<p className="text-xs text-emerald-500">Early Bird: {plan.earlyPrice} ₽</p>
-															</div>
-															{!plan.current && (
-																<Button
-																	variant="outline"
-																	size="sm"
-																	className="rounded-xl"
-																	onClick={() => {
-																		showToast({
-																			title: 'В разработке',
-																			description: 'Смена тарифа будет доступна после подключения платежей',
-																			type: 'info',
-																		})
-																	}}
-																>
-																	Выбрать
-																</Button>
+										{subLoading ? (
+											<div className="space-y-4">
+												<Skeleton className="h-24 w-full" />
+												<Skeleton className="h-24 w-full" />
+											</div>
+										) : (
+											<div className="grid gap-4">
+												{availablePlans.map((plan: any) => {
+													const isCurrent = mySubscription?.plan === plan.name;
+													return (
+														<div
+															key={plan.name}
+															className={cn(
+																'p-4 rounded-2xl border transition-all',
+																isCurrent
+																	? 'border-primary bg-primary/5'
+																	: 'border-border/50 bg-card hover:border-primary/30'
 															)}
+														>
+															<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+																<div className="flex items-center gap-4">
+																	<div className={cn(
+																		'w-12 h-12 rounded-xl flex items-center justify-center',
+																		plan.name === 'LITE' && 'bg-blue-500/10 text-blue-500',
+																		plan.name === 'FOREMAN' && 'bg-amber-500/10 text-amber-500',
+																		plan.name === 'BRIGADE' && 'bg-primary/10 text-primary'
+																	)}>
+																		{plan.name === 'LITE' && <Zap className="w-6 h-6" />}
+																		{plan.name === 'FOREMAN' && <Star className="w-6 h-6" />}
+																		{plan.name === 'BRIGADE' && <Crown className="w-6 h-6" />}
+																	</div>
+																	<div>
+																		<div className="flex items-center gap-2">
+																			<h4 className="font-semibold capitalize">{plan.name.toLowerCase()}</h4>
+																			{plan.name === 'BRIGADE' && (
+																				<Badge variant="default" className="text-xs">Популярный</Badge>
+																			)}
+																			{isCurrent && (
+																				<Badge variant="outline" className="text-xs border-primary text-primary">Текущий</Badge>
+																			)}
+																		</div>
+																		<div className="flex flex-wrap gap-2 mt-1">
+																			{[
+																				`${plan.maxActiveProjects === 9999 ? 'Безлимит' : plan.maxActiveProjects} проектов`,
+																				`До ${plan.maxMembers} участников`,
+																				`${plan.storageGB} ГБ хранилище`
+																			].map((feature) => (
+																				<span key={feature} className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+																					{feature}
+																				</span>
+																			))}
+																		</div>
+																	</div>
+																</div>
+																<div className="flex items-center gap-4">
+																	<div className="text-right">
+																		<p className="font-bold">{plan.price} ₽<span className="text-xs font-normal text-muted-foreground">/мес</span></p>
+																	</div>
+																	{!isCurrent && (
+																		<Button
+																			variant="outline"
+																			size="sm"
+																			className="rounded-xl"
+																			onClick={() => {
+																				showToast({
+																					title: 'В разработке',
+																					description: 'Смена тарифа будет доступна после подключения эквайринга',
+																					type: 'info',
+																				})
+																			}}
+																		>
+																			Выбрать
+																		</Button>
+																	)}
+																</div>
+															</div>
 														</div>
-													</div>
-												</div>
-											))}
-										</div>
+													)
+												})}
+											</div>
+										)}
 									</motion.section>
 
 									{/* Payment History */}
@@ -1465,37 +1666,41 @@ export default function SettingsPage() {
 										</div>
 
 										<div className="divide-y divide-border/30">
-											{[
-												{ date: '15 дек 2025', amount: 1990, status: 'success', plan: 'Бригада' },
-												{ date: '15 ноя 2025', amount: 1990, status: 'success', plan: 'Бригада' },
-												{ date: '15 окт 2025', amount: 990, status: 'success', plan: 'Прораб' },
-											].map((payment, i) => (
-												<div key={i} className="p-4 flex items-center justify-between">
-													<div className="flex items-center gap-4">
-														<div className={cn(
-															'w-10 h-10 rounded-full flex items-center justify-center',
-															payment.status === 'success' ? 'bg-emerald-500/10' : 'bg-destructive/10'
-														)}>
-															{payment.status === 'success' ? (
-																<CheckCircle className="w-5 h-5 text-emerald-500" />
-															) : (
-																<AlertCircle className="w-5 h-5 text-destructive" />
-															)}
-														</div>
-														<div>
-															<p className="font-medium">Тариф «{payment.plan}»</p>
-															<p className="text-sm text-muted-foreground">{payment.date}</p>
-														</div>
-													</div>
-													<p className="font-semibold">{payment.amount} ₽</p>
+											{paymentsLoading ? (
+												<div className="p-4 space-y-3">
+													<Skeleton className="h-10 w-full" />
+													<Skeleton className="h-10 w-full" />
 												</div>
-											))}
-										</div>
-
-										<div className="p-4 bg-secondary/30 text-center">
-											<Button variant="ghost" size="sm" className="rounded-xl">
-												Показать все платежи
-											</Button>
+											) : payments.length === 0 ? (
+												<div className="p-8 text-center text-muted-foreground">
+													<Receipt className="w-10 h-10 mx-auto mb-2 opacity-50" />
+													<p>История платежей пуста</p>
+												</div>
+											) : (
+												payments.map((payment: any) => (
+													<div key={payment.id} className="p-4 flex items-center justify-between">
+														<div className="flex items-center gap-4">
+															<div className={cn(
+																'w-10 h-10 rounded-full flex items-center justify-center',
+																payment.status === 'succeeded' ? 'bg-emerald-500/10' : 'bg-destructive/10'
+															)}>
+																{payment.status === 'succeeded' ? (
+																	<CheckCircle className="w-5 h-5 text-emerald-500" />
+																) : (
+																	<AlertCircle className="w-5 h-5 text-destructive" />
+																)}
+															</div>
+															<div>
+																<p className="font-medium">{payment.description || 'Оплата подписки'}</p>
+																<p className="text-sm text-muted-foreground">
+																	{new Date(payment.createdAt).toLocaleDateString()}
+																</p>
+															</div>
+														</div>
+														<p className="font-semibold">{payment.amount} ₽</p>
+													</div>
+												))
+											)}
 										</div>
 									</motion.section>
 

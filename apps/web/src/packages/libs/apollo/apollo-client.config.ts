@@ -6,10 +6,17 @@ import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { createClient as createWsClient } from 'graphql-ws';
 
 import { SERVER_URL, WEBSOCKET_URL } from '@/packages/constants/url';
-import { CombinedGraphQLErrors } from '@apollo/client';
-import { CombinedProtocolErrors } from '@apollo/client';
+import { CombinedGraphQLErrors, CombinedProtocolErrors } from '@apollo/client';
 
 const isBrowser = typeof window !== 'undefined';
+
+// Log GraphQL endpoint URLs in development
+if (isBrowser && process.env.NODE_ENV === 'development') {
+  console.log('[Apollo Client] GraphQL Server URL:', SERVER_URL);
+  if (WEBSOCKET_URL) {
+    console.log('[Apollo Client] WebSocket URL:', WEBSOCKET_URL);
+  }
+}
 
 /** HTTP link with upload (multipart) support */
 const httpUploadLink = new UploadHttpLink({
@@ -24,7 +31,7 @@ const httpUploadLink = new UploadHttpLink({
 }) as unknown as ApolloLink;
 
 /** WS link (browser only). On the server — null. */
-const wsLink = isBrowser
+const wsLink = isBrowser && WEBSOCKET_URL
   ? new GraphQLWsLink(
       createWsClient({
         url: WEBSOCKET_URL,
@@ -33,6 +40,9 @@ const wsLink = isBrowser
         lazy: true,
         retryAttempts: 10,
         shouldRetry: () => true,
+        onNonLazyError: (error) => {
+          console.warn('[Apollo WS] WebSocket connection error:', error);
+        },
       }),
     )
   : null;
@@ -49,7 +59,7 @@ const transport: ApolloLink = wsLink
     )
   : httpUploadLink;
 
-const errorLink = new ErrorLink(({ error, operation }) => {
+const errorLink = new ErrorLink(({ error, operation, forward }) => {
     if (CombinedGraphQLErrors.is(error)) {
         error.errors.forEach(({ message, locations, path }) =>
             console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
@@ -59,7 +69,26 @@ const errorLink = new ErrorLink(({ error, operation }) => {
             console.log(`[Protocol error]: Message: ${message}, Extensions: ${JSON.stringify(extensions)}`)
         )
     } else {
-        console.error(`[Network error]: ${error}`)
+        // Network error - provide more details
+        const networkError = error.networkError
+        if (networkError) {
+            console.error(`[Network error]:`, {
+                message: networkError.message,
+                statusCode: (networkError as any).statusCode,
+                response: (networkError as any).result,
+                operation: operation?.operationName,
+                variables: operation?.variables,
+                serverUrl: SERVER_URL,
+            })
+            
+            // Check if server is reachable
+            if (networkError.message.includes('Failed to fetch') || networkError.message.includes('NetworkError')) {
+                console.warn(`[Apollo Client] Cannot reach GraphQL server at ${SERVER_URL}`)
+                console.warn(`[Apollo Client] Make sure the API server is running on port 8080`)
+            }
+        } else {
+            console.error(`[Network error]: ${error}`)
+        }
     }
 })
 

@@ -348,6 +348,7 @@ export type ProjectWhereInput = {
   expenses?: Prisma.ExpenseListRelationFilter
   photoReports?: Prisma.PhotoReportListRelationFilter
   payouts?: Prisma.ProjectPayoutListRelationFilter
+  tasks?: Prisma.TaskListRelationFilter
 }
 
 export type ProjectOrderByWithRelationInput = {
@@ -375,6 +376,7 @@ export type ProjectOrderByWithRelationInput = {
   expenses?: Prisma.ExpenseOrderByRelationAggregateInput
   photoReports?: Prisma.PhotoReportOrderByRelationAggregateInput
   payouts?: Prisma.ProjectPayoutOrderByRelationAggregateInput
+  tasks?: Prisma.TaskOrderByRelationAggregateInput
 }
 
 export type ProjectWhereUniqueInput = Prisma.AtLeast<{
@@ -405,6 +407,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   expenses?: Prisma.ExpenseListRelationFilter
   photoReports?: Prisma.PhotoReportListRelationFilter
   payouts?: Prisma.ProjectPayoutListRelationFilter
+  tasks?: Prisma.TaskListRelationFilter
 }, "id">
 
 export type ProjectOrderByWithAggregationInput = {
@@ -485,6 +488,7 @@ export type ProjectCreateInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateInput = {
@@ -511,6 +515,7 @@ export type ProjectUncheckedCreateInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportUncheckedCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUpdateInput = {
@@ -537,6 +542,7 @@ export type ProjectUpdateInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateInput = {
@@ -563,6 +569,7 @@ export type ProjectUncheckedUpdateInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUncheckedUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyInput = {
@@ -825,6 +832,20 @@ export type ProjectUpdateOneRequiredWithoutPhotoReportsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutPhotoReportsInput, Prisma.ProjectUpdateWithoutPhotoReportsInput>, Prisma.ProjectUncheckedUpdateWithoutPhotoReportsInput>
 }
 
+export type ProjectCreateNestedOneWithoutTasksInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutTasksInput, Prisma.ProjectUncheckedCreateWithoutTasksInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutTasksInput
+  connect?: Prisma.ProjectWhereUniqueInput
+}
+
+export type ProjectUpdateOneRequiredWithoutTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutTasksInput, Prisma.ProjectUncheckedCreateWithoutTasksInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutTasksInput
+  upsert?: Prisma.ProjectUpsertWithoutTasksInput
+  connect?: Prisma.ProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutTasksInput, Prisma.ProjectUpdateWithoutTasksInput>, Prisma.ProjectUncheckedUpdateWithoutTasksInput>
+}
+
 export type ProjectCreateWithoutTeamInput = {
   id?: string
   name: string
@@ -848,6 +869,7 @@ export type ProjectCreateWithoutTeamInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutTeamInput = {
@@ -873,6 +895,7 @@ export type ProjectUncheckedCreateWithoutTeamInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportUncheckedCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutTeamInput = {
@@ -950,6 +973,7 @@ export type ProjectCreateWithoutPayoutsInput = {
   team: Prisma.TeamCreateNestedOneWithoutProjectsInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutPayoutsInput = {
@@ -975,6 +999,7 @@ export type ProjectUncheckedCreateWithoutPayoutsInput = {
   updatedAt?: Date | string
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutProjectInput
   photoReports?: Prisma.PhotoReportUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutPayoutsInput = {
@@ -1016,6 +1041,7 @@ export type ProjectUpdateWithoutPayoutsInput = {
   team?: Prisma.TeamUpdateOneRequiredWithoutProjectsNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutPayoutsInput = {
@@ -1041,6 +1067,7 @@ export type ProjectUncheckedUpdateWithoutPayoutsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutExpensesInput = {
@@ -1066,6 +1093,7 @@ export type ProjectCreateWithoutExpensesInput = {
   team: Prisma.TeamCreateNestedOneWithoutProjectsInput
   photoReports?: Prisma.PhotoReportCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutExpensesInput = {
@@ -1091,6 +1119,7 @@ export type ProjectUncheckedCreateWithoutExpensesInput = {
   updatedAt?: Date | string
   photoReports?: Prisma.PhotoReportUncheckedCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutExpensesInput = {
@@ -1132,6 +1161,7 @@ export type ProjectUpdateWithoutExpensesInput = {
   team?: Prisma.TeamUpdateOneRequiredWithoutProjectsNestedInput
   photoReports?: Prisma.PhotoReportUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutExpensesInput = {
@@ -1157,6 +1187,7 @@ export type ProjectUncheckedUpdateWithoutExpensesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photoReports?: Prisma.PhotoReportUncheckedUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutPhotoReportsInput = {
@@ -1182,6 +1213,7 @@ export type ProjectCreateWithoutPhotoReportsInput = {
   team: Prisma.TeamCreateNestedOneWithoutProjectsInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutPhotoReportsInput = {
@@ -1207,6 +1239,7 @@ export type ProjectUncheckedCreateWithoutPhotoReportsInput = {
   updatedAt?: Date | string
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutProjectInput
   payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutProjectInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutPhotoReportsInput = {
@@ -1248,6 +1281,7 @@ export type ProjectUpdateWithoutPhotoReportsInput = {
   team?: Prisma.TeamUpdateOneRequiredWithoutProjectsNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutPhotoReportsInput = {
@@ -1272,6 +1306,127 @@ export type ProjectUncheckedUpdateWithoutPhotoReportsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutProjectNestedInput
+  payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectCreateWithoutTasksInput = {
+  id?: string
+  name: string
+  address?: string | null
+  description?: string | null
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
+  closedAt?: Date | string | null
+  finalProfit?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  team: Prisma.TeamCreateNestedOneWithoutProjectsInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutProjectInput
+  photoReports?: Prisma.PhotoReportCreateNestedManyWithoutProjectInput
+  payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectUncheckedCreateWithoutTasksInput = {
+  id?: string
+  teamId: string
+  name: string
+  address?: string | null
+  description?: string | null
+  budget?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: string | null
+  startDate?: Date | string | null
+  endDate?: Date | string | null
+  photoUrl?: string | null
+  progress?: number
+  notes?: string | null
+  status?: $Enums.ProjectStatus
+  archivedAt?: Date | string | null
+  completedAt?: Date | string | null
+  closedAt?: Date | string | null
+  finalProfit?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutProjectInput
+  photoReports?: Prisma.PhotoReportUncheckedCreateNestedManyWithoutProjectInput
+  payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectCreateOrConnectWithoutTasksInput = {
+  where: Prisma.ProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutTasksInput, Prisma.ProjectUncheckedCreateWithoutTasksInput>
+}
+
+export type ProjectUpsertWithoutTasksInput = {
+  update: Prisma.XOR<Prisma.ProjectUpdateWithoutTasksInput, Prisma.ProjectUncheckedUpdateWithoutTasksInput>
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutTasksInput, Prisma.ProjectUncheckedCreateWithoutTasksInput>
+  where?: Prisma.ProjectWhereInput
+}
+
+export type ProjectUpdateToOneWithWhereWithoutTasksInput = {
+  where?: Prisma.ProjectWhereInput
+  data: Prisma.XOR<Prisma.ProjectUpdateWithoutTasksInput, Prisma.ProjectUncheckedUpdateWithoutTasksInput>
+}
+
+export type ProjectUpdateWithoutTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finalProfit?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  team?: Prisma.TeamUpdateOneRequiredWithoutProjectsNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutProjectNestedInput
+  photoReports?: Prisma.PhotoReportUpdateManyWithoutProjectNestedInput
+  payouts?: Prisma.ProjectPayoutUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectUncheckedUpdateWithoutTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  budget?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  clientPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finalProfit?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutProjectNestedInput
+  photoReports?: Prisma.PhotoReportUncheckedUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1320,6 +1475,7 @@ export type ProjectUpdateWithoutTeamInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutTeamInput = {
@@ -1345,6 +1501,7 @@ export type ProjectUncheckedUpdateWithoutTeamInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutProjectNestedInput
   photoReports?: Prisma.PhotoReportUncheckedUpdateManyWithoutProjectNestedInput
   payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutProjectNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutTeamInput = {
@@ -1378,12 +1535,14 @@ export type ProjectCountOutputType = {
   expenses: number
   photoReports: number
   payouts: number
+  tasks: number
 }
 
 export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   expenses?: boolean | ProjectCountOutputTypeCountExpensesArgs
   photoReports?: boolean | ProjectCountOutputTypeCountPhotoReportsArgs
   payouts?: boolean | ProjectCountOutputTypeCountPayoutsArgs
+  tasks?: boolean | ProjectCountOutputTypeCountTasksArgs
 }
 
 /**
@@ -1417,6 +1576,13 @@ export type ProjectCountOutputTypeCountPayoutsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ProjectPayoutWhereInput
 }
 
+/**
+ * ProjectCountOutputType without action
+ */
+export type ProjectCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskWhereInput
+}
+
 
 export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1443,6 +1609,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   expenses?: boolean | Prisma.Project$expensesArgs<ExtArgs>
   photoReports?: boolean | Prisma.Project$photoReportsArgs<ExtArgs>
   payouts?: boolean | Prisma.Project$payoutsArgs<ExtArgs>
+  tasks?: boolean | Prisma.Project$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["project"]>
 
@@ -1523,6 +1690,7 @@ export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   expenses?: boolean | Prisma.Project$expensesArgs<ExtArgs>
   photoReports?: boolean | Prisma.Project$photoReportsArgs<ExtArgs>
   payouts?: boolean | Prisma.Project$payoutsArgs<ExtArgs>
+  tasks?: boolean | Prisma.Project$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1539,6 +1707,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     expenses: Prisma.$ExpensePayload<ExtArgs>[]
     photoReports: Prisma.$PhotoReportPayload<ExtArgs>[]
     payouts: Prisma.$ProjectPayoutPayload<ExtArgs>[]
+    tasks: Prisma.$TaskPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1959,6 +2128,7 @@ export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends runtime.
   expenses<T extends Prisma.Project$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   photoReports<T extends Prisma.Project$photoReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$photoReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PhotoReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   payouts<T extends Prisma.Project$payoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$payoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tasks<T extends Prisma.Project$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2473,6 +2643,30 @@ export type Project$payoutsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ProjectPayoutScalarFieldEnum | Prisma.ProjectPayoutScalarFieldEnum[]
+}
+
+/**
+ * Project.tasks
+ */
+export type Project$tasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Task
+   */
+  select?: Prisma.TaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Task
+   */
+  omit?: Prisma.TaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskInclude<ExtArgs> | null
+  where?: Prisma.TaskWhereInput
+  orderBy?: Prisma.TaskOrderByWithRelationInput | Prisma.TaskOrderByWithRelationInput[]
+  cursor?: Prisma.TaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskScalarFieldEnum | Prisma.TaskScalarFieldEnum[]
 }
 
 /**

@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  NotificationSettings: 'NotificationSettings',
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
   TelegramAuthToken: 'TelegramAuthToken',
@@ -63,8 +64,12 @@ export const ModelName = {
   Expense: 'Expense',
   PhotoReport: 'PhotoReport',
   ReportPhoto: 'ReportPhoto',
+  Task: 'Task',
   Subscription: 'Subscription',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  SupportTicket: 'SupportTicket',
+  SupportMessage: 'SupportMessage',
+  FAQEntry: 'FAQEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -105,6 +110,21 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const NotificationSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  appPush: 'appPush',
+  appEmail: 'appEmail',
+  appSms: 'appSms',
+  marketingPush: 'marketingPush',
+  marketingEmail: 'marketingEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationSettingsScalarFieldEnum = (typeof NotificationSettingsScalarFieldEnum)[keyof typeof NotificationSettingsScalarFieldEnum]
 
 
 export const VerificationTokenScalarFieldEnum = {
@@ -276,6 +296,26 @@ export const ReportPhotoScalarFieldEnum = {
 export type ReportPhotoScalarFieldEnum = (typeof ReportPhotoScalarFieldEnum)[keyof typeof ReportPhotoScalarFieldEnum]
 
 
+export const TaskScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  assigneeId: 'assigneeId',
+  priority: 'priority',
+  dueDate: 'dueDate',
+  orderIndex: 'orderIndex',
+  checklist: 'checklist',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
 export const SubscriptionScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
@@ -316,12 +356,63 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const SupportTicketScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  telegramChatId: 'telegramChatId',
+  subject: 'subject',
+  status: 'status',
+  priority: 'priority',
+  category: 'category',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  closedAt: 'closedAt'
+} as const
+
+export type SupportTicketScalarFieldEnum = (typeof SupportTicketScalarFieldEnum)[keyof typeof SupportTicketScalarFieldEnum]
+
+
+export const SupportMessageScalarFieldEnum = {
+  id: 'id',
+  ticketId: 'ticketId',
+  fromUser: 'fromUser',
+  message: 'message',
+  createdAt: 'createdAt'
+} as const
+
+export type SupportMessageScalarFieldEnum = (typeof SupportMessageScalarFieldEnum)[keyof typeof SupportMessageScalarFieldEnum]
+
+
+export const FAQEntryScalarFieldEnum = {
+  id: 'id',
+  question: 'question',
+  answer: 'answer',
+  category: 'category',
+  keywords: 'keywords',
+  views: 'views',
+  helpful: 'helpful',
+  notHelpful: 'notHelpful',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FAQEntryScalarFieldEnum = (typeof FAQEntryScalarFieldEnum)[keyof typeof FAQEntryScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull'
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -338,4 +429,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

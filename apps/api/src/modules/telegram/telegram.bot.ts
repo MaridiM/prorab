@@ -9,7 +9,7 @@ export class TelegramBot {
 	private readonly logger = new Logger(TelegramBot.name)
 
 	constructor(
-		@InjectBot() private readonly bot: Telegraf<Context>,
+		@InjectBot('oauth') private readonly bot: Telegraf<Context>,
 		private readonly telegramAuthService: TelegramAuthService,
 	) {}
 

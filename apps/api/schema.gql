@@ -132,6 +132,26 @@ input CreateSubscriptionInput {
   useEarlyBird: Boolean
 }
 
+input CreateTaskInput {
+  """ID назначенного участника команды"""
+  assigneeId: String
+
+  """Описание задачи"""
+  description: String
+
+  """Срок выполнения (ISO 8601)"""
+  dueDate: String
+
+  """Приоритет задачи"""
+  priority: TaskPriority = MEDIUM
+
+  """ID проекта"""
+  projectId: String!
+
+  """Название задачи"""
+  title: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -167,6 +187,11 @@ type Expense {
   updatedAt: DateTime!
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 input LoginInput {
   email: String!
   password: String!
@@ -193,6 +218,17 @@ type MemberPayoutDetail {
 
   """Payout status: pending, paid"""
   status: String!
+}
+
+input MoveTaskInput {
+  """Новый индекс позиции (orderIndex)"""
+  newOrderIndex: Int!
+
+  """Новый статус задачи"""
+  newStatus: TaskStatus!
+
+  """ID перемещаемой задачи"""
+  taskId: String!
 }
 
 type Mutation {
@@ -225,6 +261,12 @@ type Mutation {
   createProject(input: CreateProjectInput!): Project!
   createSubscription(input: CreateSubscriptionInput!): Subscription!
 
+  """Создать задачу"""
+  createTask(input: CreateTaskInput!): Task!
+
+  """Удаление аккаунта пользователя"""
+  deleteAccount: Boolean!
+
   """Удалить расход"""
   deleteExpense(id: ID!): Expense!
 
@@ -233,11 +275,17 @@ type Mutation {
 
   """Удалить фотоотчёт"""
   deletePhotoReport(id: String!): Boolean!
+
+  """Удалить задачу"""
+  deleteTask(id: ID!): Task!
   forgotPassword(email: String!): Boolean!
   initTelegramAuth: TelegramAuthPayload!
   initializePayment(subscriptionId: String!): PaymentUrl!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
+
+  """Переместить задачу (drag & drop)"""
+  moveTask(input: MoveTaskInput!): Task!
   reactivateSubscription(subscriptionId: String!): Subscription!
   refreshSession: AuthPayload
   register(input: RegisterInput!): AuthPayload!
@@ -261,6 +309,7 @@ type Mutation {
 
   """Update team member salary settings (owner only)"""
   updateMemberSalary(input: UpdateMemberSalaryInput!): TeamMember!
+  updateNotificationSettings(input: UpdateNotificationSettingsInput!): NotificationSettings!
 
   """Обновить подпись фото"""
   updatePhotoCaption(caption: String!, photoId: String!): ReportPhoto!
@@ -277,12 +326,27 @@ type Mutation {
   """Обновить прогресс проекта"""
   updateProjectProgress(id: ID!, progress: Int!): Project!
 
+  """Обновить задачу"""
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+
   """Обновление настроек команды (только для владельца)"""
   updateTeam(input: UpdateTeamInput!): Team!
 
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
   verifyEmail(token: String!): Boolean!
+}
+
+type NotificationSettings {
+  appEmail: Boolean!
+  appPush: Boolean!
+  appSms: Boolean!
+  createdAt: DateTime!
+  id: String!
+  marketingEmail: Boolean!
+  marketingPush: Boolean!
+  updatedAt: DateTime!
+  userId: String!
 }
 
 type OnboardingResult {
@@ -544,7 +608,13 @@ type Query {
 
   """Get all payouts for a team member (owner or member themselves)"""
   memberPayouts(memberId: ID!): [ProjectPayout!]!
+
+  """Получить задачи, назначенные участнику"""
+  memberTasks(assigneeId: ID!): [Task!]!
   mySubscription: Subscription
+
+  """Получить все задачи пользователя (созданные или назначенные)"""
+  myTasks: [Task!]!
 
   """Получение всех команд, в которых состоит пользователь"""
   myTeams: [Team!]!
@@ -568,6 +638,9 @@ type Query {
   """Статистика проекта"""
   projectStats(projectId: ID!): ProjectStats!
 
+  """Получить задачи проекта, сгруппированные по статусу (для Kanban)"""
+  projectTasks(projectId: ID!): TasksByStatus!
+
   """Получить проекты команды"""
   projectsByTeam(filter: ProjectFilterInput, teamId: ID!): [Project!]!
 
@@ -575,6 +648,9 @@ type Query {
   publicPhotoReport(slug: String!): PublicPhotoReport!
   sessions: [Session!]!
   subscription(id: String!): Subscription!
+
+  """Получить задачу по ID"""
+  task(id: ID!): Task!
 
   """Получение команды по ID"""
   team(id: ID!): Team
@@ -646,6 +722,80 @@ enum SubscriptionStatus {
   EXPIRED
   PAST_DUE
   TRIALING
+}
+
+type Task {
+  """Назначенный участник"""
+  assignee: TeamMember
+
+  """ID назначенного участника"""
+  assigneeId: ID
+
+  """Чек-лист задачи (JSON)"""
+  checklist: JSON
+
+  """Дата завершения"""
+  completedAt: DateTime
+
+  """Дата создания"""
+  createdAt: DateTime!
+
+  """Создатель задачи"""
+  createdBy: User
+
+  """ID создателя задачи"""
+  createdById: ID!
+
+  """Описание задачи"""
+  description: String
+
+  """Срок выполнения"""
+  dueDate: DateTime
+  id: ID!
+
+  """Индекс порядка для drag & drop"""
+  orderIndex: Int!
+
+  """Приоритет задачи"""
+  priority: TaskPriority!
+
+  """ID проекта"""
+  projectId: ID!
+
+  """Статус задачи"""
+  status: TaskStatus!
+
+  """Название задачи"""
+  title: String!
+
+  """Дата последнего обновления"""
+  updatedAt: DateTime!
+}
+
+"""Приоритет задачи"""
+enum TaskPriority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
+}
+
+"""Статус задачи"""
+enum TaskStatus {
+  DONE
+  IN_PROGRESS
+  TODO
+}
+
+type TasksByStatus {
+  """Задачи со статусом DONE"""
+  done: [Task!]!
+
+  """Задачи со статусом IN_PROGRESS"""
+  inProgress: [Task!]!
+
+  """Задачи со статусом TODO"""
+  todo: [Task!]!
 }
 
 type Team {
@@ -743,6 +893,14 @@ input UpdateMemberSalaryInput {
   salaryType: String!
 }
 
+input UpdateNotificationSettingsInput {
+  appEmail: Boolean
+  appPush: Boolean
+  appSms: Boolean
+  marketingEmail: Boolean
+  marketingPush: Boolean
+}
+
 input UpdatePhotoReportInput {
   description: String
   id: String!
@@ -787,6 +945,26 @@ input UpdateProjectInput {
   startDate: DateTime
 }
 
+input UpdateTaskInput {
+  """ID назначенного участника команды"""
+  assigneeId: String
+
+  """Описание задачи"""
+  description: String
+
+  """Срок выполнения (ISO 8601)"""
+  dueDate: String
+
+  """Приоритет задачи"""
+  priority: TaskPriority
+
+  """Статус задачи"""
+  status: TaskStatus
+
+  """Название задачи"""
+  title: String
+}
+
 input UpdateTeamInput {
   colorId: String
   iconId: String
@@ -821,6 +999,7 @@ type User {
   fullName: String!
   hasCompletedOnboarding: Boolean!
   id: ID!
+  notificationSettings: NotificationSettings
   phone: String
   updatedAt: DateTime!
 }

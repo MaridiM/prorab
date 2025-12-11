@@ -26,7 +26,6 @@ import {
 	ChevronUp,
 	Users,
 	Crown,
-	Settings,
     Banknote,
     LayoutGrid,
 } from 'lucide-react'
@@ -338,15 +337,6 @@ export default function TeamDashboardPage() {
 
 						{/* Actions */}
 						<div className="flex items-center gap-2">
-							{isOwner && (
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={() => router.push(`/teams/${teamId}/settings`)}
-								>
-									<Settings className="w-5 h-5" />
-								</Button>
-							)}
 							<Button onClick={handleCreateProject}>
 								<Plus className="w-4 h-4 mr-2" />
 								Новый проект

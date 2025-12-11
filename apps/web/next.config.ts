@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_NAME: name,
     NEXT_PUBLIC_APP_VERSION: version,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.svg": {

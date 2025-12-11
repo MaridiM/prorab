@@ -57,7 +57,7 @@ query MySubscription {
   }
 }
 
-query GetSubscription($id: ID!) {
+query GetSubscription($id: String!) {
   subscription(id: $id) {
     ...SubscriptionFields
   }
@@ -69,13 +69,13 @@ query AvailablePlans {
   }
 }
 
-query CurrentPlanLimits($teamId: ID!) {
+query CurrentPlanLimits($teamId: String!) {
   currentPlanLimits(teamId: $teamId) {
     ...PlanLimitsFields
   }
 }
 
-query UsageStats($teamId: ID!) {
+query UsageStats($teamId: String!) {
   usageStats(teamId: $teamId) {
     activeProjects
     totalMembers
@@ -86,11 +86,11 @@ query UsageStats($teamId: ID!) {
   }
 }
 
-query CanAddProject($teamId: ID!) {
+query CanAddProject($teamId: String!) {
   canAddProject(teamId: $teamId)
 }
 
-query PaymentsBySubscription($subscriptionId: ID!) {
+query PaymentsBySubscription($subscriptionId: String!) {
   paymentsBySubscription(subscriptionId: $subscriptionId) {
     ...PaymentFields
   }
@@ -110,19 +110,19 @@ mutation ChangePlan($input: ChangePlanInput!) {
   }
 }
 
-mutation CancelSubscription($subscriptionId: ID!) {
+mutation CancelSubscription($subscriptionId: String!) {
   cancelSubscription(subscriptionId: $subscriptionId) {
     ...SubscriptionFields
   }
 }
 
-mutation ReactivateSubscription($subscriptionId: ID!) {
+mutation ReactivateSubscription($subscriptionId: String!) {
   reactivateSubscription(subscriptionId: $subscriptionId) {
     ...SubscriptionFields
   }
 }
 
-mutation InitializePayment($subscriptionId: ID!) {
+mutation InitializePayment($subscriptionId: String!) {
   initializePayment(subscriptionId: $subscriptionId) {
     url
     paymentId

@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/NotificationSettings'
 export type * from './models/VerificationToken'
 export type * from './models/PasswordResetToken'
 export type * from './models/TelegramAuthToken'
@@ -20,6 +21,10 @@ export type * from './models/Project'
 export type * from './models/Expense'
 export type * from './models/PhotoReport'
 export type * from './models/ReportPhoto'
+export type * from './models/Task'
 export type * from './models/Subscription'
 export type * from './models/Payment'
+export type * from './models/SupportTicket'
+export type * from './models/SupportMessage'
+export type * from './models/FAQEntry'
 export type * from './commonInputTypes'
