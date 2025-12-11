@@ -73,6 +73,17 @@ export type CreateExpenseInput = {
   projectId: Scalars['String']['input'];
 };
 
+export type CreatePayoutInput = {
+  /** Payout amount */
+  amount: Scalars['Float']['input'];
+  /** Team member ID */
+  memberId: Scalars['ID']['input'];
+  /** Notes about the payout */
+  notes: InputMaybe<Scalars['String']['input']>;
+  /** Project ID */
+  projectId: Scalars['ID']['input'];
+};
+
 export type CreatePhotoReportInput = {
   description: InputMaybe<Scalars['String']['input']>;
   isPublic: InputMaybe<Scalars['Boolean']['input']>;
@@ -136,6 +147,20 @@ export enum LogoType {
   Uploaded = 'UPLOADED'
 }
 
+export type MemberPayoutDetail = {
+  __typename?: 'MemberPayoutDetail';
+  /** Calculated payout for this member */
+  calculatedPayout: Scalars['Float']['output'];
+  memberId: Scalars['ID']['output'];
+  memberName: Scalars['String']['output'];
+  /** Salary amount or percentage */
+  salaryAmount: Maybe<Scalars['Float']['output']>;
+  /** Salary type: fixed, percentage, none */
+  salaryType: Scalars['String']['output'];
+  /** Payout status: pending, paid */
+  status: Scalars['String']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   /** Добавить фото к фотоотчёту */
@@ -143,10 +168,14 @@ export type Mutation = {
   /** Архивировать проект */
   archiveProject: Project;
   changePassword: Scalars['Boolean']['output'];
+  /** Close project with final calculations (owner only) */
+  closeProject: Project;
   /** Завершение онбординга: создание команды и первого проекта */
   completeOnboarding: OnboardingResult;
   /** Создать расход */
   createExpense: Expense;
+  /** Create or update payout (mark as paid) (owner only) */
+  createPayout: ProjectPayout;
   /** Создать новый фотоотчёт */
   createPhotoReport: PhotoReport;
   /** Создать проект */
@@ -173,6 +202,8 @@ export type Mutation = {
   revokeSession: Scalars['Boolean']['output'];
   /** Обновить расход */
   updateExpense: Expense;
+  /** Update team member salary settings (owner only) */
+  updateMemberSalary: TeamMember;
   /** Обновить подпись фото */
   updatePhotoCaption: ReportPhoto;
   /** Обновить фотоотчёт */
@@ -202,6 +233,11 @@ export type MutationChangePasswordArgs = {
 };
 
 
+export type MutationCloseProjectArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
 export type MutationCompleteOnboardingArgs = {
   input: CompleteOnboardingInput;
 };
@@ -209,6 +245,11 @@ export type MutationCompleteOnboardingArgs = {
 
 export type MutationCreateExpenseArgs = {
   input: CreateExpenseInput;
+};
+
+
+export type MutationCreatePayoutArgs = {
+  input: CreatePayoutInput;
 };
 
 
@@ -278,6 +319,11 @@ export type MutationUpdateExpenseArgs = {
 };
 
 
+export type MutationUpdateMemberSalaryArgs = {
+  input: UpdateMemberSalaryInput;
+};
+
+
 export type MutationUpdatePhotoCaptionArgs = {
   caption: Scalars['String']['input'];
   photoId: Scalars['String']['input'];
@@ -322,6 +368,24 @@ export type OnboardingResult = {
   team: Team;
 };
 
+export type PayoutSummary = {
+  __typename?: 'PayoutSummary';
+  /** Project budget */
+  budget: Scalars['Float']['output'];
+  /** Detailed payouts for each member */
+  members: Array<MemberPayoutDetail>;
+  /** Net profit after expenses */
+  netProfit: Scalars['Float']['output'];
+  /** Owner profit after all payouts */
+  ownerProfit: Scalars['Float']['output'];
+  projectId: Scalars['ID']['output'];
+  projectName: Scalars['String']['output'];
+  /** Total expenses */
+  totalExpenses: Scalars['Float']['output'];
+  /** Total payouts to members */
+  totalPayouts: Scalars['Float']['output'];
+};
+
 export type PhotoReport = {
   __typename?: 'PhotoReport';
   coverPhotoUrl: Maybe<Scalars['String']['output']>;
@@ -349,6 +413,8 @@ export type Project = {
   budget: Maybe<Scalars['Float']['output']>;
   /** Телефон клиента */
   clientPhone: Maybe<Scalars['String']['output']>;
+  /** Дата закрытия проекта */
+  closedAt: Maybe<Scalars['DateTime']['output']>;
   /** Дата завершения */
   completedAt: Maybe<Scalars['DateTime']['output']>;
   /** Дата создания */
@@ -359,6 +425,8 @@ export type Project = {
   description: Maybe<Scalars['String']['output']>;
   /** Дата завершения проекта */
   endDate: Maybe<Scalars['DateTime']['output']>;
+  /** Финальная прибыль после закрытия */
+  finalProfit: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   /** Название проекта */
   name: Scalars['String']['output'];
@@ -387,6 +455,29 @@ export type ProjectFilterInput = {
   status: InputMaybe<ProjectStatus>;
   /** Количество записей */
   take: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ProjectPayout = {
+  __typename?: 'ProjectPayout';
+  /** Actual paid amount */
+  actualAmount: Maybe<Scalars['Float']['output']>;
+  /** Calculated payout amount */
+  calculatedAmount: Scalars['Float']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  /** Team member receiving this payout */
+  member: TeamMember;
+  memberId: Scalars['ID']['output'];
+  /** Notes about the payout */
+  notes: Maybe<Scalars['String']['output']>;
+  /** Date when payout was paid */
+  paidAt: Maybe<Scalars['DateTime']['output']>;
+  /** Project this payout belongs to */
+  project: Project;
+  projectId: Scalars['ID']['output'];
+  /** Payout status: pending, paid */
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type ProjectStats = {
@@ -443,12 +534,18 @@ export type Query = {
   /** Simple health check */
   health: Scalars['String']['output'];
   me: Maybe<User>;
+  /** Get all payouts for a team member (owner or member themselves) */
+  memberPayouts: Array<ProjectPayout>;
   /** Получение всех команд, в которых состоит пользователь */
   myTeams: Array<Team>;
+  /** Calculate payout summary for a project (owner only) */
+  payoutSummary: PayoutSummary;
   /** Получить фотоотчёт по ID */
   photoReport: PhotoReport;
   /** Получить проект по ID */
   project: Project;
+  /** Get all payouts for a project (owner only) */
+  projectPayouts: Array<ProjectPayout>;
   /** Получить все фотоотчёты проекта */
   projectPhotoReports: Array<PhotoReport>;
   /** Статистика проекта */
@@ -477,6 +574,16 @@ export type QueryExpensesByProjectArgs = {
 };
 
 
+export type QueryMemberPayoutsArgs = {
+  memberId: Scalars['ID']['input'];
+};
+
+
+export type QueryPayoutSummaryArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
 export type QueryPhotoReportArgs = {
   id: Scalars['String']['input'];
 };
@@ -484,6 +591,11 @@ export type QueryPhotoReportArgs = {
 
 export type QueryProjectArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryProjectPayoutsArgs = {
+  projectId: Scalars['ID']['input'];
 };
 
 
@@ -563,6 +675,25 @@ export type Team = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type TeamMember = {
+  __typename?: 'TeamMember';
+  id: Scalars['ID']['output'];
+  /** Дата присоединения к команде */
+  joinedAt: Scalars['DateTime']['output'];
+  /** Роль в команде (owner/member) */
+  role: Scalars['String']['output'];
+  /** Сумма зарплаты или процент (0-100) */
+  salaryAmount: Maybe<Scalars['Float']['output']>;
+  /** Тип зарплаты: fixed, percentage, none */
+  salaryType: Scalars['String']['output'];
+  /** Команда */
+  team: Maybe<Team>;
+  teamId: Scalars['ID']['output'];
+  /** Пользователь */
+  user: Maybe<User>;
+  userId: Scalars['ID']['output'];
+};
+
 export type UpdateExpenseInput = {
   /** Сумма расхода */
   amount: InputMaybe<Scalars['Float']['input']>;
@@ -576,6 +707,15 @@ export type UpdateExpenseInput = {
   paidByClient: InputMaybe<Scalars['Boolean']['input']>;
   /** Массив URL фотографий */
   photos: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type UpdateMemberSalaryInput = {
+  /** Team member ID */
+  memberId: Scalars['ID']['input'];
+  /** Salary amount (for fixed) or percentage (0-100) */
+  salaryAmount: InputMaybe<Scalars['Float']['input']>;
+  /** Salary type: fixed, percentage, none */
+  salaryType: Scalars['String']['input'];
 };
 
 export type UpdatePhotoReportInput = {
@@ -754,6 +894,54 @@ export type DeleteExpenseMutationVariables = Exact<{
 
 export type DeleteExpenseMutation = { __typename?: 'Mutation', deleteExpense: { __typename?: 'Expense', id: string } };
 
+export type ProjectPayoutFieldsFragment = { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, createdAt: string, updatedAt: string, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } };
+
+export type MemberPayoutDetailFieldsFragment = { __typename?: 'MemberPayoutDetail', memberId: string, memberName: string, salaryType: string, salaryAmount: number | null, calculatedPayout: number, status: string };
+
+export type PayoutSummaryFieldsFragment = { __typename?: 'PayoutSummary', projectId: string, projectName: string, budget: number, totalExpenses: number, netProfit: number, totalPayouts: number, ownerProfit: number, members: Array<{ __typename?: 'MemberPayoutDetail', memberId: string, memberName: string, salaryType: string, salaryAmount: number | null, calculatedPayout: number, status: string }> };
+
+export type PayoutSummaryQueryVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type PayoutSummaryQuery = { __typename?: 'Query', payoutSummary: { __typename?: 'PayoutSummary', projectId: string, projectName: string, budget: number, totalExpenses: number, netProfit: number, totalPayouts: number, ownerProfit: number, members: Array<{ __typename?: 'MemberPayoutDetail', memberId: string, memberName: string, salaryType: string, salaryAmount: number | null, calculatedPayout: number, status: string }> } };
+
+export type ProjectPayoutsQueryVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type ProjectPayoutsQuery = { __typename?: 'Query', projectPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, createdAt: string, updatedAt: string, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
+
+export type MemberPayoutsQueryVariables = Exact<{
+  memberId: Scalars['ID']['input'];
+}>;
+
+
+export type MemberPayoutsQuery = { __typename?: 'Query', memberPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, createdAt: string, updatedAt: string, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
+
+export type UpdateMemberSalaryMutationVariables = Exact<{
+  input: UpdateMemberSalaryInput;
+}>;
+
+
+export type UpdateMemberSalaryMutation = { __typename?: 'Mutation', updateMemberSalary: { __typename?: 'TeamMember', id: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } };
+
+export type CreatePayoutMutationVariables = Exact<{
+  input: CreatePayoutInput;
+}>;
+
+
+export type CreatePayoutMutation = { __typename?: 'Mutation', createPayout: { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, createdAt: string, updatedAt: string, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } } };
+
+export type CloseProjectMutationVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type CloseProjectMutation = { __typename?: 'Mutation', closeProject: { __typename?: 'Project', id: string, status: ProjectStatus, closedAt: string | null, finalProfit: number | null } };
+
 export type PhotoReportFieldsFragment = { __typename?: 'PhotoReport', id: string, slug: string, projectId: string, title: string, description: string | null, coverPhotoUrl: string | null, isPublic: boolean, viewCount: number, createdById: string, createdAt: string, updatedAt: string, publishedAt: string | null };
 
 export type PublicPhotoReportFieldsFragment = { __typename?: 'PublicPhotoReport', slug: string, title: string, description: string | null, coverPhotoUrl: string | null, viewCount: number, createdAt: string, publishedAt: string | null, project: { __typename?: 'PublicProject', name: string, address: string | null } };
@@ -910,6 +1098,9 @@ export type CompleteOnboardingMutationVariables = Exact<{
 
 export type CompleteOnboardingMutation = { __typename?: 'Mutation', completeOnboarding: { __typename?: 'OnboardingResult', success: boolean, message: string, team: { __typename?: 'Team', id: string, name: string, logoType: LogoType, logoUrl: string | null, iconId: string | null, colorId: string | null, createdAt: string }, project: { __typename?: 'Project', id: string, name: string, address: string | null, description: string | null, status: ProjectStatus, progress: number, createdAt: string } } };
 
+export const ProjectPayoutFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectPayoutFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectPayout"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedAmount"}},{"kind":"Field","name":{"kind":"Name","value":"actualAmount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"paidAt"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"member"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<ProjectPayoutFieldsFragment, unknown>;
+export const MemberPayoutDetailFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberPayoutDetailFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberPayoutDetail"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedPayout"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]} as unknown as DocumentNode<MemberPayoutDetailFieldsFragment, unknown>;
+export const PayoutSummaryFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PayoutSummaryFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PayoutSummary"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"netProfit"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"ownerProfit"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberPayoutDetailFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberPayoutDetailFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberPayoutDetail"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedPayout"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]} as unknown as DocumentNode<PayoutSummaryFieldsFragment, unknown>;
 export const PhotoReportFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PhotoReportFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoReport"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"coverPhotoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"publishedAt"}}]}}]} as unknown as DocumentNode<PhotoReportFieldsFragment, unknown>;
 export const PublicPhotoReportFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PublicPhotoReportFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PublicPhotoReport"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"coverPhotoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"publishedAt"}},{"kind":"Field","name":{"kind":"Name","value":"project"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}}]} as unknown as DocumentNode<PublicPhotoReportFieldsFragment, unknown>;
 export const ReportPhotoFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ReportPhotoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ReportPhoto"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnailUrl"}},{"kind":"Field","name":{"kind":"Name","value":"caption"}},{"kind":"Field","name":{"kind":"Name","value":"orderIndex"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<ReportPhotoFieldsFragment, unknown>;
@@ -933,6 +1124,12 @@ export const ExpensesByCategoryDocument = {"kind":"Document","definitions":[{"ki
 export const CreateExpenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateExpense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateExpenseInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createExpense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"photos"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}},{"kind":"Field","name":{"kind":"Name","value":"paidByClient"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<CreateExpenseMutation, CreateExpenseMutationVariables>;
 export const UpdateExpenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateExpense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateExpenseInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateExpense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"photos"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}},{"kind":"Field","name":{"kind":"Name","value":"paidByClient"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateExpenseMutation, UpdateExpenseMutationVariables>;
 export const DeleteExpenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteExpense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteExpense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<DeleteExpenseMutation, DeleteExpenseMutationVariables>;
+export const PayoutSummaryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PayoutSummary"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"payoutSummary"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PayoutSummaryFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberPayoutDetailFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberPayoutDetail"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedPayout"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PayoutSummaryFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PayoutSummary"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"netProfit"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"ownerProfit"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberPayoutDetailFields"}}]}}]}}]} as unknown as DocumentNode<PayoutSummaryQuery, PayoutSummaryQueryVariables>;
+export const ProjectPayoutsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProjectPayouts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectPayouts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectPayoutFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectPayoutFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectPayout"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedAmount"}},{"kind":"Field","name":{"kind":"Name","value":"actualAmount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"paidAt"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"member"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<ProjectPayoutsQuery, ProjectPayoutsQueryVariables>;
+export const MemberPayoutsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MemberPayouts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberPayouts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"memberId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectPayoutFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectPayoutFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectPayout"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedAmount"}},{"kind":"Field","name":{"kind":"Name","value":"actualAmount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"paidAt"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"member"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<MemberPayoutsQuery, MemberPayoutsQueryVariables>;
+export const UpdateMemberSalaryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMemberSalary"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateMemberSalaryInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateMemberSalary"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateMemberSalaryMutation, UpdateMemberSalaryMutationVariables>;
+export const CreatePayoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePayout"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePayoutInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPayout"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectPayoutFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectPayoutFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectPayout"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"calculatedAmount"}},{"kind":"Field","name":{"kind":"Name","value":"actualAmount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"paidAt"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"member"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePayoutMutation, CreatePayoutMutationVariables>;
+export const CloseProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CloseProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"closeProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}},{"kind":"Field","name":{"kind":"Name","value":"finalProfit"}}]}}]}}]} as unknown as DocumentNode<CloseProjectMutation, CloseProjectMutationVariables>;
 export const CreatePhotoReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhotoReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePhotoReportInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPhotoReport"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PhotoReportFields"}},{"kind":"Field","name":{"kind":"Name","value":"photos"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ReportPhotoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PhotoReportFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoReport"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"coverPhotoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"publishedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ReportPhotoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ReportPhoto"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnailUrl"}},{"kind":"Field","name":{"kind":"Name","value":"caption"}},{"kind":"Field","name":{"kind":"Name","value":"orderIndex"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<CreatePhotoReportMutation, CreatePhotoReportMutationVariables>;
 export const UpdatePhotoReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePhotoReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdatePhotoReportInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePhotoReport"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PhotoReportFields"}},{"kind":"Field","name":{"kind":"Name","value":"photos"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ReportPhotoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PhotoReportFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoReport"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"coverPhotoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"publishedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ReportPhotoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ReportPhoto"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnailUrl"}},{"kind":"Field","name":{"kind":"Name","value":"caption"}},{"kind":"Field","name":{"kind":"Name","value":"orderIndex"}},{"kind":"Field","name":{"kind":"Name","value":"width"}},{"kind":"Field","name":{"kind":"Name","value":"height"}},{"kind":"Field","name":{"kind":"Name","value":"fileSize"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<UpdatePhotoReportMutation, UpdatePhotoReportMutationVariables>;
 export const DeletePhotoReportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePhotoReport"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePhotoReport"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeletePhotoReportMutation, DeletePhotoReportMutationVariables>;

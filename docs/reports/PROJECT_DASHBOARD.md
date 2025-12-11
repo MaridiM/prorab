@@ -380,6 +380,63 @@ User ──┬── Team ──┬── Project ──┬── Expense
 
 **Stage 5 завершён полностью!** Photo Reports - это первая "WOW" фича MVP, готовая к production.
 
+#### 🚀 Potential Future Enhancements (Post-MVP)
+
+**UX Improvements:**
+
+- [ ] **Inline Caption Editing** - редактирование подписей прямо в PhotoGallery без modal
+- [ ] **Batch Photo Upload** - прогресс-бар для группы фото (уже есть структура)
+- [ ] **Photo Compression Settings** - пользователь выбирает качество (high/medium/low)
+- [ ] **Watermark Support** - автоматическое добавление логотипа команды
+- [ ] **Photo Filters** - базовые фильтры (brightness, contrast, saturation)
+- [ ] **Before/After Slider** - для сравнения фото (строительство)
+
+**Sharing & Collaboration:**
+
+- [ ] **Social Share Buttons** - Facebook, WhatsApp, Telegram, копировать QR-код
+- [ ] **Email Share** - отправить фотоотчёт клиенту по email
+- [ ] **PDF Export** - скачать фотоотчёт в PDF для печати
+- [ ] **Password Protected Reports** - приватные отчёты с паролем
+- [ ] **Comments on Photos** - обсуждение конкретных фото в команде
+- [ ] **Photo Reactions** - лайки/реакции от клиентов
+
+**Advanced Features:**
+
+- [ ] **Geolocation Tags** - GPS координаты для фото (карта объектов)
+- [ ] **Time-Lapse View** - автоматическое видео из фото по датам
+- [ ] **Photo Comparison** - сравнение фото одного места в разное время
+- [ ] **Auto-Sort by EXIF** - сортировка по дате съёмки (EXIF metadata)
+- [ ] **Photo Templates** - шаблоны для типовых отчётов (еженедельный, финальный)
+- [ ] **Analytics Dashboard** - статистика просмотров, популярные отчёты
+
+**Integration:**
+
+- [ ] **Cloudflare R2 Storage** - миграция с local storage на R2
+- [ ] **CDN Integration** - быстрая загрузка фото через CDN
+- [ ] **Mobile App Upload** - прямая загрузка с телефона (PWA)
+- [ ] **Telegram Bot** - отправка фото в бот → автоматический отчёт
+- [ ] **WhatsApp Integration** - отправка отчётов через WhatsApp Business API
+
+**Performance:**
+
+- [ ] **Lazy Loading** - progressive image loading (blur → full)
+- [ ] **WebP/AVIF Support** - современные форматы (уже есть WebP)
+- [ ] **Image CDN Resize** - динамический resize через URL параметры
+- [ ] **Infinite Scroll** - для отчётов с большим количеством фото
+- [ ] **Offline Support** - PWA с offline-first для просмотра
+
+**SEO & Marketing:**
+
+- [ ] **Custom Domains** - кастомные домены для публичных страниц (client.prorab.space)
+- [ ] **Branded Reports** - белый label для подрядчиков
+- [ ] **Portfolio Mode** - публичная галерея всех проектов команды
+- [ ] **Schema.org Markup** - structured data для Google Rich Results
+
+**Priority для Post-MVP:**
+1. 🔴 **High:** Social share buttons, PDF export, Cloudflare R2
+2. 🟡 **Medium:** Inline editing, watermarks, geolocation
+3. 🟢 **Low:** Filters, time-lapse, custom domains
+
 ---
 
 ## 🔄 Текущие задачи

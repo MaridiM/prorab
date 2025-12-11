@@ -54,6 +54,12 @@ export class Project {
   @Field(() => Date, { nullable: true, description: 'Дата завершения' })
   completedAt?: Date;
 
+  @Field(() => Date, { nullable: true, description: 'Дата закрытия проекта' })
+  closedAt?: Date;
+
+  @Field(() => Float, { nullable: true, description: 'Финальная прибыль после закрытия' })
+  finalProfit?: number;
+
   @Field(() => ID, { description: 'ID создателя проекта' })
   createdById: string;
 

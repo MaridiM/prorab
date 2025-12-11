@@ -4,6 +4,7 @@ import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { Project } from '../teams/models/project.model';
+import { CheckProjectLimitGuard } from '../subscriptions/guards/check-project-limit.guard';
 
 import { CreateProjectInput } from './dto/create-project.input';
 import { ProjectFilterInput } from './dto/project-filter.input';
@@ -48,7 +49,7 @@ export class ProjectsResolver {
   // ========== MUTATIONS ==========
 
   @Mutation(() => Project, { description: 'Создать проект' })
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CheckProjectLimitGuard)
   async createProject(
     @Args('input') input: CreateProjectInput,
     @CurrentUser() user: { id: string },

@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CoreService } from '../../core/core.service';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { RedisService } from '../../core/redis/redis.service';
 import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
+import { UpdateTeamInput } from './dto/update-team.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { StorageService } from '../../core/storage/storage.service';
 import { LogoType } from './models/logo-type.enum';
@@ -254,5 +255,143 @@ export class TeamsService extends CoreService {
         createdAt: 'desc',
       },
     });
+  }
+
+  /**
+   * Получение команды по ID
+   */
+  async getTeamById(teamId: string): Promise<any> {
+    return this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        members: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Обновление данных команды (только для владельца)
+   */
+  async updateTeam(userId: string, input: UpdateTeamInput): Promise<any> {
+    // 1. Проверяем существование команды
+    const team = await this.prisma.team.findUnique({
+      where: { id: input.teamId },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    // 2. Проверяем что пользователь - владелец
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может изменять настройки команды');
+    }
+
+    // 3. Подготавливаем данные для обновления
+    const updateData: any = {};
+
+    if (input.name) {
+      updateData.name = input.name;
+    }
+
+    // 4. Обрабатываем логотип
+    if (input.logoFile) {
+      this.logger.log('Processing uploaded logo file for team update');
+      const logoUrl = await this.storageService.uploadTeamLogo(input.logoFile);
+      updateData.logoType = LogoType.UPLOADED;
+      updateData.logoUrl = logoUrl;
+      updateData.iconId = null;
+      updateData.colorId = null;
+    } else if (input.iconId && input.colorId) {
+      this.logger.log(`Updating team logo to generated: ${input.iconId} + ${input.colorId}`);
+      updateData.logoType = LogoType.GENERATED;
+      updateData.logoUrl = null;
+      updateData.iconId = input.iconId;
+      updateData.colorId = input.colorId;
+    }
+
+    // 5. Обновляем команду
+    const updatedTeam = await this.prisma.team.update({
+      where: { id: input.teamId },
+      data: updateData,
+    });
+
+    this.logger.log(`Updated team ${input.teamId}`);
+
+    return updatedTeam;
+  }
+
+  /**
+   * Получение участников команды
+   */
+  async getTeamMembers(teamId: string, userId: string): Promise<any[]> {
+    // Проверяем что пользователь состоит в команде
+    const membership = await this.prisma.teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId,
+          userId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('Вы не являетесь участником этой команды');
+    }
+
+    return this.prisma.teamMember.findMany({
+      where: { teamId },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        joinedAt: 'asc',
+      },
+    });
+  }
+
+  /**
+   * Удаление участника из команды (только для владельца)
+   */
+  async removeTeamMember(teamId: string, memberId: string, userId: string): Promise<boolean> {
+    // 1. Проверяем что команда существует и пользователь - владелец
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может удалять участников');
+    }
+
+    // 2. Проверяем что участник существует
+    const member = await this.prisma.teamMember.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member) {
+      throw new BadRequestException('Участник не найден');
+    }
+
+    // 3. Запрещаем удаление владельца
+    if (member.userId === userId) {
+      throw new BadRequestException('Владелец не может удалить себя из команды');
+    }
+
+    // 4. Удаляем участника
+    await this.prisma.teamMember.delete({
+      where: { id: memberId },
+    });
+
+    this.logger.log(`Removed member ${memberId} from team ${teamId}`);
+
+    return true;
   }
 }

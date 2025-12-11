@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
+import { UpdateProfileInput } from './dto/update-profile.input'
 
 interface CreateUserData {
 	email: string
@@ -109,6 +110,25 @@ export class UsersService {
 		return this.prisma.passwordResetToken.update({
 			where: { token },
 			data: { used: true },
+		})
+	}
+
+	// ==================== Profile ====================
+
+	async updateProfile(userId: string, input: UpdateProfileInput) {
+		const updateData: any = {}
+
+		if (input.fullName !== undefined) {
+			updateData.fullName = input.fullName
+		}
+
+		if (input.phone !== undefined) {
+			updateData.phone = input.phone || null
+		}
+
+		return this.prisma.user.update({
+			where: { id: userId },
+			data: updateData,
 		})
 	}
 }

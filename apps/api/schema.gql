@@ -66,6 +66,20 @@ input CreateExpenseInput {
   projectId: String!
 }
 
+input CreatePayoutInput {
+  """Payout amount"""
+  amount: Float!
+
+  """Team member ID"""
+  memberId: ID!
+
+  """Notes about the payout"""
+  notes: String
+
+  """Project ID"""
+  projectId: ID!
+}
+
 input CreatePhotoReportInput {
   description: String
   isPublic: Boolean = true
@@ -149,6 +163,22 @@ enum LogoType {
   UPLOADED
 }
 
+type MemberPayoutDetail {
+  """Calculated payout for this member"""
+  calculatedPayout: Float!
+  memberId: ID!
+  memberName: String!
+
+  """Salary amount or percentage"""
+  salaryAmount: Float
+
+  """Salary type: fixed, percentage, none"""
+  salaryType: String!
+
+  """Payout status: pending, paid"""
+  status: String!
+}
+
 type Mutation {
   """Добавить фото к фотоотчёту"""
   addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
@@ -157,11 +187,17 @@ type Mutation {
   archiveProject(id: ID!): Project!
   changePassword(input: ChangePasswordInput!): Boolean!
 
+  """Close project with final calculations (owner only)"""
+  closeProject(projectId: ID!): Project!
+
   """Завершение онбординга: создание команды и первого проекта"""
   completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!
 
   """Создать расход"""
   createExpense(input: CreateExpenseInput!): Expense!
+
+  """Create or update payout (mark as paid) (owner only)"""
+  createPayout(input: CreatePayoutInput!): ProjectPayout!
 
   """Создать новый фотоотчёт"""
   createPhotoReport(input: CreatePhotoReportInput!): PhotoReport!
@@ -197,6 +233,9 @@ type Mutation {
   """Обновить расход"""
   updateExpense(input: UpdateExpenseInput!): Expense!
 
+  """Update team member salary settings (owner only)"""
+  updateMemberSalary(input: UpdateMemberSalaryInput!): TeamMember!
+
   """Обновить подпись фото"""
   updatePhotoCaption(caption: String!, photoId: String!): ReportPhoto!
 
@@ -228,6 +267,28 @@ type OnboardingResult {
   team: Team!
 }
 
+type PayoutSummary {
+  """Project budget"""
+  budget: Float!
+
+  """Detailed payouts for each member"""
+  members: [MemberPayoutDetail!]!
+
+  """Net profit after expenses"""
+  netProfit: Float!
+
+  """Owner profit after all payouts"""
+  ownerProfit: Float!
+  projectId: ID!
+  projectName: String!
+
+  """Total expenses"""
+  totalExpenses: Float!
+
+  """Total payouts to members"""
+  totalPayouts: Float!
+}
+
 type PhotoReport {
   coverPhotoUrl: String
   createdAt: DateTime!
@@ -257,6 +318,9 @@ type Project {
   """Телефон клиента"""
   clientPhone: String
 
+  """Дата закрытия проекта"""
+  closedAt: DateTime
+
   """Дата завершения"""
   completedAt: DateTime
 
@@ -271,6 +335,9 @@ type Project {
 
   """Дата завершения проекта"""
   endDate: DateTime
+
+  """Финальная прибыль после закрытия"""
+  finalProfit: Float
   id: ID!
 
   """Название проекта"""
@@ -310,6 +377,34 @@ input ProjectFilterInput {
 
   """Количество записей"""
   take: Int = 50
+}
+
+type ProjectPayout {
+  """Actual paid amount"""
+  actualAmount: Float
+
+  """Calculated payout amount"""
+  calculatedAmount: Float!
+  createdAt: DateTime!
+  id: ID!
+
+  """Team member receiving this payout"""
+  member: TeamMember!
+  memberId: ID!
+
+  """Notes about the payout"""
+  notes: String
+
+  """Date when payout was paid"""
+  paidAt: DateTime
+
+  """Project this payout belongs to"""
+  project: Project!
+  projectId: ID!
+
+  """Payout status: pending, paid"""
+  status: String!
+  updatedAt: DateTime!
 }
 
 type ProjectStats {
@@ -372,14 +467,23 @@ type Query {
   health: String!
   me: User
 
+  """Get all payouts for a team member (owner or member themselves)"""
+  memberPayouts(memberId: ID!): [ProjectPayout!]!
+
   """Получение всех команд, в которых состоит пользователь"""
   myTeams: [Team!]!
+
+  """Calculate payout summary for a project (owner only)"""
+  payoutSummary(projectId: ID!): PayoutSummary!
 
   """Получить фотоотчёт по ID"""
   photoReport(id: String!): PhotoReport!
 
   """Получить проект по ID"""
   project(id: ID!): Project!
+
+  """Get all payouts for a project (owner only)"""
+  projectPayouts(projectId: ID!): [ProjectPayout!]!
 
   """Получить все фотоотчёты проекта"""
   projectPhotoReports(projectId: String!): [PhotoReport!]!
@@ -455,6 +559,30 @@ type Team {
   updatedAt: DateTime!
 }
 
+type TeamMember {
+  id: ID!
+
+  """Дата присоединения к команде"""
+  joinedAt: DateTime!
+
+  """Роль в команде (owner/member)"""
+  role: String!
+
+  """Сумма зарплаты или процент (0-100)"""
+  salaryAmount: Float
+
+  """Тип зарплаты: fixed, percentage, none"""
+  salaryType: String!
+
+  """Команда"""
+  team: Team
+  teamId: ID!
+
+  """Пользователь"""
+  user: User
+  userId: ID!
+}
+
 input UpdateExpenseInput {
   """Сумма расхода"""
   amount: Float
@@ -473,6 +601,17 @@ input UpdateExpenseInput {
 
   """Массив URL фотографий"""
   photos: [String!]
+}
+
+input UpdateMemberSalaryInput {
+  """Team member ID"""
+  memberId: ID!
+
+  """Salary amount (for fixed) or percentage (0-100)"""
+  salaryAmount: Float
+
+  """Salary type: fixed, percentage, none"""
+  salaryType: String!
 }
 
 input UpdatePhotoReportInput {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
 	ProjectDocument,
@@ -17,11 +18,11 @@ import {
 	ProjectPhotoReportsDocument,
 	CreatePhotoReportDocument,
 	UpdatePhotoReportDocument,
-	DeletePhotoReportDocument,
-	UploadPhotoToReportDocument,
-	DeletePhotoFromReportDocument,
-	ReorderReportPhotosDocument,
-	MyTeamsDocument,
+    DeletePhotoReportDocument,
+    UploadPhotoToReportDocument,
+    DeletePhotoFromReportDocument,
+    ReorderReportPhotosDocument,
+    MyTeamsDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
 import {
@@ -33,6 +34,7 @@ import {
 	Badge,
 	ProgressBar,
 	Skeleton,
+	UserMenu,
 } from '@/packages/components/ui'
 import { ExpenseList, ExpenseForm } from '@/packages/components/expenses'
 import { FinancialDashboard } from '@/packages/components/financial'
@@ -40,6 +42,7 @@ import {
 	PhotoReportForm,
 	PhotoReportCard,
 } from '@/app/components/photo-reports'
+import { PayoutCalculator } from '@/packages/components/payouts' // NEW
 import { useToast } from '@/packages/hooks'
 import { useAuth } from '@/packages/libs/auth'
 import {
@@ -57,6 +60,7 @@ import {
 	CheckSquare,
 	TrendingUp,
 	TrendingDown,
+    Calculator, // NEW
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -70,6 +74,39 @@ const fadeIn = {
 	},
 }
 
+const PAYOUT_SUMMARY_QUERY = gql`
+  query PayoutSummary($projectId: ID!) {
+    payoutSummary(projectId: $projectId) {
+      projectId
+      projectName
+      budget
+      totalExpenses
+      netProfit
+      totalPayouts
+      ownerProfit
+      members {
+        memberId
+        memberName
+        salaryType
+        salaryAmount
+        calculatedPayout
+        status
+      }
+    }
+  }
+`
+
+const CLOSE_PROJECT_MUTATION = gql`
+  mutation CloseProject($projectId: ID!) {
+    closeProject(projectId: $projectId) {
+      id
+      status
+      closedAt
+      finalProfit
+    }
+  }
+`
+
 export default function ProjectDetailsPage() {
 	const params = useParams()
 	const router = useRouter()
@@ -79,7 +116,7 @@ export default function ProjectDetailsPage() {
 	const projectId = params.projectId as string
 
 	const [activeTab, setActiveTab] = useState<
-		'info' | 'expenses' | 'tasks' | 'reports'
+		'info' | 'expenses' | 'tasks' | 'reports' | 'payouts'
 	>('info')
 	const [showExpenseForm, setShowExpenseForm] = useState(false)
 	const [editingExpense, setEditingExpense] = useState<any>(null)
@@ -120,6 +157,18 @@ export default function ProjectDetailsPage() {
 		variables: { projectId },
 		skip: activeTab !== 'reports',
 	})
+
+    const { data: payoutData, loading: payoutLoading } = useQuery(PAYOUT_SUMMARY_QUERY, {
+        variables: { projectId },
+        skip: activeTab !== 'payouts'
+    })
+
+    const [closeProject] = useMutation(CLOSE_PROJECT_MUTATION, {
+        refetchQueries: [
+            { query: ProjectDocument, variables: { id: projectId } },
+            { query: ProjectsByTeamDocument, variables: { teamId } }
+        ]
+    })
 
 	const [archiveProject, { loading: archiving }] = useMutation(
 		ArchiveProjectDocument,
@@ -499,6 +548,17 @@ export default function ProjectDetailsPage() {
 		})
 	}
 
+    const handleCloseProject = async () => {
+        try {
+            await closeProject({ variables: { projectId } })
+            showToast({ type: 'success', message: 'Проект закрыт и выплаты зафиксированы' })
+            router.push(`/teams/${teamId}`)
+        } catch (error: any) {
+            showToast({ type: 'error', message: error.message || 'Ошибка закрытия проекта' })
+            throw error
+        }
+    }
+
 	const formatDate = (date: string | null | undefined) => {
 		if (!date) return '—'
 		return format(new Date(date), 'dd MMMM yyyy', { locale: ru })
@@ -569,6 +629,7 @@ export default function ProjectDetailsPage() {
 		{ id: 'info' as const, label: 'Информация', icon: FileText },
 		{ id: 'expenses' as const, label: 'Расходы', icon: Wallet },
 		{ id: 'reports' as const, label: 'Фотоотчёты', icon: Camera },
+        ...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator }] : []),
 		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare, disabled: true },
 	]
 
@@ -610,7 +671,7 @@ export default function ProjectDetailsPage() {
 						</div>
 
 						{/* Actions */}
-						<div className="flex gap-2">
+						<div className="flex items-center gap-2">
 							<Button variant="outline" size="sm" onClick={handleEdit}>
 								<Edit className="h-4 w-4 mr-2" />
 								<span className="hidden sm:inline">Редактировать</span>
@@ -636,6 +697,7 @@ export default function ProjectDetailsPage() {
 									<span className="hidden sm:inline">В архив</span>
 								</Button>
 							)}
+							<UserMenu avatarSize="sm" />
 						</div>
 					</div>
 
@@ -1054,6 +1116,32 @@ export default function ProjectDetailsPage() {
 							)}
 						</motion.div>
 					)}
+
+                    {/* Payouts Tab */}
+                    {activeTab === 'payouts' && (
+                        <motion.div
+                            key="payouts"
+                            initial="hidden"
+                            animate="visible"
+                            exit="hidden"
+                            variants={fadeIn}
+                        >
+                            {payoutLoading ? (
+                                <Skeleton className="h-[600px] w-full rounded-2xl" />
+                            ) : payoutData?.payoutSummary ? (
+                                <PayoutCalculator 
+                                    summary={payoutData.payoutSummary as any}
+                                    onClose={handleCloseProject}
+                                />
+                            ) : (
+                                <Card>
+                                    <CardContent className="py-12 text-center text-muted-foreground">
+                                        Ошибка загрузки данных
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </motion.div>
+                    )}
 				</AnimatePresence>
 			</main>
 

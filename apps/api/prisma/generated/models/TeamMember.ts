@@ -20,8 +20,18 @@ export type TeamMemberModel = runtime.Types.Result.DefaultSelection<Prisma.$Team
 
 export type AggregateTeamMember = {
   _count: TeamMemberCountAggregateOutputType | null
+  _avg: TeamMemberAvgAggregateOutputType | null
+  _sum: TeamMemberSumAggregateOutputType | null
   _min: TeamMemberMinAggregateOutputType | null
   _max: TeamMemberMaxAggregateOutputType | null
+}
+
+export type TeamMemberAvgAggregateOutputType = {
+  salaryAmount: runtime.Decimal | null
+}
+
+export type TeamMemberSumAggregateOutputType = {
+  salaryAmount: runtime.Decimal | null
 }
 
 export type TeamMemberMinAggregateOutputType = {
@@ -30,6 +40,8 @@ export type TeamMemberMinAggregateOutputType = {
   userId: string | null
   role: string | null
   joinedAt: Date | null
+  salaryType: string | null
+  salaryAmount: runtime.Decimal | null
 }
 
 export type TeamMemberMaxAggregateOutputType = {
@@ -38,6 +50,8 @@ export type TeamMemberMaxAggregateOutputType = {
   userId: string | null
   role: string | null
   joinedAt: Date | null
+  salaryType: string | null
+  salaryAmount: runtime.Decimal | null
 }
 
 export type TeamMemberCountAggregateOutputType = {
@@ -46,9 +60,19 @@ export type TeamMemberCountAggregateOutputType = {
   userId: number
   role: number
   joinedAt: number
+  salaryType: number
+  salaryAmount: number
   _all: number
 }
 
+
+export type TeamMemberAvgAggregateInputType = {
+  salaryAmount?: true
+}
+
+export type TeamMemberSumAggregateInputType = {
+  salaryAmount?: true
+}
 
 export type TeamMemberMinAggregateInputType = {
   id?: true
@@ -56,6 +80,8 @@ export type TeamMemberMinAggregateInputType = {
   userId?: true
   role?: true
   joinedAt?: true
+  salaryType?: true
+  salaryAmount?: true
 }
 
 export type TeamMemberMaxAggregateInputType = {
@@ -64,6 +90,8 @@ export type TeamMemberMaxAggregateInputType = {
   userId?: true
   role?: true
   joinedAt?: true
+  salaryType?: true
+  salaryAmount?: true
 }
 
 export type TeamMemberCountAggregateInputType = {
@@ -72,6 +100,8 @@ export type TeamMemberCountAggregateInputType = {
   userId?: true
   role?: true
   joinedAt?: true
+  salaryType?: true
+  salaryAmount?: true
   _all?: true
 }
 
@@ -113,6 +143,18 @@ export type TeamMemberAggregateArgs<ExtArgs extends runtime.Types.Extensions.Int
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: TeamMemberAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: TeamMemberSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: TeamMemberMinAggregateInputType
@@ -143,6 +185,8 @@ export type TeamMemberGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   _count?: TeamMemberCountAggregateInputType | true
+  _avg?: TeamMemberAvgAggregateInputType
+  _sum?: TeamMemberSumAggregateInputType
   _min?: TeamMemberMinAggregateInputType
   _max?: TeamMemberMaxAggregateInputType
 }
@@ -153,7 +197,11 @@ export type TeamMemberGroupByOutputType = {
   userId: string
   role: string
   joinedAt: Date
+  salaryType: string
+  salaryAmount: runtime.Decimal | null
   _count: TeamMemberCountAggregateOutputType | null
+  _avg: TeamMemberAvgAggregateOutputType | null
+  _sum: TeamMemberSumAggregateOutputType | null
   _min: TeamMemberMinAggregateOutputType | null
   _max: TeamMemberMaxAggregateOutputType | null
 }
@@ -182,8 +230,11 @@ export type TeamMemberWhereInput = {
   userId?: Prisma.StringFilter<"TeamMember"> | string
   role?: Prisma.StringFilter<"TeamMember"> | string
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
+  salaryType?: Prisma.StringFilter<"TeamMember"> | string
+  salaryAmount?: Prisma.DecimalNullableFilter<"TeamMember"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  payouts?: Prisma.ProjectPayoutListRelationFilter
 }
 
 export type TeamMemberOrderByWithRelationInput = {
@@ -192,8 +243,11 @@ export type TeamMemberOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
+  salaryType?: Prisma.SortOrder
+  salaryAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   team?: Prisma.TeamOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  payouts?: Prisma.ProjectPayoutOrderByRelationAggregateInput
 }
 
 export type TeamMemberWhereUniqueInput = Prisma.AtLeast<{
@@ -206,8 +260,11 @@ export type TeamMemberWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"TeamMember"> | string
   role?: Prisma.StringFilter<"TeamMember"> | string
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
+  salaryType?: Prisma.StringFilter<"TeamMember"> | string
+  salaryAmount?: Prisma.DecimalNullableFilter<"TeamMember"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  payouts?: Prisma.ProjectPayoutListRelationFilter
 }, "id" | "teamId_userId">
 
 export type TeamMemberOrderByWithAggregationInput = {
@@ -216,9 +273,13 @@ export type TeamMemberOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
+  salaryType?: Prisma.SortOrder
+  salaryAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TeamMemberCountOrderByAggregateInput
+  _avg?: Prisma.TeamMemberAvgOrderByAggregateInput
   _max?: Prisma.TeamMemberMaxOrderByAggregateInput
   _min?: Prisma.TeamMemberMinOrderByAggregateInput
+  _sum?: Prisma.TeamMemberSumOrderByAggregateInput
 }
 
 export type TeamMemberScalarWhereWithAggregatesInput = {
@@ -230,14 +291,19 @@ export type TeamMemberScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
   role?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
+  salaryType?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
+  salaryAmount?: Prisma.DecimalNullableWithAggregatesFilter<"TeamMember"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberCreateInput = {
   id?: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team: Prisma.TeamCreateNestedOneWithoutMembersInput
   user: Prisma.UserCreateNestedOneWithoutTeamMembershipsInput
+  payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberUncheckedCreateInput = {
@@ -246,14 +312,20 @@ export type TeamMemberUncheckedCreateInput = {
   userId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team?: Prisma.TeamUpdateOneRequiredWithoutMembersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutTeamMembershipsNestedInput
+  payouts?: Prisma.ProjectPayoutUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberUncheckedUpdateInput = {
@@ -262,6 +334,9 @@ export type TeamMemberUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberCreateManyInput = {
@@ -270,12 +345,16 @@ export type TeamMemberCreateManyInput = {
   userId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberUncheckedUpdateManyInput = {
@@ -284,6 +363,8 @@ export type TeamMemberUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberListRelationFilter = {
@@ -294,6 +375,11 @@ export type TeamMemberListRelationFilter = {
 
 export type TeamMemberOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type TeamMemberScalarRelationFilter = {
+  is?: Prisma.TeamMemberWhereInput
+  isNot?: Prisma.TeamMemberWhereInput
 }
 
 export type TeamMemberTeamIdUserIdCompoundUniqueInput = {
@@ -307,6 +393,12 @@ export type TeamMemberCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
+  salaryType?: Prisma.SortOrder
+  salaryAmount?: Prisma.SortOrder
+}
+
+export type TeamMemberAvgOrderByAggregateInput = {
+  salaryAmount?: Prisma.SortOrder
 }
 
 export type TeamMemberMaxOrderByAggregateInput = {
@@ -315,6 +407,8 @@ export type TeamMemberMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
+  salaryType?: Prisma.SortOrder
+  salaryAmount?: Prisma.SortOrder
 }
 
 export type TeamMemberMinOrderByAggregateInput = {
@@ -323,6 +417,12 @@ export type TeamMemberMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
+  salaryType?: Prisma.SortOrder
+  salaryAmount?: Prisma.SortOrder
+}
+
+export type TeamMemberSumOrderByAggregateInput = {
+  salaryAmount?: Prisma.SortOrder
 }
 
 export type TeamMemberCreateNestedManyWithoutUserInput = {
@@ -409,11 +509,28 @@ export type TeamMemberUncheckedUpdateManyWithoutTeamNestedInput = {
   deleteMany?: Prisma.TeamMemberScalarWhereInput | Prisma.TeamMemberScalarWhereInput[]
 }
 
+export type TeamMemberCreateNestedOneWithoutPayoutsInput = {
+  create?: Prisma.XOR<Prisma.TeamMemberCreateWithoutPayoutsInput, Prisma.TeamMemberUncheckedCreateWithoutPayoutsInput>
+  connectOrCreate?: Prisma.TeamMemberCreateOrConnectWithoutPayoutsInput
+  connect?: Prisma.TeamMemberWhereUniqueInput
+}
+
+export type TeamMemberUpdateOneRequiredWithoutPayoutsNestedInput = {
+  create?: Prisma.XOR<Prisma.TeamMemberCreateWithoutPayoutsInput, Prisma.TeamMemberUncheckedCreateWithoutPayoutsInput>
+  connectOrCreate?: Prisma.TeamMemberCreateOrConnectWithoutPayoutsInput
+  upsert?: Prisma.TeamMemberUpsertWithoutPayoutsInput
+  connect?: Prisma.TeamMemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TeamMemberUpdateToOneWithWhereWithoutPayoutsInput, Prisma.TeamMemberUpdateWithoutPayoutsInput>, Prisma.TeamMemberUncheckedUpdateWithoutPayoutsInput>
+}
+
 export type TeamMemberCreateWithoutUserInput = {
   id?: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team: Prisma.TeamCreateNestedOneWithoutMembersInput
+  payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberUncheckedCreateWithoutUserInput = {
@@ -421,6 +538,9 @@ export type TeamMemberUncheckedCreateWithoutUserInput = {
   teamId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberCreateOrConnectWithoutUserInput = {
@@ -458,13 +578,18 @@ export type TeamMemberScalarWhereInput = {
   userId?: Prisma.StringFilter<"TeamMember"> | string
   role?: Prisma.StringFilter<"TeamMember"> | string
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
+  salaryType?: Prisma.StringFilter<"TeamMember"> | string
+  salaryAmount?: Prisma.DecimalNullableFilter<"TeamMember"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberCreateWithoutTeamInput = {
   id?: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   user: Prisma.UserCreateNestedOneWithoutTeamMembershipsInput
+  payouts?: Prisma.ProjectPayoutCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberUncheckedCreateWithoutTeamInput = {
@@ -472,6 +597,9 @@ export type TeamMemberUncheckedCreateWithoutTeamInput = {
   userId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type TeamMemberCreateOrConnectWithoutTeamInput = {
@@ -500,18 +628,79 @@ export type TeamMemberUpdateManyWithWhereWithoutTeamInput = {
   data: Prisma.XOR<Prisma.TeamMemberUpdateManyMutationInput, Prisma.TeamMemberUncheckedUpdateManyWithoutTeamInput>
 }
 
+export type TeamMemberCreateWithoutPayoutsInput = {
+  id?: string
+  role?: string
+  joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  team: Prisma.TeamCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutTeamMembershipsInput
+}
+
+export type TeamMemberUncheckedCreateWithoutPayoutsInput = {
+  id?: string
+  teamId: string
+  userId: string
+  role?: string
+  joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+}
+
+export type TeamMemberCreateOrConnectWithoutPayoutsInput = {
+  where: Prisma.TeamMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.TeamMemberCreateWithoutPayoutsInput, Prisma.TeamMemberUncheckedCreateWithoutPayoutsInput>
+}
+
+export type TeamMemberUpsertWithoutPayoutsInput = {
+  update: Prisma.XOR<Prisma.TeamMemberUpdateWithoutPayoutsInput, Prisma.TeamMemberUncheckedUpdateWithoutPayoutsInput>
+  create: Prisma.XOR<Prisma.TeamMemberCreateWithoutPayoutsInput, Prisma.TeamMemberUncheckedCreateWithoutPayoutsInput>
+  where?: Prisma.TeamMemberWhereInput
+}
+
+export type TeamMemberUpdateToOneWithWhereWithoutPayoutsInput = {
+  where?: Prisma.TeamMemberWhereInput
+  data: Prisma.XOR<Prisma.TeamMemberUpdateWithoutPayoutsInput, Prisma.TeamMemberUncheckedUpdateWithoutPayoutsInput>
+}
+
+export type TeamMemberUpdateWithoutPayoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  team?: Prisma.TeamUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutTeamMembershipsNestedInput
+}
+
+export type TeamMemberUncheckedUpdateWithoutPayoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+}
+
 export type TeamMemberCreateManyUserInput = {
   id?: string
   teamId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   team?: Prisma.TeamUpdateOneRequiredWithoutMembersNestedInput
+  payouts?: Prisma.ProjectPayoutUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberUncheckedUpdateWithoutUserInput = {
@@ -519,6 +708,9 @@ export type TeamMemberUncheckedUpdateWithoutUserInput = {
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
@@ -526,6 +718,8 @@ export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberCreateManyTeamInput = {
@@ -533,13 +727,18 @@ export type TeamMemberCreateManyTeamInput = {
   userId: string
   role?: string
   joinedAt?: Date | string
+  salaryType?: string
+  salaryAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type TeamMemberUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutTeamMembershipsNestedInput
+  payouts?: Prisma.ProjectPayoutUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberUncheckedUpdateWithoutTeamInput = {
@@ -547,6 +746,9 @@ export type TeamMemberUncheckedUpdateWithoutTeamInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payouts?: Prisma.ProjectPayoutUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type TeamMemberUncheckedUpdateManyWithoutTeamInput = {
@@ -554,8 +756,39 @@ export type TeamMemberUncheckedUpdateManyWithoutTeamInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  salaryType?: Prisma.StringFieldUpdateOperationsInput | string
+  salaryAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
+
+/**
+ * Count Type TeamMemberCountOutputType
+ */
+
+export type TeamMemberCountOutputType = {
+  payouts: number
+}
+
+export type TeamMemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  payouts?: boolean | TeamMemberCountOutputTypeCountPayoutsArgs
+}
+
+/**
+ * TeamMemberCountOutputType without action
+ */
+export type TeamMemberCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TeamMemberCountOutputType
+   */
+  select?: Prisma.TeamMemberCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TeamMemberCountOutputType without action
+ */
+export type TeamMemberCountOutputTypeCountPayoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProjectPayoutWhereInput
+}
 
 
 export type TeamMemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -564,8 +797,12 @@ export type TeamMemberSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   userId?: boolean
   role?: boolean
   joinedAt?: boolean
+  salaryType?: boolean
+  salaryAmount?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  payouts?: boolean | Prisma.TeamMember$payoutsArgs<ExtArgs>
+  _count?: boolean | Prisma.TeamMemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teamMember"]>
 
 export type TeamMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -574,6 +811,8 @@ export type TeamMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   userId?: boolean
   role?: boolean
   joinedAt?: boolean
+  salaryType?: boolean
+  salaryAmount?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teamMember"]>
@@ -584,6 +823,8 @@ export type TeamMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   userId?: boolean
   role?: boolean
   joinedAt?: boolean
+  salaryType?: boolean
+  salaryAmount?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teamMember"]>
@@ -594,12 +835,16 @@ export type TeamMemberSelectScalar = {
   userId?: boolean
   role?: boolean
   joinedAt?: boolean
+  salaryType?: boolean
+  salaryAmount?: boolean
 }
 
-export type TeamMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "userId" | "role" | "joinedAt", ExtArgs["result"]["teamMember"]>
+export type TeamMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "userId" | "role" | "joinedAt" | "salaryType" | "salaryAmount", ExtArgs["result"]["teamMember"]>
 export type TeamMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  payouts?: boolean | Prisma.TeamMember$payoutsArgs<ExtArgs>
+  _count?: boolean | Prisma.TeamMemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TeamMemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
@@ -615,6 +860,7 @@ export type $TeamMemberPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     team: Prisma.$TeamPayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
+    payouts: Prisma.$ProjectPayoutPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -622,6 +868,8 @@ export type $TeamMemberPayload<ExtArgs extends runtime.Types.Extensions.Internal
     userId: string
     role: string
     joinedAt: Date
+    salaryType: string
+    salaryAmount: runtime.Decimal | null
   }, ExtArgs["result"]["teamMember"]>
   composites: {}
 }
@@ -1018,6 +1266,7 @@ export interface Prisma__TeamMemberClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   team<T extends Prisma.TeamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamDefaultArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  payouts<T extends Prisma.TeamMember$payoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamMember$payoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1052,6 +1301,8 @@ export interface TeamMemberFieldRefs {
   readonly userId: Prisma.FieldRef<"TeamMember", 'String'>
   readonly role: Prisma.FieldRef<"TeamMember", 'String'>
   readonly joinedAt: Prisma.FieldRef<"TeamMember", 'DateTime'>
+  readonly salaryType: Prisma.FieldRef<"TeamMember", 'String'>
+  readonly salaryAmount: Prisma.FieldRef<"TeamMember", 'Decimal'>
 }
     
 
@@ -1445,6 +1696,30 @@ export type TeamMemberDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many TeamMembers to delete.
    */
   limit?: number
+}
+
+/**
+ * TeamMember.payouts
+ */
+export type TeamMember$payoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProjectPayout
+   */
+  select?: Prisma.ProjectPayoutSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProjectPayout
+   */
+  omit?: Prisma.ProjectPayoutOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProjectPayoutInclude<ExtArgs> | null
+  where?: Prisma.ProjectPayoutWhereInput
+  orderBy?: Prisma.ProjectPayoutOrderByWithRelationInput | Prisma.ProjectPayoutOrderByWithRelationInput[]
+  cursor?: Prisma.ProjectPayoutWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProjectPayoutScalarFieldEnum | Prisma.ProjectPayoutScalarFieldEnum[]
 }
 
 /**

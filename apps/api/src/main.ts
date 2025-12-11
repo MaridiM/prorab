@@ -26,6 +26,10 @@ async function bootstrap() {
 
 	const config = app.get(ConfigService)
 
+	// ✅ Trust proxy for correct IP detection (production: behind Nginx/Cloudflare/ALB)
+	// This ensures req.ip returns the real client IP, not the proxy IP
+	app.set('trust proxy', true)
+
 	// ✅ Serve static assets (uploads)
 	app.useStaticAssets(join(process.cwd(), 'uploads'), {
 		prefix: '/uploads/',

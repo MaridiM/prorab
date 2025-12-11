@@ -11,7 +11,7 @@ import {
 	MyTeamsDocument,
 } from '@/packages/api/graphql'
 import { ProjectForm } from '@/packages/components/projects'
-import { Card, CardContent, CardHeader, CardTitle, Skeleton, Button } from '@/packages/components/ui'
+import { Card, CardContent, CardHeader, CardTitle, Skeleton, Button, UserMenu } from '@/packages/components/ui'
 import { useToast } from '@/packages/hooks'
 import { ArrowLeft, Edit3, Users } from 'lucide-react'
 import type { UpdateProjectInput } from '@/packages/schemas'
@@ -140,37 +140,40 @@ export default function EditProjectPage() {
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
 				<div className="container mx-auto px-4 py-4">
-					<div className="flex items-center gap-4">
-						{/* Back Button */}
-						<button
-							onClick={() => router.push(`/teams/${teamId}/projects/${projectId}`)}
-							className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
-						>
-							<ArrowLeft className="w-5 h-5" />
-						</button>
+					<div className="flex items-center justify-between gap-4">
+						<div className="flex items-center gap-4">
+							{/* Back Button */}
+							<button
+								onClick={() => router.push(`/teams/${teamId}/projects/${projectId}`)}
+								className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+							>
+								<ArrowLeft className="w-5 h-5" />
+							</button>
 
-						{/* Team & Page Info */}
-						<div className="flex items-center gap-3">
-							{team?.logoUrl ? (
-								<div className="w-10 h-10 rounded-xl overflow-hidden">
-									<img
-										src={team.logoUrl}
-										alt={team.name}
-										className="w-full h-full object-cover"
-									/>
+							{/* Team & Page Info */}
+							<div className="flex items-center gap-3">
+								{team?.logoUrl ? (
+									<div className="w-10 h-10 rounded-xl overflow-hidden">
+										<img
+											src={team.logoUrl}
+											alt={team.name}
+											className="w-full h-full object-cover"
+										/>
+									</div>
+								) : (
+									<div className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-indigo-500">
+										<Users className="w-5 h-5" />
+									</div>
+								)}
+								<div>
+									<h1 className="text-xl font-bold">Редактирование</h1>
+									<p className="text-sm text-muted-foreground">
+										{project.name}
+									</p>
 								</div>
-							) : (
-								<div className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-indigo-500">
-									<Users className="w-5 h-5" />
-								</div>
-							)}
-							<div>
-								<h1 className="text-xl font-bold">Редактирование</h1>
-								<p className="text-sm text-muted-foreground">
-									{project.name}
-								</p>
 							</div>
 						</div>
+						<UserMenu avatarSize="sm" />
 					</div>
 				</div>
 			</motion.header>

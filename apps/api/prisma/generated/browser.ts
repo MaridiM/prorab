@@ -38,6 +38,11 @@ export type PasswordResetToken = Prisma.PasswordResetTokenModel
  */
 export type Team = Prisma.TeamModel
 /**
+ * Model ProjectPayout
+ * 
+ */
+export type ProjectPayout = Prisma.ProjectPayoutModel
+/**
  * Model TeamMember
  * 
  */
@@ -67,3 +72,13 @@ export type PhotoReport = Prisma.PhotoReportModel
  * 
  */
 export type ReportPhoto = Prisma.ReportPhotoModel
+/**
+ * Model Subscription
+ * 
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel

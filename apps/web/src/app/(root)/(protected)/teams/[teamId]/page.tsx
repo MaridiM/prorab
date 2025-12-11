@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useTransition } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useMutation } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
 	ProjectsByTeamDocument,
@@ -12,8 +13,10 @@ import {
 import { ProjectStatus } from '@/packages/schemas'
 import { ProjectCardDashboard } from '@/packages/components/dashboard'
 import { FinancialSummary } from '@/packages/components/dashboard'
-import { Button, Skeleton, Badge } from '@/packages/components/ui'
+import { Button, Skeleton, Badge, UserMenu, Dialog, DialogContent, DialogHeader, DialogTitle } from '@/packages/components/ui'
+import { SalarySettingsForm, MemberSalaryBadge } from '@/packages/components/payouts'
 import { useAuth } from '@/packages/libs/auth'
+import { useToast } from '@/packages/hooks'
 import {
 	Plus,
 	Search,
@@ -24,6 +27,8 @@ import {
 	Users,
 	Crown,
 	Settings,
+    Banknote,
+    LayoutGrid,
 } from 'lucide-react'
 
 const fadeIn = {
@@ -34,6 +39,41 @@ const fadeIn = {
 		transition: { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] as const },
 	},
 }
+
+const TEAM_MEMBERS_QUERY = gql`
+  query TeamMembers($teamId: ID!) {
+    teamMembers(teamId: $teamId) {
+      id
+      teamId
+      userId
+      role
+      salaryType
+      salaryAmount
+      joinedAt
+      user {
+        id
+        email
+        fullName
+        phone
+      }
+    }
+  }
+`
+
+const UPDATE_MEMBER_SALARY_MUTATION = gql`
+  mutation UpdateMemberSalary($input: UpdateMemberSalaryInput!) {
+    updateMemberSalary(input: $input) {
+      id
+      salaryType
+      salaryAmount
+      user {
+        id
+        fullName
+        email
+      }
+    }
+  }
+`
 
 const stagger = {
 	hidden: {},
@@ -51,14 +91,21 @@ export default function TeamDashboardPage() {
 	const { user } = useAuth()
 	const teamId = params.teamId as string
 
+	// Используем URL как источник правды
 	const statusFilter = (searchParams.get('filter') as StatusFilter) || 'ALL'
 	const [searchQuery, setSearchQuery] = useState('')
 	const [showArchived, setShowArchived] = useState(false)
+    const [activeTab, setActiveTab] = useState<'projects' | 'salaries'>('projects')
+    const [editingMember, setEditingMember] = useState<any>(null)
+	const [, startTransition] = useTransition()
+    const { showToast } = useToast()
 
 	const setStatusFilter = (filter: StatusFilter) => {
-		const newParams = new URLSearchParams(searchParams.toString())
-		newParams.set('filter', filter)
-		router.replace(`?${newParams.toString()}`, { scroll: false })
+		startTransition(() => {
+			const newParams = new URLSearchParams(searchParams.toString())
+			newParams.set('filter', filter)
+			router.replace(`?${newParams.toString()}`, { scroll: false })
+		})
 	}
 
 	// Загрузка команды
@@ -74,11 +121,41 @@ export default function TeamDashboardPage() {
 				teamId,
 				filter: null,
 			},
-			fetchPolicy: 'cache-and-network',
+			fetchPolicy: 'no-cache', // Отключаем кэш для избежания проблем при переключении фильтров
+			notifyOnNetworkStatusChange: true,
+            skip: activeTab !== 'projects'
 		}
 	)
 
-	const allProjects = projectsData?.projectsByTeam || []
+    const { data: membersData, loading: membersLoading, refetch: refetchMembers } = useQuery(
+        TEAM_MEMBERS_QUERY,
+        {
+            variables: { teamId },
+            skip: activeTab !== 'salaries'
+        }
+    )
+
+    const [updateSalary, { loading: updatingSalary }] = useMutation(UPDATE_MEMBER_SALARY_MUTATION)
+
+    const handleUpdateSalary = async (data: any) => {
+        try {
+            await updateSalary({ 
+                variables: { 
+                    input: data
+                } 
+            })
+            showToast({ type: 'success', message: 'Зарплата обновлена' })
+            setEditingMember(null)
+            refetchMembers()
+        } catch (error: any) {
+            showToast({ type: 'error', message: error.message || 'Ошибка обновления зарплаты' })
+        }
+    }
+
+	const allProjects = useMemo(() => {
+		// Создаем новый массив при каждом изменении данных, чтобы избежать мутаций
+		return projectsData?.projectsByTeam || []
+	}, [projectsData])
 
 	// Фильтрация проектов
 	const filteredProjects = useMemo(() => {
@@ -102,15 +179,33 @@ export default function TeamDashboardPage() {
 		return projects
 	}, [allProjects, statusFilter, searchQuery])
 
-	// Разделение на активные и архивные
-	const activeProjects = filteredProjects.filter(
-		p =>
-			p?.status === ProjectStatus.ACTIVE ||
-			p?.status === ProjectStatus.COMPLETED
-	)
-	const archivedProjects = filteredProjects.filter(
-		p => p?.status === ProjectStatus.ARCHIVED
-	)
+	// Разделение на активные и архивные на основе текущего фильтра
+	const activeProjects = useMemo(() => {
+		if (statusFilter === 'COMPLETED') {
+			// Для завершенных показываем только завершенные (filteredProjects уже отфильтрован)
+			return filteredProjects
+		} else if (statusFilter === 'ACTIVE') {
+			// Для активных показываем только активные (filteredProjects уже отфильтрован)
+			return filteredProjects
+		} else {
+			// Для "Все проекты" показываем активные и завершенные
+			return filteredProjects.filter(
+				p =>
+					p?.status === ProjectStatus.ACTIVE ||
+					p?.status === ProjectStatus.COMPLETED
+			)
+		}
+	}, [filteredProjects, statusFilter])
+
+	const archivedProjects = useMemo(() => {
+		if (statusFilter === 'ARCHIVED') {
+			// Для архива показываем все отфильтрованные проекты (они уже архивные)
+			return filteredProjects
+		} else {
+			// Для других фильтров показываем архивные из отфильтрованных
+			return filteredProjects.filter(p => p?.status === ProjectStatus.ARCHIVED)
+		}
+	}, [filteredProjects, statusFilter])
 
 	// Финансовые метрики
 	const financialMetrics = useMemo(() => {
@@ -256,13 +351,47 @@ export default function TeamDashboardPage() {
 								<Plus className="w-4 h-4 mr-2" />
 								Новый проект
 							</Button>
+							<UserMenu avatarSize="sm" />
 						</div>
 					</div>
 				</div>
 			</motion.header>
 
+            {/* Tabs Navigation */}
+            <div className="border-b border-border/30 bg-card/50">
+				<div className="container mx-auto px-4">
+					<div className="flex gap-1 overflow-x-auto">
+                        <button
+                            onClick={() => setActiveTab('projects')}
+                            className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+                                activeTab === 'projects'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                            Проекты
+                        </button>
+                        {isOwner && (
+                            <button
+                                onClick={() => setActiveTab('salaries')}
+                                className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+                                    activeTab === 'salaries'
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                                }`}
+                            >
+                                <Banknote className="w-4 h-4" />
+                                Зарплаты
+                            </button>
+                        )}
+					</div>
+				</div>
+			</div>
+
 			{/* Main Content */}
 			<main className="container mx-auto px-4 py-6">
+                {activeTab === 'projects' ? (
 				<motion.div initial="hidden" animate="visible" variants={stagger}>
 					{/* Financial Summary (только для владельца) */}
 					{isOwner && financialMetrics.totalBudget > 0 && (
@@ -319,7 +448,9 @@ export default function TeamDashboardPage() {
 								<span className="w-2 h-2 rounded-full bg-emerald-500" />
 								{statusFilter === 'COMPLETED'
 									? 'Завершённые проекты'
-									: 'Активные проекты'}
+									: statusFilter === 'ACTIVE'
+									? 'Активные проекты'
+									: 'Проекты'}
 								{activeProjects.length > 0 && (
 									<span className="text-sm font-normal text-muted-foreground">
 										({activeProjects.length})
@@ -473,19 +604,107 @@ export default function TeamDashboardPage() {
 							</motion.section>
 						)}
 				</motion.div>
-			</main>
+                ) : (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="max-w-4xl mx-auto"
+                    >
+                        <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-6 mb-8 border border-white/10">
+                            <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                                <Banknote className="w-5 h-5 text-indigo-400" />
+                                Управление зарплатами
+                            </h2>
+                            <p className="text-muted-foreground text-sm">
+                                Настройте условия оплаты для каждого участника команды. Эти настройки будут автоматически применяться при расчете выплат в проектах.
+                            </p>
+                        </div>
 
-			{/* FAB Button */}
-			<motion.button
-				initial={{ scale: 0, opacity: 0 }}
-				animate={{ scale: 1, opacity: 1 }}
-				transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-				onClick={handleCreateProject}
-				className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all hover:scale-105 flex items-center justify-center z-50"
-				aria-label="Создать проект"
-			>
-				<Plus className="h-6 w-6" />
-			</motion.button>
+                        {membersLoading ? (
+                            <div className="space-y-4">
+                                {[1, 2, 3].map(i => (
+                                    <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {membersData?.teamMembers?.map((member) => (
+                                    <div 
+                                        key={member.id}
+                                        className="bg-card border border-border/50 rounded-2xl p-4 flex items-center justify-between hover:border-primary/30 transition-all group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-lg font-bold text-muted-foreground">
+                                                {member.user?.fullName?.[0] || 'U'}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="font-semibold">{member.user?.fullName}</h3>
+                                                    {member.role === 'owner' && (
+                                                        <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">
+                                                            Владелец
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">{member.user?.email}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <MemberSalaryBadge 
+                                                salaryType={member.salaryType as any}
+                                                salaryAmount={member.salaryAmount}
+                                            />
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm"
+                                                onClick={() => setEditingMember(member)}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                Настроить
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+			</main>
+            
+            <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMember(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Настройка зарплаты</DialogTitle>
+                    </DialogHeader>
+                    {editingMember && (
+                        <SalarySettingsForm
+                            memberId={editingMember.id}
+                            memberName={editingMember.user?.fullName || 'Участник'}
+                            currentSalaryType={editingMember.salaryType}
+                            currentSalaryAmount={editingMember.salaryAmount}
+                            onSubmit={handleUpdateSalary}
+                            onCancel={() => setEditingMember(null)}
+                            isLoading={updatingSalary}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+
+			{/* FAB Button (only show in projects tab) */}
+			{activeTab === 'projects' && (
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+                    onClick={handleCreateProject}
+                    className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all hover:scale-105 flex items-center justify-center z-50"
+                    aria-label="Создать проект"
+                >
+                    <Plus className="h-6 w-6" />
+                </motion.button>
+            )}
 		</div>
 	)
 }

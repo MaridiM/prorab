@@ -1,0 +1,130 @@
+# ============ FRAGMENTS ============
+
+fragment SubscriptionFields on Subscription {
+  id
+  teamId
+  plan
+  status
+  currentPeriodStart
+  currentPeriodEnd
+  trialEndsAt
+  cancelAtPeriodEnd
+  cancelledAt
+  isEarlyBird
+  limits {
+    name
+    price
+    maxActiveProjects
+    maxMembers
+    storageGB
+    features
+  }
+  createdAt
+  updatedAt
+}
+
+fragment PlanLimitsFields on PlanLimits {
+  name
+  price
+  maxActiveProjects
+  maxMembers
+  storageGB
+  features
+}
+
+fragment PaymentFields on Payment {
+  id
+  subscriptionId
+  teamId
+  amount
+  currency
+  status
+  yookassaPaymentId
+  paymentMethod
+  description
+  failureReason
+  paidAt
+  refundedAt
+  createdAt
+  updatedAt
+}
+
+# ============ QUERIES ============
+
+query MySubscription {
+  mySubscription {
+    ...SubscriptionFields
+  }
+}
+
+query GetSubscription($id: ID!) {
+  subscription(id: $id) {
+    ...SubscriptionFields
+  }
+}
+
+query AvailablePlans {
+  availablePlans {
+    ...PlanLimitsFields
+  }
+}
+
+query CurrentPlanLimits($teamId: ID!) {
+  currentPlanLimits(teamId: $teamId) {
+    ...PlanLimitsFields
+  }
+}
+
+query UsageStats($teamId: ID!) {
+  usageStats(teamId: $teamId) {
+    activeProjects
+    totalMembers
+    storageUsedGB
+    limits {
+      ...PlanLimitsFields
+    }
+  }
+}
+
+query CanAddProject($teamId: ID!) {
+  canAddProject(teamId: $teamId)
+}
+
+query PaymentsBySubscription($subscriptionId: ID!) {
+  paymentsBySubscription(subscriptionId: $subscriptionId) {
+    ...PaymentFields
+  }
+}
+
+# ============ MUTATIONS ============
+
+mutation CreateSubscription($input: CreateSubscriptionInput!) {
+  createSubscription(input: $input) {
+    ...SubscriptionFields
+  }
+}
+
+mutation ChangePlan($input: ChangePlanInput!) {
+  changePlan(input: $input) {
+    ...SubscriptionFields
+  }
+}
+
+mutation CancelSubscription($subscriptionId: ID!) {
+  cancelSubscription(subscriptionId: $subscriptionId) {
+    ...SubscriptionFields
+  }
+}
+
+mutation ReactivateSubscription($subscriptionId: ID!) {
+  reactivateSubscription(subscriptionId: $subscriptionId) {
+    ...SubscriptionFields
+  }
+}
+
+mutation InitializePayment($subscriptionId: ID!) {
+  initializePayment(subscriptionId: $subscriptionId) {
+    url
+    paymentId
+  }
+}

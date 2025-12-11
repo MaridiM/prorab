@@ -14,6 +14,9 @@ export class User {
 	@Field({ nullable: true })
 	phone?: string
 
+	@Field({ nullable: true, description: 'URL аватарки пользователя' })
+	avatarUrl?: string
+
 	@Field()
 	emailVerified: boolean
 

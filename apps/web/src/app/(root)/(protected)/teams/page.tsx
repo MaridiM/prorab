@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Users, Plus, ArrowRight, Crown, ArrowLeft, FolderKanban } from 'lucide-react'
 
 import { MyTeamsDocument } from '@/packages/api/graphql'
-import { Button, Skeleton } from '@/packages/components'
+import { Button, Skeleton, UserMenu } from '@/packages/components'
 import { useAuth } from '@/packages/libs/auth'
 
 const fadeIn = {
@@ -132,10 +132,13 @@ export default function TeamsPage() {
 							</div>
 						</div>
 
-						<Button onClick={handleCreateTeam}>
-							<Plus className="w-4 h-4 mr-2" />
-							Создать команду
-						</Button>
+						<div className="flex items-center gap-3">
+							<Button onClick={handleCreateTeam}>
+								<Plus className="w-4 h-4 mr-2" />
+								Создать команду
+							</Button>
+							<UserMenu avatarSize="sm" />
+						</div>
 					</div>
 				</div>
 			</motion.header>

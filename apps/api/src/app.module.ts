@@ -9,6 +9,9 @@ import { UsersModule } from './modules/users/users.module'
 import { TeamsModule } from './modules/teams/teams.module'
 import { ExpensesModule } from './modules/expenses/expenses.module'
 import { PhotoReportsModule } from './modules/photo-reports/photo-reports.module'
+import { PayoutsModule } from './modules/payouts/payouts.module'
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module'
+import { PaymentsModule } from './modules/payments/payments.module'
 import { MailModule } from './core/mail/mail.module'
 import { StorageModule } from './core/storage/storage.module'
 import { AuthGuard } from './shared/guards/auth.guard'
@@ -22,6 +25,9 @@ import { AuthGuard } from './shared/guards/auth.guard'
 		TeamsModule,
 		ExpensesModule,
 		PhotoReportsModule,
+		PayoutsModule,
+		SubscriptionsModule,
+		PaymentsModule,
 		MailModule,
 		StorageModule,
 	],

@@ -1,0 +1,98 @@
+# ==================== FRAGMENTS ====================
+
+fragment ProjectPayoutFields on ProjectPayout {
+  id
+  projectId
+  memberId
+  calculatedAmount
+  actualAmount
+  status
+  paidAt
+  notes
+  createdAt
+  updatedAt
+  member {
+    id
+    userId
+    role
+    salaryType
+    salaryAmount
+    user {
+      id
+      fullName
+      email
+    }
+  }
+}
+
+fragment MemberPayoutDetailFields on MemberPayoutDetail {
+  memberId
+  memberName
+  salaryType
+  salaryAmount
+  calculatedPayout
+  status
+}
+
+fragment PayoutSummaryFields on PayoutSummary {
+  projectId
+  projectName
+  budget
+  totalExpenses
+  netProfit
+  totalPayouts
+  ownerProfit
+  members {
+    ...MemberPayoutDetailFields
+  }
+}
+
+# ==================== QUERIES ====================
+
+query PayoutSummary($projectId: ID!) {
+  payoutSummary(projectId: $projectId) {
+    ...PayoutSummaryFields
+  }
+}
+
+query ProjectPayouts($projectId: ID!) {
+  projectPayouts(projectId: $projectId) {
+    ...ProjectPayoutFields
+  }
+}
+
+query MemberPayouts($memberId: ID!) {
+  memberPayouts(memberId: $memberId) {
+    ...ProjectPayoutFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation UpdateMemberSalary($input: UpdateMemberSalaryInput!) {
+  updateMemberSalary(input: $input) {
+    id
+    salaryType
+    salaryAmount
+    user {
+      id
+      fullName
+      email
+    }
+  }
+}
+
+mutation CreatePayout($input: CreatePayoutInput!) {
+  createPayout(input: $input) {
+    ...ProjectPayoutFields
+  }
+}
+
+mutation CloseProject($projectId: ID!) {
+  closeProject(projectId: $projectId) {
+    id
+    status
+    closedAt
+    finalProfit
+  }
+}

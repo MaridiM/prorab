@@ -9,7 +9,6 @@ import {
 	Plus,
 	Search,
 	ChevronDown,
-	LogOut,
 	MapPin,
 	TrendingUp,
 	TrendingDown,
@@ -29,7 +28,6 @@ import {
 	ImageIcon,
 	MoreHorizontal,
 	Eye,
-	Settings,
 	AlertCircle,
 	CheckCircle2,
 } from 'lucide-react'
@@ -42,7 +40,7 @@ import {
 	ProjectPhotoReportsDocument,
 } from '@/packages/api/graphql'
 import { useAuth } from '@/packages/libs/auth'
-import { Button, Skeleton, Badge, ProgressBar } from '@/packages/components'
+import { Button, Skeleton, Badge, ProgressBar, UserMenu } from '@/packages/components'
 import { ProjectStatus } from '@/packages/schemas'
 import { useToast } from '@/packages/hooks'
 import { cn } from '@/packages/utils'
@@ -957,7 +955,7 @@ function ActivityLoader({
 // ============ Main Dashboard Component ============
 export default function DashboardPage() {
 	const router = useRouter()
-	const { user, logout } = useAuth()
+	const { user } = useAuth()
 	const { error: showError } = useToast()
 
 	// State
@@ -1157,15 +1155,6 @@ export default function DashboardPage() {
 			router.push(`/teams/${currentTeamId}/projects/new`)
 		} else {
 			showError('Сначала выберите команду')
-		}
-	}
-
-	const handleLogout = async () => {
-		try {
-			await logout()
-			router.push('/auth/login')
-		} catch {
-			showError('Ошибка при выходе')
 		}
 	}
 
@@ -1385,7 +1374,7 @@ export default function DashboardPage() {
 						</div>
 
 						{/* Actions */}
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-3">
 							<Button
 								variant="ghost"
 								onClick={() => router.push('/teams')}
@@ -1394,9 +1383,7 @@ export default function DashboardPage() {
 								<Users className="w-5 h-5" />
 								<span>Мои команды</span>
 							</Button>
-							<Button variant="ghost" size="icon" onClick={handleLogout}>
-								<LogOut className="w-5 h-5" />
-							</Button>
+							<UserMenu avatarSize="sm" />
 						</div>
 					</div>
 				</div>

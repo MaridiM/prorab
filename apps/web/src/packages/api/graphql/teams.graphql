@@ -18,6 +18,38 @@ query MyTeams {
   }
 }
 
+query Team($id: ID!) {
+  team(id: $id) {
+    id
+    name
+    logoType
+    logoUrl
+    iconId
+    colorId
+    ownerId
+    createdAt
+    updatedAt
+  }
+}
+
+query TeamMembers($teamId: ID!) {
+  teamMembers(teamId: $teamId) {
+    id
+    teamId
+    userId
+    role
+    salaryType
+    salaryAmount
+    joinedAt
+    user {
+      id
+      email
+      fullName
+      phone
+    }
+  }
+}
+
 # ==================== MUTATIONS ====================
 
 mutation CompleteOnboarding(
@@ -47,11 +79,18 @@ mutation CompleteOnboarding(
   }
 }
 
-# TODO: Implement these mutations on backend
-# mutation UpdateTeamLogo
-# mutation CreateInviteCode
-# mutation JoinTeamByInvite
-# mutation CreateTeam
-# mutation UpdateTeam
-# mutation CreateProject
-# mutation UpdateProject
+mutation UpdateTeam($input: UpdateTeamInput!) {
+  updateTeam(input: $input) {
+    id
+    name
+    logoType
+    logoUrl
+    iconId
+    colorId
+    updatedAt
+  }
+}
+
+mutation RemoveTeamMember($teamId: ID!, $memberId: ID!) {
+  removeTeamMember(teamId: $teamId, memberId: $memberId)
+}

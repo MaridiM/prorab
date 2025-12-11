@@ -55,12 +55,15 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
   Team: 'Team',
+  ProjectPayout: 'ProjectPayout',
   TeamMember: 'TeamMember',
   InviteCode: 'InviteCode',
   Project: 'Project',
   Expense: 'Expense',
   PhotoReport: 'PhotoReport',
-  ReportPhoto: 'ReportPhoto'
+  ReportPhoto: 'ReportPhoto',
+  Subscription: 'Subscription',
+  Payment: 'Payment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -128,6 +131,7 @@ export const TeamScalarFieldEnum = {
   iconId: 'iconId',
   colorId: 'colorId',
   ownerId: 'ownerId',
+  storageUsedBytes: 'storageUsedBytes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -135,12 +139,30 @@ export const TeamScalarFieldEnum = {
 export type TeamScalarFieldEnum = (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum]
 
 
+export const ProjectPayoutScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  memberId: 'memberId',
+  calculatedAmount: 'calculatedAmount',
+  actualAmount: 'actualAmount',
+  status: 'status',
+  paidAt: 'paidAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProjectPayoutScalarFieldEnum = (typeof ProjectPayoutScalarFieldEnum)[keyof typeof ProjectPayoutScalarFieldEnum]
+
+
 export const TeamMemberScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
   userId: 'userId',
   role: 'role',
-  joinedAt: 'joinedAt'
+  joinedAt: 'joinedAt',
+  salaryType: 'salaryType',
+  salaryAmount: 'salaryAmount'
 } as const
 
 export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
@@ -175,6 +197,8 @@ export const ProjectScalarFieldEnum = {
   status: 'status',
   archivedAt: 'archivedAt',
   completedAt: 'completedAt',
+  closedAt: 'closedAt',
+  finalProfit: 'finalProfit',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -231,6 +255,46 @@ export const ReportPhotoScalarFieldEnum = {
 } as const
 
 export type ReportPhotoScalarFieldEnum = (typeof ReportPhotoScalarFieldEnum)[keyof typeof ReportPhotoScalarFieldEnum]
+
+
+export const SubscriptionScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  plan: 'plan',
+  status: 'status',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  trialEndsAt: 'trialEndsAt',
+  yookassaSubscriptionId: 'yookassaSubscriptionId',
+  paymentMethodId: 'paymentMethodId',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  cancelledAt: 'cancelledAt',
+  isEarlyBird: 'isEarlyBird',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  teamId: 'teamId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  yookassaPaymentId: 'yookassaPaymentId',
+  paymentMethod: 'paymentMethod',
+  description: 'description',
+  failureReason: 'failureReason',
+  paidAt: 'paidAt',
+  refundedAt: 'refundedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
 export const SortOrder = {

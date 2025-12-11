@@ -33,7 +33,13 @@
       "Bash(cat:*)",
       "Bash(dir /b /ad \"G:\\Projects\\prorab\\v-1\\apps\\web\\src\\app\\components\")",
       "Bash(cmd /c \"dir /b /ad G:\\Projects\\prorab\\v-1\\apps\\web\\src\\packages\\components\")",
-      "Bash(pnpm add:concurrently:*)"
+      "Bash(pnpm add:concurrently:*)",
+      "Bash(timeout 15 bash:*)",
+      "Bash(wc:*)",
+      "Bash(npm run start:dev:api:*)",
+      "Bash(timeout 5 bash:*)",
+      "Bash(git -C \"g:\\Projects\\prorab\\v-1\" status --short)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
