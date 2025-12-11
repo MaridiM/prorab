@@ -153,6 +153,11 @@ model ProjectPayout {
   status           String    @default("pending") // "pending", "paid"
   paidAt           DateTime? @map("paid_at")
   notes            String?   @db.Text
+
+  // Payment method fields
+  paymentMethod    String?   @default("cash") @map("payment_method") // "cash", "card", "transfer", "sbp"
+  receiptUrl       String?   @map("receipt_url")
+
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 

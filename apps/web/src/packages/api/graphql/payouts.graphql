@@ -9,8 +9,14 @@ fragment ProjectPayoutFields on ProjectPayout {
   status
   paidAt
   notes
+  paymentMethod
+  receiptUrl
   createdAt
   updatedAt
+  project {
+    id
+    name
+  }
   member {
     id
     userId
@@ -94,5 +100,11 @@ mutation CloseProject($projectId: ID!) {
     status
     closedAt
     finalProfit
+  }
+}
+
+mutation UpdatePayoutPayment($input: UpdatePayoutPaymentInput!) {
+  updatePayoutPayment(input: $input) {
+    ...ProjectPayoutFields
   }
 }

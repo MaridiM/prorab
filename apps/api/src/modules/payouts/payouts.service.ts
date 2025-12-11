@@ -419,4 +419,59 @@ export class PayoutsService extends CoreService {
 
     return project.team;
   }
+
+  /**
+   * Обновление метода оплаты и чека для выплаты
+   */
+  async updatePayoutPayment(
+    payoutId: string,
+    paymentMethod: string,
+    receiptUrl: string | undefined,
+    userId: string,
+  ): Promise<ProjectPayout> {
+    // 1. Получаем выплату с проверкой доступа
+    const payout = await this.prisma.projectPayout.findUnique({
+      where: { id: payoutId },
+      include: {
+        project: {
+          include: {
+            team: true,
+          },
+        },
+        member: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!payout) {
+      throw new NotFoundException('Выплата не найдена');
+    }
+
+    // 2. Проверяем что пользователь - владелец команды
+    if (payout.project.team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец команды может обновлять данные о выплате');
+    }
+
+    // 3. Обновляем метод оплаты и чек
+    const updatedPayout = await this.prisma.projectPayout.update({
+      where: { id: payoutId },
+      data: {
+        paymentMethod,
+        receiptUrl,
+      },
+      include: {
+        project: true,
+        member: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    return updatedPayout as any;
+  }
 }

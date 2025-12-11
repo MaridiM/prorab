@@ -7,6 +7,7 @@ import { ProjectPayout } from './models/project-payout.model';
 import { PayoutSummary } from './models/payout-summary.model';
 import { UpdateMemberSalaryInput } from './dto/update-member-salary.input';
 import { CreatePayoutInput } from './dto/create-payout.input';
+import { UpdatePayoutPaymentInput } from './dto/update-payout-payment.input';
 import { TeamMember } from '../teams/models/team-member.model';
 import { Project } from '../teams/models/project.model';
 
@@ -82,5 +83,21 @@ export class PayoutsResolver {
     @CurrentUser() user: any
   ): Promise<Project> {
     return this.payoutsService.closeProject(projectId, user.id);
+  }
+
+  @Mutation(() => ProjectPayout, {
+    description: 'Update payment method and receipt for payout (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async updatePayoutPayment(
+    @Args('input') input: UpdatePayoutPaymentInput,
+    @CurrentUser() user: any
+  ): Promise<ProjectPayout> {
+    return this.payoutsService.updatePayoutPayment(
+      input.payoutId,
+      input.paymentMethod,
+      input.receiptUrl,
+      user.id,
+    );
   }
 }

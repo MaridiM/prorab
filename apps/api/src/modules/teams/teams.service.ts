@@ -345,7 +345,7 @@ export class TeamsService extends CoreService {
       throw new ForbiddenException('Вы не являетесь участником этой команды');
     }
 
-    return this.prisma.teamMember.findMany({
+    const members = await this.prisma.teamMember.findMany({
       where: { teamId },
       include: {
         user: true,
@@ -354,6 +354,80 @@ export class TeamsService extends CoreService {
         joinedAt: 'asc',
       },
     });
+
+    // Добавляем статистику для каждого участника
+    const membersWithStats = await Promise.all(
+      members.map(async (member) => {
+        const stats = await this.getMemberStats(member.id);
+        return {
+          ...member,
+          stats,
+        };
+      })
+    );
+
+    return membersWithStats;
+  }
+
+  /**
+   * Получение статистики участника команды
+   */
+  private async getMemberStats(memberId: string): Promise<any> {
+    // Получаем все проекты команды, в которых участвует member
+    const teamMember = await this.prisma.teamMember.findUnique({
+      where: { id: memberId },
+      include: {
+        team: {
+          include: {
+            projects: {
+              select: { id: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!teamMember) {
+      return {
+        projectCount: 0,
+        totalPayouts: 0,
+        averagePayoutPerProject: 0,
+        completedPayoutsCount: 0,
+        pendingPayoutsCount: 0,
+      };
+    }
+
+    const projectCount = teamMember.team.projects.length;
+
+    // Получаем все выплаты участника
+    const payouts = await this.prisma.projectPayout.findMany({
+      where: {
+        memberId: memberId,
+      },
+    });
+
+    const totalPayouts = payouts.reduce(
+      (sum, payout) => sum + Number(payout.actualAmount),
+      0
+    );
+
+    const completedPayoutsCount = payouts.filter(
+      (p) => p.status === 'paid'
+    ).length;
+    const pendingPayoutsCount = payouts.filter(
+      (p) => p.status === 'pending'
+    ).length;
+
+    const averagePayoutPerProject =
+      completedPayoutsCount > 0 ? totalPayouts / completedPayoutsCount : 0;
+
+    return {
+      projectCount,
+      totalPayouts,
+      averagePayoutPerProject,
+      completedPayoutsCount,
+      pendingPayoutsCount,
+    };
   }
 
   /**
@@ -395,5 +469,186 @@ export class TeamsService extends CoreService {
     this.logger.log(`Removed member ${memberId} from team ${teamId}`);
 
     return true;
+  }
+
+  /**
+   * Создание ссылки-приглашения в команду
+   */
+  async createInviteLink(userId: string, teamId: string, expiresInDays: number = 7): Promise<any> {
+    // 1. Проверяем что команда существует и пользователь - владелец
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может создавать ссылки-приглашения');
+    }
+
+    // 2. Генерируем уникальный код (8 символов, A-Z, 0-9)
+    const code = this.generateInviteCode();
+
+    // 3. Вычисляем дату истечения
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    // 4. Создаём запись в БД
+    const inviteCode = await this.prisma.inviteCode.create({
+      data: {
+        teamId,
+        code,
+        expiresAt,
+      },
+      include: {
+        team: true,
+      },
+    });
+
+    this.logger.log(`Created invite code ${code} for team ${teamId}, expires ${expiresAt.toISOString()}`);
+
+    return inviteCode;
+  }
+
+  /**
+   * Присоединение к команде по коду приглашения
+   */
+  async joinTeamByInvite(userId: string, code: string): Promise<any> {
+    // 1. Находим код приглашения
+    const inviteCode = await this.prisma.inviteCode.findUnique({
+      where: { code },
+      include: {
+        team: true,
+      },
+    });
+
+    if (!inviteCode) {
+      throw new BadRequestException('Код приглашения не найден');
+    }
+
+    // 2. Проверяем что код не использован
+    if (inviteCode.usedBy) {
+      throw new BadRequestException('Этот код приглашения уже был использован');
+    }
+
+    // 3. Проверяем что код не истёк
+    const now = new Date();
+    if (inviteCode.expiresAt < now) {
+      throw new BadRequestException('Срок действия кода приглашения истёк');
+    }
+
+    // 4. Проверяем что пользователь ещё не состоит в команде
+    const existingMembership = await this.prisma.teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId: inviteCode.teamId,
+          userId,
+        },
+      },
+    });
+
+    if (existingMembership) {
+      throw new BadRequestException('Вы уже состоите в этой команде');
+    }
+
+    // 5. Добавляем пользователя в команду и отмечаем код как использованный
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Создаём участника команды
+      const teamMember = await tx.teamMember.create({
+        data: {
+          teamId: inviteCode.teamId,
+          userId,
+          role: 'member',
+        },
+        include: {
+          team: true,
+          user: true,
+        },
+      });
+
+      // Отмечаем код как использованный
+      await tx.inviteCode.update({
+        where: { id: inviteCode.id },
+        data: {
+          usedBy: userId,
+          usedAt: new Date(),
+        },
+      });
+
+      return teamMember;
+    });
+
+    this.logger.log(`User ${userId} joined team ${inviteCode.teamId} via invite code ${code}`);
+
+    return result;
+  }
+
+  /**
+   * Получение активных кодов приглашения команды
+   */
+  async getTeamInvites(teamId: string, userId: string): Promise<any[]> {
+    // Проверяем что пользователь - владелец команды
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может просматривать коды приглашения');
+    }
+
+    // Получаем все коды (включая использованные и истёкшие для истории)
+    return this.prisma.inviteCode.findMany({
+      where: { teamId },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Удаление (деактивация) кода приглашения
+   */
+  async deleteInviteCode(userId: string, codeId: string): Promise<boolean> {
+    // 1. Находим код
+    const inviteCode = await this.prisma.inviteCode.findUnique({
+      where: { id: codeId },
+      include: { team: true },
+    });
+
+    if (!inviteCode) {
+      throw new BadRequestException('Код приглашения не найден');
+    }
+
+    // 2. Проверяем что пользователь - владелец команды
+    if (inviteCode.team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может удалять коды приглашения');
+    }
+
+    // 3. Удаляем код
+    await this.prisma.inviteCode.delete({
+      where: { id: codeId },
+    });
+
+    this.logger.log(`Deleted invite code ${codeId}`);
+
+    return true;
+  }
+
+  /**
+   * Генерация уникального кода приглашения (8 символов, A-Z, 0-9)
+   */
+  private generateInviteCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Убраны похожие символы: I, O, 1, 0
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   }
 }

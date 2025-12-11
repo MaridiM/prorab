@@ -46,6 +46,14 @@ query TeamMembers($teamId: ID!) {
       email
       fullName
       phone
+      avatarUrl
+    }
+    stats {
+      projectCount
+      totalPayouts
+      averagePayoutPerProject
+      completedPayoutsCount
+      pendingPayoutsCount
     }
   }
 }
@@ -93,4 +101,54 @@ mutation UpdateTeam($input: UpdateTeamInput!) {
 
 mutation RemoveTeamMember($teamId: ID!, $memberId: ID!) {
   removeTeamMember(teamId: $teamId, memberId: $memberId)
+}
+
+mutation CreateInviteLink($teamId: ID!, $expiresInDays: Int) {
+  createInviteLink(teamId: $teamId, expiresInDays: $expiresInDays) {
+    id
+    teamId
+    code
+    expiresAt
+    usedBy
+    usedAt
+    createdAt
+    isActive
+    inviteUrl
+  }
+}
+
+mutation JoinTeamByInvite($code: String!) {
+  joinTeamByInvite(code: $code) {
+    id
+    teamId
+    userId
+    role
+    joinedAt
+    team {
+      id
+      name
+      logoType
+      logoUrl
+      iconId
+      colorId
+    }
+  }
+}
+
+query TeamInvites($teamId: ID!) {
+  teamInvites(teamId: $teamId) {
+    id
+    teamId
+    code
+    expiresAt
+    usedBy
+    usedAt
+    createdAt
+    isActive
+    inviteUrl
+  }
+}
+
+mutation DeleteInviteCode($codeId: ID!) {
+  deleteInviteCode(codeId: $codeId)
 }

@@ -1,6 +1,7 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import { Project } from '../../teams/models/project.model';
 import { TeamMember } from '../../teams/models/team-member.model';
+import { PaymentMethod } from '../enums/payment-method.enum';
 
 @ObjectType()
 export class ProjectPayout {
@@ -27,6 +28,12 @@ export class ProjectPayout {
 
   @Field({ nullable: true, description: 'Notes about the payout' })
   notes?: string;
+
+  @Field(() => PaymentMethod, { nullable: true, description: 'Payment method used for this payout' })
+  paymentMethod?: PaymentMethod;
+
+  @Field({ nullable: true, description: 'URL to receipt/proof of payment' })
+  receiptUrl?: string;
 
   @Field()
   createdAt: Date;

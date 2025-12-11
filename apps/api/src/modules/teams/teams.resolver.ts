@@ -1,11 +1,14 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
 import { UpdateTeamInput } from './dto/update-team.input';
+import { CreateInviteLinkInput } from './dto/create-invite-link.input';
+import { JoinTeamByInviteInput } from './dto/join-team-by-invite.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { Team } from './models/team.model';
 import { TeamMember } from './models/team-member.model';
+import { InviteCode } from './models/invite-code.model';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 
@@ -39,6 +42,9 @@ export class TeamsResolver {
   })
   @UseGuards(AuthGuard)
   async myTeams(@CurrentUser() user: { id: string }): Promise<Team[]> {
+    if (!user?.id) {
+      throw new UnauthorizedException('User not authenticated');
+    }
     return this.teamsService.getMyTeams(user.id);
   }
 
@@ -97,5 +103,62 @@ export class TeamsResolver {
     @CurrentUser() user: { id: string },
   ): Promise<boolean> {
     return this.teamsService.removeTeamMember(teamId, memberId, user.id);
+  }
+
+  /**
+   * Мутация: создание ссылки-приглашения в команду
+   */
+  @Mutation(() => InviteCode, {
+    description: 'Создание ссылки-приглашения в команду (только для владельца)',
+  })
+  @UseGuards(AuthGuard)
+  async createInviteLink(
+    @Args('teamId', { type: () => ID }) teamId: string,
+    @Args('expiresInDays', { type: () => Int, nullable: true, defaultValue: 7 }) expiresInDays: number,
+    @CurrentUser() user: { id: string },
+  ): Promise<InviteCode> {
+    return this.teamsService.createInviteLink(user.id, teamId, expiresInDays);
+  }
+
+  /**
+   * Мутация: присоединение к команде по коду приглашения
+   */
+  @Mutation(() => TeamMember, {
+    description: 'Присоединение к команде по коду приглашения',
+  })
+  @UseGuards(AuthGuard)
+  async joinTeamByInvite(
+    @Args('code') code: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<TeamMember> {
+    return this.teamsService.joinTeamByInvite(user.id, code);
+  }
+
+  /**
+   * Query: получение кодов приглашения команды
+   */
+  @Query(() => [InviteCode], {
+    description: 'Получение кодов приглашения команды (только для владельца)',
+  })
+  @UseGuards(AuthGuard)
+  async teamInvites(
+    @Args('teamId', { type: () => ID }) teamId: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<InviteCode[]> {
+    return this.teamsService.getTeamInvites(teamId, user.id);
+  }
+
+  /**
+   * Мутация: удаление кода приглашения
+   */
+  @Mutation(() => Boolean, {
+    description: 'Удаление кода приглашения (только для владельца)',
+  })
+  @UseGuards(AuthGuard)
+  async deleteInviteCode(
+    @Args('codeId', { type: () => ID }) codeId: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<boolean> {
+    return this.teamsService.deleteInviteCode(user.id, codeId);
   }
 }

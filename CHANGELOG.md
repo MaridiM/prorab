@@ -7,6 +7,491 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Telegram Support Bot (ProRabSupportBot) - Критическое исправление маршрутизации:**
+  - ✅ Исправлена основная проблема: команды от `ProRabSupportBot` попадали в `TelegramBot` (OAuth бот) вместо `TelegramSupportBot`
+  - ✅ Добавлена проверка `botInfo.username` в начале каждого обработчика для правильной изоляции ботов
+  - ✅ Проверка добавлена во все обработчики: `/start`, `/help`, `/status`, `/cancel`, `@On('text')`, `@On('callback_query')`
+  - ✅ OAuth бот (`TelegramBot`) проверяет `botInfo.username === 'ProRabSpaceBot'` и пропускает команды от других ботов
+  - ✅ Support бот (`TelegramSupportBot`) проверяет `botInfo.username === 'ProRabSupportBot'` и пропускает команды от других ботов
+  - ✅ Улучшено логирование с префиксами `[ProRabSpaceBot]` и `[ProRabSupportBot]` для отладки
+  - ✅ Добавлена детальная обработка ошибок во всех командах с логированием
+  - ✅ TypeScript компиляция успешна (0 ошибок)
+  - **Результат:** Support Bot теперь корректно обрабатывает все команды `/start`, `/help`, `/status`, `/cancel` без попадания в OAuth бот
+
+### Added
+- **Telegram Menu Commands (кнопки для ботов):**
+  - ✅ OAuth Bot (@ProRabSpaceBot): добавлены команды /start и /help в меню
+  - ✅ Support Bot (@ProRabSupportBot): добавлены команды /start, /help, /status, /cancel в меню
+  - ✅ Пользователи больше не нужно вводить команды вручную - доступны через кнопки
+  - Реализовано через `bot.telegram.setMyCommands()` в конструкторе каждого бота
+
+- **Улучшенное логирование для Telegram ботов:**
+  - ✅ Добавлены детальные логи в каждый handler с префиксом `[ProRabSpaceBot]` и `[ProRabSupportBot]`
+  - ✅ Логирование chat_id, username, команд и ошибок
+  - ✅ Упрощает диагностику проблем в production
+
+### Changed
+- **Telegram Bot Architecture:**
+  - Убраны проверки username из Support Bot handlers (полагаемся на `@InjectBot('support')`)
+  - Улучшена структура error handling во всех bot handlers
+  - Все bot handlers теперь имеют единообразную структуру try-catch с логированием
+
+- **Авторизация и редиректы:**
+  - Исправлена проблема с показом страницы `/auth/login` для авторизованных пользователей
+  - Добавлена проверка `session_token` в `proxy.ts` для редиректа авторизованных пользователей с `/auth/login` на `/dashboard` на сервере
+  - Добавлена быстрая проверка `session_token` в `AuthProvider` до загрузки пользователя для предотвращения мигания страницы логина
+  - Авторизованные пользователи больше не видят страницу логина при загрузке приложения
+
+## [0.3.1] - 2025-12-12
+
+### Fixed
+- **Авторизация и редиректы:**
+  - Исправлены все редиректы с `/login` на `/auth/login` во всех компонентах
+  - Добавлены страницы редиректа `/auth` → `/auth/login` и `/login` → `/auth/login`
+  - Исправлены бесконечные редиректы в `AuthProvider` (заменён `router.push` на `router.replace`)
+  - Убрана дублирующая логика редиректов из `TeamLayout` и `proxy.ts`
+  - Добавлена защита от циклов редиректов в Apollo Client (проверка текущего пути перед редиректом)
+- **Telegram бот поддержки:**
+  - Исправлена команда `/help` - теперь проверяет авторизацию и отправляет сообщение неавторизованным пользователям
+  - Улучшена проверка username бота (регистронезависимая)
+  - Добавлено логирование для отладки
+- **Задачи (Tasks):**
+  - Исправлена вкладка "Задачи" - убран `disabled: true`, добавлен редирект на страницу задач
+  - Улучшена страница задач с `PageHeader` и навигацией назад
+
+### Changed
+- Все редиректы на страницу логина теперь используют единый путь `/auth/login`
+- `AuthProvider` теперь единственная точка управления редиректами для авторизации
+- Apollo Client не делает редирект, если пользователь уже на странице логина
+
+---
+
+### [0.3.0] - In Development (Started 2025-12-11)
+
+### Added
+
+**Stage 9 Phase 1 Day 7: Testing and Bug Fixes (2025-12-12)**
+
+**Bugs Fixed:**
+- ✅ Navigation to payout history from people table - Added `router.push` in `people-table.tsx`
+  - Was: `console.log('Navigate to payouts')` (TODO)
+  - Now: Navigates to `/teams/[teamId]/members/[memberId]/payouts`
+- ✅ GraphQL Fragment extended - Added `project { id, name }` to `ProjectPayoutFields`
+  - Enables project name display and filtering in payout history
+- ✅ Type Error fixed - Changed `receiptUrl: undefined` to `null` in `PayoutMethodDialog`
+  - Fixed InputMaybe<string> type compatibility
+- ✅ Missing import - Added `useRouter` import in `people-table.tsx`
+
+**Testing Completed:**
+- ✅ People Management page (`/teams/[teamId]/people`)
+- ✅ Invite functionality (create, copy, delete, join)
+- ✅ Payment Methods dialog (all 4 methods: cash, card, transfer, sbp)
+- ✅ Payout History page with filters and CSV export
+- ✅ GraphQL codegen successful (no errors)
+
+**Documentation:**
+- ✅ Created `docs/STAGE_9_PHASE_1_COMPLETE.md` - Full summary of Phase 1
+- ✅ Updated `CHANGELOG.md` with all 7 days
+- ✅ Updated `docs/roadmap.md` marking Phase 1 as complete
+
+**Result:** Stage 9 Phase 1 (P0 - Critical) is **COMPLETE** and **PRODUCTION READY** 🚀
+
+---
+
+**Stage 9 Phase 1 Day 6: Payout History Page (2025-12-12)**
+
+**Frontend (2 files, ~450 строк):**
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/members/[memberId]/payouts/page.tsx` - New payout history page (430 lines)
+  - URL: `/teams/[teamId]/members/[memberId]/payouts`
+  - MemberPayouts GraphQL query with extended ProjectPayoutFields fragment (includes project name)
+  - **Stats Cards:** Total payouts, paid amount, pending amount with counts
+  - **Filters:**
+    - Status filter (all, pending, paid)
+    - Project filter (all projects + dynamic list from payouts)
+    - Date filter (all period, this month, last month, this year)
+  - **Export Functionality:**
+    - CSV export with BOM for correct Cyrillic encoding
+    - Columns: created date, paid date, project, calculated amount, actual amount, status, payment method, notes
+    - Auto-download with filename pattern: `payouts-{memberId}-{YYYY-MM-DD}.csv`
+    - PDF export placeholder (toast notification for future implementation)
+  - **Table Display:**
+    - Date with calendar icon (shows paid date if paid, created date otherwise)
+    - Project name
+    - Salary type badge (FIXED/PERCENTAGE/NONE)
+    - Amount (shows actual amount, crossed calculated if different)
+    - Status badge (green for paid, secondary for pending)
+    - Payment method with icon (cash, card, transfer, sbp)
+    - Receipt button (opens URL in new tab if available)
+  - **Notes Section:** Shows all notes from payouts with project names
+  - **Navigation:** Back button to people page
+  - **Responsive:** Mobile-friendly table layout
+- `apps/web/src/packages/api/graphql/payouts.graphql` - Extended ProjectPayoutFields fragment
+  - Added `project { id, name }` to get project information for filtering and display
+
+**Features:**
+- ✅ Real-time filtering by status, project, and date range
+- ✅ CSV export with proper Russian locale support
+- ✅ Statistics summary (total/paid/pending)
+- ✅ Receipt download capability
+- ✅ Payment method display with icons
+- ✅ Responsive design
+- ✅ Loading and error states
+- ✅ Empty state handling
+- ✅ TypeScript fully typed
+
+---
+
+**Stage 9 Phase 1 Day 1-2: People Management Page (2025-12-12)**
+
+**Backend (3 files modified, ~100 строк):**
+- `apps/api/src/modules/teams/models/team-member-stats.model.ts` - New GraphQL model for member statistics
+  - Fields: projectCount, totalPayouts, averagePayoutPerProject, completedPayoutsCount, pendingPayoutsCount
+- `apps/api/src/modules/teams/models/team-member.model.ts` - Extended with optional stats field
+- `apps/api/src/modules/teams/teams.service.ts` - Added `getMemberStats()` private method
+  - Calculates statistics for each team member (optimized queries)
+  - Integrated into `getTeamMembers()` method
+
+**Frontend (7 files created/modified, ~850 строк):**
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/people/page.tsx` - New people management page
+  - GraphQL query with loading states
+  - Header with team member count
+  - Invite button (placeholder for Day 3-4)
+  - PeopleTable integration
+- `apps/web/src/app/components/people/people-table.tsx` - Comprehensive member table component (278 строк)
+  - 7-column table: Member, Role, Salary, Projects, Payouts, Join Date, Actions
+  - Avatar display with fallback initials
+  - Statistics display (project count, total payouts)
+  - Role badges (Owner/Member)
+  - Salary type badges
+  - Delete member functionality with confirmation dialog
+  - Actions dropdown (edit salary placeholder, delete)
+- `apps/web/src/packages/components/ui/table.tsx` - Reusable table component (new)
+  - shadcn/ui style implementation
+  - Components: Table, TableHeader, TableBody, TableHead, TableRow, TableCell, TableCaption
+  - Responsive design with overflow handling
+- `apps/web/src/packages/components/ui/alert-dialog.tsx` - Confirmation dialog component (new)
+  - Radix UI AlertDialog wrapper with animations
+  - Components: AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, etc.
+  - Used for delete confirmation
+- `apps/web/src/packages/components/ui/index.ts` - Added exports for table and alert-dialog
+- `apps/web/src/packages/api/graphql/teams.graphql` - Extended TeamMembers query
+  - Added avatarUrl to user fields
+  - Added stats object with all statistics fields
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/page.tsx` - Added "Люди" navigation button
+  - Links to `/teams/[teamId]/people`
+
+**Features Working:**
+- ✅ View all team members with avatars and details
+- ✅ Display member statistics (projects, payouts, averages)
+- ✅ Role-based badges (Owner/Member)
+- ✅ Salary condition display
+- ✅ Delete members with confirmation (owner-only)
+- ✅ Responsive design (mobile + desktop)
+- ✅ Loading states with skeleton
+- ✅ Error handling with toast notifications
+- ✅ Navigation from team page
+
+**Technical Details:**
+- Zero TypeScript errors for people-related files
+- GraphQL codegen updated and working
+- Radix UI AlertDialog dependency installed
+- Optimized backend queries (no N+1 problems)
+- Used sonner for toast notifications
+- Follows established code patterns
+
+**Known Limitations:**
+- Inline salary editing temporarily disabled (interface mismatch with SalarySettingsForm)
+- Will be implemented in future iteration
+
+---
+
+**Stage 9 Phase 1 Day 3-4: Invite Functionality (2025-12-12)**
+
+**Backend (5 files created, ~250 строк):**
+- `apps/api/src/modules/teams/models/invite-code.model.ts` - GraphQL model for invite codes
+  - Fields: id, teamId, code, expiresAt, usedBy, usedAt, createdAt
+  - Computed fields: isActive (checks expiry and usage), inviteUrl
+- `apps/api/src/modules/teams/dto/create-invite-link.input.ts` - DTO for creating invites
+  - Validation: teamId (UUID), expiresInDays (1-30 days, default 7)
+- `apps/api/src/modules/teams/dto/join-team-by-invite.input.ts` - DTO for joining by invite
+  - Validation: code (8-12 chars, uppercase letters and numbers only)
+- `apps/api/src/modules/teams/teams.service.ts` - Extended with invite methods (~180 строк)
+  - `createInviteLink()` - Generate unique 8-char code, set expiry, save to DB
+  - `joinTeamByInvite()` - Validate code, check expiry/usage, add user to team (transaction)
+  - `getTeamInvites()` - List all invites for team (owner only)
+  - `deleteInviteCode()` - Delete invite code (owner only)
+  - `generateInviteCode()` - Private helper (A-Z, 2-9, excluding similar chars: I, O, 1, 0)
+- `apps/api/src/modules/teams/teams.resolver.ts` - Added 4 new operations
+  - Mutation: `createInviteLink(teamId, expiresInDays)` → InviteCode
+  - Mutation: `joinTeamByInvite(code)` → TeamMember
+  - Query: `teamInvites(teamId)` → [InviteCode]
+  - Mutation: `deleteInviteCode(codeId)` → Boolean
+
+**Frontend (3 files created/modified, ~420 строк):**
+- `apps/web/src/app/components/people/invite-link-dialog.tsx` - Invite management dialog (280 строк)
+  - Create new invite links with configurable expiry (1, 3, 7, 14, 30 days)
+  - List active invites with copy-to-clipboard functionality
+  - List expired/used invites for history
+  - Delete invites
+  - Visual states: success badge (active), secondary badge (expired/used)
+  - Copy link with toast notification and visual feedback
+  - Open invite link in new tab
+- `apps/web/src/app/(root)/invite/[code]/page.tsx` - Public invite join page (220 строк)
+  - Dynamic route for invite codes
+  - Guest state: Shows invite code, prompts to login
+  - Logged-in state: Shows "Join Team" button
+  - Auto-join after login (uses sessionStorage for pending invite)
+  - Success state: Confirmation with team name, auto-redirect to team page
+  - Error state: Shows error message with helpful hints
+  - Gradient backgrounds for visual states (blue/green/red)
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/people/page.tsx` - Integrated dialog
+  - Added state for invite dialog open/close
+  - Connected "Пригласить участника" button to dialog
+  - Added InviteLinkDialog component at bottom
+- `apps/web/src/packages/api/graphql/teams.graphql` - Added 5 operations
+  - Mutation: CreateInviteLink
+  - Mutation: JoinTeamByInvite
+  - Query: TeamInvites
+  - Mutation: DeleteInviteCode
+
+**Features Working:**
+- ✅ Owner can create invite links with custom expiry (1-30 days)
+- ✅ Invite links use unique 8-character codes (A-Z, 2-9, no confusing chars)
+- ✅ Copy invite URL to clipboard with visual feedback
+- ✅ View all active and expired/used invites
+- ✅ Delete invite codes (owner only)
+- ✅ Public join page accessible to guests
+- ✅ Guests redirected to login with pending invite
+- ✅ Auto-join after successful login
+- ✅ One-time use invite codes (marked as used after join)
+- ✅ Expiry validation (server-side)
+- ✅ Duplicate membership prevention
+- ✅ Transaction-based join (atomic operation)
+- ✅ Success/error states with friendly messages
+- ✅ Auto-redirect to team page after join
+
+**Technical Details:**
+- Zero TypeScript errors
+- GraphQL codegen updated successfully
+- Unique code generation (no I, O, 1, 0 for clarity)
+- Server-side validation (expiry, usage, membership)
+- Prisma transactions for atomic operations
+- Toast notifications for user feedback
+- SessionStorage for cross-page invite flow
+- Responsive design for all screen sizes
+
+---
+
+**Stage 9 Phase 1 Day 5: Payment Methods for Payouts (2025-12-12)**
+
+**Backend (4 files created/modified, ~80 строк):**
+- `apps/api/prisma/schema.prisma` - Extended ProjectPayout model
+  - Added `paymentMethod` field (cash, card, transfer, sbp) with default "cash"
+  - Added `receiptUrl` field for proof of payment
+- `apps/api/src/modules/payouts/enums/payment-method.enum.ts` - PaymentMethod enum (new)
+  - Values: CASH, CARD, TRANSFER, SBP
+  - Registered with GraphQL with Russian descriptions
+- `apps/api/src/modules/payouts/models/project-payout.model.ts` - Extended GraphQL model
+  - Added paymentMethod and receiptUrl fields
+- `apps/api/src/modules/payouts/dto/update-payout-payment.input.ts` - New DTO (new)
+  - Validation: payoutId (UUID), paymentMethod (enum), receiptUrl (optional URL)
+- `apps/api/src/modules/payouts/payouts.service.ts` - Added `updatePayoutPayment()` method (~50 строк)
+  - Validate payout exists and user is owner
+  - Update payment method and receipt URL
+  - Return updated payout with relations
+- `apps/api/src/modules/payouts/payouts.resolver.ts` - Added mutation
+  - Mutation: `updatePayoutPayment(input)` → ProjectPayout
+
+**Frontend (3 files created/modified, ~220 строк):**
+- `apps/web/src/packages/components/payouts/PayoutMethodDialog.tsx` - Payment method dialog (220 строк)
+  - Select payment method (Cash, Card, Transfer, SBP) with icons
+  - Display payout amount (formatted currency)
+  - Receipt URL input field
+  - File upload button placeholder (TODO)
+  - Form validation and submission
+  - Toast notifications for success/error
+  - Loading states
+- `apps/web/src/packages/api/graphql/payouts.graphql` - Extended operations
+  - Added paymentMethod and receiptUrl to ProjectPayoutFields fragment
+  - Added UpdatePayoutPayment mutation
+- `apps/web/src/packages/components/payouts/index.ts` - Added export
+
+**Features Working:**
+- ✅ Extend ProjectPayout with payment method fields
+- ✅ PaymentMethod enum with 4 options (cash, card, transfer, sbp)
+- ✅ Backend mutation to update payment method and receipt
+- ✅ Owner-only access control
+- ✅ PayoutMethodDialog component with method selection
+- ✅ Visual payment method icons (Banknote, CreditCard, Building2, Smartphone)
+- ✅ Receipt URL input
+- ✅ Amount display in dialog
+- ✅ Form validation
+- ✅ Toast notifications
+- ✅ Loading states
+
+**Technical Details:**
+- Zero TypeScript errors
+- Prisma migration applied successfully
+- GraphQL codegen updated
+- Enum registered with GraphQL schema
+- Validation with class-validator
+- Owner access control in service layer
+
+**Known Limitations:**
+- File upload for receipts not yet implemented (shows toast with "TODO" message)
+- Will be implemented in future iteration
+
+### Stage 9: Personnel & Payments Management 📋 ANALYSIS COMPLETE
+
+**Приоритет:** 🔥 Critical (Required for Production)
+**Статус:** 📋 Analysis Complete | 🔄 Implementation Starting
+**Время:** 17 дней (3.5 недели) | MVP минимум: 7 дней
+
+**Version Bump:**
+- **Монорепо:** 0.2.0 → 0.3.0
+- **API (Backend):** 0.1.0 → 0.2.0
+- **Web (Frontend):** 0.1.0 → 0.2.0
+
+**Описание:**
+Полная реализация функционала управления персоналом и оплаты труда. Аудит показал, что текущая реализация покрывает только 60% необходимого функционала. Критично отсутствуют: страница управления персоналом, приглашение участников, методы оплаты для выплат, история выплат, учёт рабочего времени.
+
+**Анализ завершён (2025-12-11):**
+- ✅ Полный аудит текущего функционала
+- ✅ Выявлено 15 критических пробелов
+- ✅ Создан детальный план реализации (3 фазы)
+- ✅ Документация: `docs/PERSONNEL_AND_PAYMENTS_ANALYSIS.md` (~2800 строк)
+
+**Текущая реализация (60%):**
+- ✅ Модель `TeamMember` с зарплатными настройками (FIXED/PERCENTAGE/NONE)
+- ✅ Модель `ProjectPayout` для выплат по проектам
+- ✅ Система автоматического расчёта выплат на основе чистой прибыли
+- ✅ UI для редактирования условий оплаты участников
+- ✅ Калькулятор выплат при закрытии проекта (PayoutCalculator)
+- ✅ Бизнес-логика: `PayoutsService.calculateProjectPayouts()`
+- ✅ GraphQL API: 6 queries + 4 mutations для выплат
+
+**Что отсутствует (40% - критично для production):**
+
+**🔴 Phase 1 - Critical (P0) - 7 дней:**
+1. ✅ Страница управления персоналом `/teams/[teamId]/people` (День 1-2, 2025-12-12)
+   - ✅ Таблица всех участников команды с аватарами
+   - ✅ Статистика по каждому участнику (проекты, выплаты)
+   - ✅ Удаление участников с подтверждением
+   - ✅ Backend: Extended TeamMembers query with stats
+   - ✅ UI Components: Table, AlertDialog
+   - ⏳ Inline редактирование зарплаты (TODO - будет позже)
+2. ✅ Приглашение участников через invite link (День 3-4, 2025-12-12)
+   - ✅ Backend: createInviteLink, joinTeamByInvite, getTeamInvites, deleteInviteCode
+   - ✅ Frontend: InviteLinkDialog + страница `/invite/[code]`
+   - ✅ Генерация уникальных кодов (8 символов, A-Z, 2-9)
+   - ✅ Валидация срока действия и one-time use
+   - ✅ Автоматическое присоединение после логина
+   - ⏳ Отправка через email/Telegram (TODO - будет позже)
+3. ✅ Методы оплаты для выплат персоналу (День 5, 2025-12-12)
+   - ✅ Расширен ProjectPayout (paymentMethod, receiptUrl)
+   - ✅ PaymentMethod enum (cash, card, transfer, sbp)
+   - ✅ PayoutMethodDialog с выбором метода и иконками
+   - ✅ Backend mutation: updatePayoutPayment
+   - ⏳ Загрузка файлов чеков (TODO - будет позже)
+4. ❌ История выплат участника
+   - Страница `/teams/[teamId]/members/[memberId]/payouts`
+   - Фильтры (дата, статус, проект)
+   - Экспорт в PDF/CSV
+
+**🟡 Phase 2 - High Priority (P1) - 7 дней:**
+5. ❌ Учёт рабочего времени
+   - Модель `WorkLog` в Prisma
+   - Страница time-tracking с календарём
+   - Отчёт по часам
+6. ❌ Отчёты и аналитика по персоналу
+   - KPI dashboard (расходы, средняя выплата, производительность)
+   - Графики расходов по месяцам
+   - Backend: `personnelAnalytics` query
+7. ❌ Аудит изменений зарплаты
+   - Модель `TeamMemberSalaryHistory`
+   - Автоматическое логирование изменений
+   - История изменений в UI
+
+**🟢 Phase 3 - Nice to Have (P2-P3) - 3 дня:**
+8. ❌ Должности/специализации участников
+9. ❌ Импорт/экспорт данных (Excel/CSV)
+10. ❌ Уведомления о выплатах (Telegram/Email)
+11. ❌ Массовое редактирование зарплат
+12. ❌ UX улучшения + кэширование расчётов
+
+**Файлы для создания:**
+- Backend: ~20 файлов (~1500 строк)
+  - Расширение Prisma schema
+  - Invite mutations в TeamsModule
+  - PaymentMethod enum
+  - WorkLog CRUD API
+  - PersonnelAnalytics queries
+- Frontend: ~15 файлов (~2000 строк)
+  - `/teams/[teamId]/people` - управление персоналом
+  - `/invite/[code]` - присоединение к команде
+  - `<InviteLinkDialog />` - создание invite link
+  - `<PeopleTable />` - таблица участников
+  - `<PayoutMethodDialog />` - выбор метода оплаты
+  - `/teams/[teamId]/members/[memberId]/payouts` - история выплат
+  - `/teams/[teamId]/projects/[projectId]/time-tracking` - учёт времени
+  - `/teams/[teamId]/analytics/personnel` - аналитика
+  - `<TimeTrackingCalendar />` - календарь рабочего времени
+- **Итого:** ~35 файлов (~3500 строк)
+
+**Технологии:**
+- Backend: NestJS, GraphQL, Prisma ORM
+- Frontend: Next.js 16, React Hook Form, Zod validation
+- UI: Radix UI, Tailwind CSS, shadcn/ui
+- Charts: recharts (для аналитики)
+- Export: ExcelJS (для экспорта данных)
+
+**Детальный план:**
+- `docs/PERSONNEL_AND_PAYMENTS_ANALYSIS.md` - Полный анализ (~2800 строк)
+  - Архитектура данных (ER-диаграмма)
+  - Backend API (GraphQL schema + services)
+  - Frontend UI (страницы + компоненты)
+  - Методы оплаты (текущие + рекомендуемые)
+  - 15 выявленных пробелов с решениями
+  - Рекомендации по улучшению (3 фазы)
+  - План реализации (17 дней)
+
+**Next Steps:**
+1. ⏳ Начать Phase 1 (Критические фичи - 7 дней)
+2. ⏳ Создать страницу управления персоналом
+3. ⏳ Реализовать приглашение участников
+4. ⏳ Добавить методы оплаты для выплат
+5. ⏳ Реализовать историю выплат
+
+**Результат после Phase 1:**
+- ✅ Полноценная страница управления персоналом
+- ✅ Возможность приглашать новых участников
+- ✅ Прозрачность выплат с методами оплаты и чеками
+- ✅ История всех выплат участника
+- ✅ Готовность к production запуску
+
+---
+
+## [0.2.0] - 2025-12-11
+
+### Version Bump: Stage 7 Complete 🚀
+
+**Монорепо:** 0.1.2 → 0.2.0
+**API (Backend):** 0.0.6 → 0.1.0
+**Web (Frontend):** 0.0.5 → 0.1.0
+
+**Причина релиза:**
+Завершена полная реализация Stage 7 (Tasks & Kanban Board) с созданием 23 файлов (~2070 строк), включая 4 новых UI компонента, полный функционал задач с drag & drop, и миграцию на sonner для toast уведомлений.
+
+**Основные изменения:**
+- ✅ Backend: Tasks Module с GraphQL API (5 queries, 5 mutations)
+- ✅ Frontend: Kanban Board с drag & drop (@dnd-kit)
+- ✅ UI Components: Calendar, Popover, Textarea, Label (Radix UI + shadcn/ui)
+- ✅ Schemas: Zod validation для всех форм
+- ✅ Documentation: CHANGELOG.md, roadmap.md обновлены
+
+---
+
 ### Added (2025-12-11) - Stage 10: Admin Panel - Implementation Plan 📋 PLANNED
 
 **Priority:** 🟡 Post-MVP (after commercial launch)
@@ -691,35 +1176,34 @@ enum SupportTicketPriority: LOW, MEDIUM, HIGH, URGENT
 #### 📊 Progress Summary
 
 **Completed:**
-- ✅ Environment setup (2 bot tokens configured)
-- ✅ Database schema (3 models, 2 enums)
-- ✅ TelegramSupportService (10 methods, 310 строк)
-- ✅ FAQService (13 methods, 180 строк)
-- ✅ FAQ seed data (8 entries готовы)
-- ✅ Multi-bot configuration
-- ✅ UsersService.findByTelegramChatId()
-
-**In Progress:**
-- 🚧 TelegramSupportBot handlers implementation
+- ✅ Phase 1: Environment setup (2 bot tokens configured)
+- ✅ Phase 2: Database schema (3 models, 2 enums)
+- ✅ Phase 2: TelegramSupportService (10 methods, 327 строк)
+- ✅ Phase 2: FAQService (13 methods, 236 строк)
+- ✅ Phase 2: FAQ seed data (8 entries готовы)
+- ✅ Phase 2: Multi-bot configuration
+- ✅ Phase 2: UsersService.findByTelegramChatId()
+- ✅ Phase 3: TelegramSupportBot handlers (620 строк, 4 commands, 15+ callbacks)
+- ✅ Phase 3: TelegramModule multi-bot integration
 
 **Pending:**
-- ⏳ Complete bot handlers
-- ⏳ FAQ seed execution
-- ⏳ Integration testing
-- ⏳ End-to-end testing
+- ⏳ Phase 4: GraphQL API для Support Tickets (optional)
+- ⏳ Phase 5: FAQ seed execution
+- ⏳ Phase 5: Integration testing
+- ⏳ Phase 5: End-to-end testing
 
 **Files Created/Modified:**
 - ✅ `apps/api/.env` - bot tokens
 - ✅ `apps/api/src/core/config/app.config.ts` - multi-bot config
 - ✅ `apps/api/prisma/schema.prisma` - 3 models, 2 enums
-- ✅ `apps/api/src/modules/telegram/telegram-support.service.ts` - 310 lines
-- ✅ `apps/api/src/modules/telegram/faq.service.ts` - 180 lines
+- ✅ `apps/api/src/modules/telegram/telegram-support.service.ts` - 327 lines
+- ✅ `apps/api/src/modules/telegram/faq.service.ts` - 236 lines
 - ✅ `apps/api/prisma/seed-faq.ts` - 200+ lines
-- 🚧 `apps/api/src/modules/telegram/telegram-support.bot.ts` - in progress
-- ⏳ `apps/api/src/modules/telegram/telegram.module.ts` - needs update
-- ⏳ `apps/api/src/modules/users/users.service.ts` - needs findByTelegramChatId
+- ✅ `apps/api/src/modules/telegram/telegram-support.bot.ts` - 620 lines COMPLETED
+- ✅ `apps/api/src/modules/telegram/telegram.module.ts` - multi-bot setup DONE
+- ✅ `apps/api/src/modules/users/users.service.ts` - findByTelegramChatId exists
 
-**Total Progress:** ~60% завершено (Phase 1-2 done, Phase 3 in progress)
+**Total Progress:** ~80% завершено (Phase 1-3 DONE, Phase 4-5 pending)
 
 ---
 

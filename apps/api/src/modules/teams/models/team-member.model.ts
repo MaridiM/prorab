@@ -1,6 +1,7 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import { Team } from './team.model';
 import { User } from '../../users/models/user.model';
+import { TeamMemberStats } from './team-member-stats.model';
 
 /**
  * GraphQL модель участника команды
@@ -35,4 +36,8 @@ export class TeamMember {
 
   @Field(() => User, { nullable: true, description: 'Пользователь' })
   user?: User;
+
+  // Stats
+  @Field(() => TeamMemberStats, { nullable: true, description: 'Статистика участника' })
+  stats?: TeamMemberStats;
 }
