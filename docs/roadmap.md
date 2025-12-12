@@ -2301,12 +2301,12 @@ model User {
 
 ## Stage 11: Settings Page - Complete Implementation
 
-**Статус:** 📋 Planned | 75% Complete → 100% Target
+**Статус:** 🔄 In Progress | 78% Complete → 100% Target
 **Приоритет:** P1 - High (Important for MVP)
-**Оценка времени:** 5-7 дней
+**Оценка времени:** 5-7 дней (2 дня осталось)
 **Документация:** `docs/stages/stage-11-settings-implementation-plan.md`
 
-### Текущее состояние (75% Complete)
+### Текущее состояние (78% Complete)
 
 **Settings Page:** `apps/web/src/app/(root)/(protected)/settings/page.tsx` (2088 строк)
 
@@ -2314,13 +2314,13 @@ model User {
 - ✅ **Appearance Tab** - 100% Complete (theme, colors, fonts)
 - ✅ **Help Tab** - 100% Complete (FAQ, contact form)
 - ✅ **About Tab** - 100% Complete (version, changelog, legal)
-- ✅ **Profile Tab** - 80% Complete (name, email, phone editing)
+- ✅ **Profile Tab** - 100% Complete ✨ NEW (name, email, phone, **avatar upload**)
 - ✅ **Security Tab** - 90% Complete (password change)
 - ✅ **Notifications Tab** - 70% Complete (basic toggles)
 - ✅ **Subscription Tab** - 85% Complete (plan display, usage)
 
-**Что нужно доделать (25%):**
-- ❌ Avatar upload & management (Profile Tab)
+**Что нужно доделать (22%):**
+- ✅ ~~Avatar upload & management (Profile Tab)~~ **DONE** (2025-12-12)
 - ❌ Telegram integration UI (Notifications Tab)
 - ❌ Subscription management (change plan, cancel, reactivate)
 - ❌ Two-Factor Authentication (Security Tab)
@@ -2333,17 +2333,22 @@ model User {
 
 #### Phase 1: Critical Features (P0) - 3 дня
 
-**Day 1: Avatar Upload & Management**
-- [ ] **Backend** (4 часа):
-  - File upload module (multer + S3/local storage)
-  - `uploadAvatar` mutation
-  - `deleteAvatar` mutation
-  - User model update (avatarUrl field)
-- [ ] **Frontend** (4 часа):
-  - AvatarUpload component (drag & drop, preview, crop)
-  - Integration with Settings page
-  - Update cache after upload/delete
-- [ ] **Files**: 4 backend, 3 frontend (~500 строк)
+**Day 1: Avatar Upload & Management** ✅ COMPLETE (2025-12-12)
+- [x] **Backend** (4 часа):
+  - ✅ GraphQL Upload integration (graphql-upload-minimal)
+  - ✅ `uploadAvatar(file: Upload!)` mutation
+  - ✅ `deleteAvatar` mutation
+  - ✅ Stream-based file handling
+  - ✅ Validation: JPG, PNG, GIF, WebP (max 5MB)
+  - ✅ Auto-delete old avatar
+- [x] **Frontend** (4 часа):
+  - ✅ AvatarUpload component (react-dropzone + react-image-crop)
+  - ✅ Drag & drop support
+  - ✅ Circular crop preview
+  - ✅ Integration with Settings page
+  - ✅ Toast notifications
+- [x] **Result**: 3 new files, 10 modified (~595 lines)
+- **Commit:** c3052c6
 
 **Day 2: Telegram Integration UI**
 - [ ] **Backend** (2 часа):

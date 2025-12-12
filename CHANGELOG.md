@@ -8,6 +8,30 @@
 ## [Unreleased]
 
 ### Added
+
+- **Stage 11: Settings Page - Avatar Upload Feature:**
+  - ✅ **Backend Implementation:**
+    - GraphQL mutations: `uploadAvatar(file: Upload!)` и `deleteAvatar`
+    - Stream-based file upload через graphql-upload-minimal
+    - Validation: JPEG, PNG, GIF, WebP (max 5MB)
+    - Auto-delete old avatar on new upload
+    - Unique filename generation: `avatar-{timestamp}-{random}.ext`
+    - Public URL: `/uploads/avatars/{filename}`
+  - ✅ **Frontend Implementation:**
+    - AvatarUpload component с Drag & Drop (react-dropzone)
+    - Image crop modal с circular preview (react-image-crop)
+    - File validation на клиенте
+    - Upload progress indication
+    - Delete avatar с подтверждением
+    - Responsive design
+  - ✅ **Integration:**
+    - Убраны "В разработке" placeholders из Settings page
+    - Интегрирован AvatarUpload component
+    - Auto-refetch после upload/delete
+    - Toast notifications
+  - **Files:** 3 new, 10 modified (~595 lines)
+  - **Dependencies:** react-dropzone@14.3.8, react-image-crop@11.0.10
+
 - **Telegram Support Bot - FAQ Database:**
   - ✅ Создан TypeScript seed script `apps/api/prisma/seed-faq.ts`
   - ✅ 8 FAQ entries в 5 категориях (projects, expenses, photo_reports, technical, general)
