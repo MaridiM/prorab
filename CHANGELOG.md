@@ -198,6 +198,116 @@
 
 ---
 
+**Stage 9 Phase 2 Day 10: Time Tracking - TeamMembers Integration Fix (2025-12-12)**
+
+**Frontend Fix (1 file modified, ~20 строк):**
+- `apps/web/src/app/components/work-logs/work-log-dialog.tsx` - Fixed member selection
+  - Added `teamId` prop to WorkLogDialogProps interface
+  - Implemented TeamMembersDocument query with proper variables
+  - Updated Select component to dynamically populate from team members
+  - Skip query when dialog closed or no teamId
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/time-tracking/page.tsx` - Pass teamId to dialog
+
+**Features:**
+- ✅ Dynamic member selection в WorkLogDialog
+- ✅ TeamMembers query integration (skip when closed)
+- ✅ Replaced placeholder Select with real data
+- ✅ Proper empty state handling
+
+**Commit:** 18877c8 - "feat(stage-9): complete Days 8-10 - Time Tracking System"
+
+---
+
+**Stage 9 Phase 2 Day 11: Personnel Analytics Backend (2025-12-12)**
+
+**Backend (3 files, ~260 строк):**
+- `apps/api/src/modules/teams/models/personnel-analytics.model.ts` - GraphQL analytics models (100 lines)
+  - **MemberAnalytics** (14 fields): memberId, memberName, memberEmail, avatarUrl, role, salaryType, salaryAmount, projectsCount, totalHoursWorked, totalPayouts, averagePayoutPerProject, completedPayoutsCount, pendingPayoutsCount, joinedAt
+  - **ProjectAnalytics** (9 fields): projectId, projectName, budget, totalHoursWorked, totalPayouts, membersCount, status, startDate, endDate
+  - **PersonnelAnalytics** (10 fields): teamId, teamName, totalMembers, totalHoursWorked, totalPayouts, averageHoursPerMember, averagePayoutPerMember, members[], projects[], generatedAt
+- `apps/api/src/modules/teams/teams.service.ts` - Added getPersonnelAnalytics method (150 lines)
+  - **Method:** `async getPersonnelAnalytics(teamId: string, userId: string): Promise<PersonnelAnalytics>`
+  - **Access Control:** Owner-only (ForbiddenException for non-owners)
+  - **Data Sources:** WorkLogs (hours), ProjectPayouts (payments), Team.members, Team.projects
+  - **Calculations:**
+    - Member analytics: projectsCount, totalHoursWorked (aggregate), totalPayouts (aggregate), averagePayoutPerProject, completed/pending payout counts
+    - Project analytics: totalHoursWorked (aggregate), totalPayouts (aggregate), membersCount (distinct)
+    - Team totals: averageHoursPerMember, averagePayoutPerMember
+  - **Sorting:** Members by totalHoursWorked DESC, Projects by totalHoursWorked DESC
+  - **Performance:** Uses Promise.all for parallel aggregations
+- `apps/api/src/modules/teams/teams.resolver.ts` - Added personnelAnalytics query (10 lines)
+  - Query: `personnelAnalytics(teamId: ID!): PersonnelAnalytics`
+  - Decorator: @UseGuards(AuthGuard)
+  - Description: 'Get personnel analytics for a team (owner only)'
+
+**Features:**
+- ✅ Comprehensive analytics calculation (hours, payouts, projects)
+- ✅ Owner-only access control
+- ✅ Prisma aggregations (_sum, _count) for performance
+- ✅ Sorted results (by totalHoursWorked)
+- ✅ Detailed per-member metrics (14 fields)
+- ✅ Project-level analytics (9 fields)
+- ✅ Team-level averages and totals
+
+**TypeScript:**
+- ✅ Компиляция успешна (0 errors related to analytics)
+- ✅ Полная типизация GraphQL models
+
+---
+
+**Stage 9 Phase 2 Day 12: Personnel Analytics Frontend (2025-12-12)**
+
+**Frontend (2 files, ~380 строк):**
+- `apps/web/src/packages/api/graphql/analytics.graphql` - GraphQL operations (55 lines)
+  - Fragment: MemberAnalyticsFields (14 fields), ProjectAnalyticsFields (9 fields), PersonnelAnalyticsFields (10 fields + nested)
+  - Query: PersonnelAnalytics($teamId: ID!)
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/analytics/personnel/page.tsx` - Analytics page (325 lines)
+  - **URL:** `/teams/[teamId]/analytics/personnel`
+  - **KPI Cards (4):**
+    - Total Members (with Users icon)
+    - Total Hours Worked (with Clock icon)
+    - Total Payouts (with DollarSign icon)
+    - Average Payout per Member (with TrendingUp icon)
+  - **Member Performance Table:**
+    - Columns: Участник (avatar + name + email), Роль, Зарплата (type + amount), Проектов, Часов, Выплачено, Средняя выплата, Выплат (completed/pending)
+    - Search functionality (by name or email)
+    - Avatar display or initials fallback
+    - Salary type badges (Fixed/Percentage/None)
+    - Color-coded payouts (green)
+  - **Project Performance Table:**
+    - Columns: Проект, Статус, Бюджет, Часов, Выплачено, Участников, Период (start-end dates)
+    - Search functionality (by project name)
+    - Status badges (Активен/Завершён/В архиве)
+    - Date range formatting (dd.MM.yy format)
+  - **Empty State:** Card with call-to-action when no data
+  - **Loading State:** Skeleton with pulse animation
+  - **Error Handling:** Error card with back button
+
+**Features:**
+- ✅ Owner-only analytics page (GraphQL enforces access)
+- ✅ 4 KPI cards with icons and formatting
+- ✅ Member performance table (8 columns, sortable by backend)
+- ✅ Project performance table (7 columns)
+- ✅ Real-time search filtering (client-side)
+- ✅ Avatar display with initials fallback
+- ✅ Responsive design (grid cols-1 md:cols-4)
+- ✅ Currency formatting (₽)
+- ✅ Hours precision (.toFixed(2))
+- ✅ Date formatting (dd MMM yyyy, ru locale)
+- ✅ Badge variants (success/secondary/warning for status)
+- ✅ Empty state handling
+
+**GraphQL Codegen:**
+- ✅ Successful generation (no errors)
+- ✅ Types: PersonnelAnalyticsQuery, MemberAnalytics, ProjectAnalytics, PersonnelAnalytics
+- ✅ Hook: usePersonnelAnalyticsQuery
+
+**TypeScript:**
+- ✅ Компиляция успешна (0 errors in analytics page)
+- ✅ Fixed Badge variant types (removed 'outline', used 'success'/'secondary'/'warning')
+
+---
+
 **Stage 9 Phase 1 Day 7: Testing and Bug Fixes (2025-12-12)**
 
 **Bugs Fixed:**

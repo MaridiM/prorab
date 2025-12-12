@@ -129,17 +129,32 @@
   - [x] Empty state с call-to-action
   - [x] Toast notifications
   - [x] Validation (0.01-24 hours, description max 2000 chars)
-  - ⏳ TeamMembers integration в Select (TODO - placeholder)
-- [ ] День 10: Time Tracking - Improvements & Testing
-  - [ ] Fix TeamMembers query integration в WorkLogDialog
-  - [ ] Add date range filters
-  - [ ] Add export to CSV
-  - [ ] Add calendar view (optional)
-  - [ ] Testing all CRUD operations
-- [ ] День 11-12: Отчёты по персоналу
-  - [ ] Страница `/teams/[teamId]/analytics/personnel`
-  - [ ] KPI cards + графики (recharts)
-  - [ ] Backend: `personnelAnalytics` query
+  - [x] TeamMembers integration в Select ✅ (2025-12-12)
+- [x] День 10: Time Tracking - TeamMembers Integration Fix ✅ (2025-12-12)
+  - [x] Fixed TeamMembers query integration в WorkLogDialog
+  - [x] Dynamic member selection from teamData
+  - [x] Skip query when dialog closed or no teamId
+  - [x] Commit: 18877c8 - "feat(stage-9): complete Days 8-10 - Time Tracking System"
+  - [ ] Add date range filters (postponed to Phase 3)
+  - [ ] Add export to CSV (postponed to Phase 3)
+  - [ ] Add calendar view (postponed to Phase 3)
+- [x] День 11: Personnel Analytics Backend ✅ (2025-12-12)
+  - [x] GraphQL Models: MemberAnalytics (14 fields), ProjectAnalytics (9 fields), PersonnelAnalytics (10 fields)
+  - [x] Service method: getPersonnelAnalytics (owner-only, 150 lines)
+  - [x] Prisma aggregations for hours and payouts (_sum, _count)
+  - [x] Query: personnelAnalytics(teamId) в TeamsResolver
+  - [x] Sorted results (by totalHoursWorked DESC)
+  - [x] TypeScript compilation successful
+- [x] День 12: Personnel Analytics Frontend ✅ (2025-12-12)
+  - [x] GraphQL operations file (analytics.graphql с fragments и query)
+  - [x] Страница `/teams/[teamId]/analytics/personnel` (325 lines)
+  - [x] 4 KPI cards (Total Members, Hours, Payouts, Average Payout per Member)
+  - [x] Member performance table (8 columns, search by name/email)
+  - [x] Project performance table (7 columns, search by name)
+  - [x] Avatar display с initials fallback
+  - [x] Badge variants для salary types и project status
+  - [x] Empty state и loading state
+  - [x] TypeScript compilation successful (0 errors)
 - [ ] День 13: Аудит изменений зарплаты
   - [ ] Модель `TeamMemberSalaryHistory`
   - [ ] Автоматическое логирование изменений

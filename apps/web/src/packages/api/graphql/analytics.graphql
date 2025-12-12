@@ -1,0 +1,55 @@
+# ==================== FRAGMENTS ====================
+
+fragment MemberAnalyticsFields on MemberAnalytics {
+  memberId
+  memberName
+  memberEmail
+  avatarUrl
+  role
+  salaryType
+  salaryAmount
+  projectsCount
+  totalHoursWorked
+  totalPayouts
+  averagePayoutPerProject
+  completedPayoutsCount
+  pendingPayoutsCount
+  joinedAt
+}
+
+fragment ProjectAnalyticsFields on ProjectAnalytics {
+  projectId
+  projectName
+  budget
+  totalHoursWorked
+  totalPayouts
+  membersCount
+  status
+  startDate
+  endDate
+}
+
+fragment PersonnelAnalyticsFields on PersonnelAnalytics {
+  teamId
+  teamName
+  totalMembers
+  totalHoursWorked
+  totalPayouts
+  averageHoursPerMember
+  averagePayoutPerMember
+  generatedAt
+  members {
+    ...MemberAnalyticsFields
+  }
+  projects {
+    ...ProjectAnalyticsFields
+  }
+}
+
+# ==================== QUERIES ====================
+
+query PersonnelAnalytics($teamId: ID!) {
+  personnelAnalytics(teamId: $teamId) {
+    ...PersonnelAnalyticsFields
+  }
+}

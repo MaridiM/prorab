@@ -249,6 +249,23 @@ enum LogoType {
   UPLOADED
 }
 
+type MemberAnalytics {
+  avatarUrl: String
+  averagePayoutPerProject: Float!
+  completedPayoutsCount: Int!
+  joinedAt: DateTime!
+  memberEmail: String!
+  memberId: String!
+  memberName: String!
+  pendingPayoutsCount: Int!
+  projectsCount: Int!
+  role: String!
+  salaryAmount: Float
+  salaryType: String!
+  totalHoursWorked: Float!
+  totalPayouts: Float!
+}
+
 type MemberPayoutDetail {
   """Calculated payout for this member"""
   calculatedPayout: Float!
@@ -317,6 +334,9 @@ type Mutation {
 
   """Удаление аккаунта пользователя"""
   deleteAccount: Boolean!
+
+  """Удаление аватара пользователя"""
+  deleteAvatar: User!
 
   """Удалить расход"""
   deleteExpense(id: ID!): Expense!
@@ -397,6 +417,9 @@ type Mutation {
 
   """Update a work log entry (owner or creator)"""
   updateWorkLog(input: UpdateWorkLogInput!): WorkLog!
+
+  """Загрузка аватара пользователя"""
+  uploadAvatar: User!
 
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
@@ -496,6 +519,19 @@ type PayoutSummary {
   totalPayouts: Float!
 }
 
+type PersonnelAnalytics {
+  averageHoursPerMember: Float!
+  averagePayoutPerMember: Float!
+  generatedAt: DateTime!
+  members: [MemberAnalytics!]!
+  projects: [ProjectAnalytics!]!
+  teamId: String!
+  teamName: String!
+  totalHoursWorked: Float!
+  totalMembers: Int!
+  totalPayouts: Float!
+}
+
 type PhotoReport {
   coverPhotoUrl: String
   createdAt: DateTime!
@@ -579,6 +615,18 @@ type Project {
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+type ProjectAnalytics {
+  budget: Float
+  endDate: DateTime
+  membersCount: Int!
+  projectId: String!
+  projectName: String!
+  startDate: DateTime
+  status: String!
+  totalHoursWorked: Float!
+  totalPayouts: Float!
 }
 
 input ProjectFilterInput {
@@ -712,6 +760,9 @@ type Query {
 
   """Calculate payout summary for a project (owner only)"""
   payoutSummary(projectId: ID!): PayoutSummary!
+
+  """Get personnel analytics for a team (owner only)"""
+  personnelAnalytics(teamId: ID!): PersonnelAnalytics!
 
   """Получить фотоотчёт по ID"""
   photoReport(id: String!): PhotoReport!
