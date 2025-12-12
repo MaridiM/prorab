@@ -83,6 +83,11 @@ export type WorkLog = Prisma.WorkLogModel
  */
 export type TeamMember = Prisma.TeamMemberModel
 /**
+ * Model TeamMemberSalaryHistory
+ * 
+ */
+export type TeamMemberSalaryHistory = Prisma.TeamMemberSalaryHistoryModel
+/**
  * Model InviteCode
  * 
  */

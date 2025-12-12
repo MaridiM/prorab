@@ -10,6 +10,7 @@ import { Team } from './models/team.model';
 import { TeamMember } from './models/team-member.model';
 import { InviteCode } from './models/invite-code.model';
 import { PersonnelAnalytics } from './models/personnel-analytics.model';
+import { TeamMemberSalaryHistory } from './models/salary-history.model';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 
@@ -178,6 +179,17 @@ export class TeamsResolver {
     @CurrentUser() user: any,
   ): Promise<PersonnelAnalytics> {
     return this.teamsService.getPersonnelAnalytics(teamId, user.id);
+  }
+
+  @Query(() => [TeamMemberSalaryHistory], {
+    description: 'Get salary change history for a team member (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async memberSalaryHistory(
+    @Args('memberId', { type: () => ID }) memberId: string,
+    @CurrentUser() user: any,
+  ): Promise<TeamMemberSalaryHistory[]> {
+    return this.teamsService.getMemberSalaryHistory(memberId, user.id);
   }
 }
 

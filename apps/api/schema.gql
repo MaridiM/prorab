@@ -355,6 +355,9 @@ type Mutation {
 
   """Delete a work log entry (owner or creator)"""
   deleteWorkLog(id: ID!): Boolean!
+
+  """Отключение Telegram от аккаунта"""
+  disconnectTelegram: User!
   forgotPassword(email: String!): Boolean!
   initTelegramAuth: TelegramAuthPayload!
   initializePayment(subscriptionId: String!): PaymentUrl!
@@ -744,6 +747,9 @@ type Query {
   """Get all payouts for a team member (owner or member themselves)"""
   memberPayouts(memberId: ID!): [ProjectPayout!]!
 
+  """Get salary change history for a team member (owner only)"""
+  memberSalaryHistory(memberId: ID!): [TeamMemberSalaryHistory!]!
+
   """Получить задачи, назначенные участнику"""
   memberTasks(assigneeId: ID!): [Task!]!
 
@@ -1002,6 +1008,32 @@ type TeamMember {
   userId: ID!
 }
 
+type TeamMemberSalaryHistory {
+  changedBy: User
+
+  """User who made the change"""
+  changedByUserId: ID!
+  createdAt: DateTime!
+  id: ID!
+  member: TeamMember
+  memberId: ID!
+
+  """New salary amount"""
+  newAmount: Float
+
+  """New salary type"""
+  newType: String!
+
+  """Previous salary amount"""
+  previousAmount: Float
+
+  """Previous salary type (null for first entry)"""
+  previousType: String
+
+  """Reason for the change"""
+  reason: String
+}
+
 type TeamMemberStats {
   """Средняя выплата на проект"""
   averagePayoutPerProject: Float!
@@ -1055,6 +1087,9 @@ input UpdateExpenseInput {
 input UpdateMemberSalaryInput {
   """Team member ID"""
   memberId: ID!
+
+  """Reason for salary change (optional)"""
+  reason: String
 
   """Salary amount (for fixed) or percentage (0-100)"""
   salaryAmount: Float
@@ -1196,6 +1231,15 @@ type User {
   id: ID!
   notificationSettings: NotificationSettings
   phone: String
+
+  """Telegram Chat ID пользователя"""
+  telegramChatId: String
+
+  """URL фото из Telegram"""
+  telegramPhotoUrl: String
+
+  """Telegram Username пользователя"""
+  telegramUsername: String
   updatedAt: DateTime!
 }
 

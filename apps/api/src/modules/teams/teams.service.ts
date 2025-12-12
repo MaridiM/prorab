@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, NotFoundException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CoreService } from '../../core/core.service';
 import { PrismaService } from '../../core/prisma/prisma.service';
@@ -810,5 +810,44 @@ export class TeamsService extends CoreService {
       projects: projectAnalytics.sort((a, b) => b.totalHoursWorked - a.totalHoursWorked),
       generatedAt: new Date(),
     };
+  }
+
+  /**
+   * Get salary change history for a team member
+   * Only owner can view
+   */
+  async getMemberSalaryHistory(memberId: string, userId: string): Promise<any[]> {
+    // Get member with team
+    const member = await this.prisma.teamMember.findUnique({
+      where: { id: memberId },
+      include: { team: true },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Team member not found');
+    }
+
+    // Verify owner access
+    if (member.team.ownerId !== userId) {
+      throw new ForbiddenException('Only team owner can view salary history');
+    }
+
+    // Get salary history
+    const history = await this.prisma.teamMemberSalaryHistory.findMany({
+      where: { memberId },
+      include: {
+        member: {
+          include: {
+            user: true,
+          },
+        },
+        changedBy: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return history;
   }
 }

@@ -242,6 +242,19 @@ export class UsersService {
 		})
 	}
 
+	// ==================== Telegram ====================
+
+	async disconnectTelegram(userId: string) {
+		return this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				telegramChatId: null,
+				telegramUsername: null,
+				telegramPhotoUrl: null,
+			},
+		})
+	}
+
 	// ==================== Notifications ====================
 
 	async getNotificationSettings(userId: string) {

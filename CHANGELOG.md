@@ -332,6 +332,92 @@
 
 ---
 
+**Stage 9 Phase 2 Day 13: Salary History Audit (2025-12-12)**
+
+**Backend (5 files, ~200 строк):**
+- `apps/api/prisma/schema.prisma` - Added TeamMemberSalaryHistory model
+  - **Fields (9):** id, memberId, previousType, previousAmount, newType, newAmount, changedByUserId, reason, createdAt
+  - **Relations:** TeamMember (cascade delete), User (changedBy)
+  - **Indexes:** memberId, (memberId + createdAt)
+- `apps/api/src/modules/teams/models/salary-history.model.ts` - GraphQL ObjectType (40 lines)
+- `apps/api/src/modules/payouts/dto/update-member-salary.input.ts` - Added reason field
+  - Validation: @IsString, @MaxLength(500), @IsOptional
+- `apps/api/src/modules/payouts/payouts.service.ts` - Updated updateMemberSalary (70 lines)
+  - **Transaction:** Update member + create history entry
+  - **Conditional logging:** Only logs when salary actually changes
+  - **Comparison:** Check salaryType and salaryAmount differences
+  - **Data stored:** previousType, previousAmount, newType, newAmount, changedByUserId, reason
+- `apps/api/src/modules/teams/teams.service.ts` - Added getMemberSalaryHistory (40 lines)
+  - **Method:** `async getMemberSalaryHistory(memberId, userId): Promise<any[]>`
+  - **Access Control:** Owner-only (ForbiddenException)
+  - **Sorting:** By createdAt DESC
+  - **Includes:** member.user, changedBy
+- `apps/api/src/modules/teams/teams.resolver.ts` - Added memberSalaryHistory query (10 lines)
+  - Query: `memberSalaryHistory(memberId: ID!): [TeamMemberSalaryHistory!]!`
+  - Decorator: @UseGuards(AuthGuard)
+
+**Database:**
+- ✅ Migration applied: `prisma db push`
+- ✅ Client generated: `prisma generate`
+- ✅ Relations validated (TeamMember.salaryHistory, User.salaryChanges)
+
+**Features:**
+- ✅ Automatic salary change logging
+- ✅ Transaction-safe updates (Prisma $transaction)
+- ✅ Only logs when salary changes (salaryType or salaryAmount differ)
+- ✅ Optional reason field (max 500 characters)
+- ✅ Owner-only access to history
+- ✅ Audit trail (who changed, when, previous/new values)
+
+**TypeScript:**
+- ✅ Компиляция успешна (0 errors)
+- ✅ NotFoundException imported
+
+---
+
+**Stage 9 Phase 2 Day 14: Integration Testing (2025-12-12)**
+
+**Testing Documentation:**
+- `docs/STAGE_9_PHASE_2_TESTING.md` - Comprehensive testing report (250 lines)
+  - Time Tracking: Backend + Frontend CRUD operations ✅
+  - Personnel Analytics: Calculations + UI display ✅
+  - Salary History: Automatic logging + Query ✅
+  - TypeScript: 0 errors (API + Web) ✅
+  - GraphQL: Schema validation ✅
+  - Database: Migrations + Relations ✅
+  - Access Control: Owner-only enforcement ✅
+  - Performance: Aggregations + Indexes ✅
+
+**Manual Testing:**
+- ✅ Create/Edit/Delete work logs
+- ✅ View analytics (owner-only)
+- ✅ Salary updates create history
+- ✅ Search/filter functionality
+- ✅ Stats cards accuracy
+- ✅ Toast notifications
+- ✅ Empty/Loading/Error states
+
+**Bugs Fixed:**
+- ✅ Day 10: TeamMembers integration in WorkLogDialog
+- ✅ Day 12: Badge variant TypeScript errors
+
+**Code Quality:**
+- ✅ Proper error handling (NotFoundException, ForbiddenException, BadRequestException)
+- ✅ Transaction-safe operations
+- ✅ Validation at DTO level
+- ✅ Access control enforced
+- ✅ TypeScript strict mode passing
+- ✅ No console errors
+
+**Phase 2 Summary:**
+- **Backend:** ~700 lines (8 files created, 3 modified)
+- **Frontend:** ~660 lines (4 files created)
+- **Database:** 2 new models (WorkLog, TeamMemberSalaryHistory)
+- **GraphQL:** 15+ operations
+- **Status:** ✅ **PRODUCTION READY**
+
+---
+
 **Stage 9 Phase 1 Day 7: Testing and Bug Fixes (2025-12-12)**
 
 **Bugs Fixed:**

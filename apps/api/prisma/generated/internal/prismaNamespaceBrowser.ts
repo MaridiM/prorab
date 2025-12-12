@@ -60,6 +60,7 @@ export const ModelName = {
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
   TeamMember: 'TeamMember',
+  TeamMemberSalaryHistory: 'TeamMemberSalaryHistory',
   InviteCode: 'InviteCode',
   Project: 'Project',
   Expense: 'Expense',
@@ -223,6 +224,21 @@ export const TeamMemberScalarFieldEnum = {
 } as const
 
 export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
+
+
+export const TeamMemberSalaryHistoryScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  previousType: 'previousType',
+  previousAmount: 'previousAmount',
+  newType: 'newType',
+  newAmount: 'newAmount',
+  changedByUserId: 'changedByUserId',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamMemberSalaryHistoryScalarFieldEnum = (typeof TeamMemberSalaryHistoryScalarFieldEnum)[keyof typeof TeamMemberSalaryHistoryScalarFieldEnum]
 
 
 export const InviteCodeScalarFieldEnum = {

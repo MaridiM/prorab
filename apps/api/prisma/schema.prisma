@@ -33,14 +33,15 @@ model User {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  verificationTokens   VerificationToken[]
-  passwordResetTokens  PasswordResetToken[]
-  notificationSettings NotificationSettings?
-  ownedTeams           Team[]               @relation("TeamOwner")
-  teamMemberships      TeamMember[]
-  currentTeam          Team?                @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
-  createdTasks         Task[]               @relation("CreatedTasks")
-  supportTickets       SupportTicket[]
+  verificationTokens      VerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  notificationSettings    NotificationSettings?
+  ownedTeams              Team[]                      @relation("TeamOwner")
+  teamMemberships         TeamMember[]
+  currentTeam             Team?                       @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
+  createdTasks            Task[]                      @relation("CreatedTasks")
+  supportTickets          SupportTicket[]
+  salaryChanges           TeamMemberSalaryHistory[]   @relation("SalaryChangedBy")
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -203,17 +204,37 @@ model TeamMember {
   salaryType   String   @default("none") @map("salary_type") // "fixed", "percentage", "none"
   salaryAmount Decimal? @map("salary_amount") @db.Decimal(12, 2)
 
-  team          Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team          Team                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user          User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   payouts       ProjectPayout[]
   workLogs      WorkLog[]
-  assignedTasks Task[]          @relation("AssignedTasks")
+  assignedTasks Task[]                    @relation("AssignedTasks")
+  salaryHistory TeamMemberSalaryHistory[]
 
   @@unique([teamId, userId])
   @@index([userId])
   @@index([teamId])
   @@index([teamId, salaryType])
   @@map("team_members")
+}
+
+model TeamMemberSalaryHistory {
+  id               String   @id @default(uuid())
+  memberId         String   @map("member_id")
+  previousType     String?  @map("previous_type") // "fixed", "percentage", "none" (null for first entry)
+  previousAmount   Decimal? @map("previous_amount") @db.Decimal(12, 2)
+  newType          String   @map("new_type") // "fixed", "percentage", "none"
+  newAmount        Decimal? @map("new_amount") @db.Decimal(12, 2)
+  changedByUserId  String   @map("changed_by_user_id")
+  reason           String?  @db.Text // Optional reason for change
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  member    TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  changedBy User       @relation("SalaryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([memberId])
+  @@index([memberId, createdAt])
+  @@map("team_member_salary_history")
 }
 
 model InviteCode {

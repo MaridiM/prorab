@@ -294,6 +294,7 @@ export type UserWhereInput = {
   currentTeam?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
   createdTasks?: Prisma.TaskListRelationFilter
   supportTickets?: Prisma.SupportTicketListRelationFilter
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -323,6 +324,7 @@ export type UserOrderByWithRelationInput = {
   currentTeam?: Prisma.TeamOrderByWithRelationInput
   createdTasks?: Prisma.TaskOrderByRelationAggregateInput
   supportTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -355,6 +357,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   currentTeam?: Prisma.XOR<Prisma.TeamNullableScalarRelationFilter, Prisma.TeamWhereInput> | null
   createdTasks?: Prisma.TaskListRelationFilter
   supportTickets?: Prisma.SupportTicketListRelationFilter
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryListRelationFilter
 }, "id" | "email" | "emailNormalized" | "telegramChatId">
 
 export type UserOrderByWithAggregationInput = {
@@ -431,6 +434,7 @@ export type UserCreateInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -459,6 +463,7 @@ export type UserUncheckedCreateInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUpdateInput = {
@@ -487,6 +492,7 @@ export type UserUpdateInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -515,6 +521,7 @@ export type UserUncheckedUpdateInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -789,6 +796,20 @@ export type UserUpdateOneRequiredWithoutTeamMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTeamMembershipsInput, Prisma.UserUpdateWithoutTeamMembershipsInput>, Prisma.UserUncheckedUpdateWithoutTeamMembershipsInput>
 }
 
+export type UserCreateNestedOneWithoutSalaryChangesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSalaryChangesInput, Prisma.UserUncheckedCreateWithoutSalaryChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSalaryChangesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSalaryChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSalaryChangesInput, Prisma.UserUncheckedCreateWithoutSalaryChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSalaryChangesInput
+  upsert?: Prisma.UserUpsertWithoutSalaryChangesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSalaryChangesInput, Prisma.UserUpdateWithoutSalaryChangesInput>, Prisma.UserUncheckedUpdateWithoutSalaryChangesInput>
+}
+
 export type UserCreateNestedOneWithoutCreatedTasksInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedTasksInput, Prisma.UserUncheckedCreateWithoutCreatedTasksInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedTasksInput
@@ -842,6 +863,7 @@ export type UserCreateWithoutNotificationSettingsInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationSettingsInput = {
@@ -869,6 +891,7 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationSettingsInput = {
@@ -912,6 +935,7 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
@@ -939,6 +963,7 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutVerificationTokensInput = {
@@ -966,6 +991,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -993,6 +1019,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -1036,6 +1063,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -1063,6 +1091,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1090,6 +1119,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1117,6 +1147,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1160,6 +1191,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1187,6 +1219,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutOwnedTeamsInput = {
@@ -1214,6 +1247,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedTeamsInput = {
@@ -1241,6 +1275,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedTeamsInput = {
@@ -1273,6 +1308,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCurrentTeamInput = {
@@ -1300,6 +1336,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCurrentTeamInput = {
@@ -1348,6 +1385,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
@@ -1375,6 +1413,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutCurrentTeamInput = {
@@ -1442,6 +1481,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -1469,6 +1509,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -1512,6 +1553,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -1537,6 +1579,135 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
   ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
+  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserCreateWithoutSalaryChangesInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
+  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSalaryChangesInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  currentTeamId?: string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSalaryChangesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSalaryChangesInput, Prisma.UserUncheckedCreateWithoutSalaryChangesInput>
+}
+
+export type UserUpsertWithoutSalaryChangesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSalaryChangesInput, Prisma.UserUncheckedUpdateWithoutSalaryChangesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSalaryChangesInput, Prisma.UserUncheckedCreateWithoutSalaryChangesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSalaryChangesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSalaryChangesInput, Prisma.UserUncheckedUpdateWithoutSalaryChangesInput>
+}
+
+export type UserUpdateWithoutSalaryChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
+  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSalaryChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1566,6 +1737,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTasksInput = {
@@ -1593,6 +1765,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTasksInput = {
@@ -1636,6 +1809,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTasksInput = {
@@ -1663,6 +1837,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -1690,6 +1865,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
   currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -1717,6 +1893,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
   teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -1760,6 +1937,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -1787,6 +1965,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateManyCurrentTeamInput = {
@@ -1834,6 +2013,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCurrentTeamInput = {
@@ -1861,6 +2041,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
@@ -1895,6 +2076,7 @@ export type UserCountOutputType = {
   teamMemberships: number
   createdTasks: number
   supportTickets: number
+  salaryChanges: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1904,6 +2086,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   teamMemberships?: boolean | UserCountOutputTypeCountTeamMembershipsArgs
   createdTasks?: boolean | UserCountOutputTypeCountCreatedTasksArgs
   supportTickets?: boolean | UserCountOutputTypeCountSupportTicketsArgs
+  salaryChanges?: boolean | UserCountOutputTypeCountSalaryChangesArgs
 }
 
 /**
@@ -1958,6 +2141,13 @@ export type UserCountOutputTypeCountSupportTicketsArgs<ExtArgs extends runtime.T
   where?: Prisma.SupportTicketWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSalaryChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TeamMemberSalaryHistoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1986,6 +2176,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
   supportTickets?: boolean | Prisma.User$supportTicketsArgs<ExtArgs>
+  salaryChanges?: boolean | Prisma.User$salaryChangesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2064,6 +2255,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
   createdTasks?: boolean | Prisma.User$createdTasksArgs<ExtArgs>
   supportTickets?: boolean | Prisma.User$supportTicketsArgs<ExtArgs>
+  salaryChanges?: boolean | Prisma.User$salaryChangesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2084,6 +2276,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     currentTeam: Prisma.$TeamPayload<ExtArgs> | null
     createdTasks: Prisma.$TaskPayload<ExtArgs>[]
     supportTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
+    salaryChanges: Prisma.$TeamMemberSalaryHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2506,6 +2699,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   currentTeam<T extends Prisma.User$currentTeamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$currentTeamArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdTasks<T extends Prisma.User$createdTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   supportTickets<T extends Prisma.User$supportTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$supportTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  salaryChanges<T extends Prisma.User$salaryChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$salaryChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberSalaryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3128,6 +3322,30 @@ export type User$supportTicketsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.SupportTicketScalarFieldEnum | Prisma.SupportTicketScalarFieldEnum[]
+}
+
+/**
+ * User.salaryChanges
+ */
+export type User$salaryChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TeamMemberSalaryHistory
+   */
+  select?: Prisma.TeamMemberSalaryHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TeamMemberSalaryHistory
+   */
+  omit?: Prisma.TeamMemberSalaryHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamMemberSalaryHistoryInclude<ExtArgs> | null
+  where?: Prisma.TeamMemberSalaryHistoryWhereInput
+  orderBy?: Prisma.TeamMemberSalaryHistoryOrderByWithRelationInput | Prisma.TeamMemberSalaryHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.TeamMemberSalaryHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TeamMemberSalaryHistoryScalarFieldEnum | Prisma.TeamMemberSalaryHistoryScalarFieldEnum[]
 }
 
 /**

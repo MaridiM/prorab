@@ -1,5 +1,5 @@
 import { Field, Float, ID, InputType } from '@nestjs/graphql';
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 @InputType()
 export class UpdateMemberSalaryInput {
@@ -19,4 +19,10 @@ export class UpdateMemberSalaryInput {
   @Max(100, { message: 'salaryAmount must be <= 100 for percentage type' })
   @IsOptional()
   salaryAmount?: number;
+
+  @Field({ nullable: true, description: 'Reason for salary change (optional)' })
+  @IsString()
+  @MaxLength(500, { message: 'reason must be <= 500 characters' })
+  @IsOptional()
+  reason?: string;
 }

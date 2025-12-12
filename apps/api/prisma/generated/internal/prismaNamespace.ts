@@ -393,6 +393,7 @@ export const ModelName = {
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
   TeamMember: 'TeamMember',
+  TeamMemberSalaryHistory: 'TeamMemberSalaryHistory',
   InviteCode: 'InviteCode',
   Project: 'Project',
   Expense: 'Expense',
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1086,6 +1087,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TeamMemberCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TeamMemberCountAggregateOutputType> | number
+        }
+      }
+    }
+    TeamMemberSalaryHistory: {
+      payload: Prisma.$TeamMemberSalaryHistoryPayload<ExtArgs>
+      fields: Prisma.TeamMemberSalaryHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TeamMemberSalaryHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TeamMemberSalaryHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.TeamMemberSalaryHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TeamMemberSalaryHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.TeamMemberSalaryHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.TeamMemberSalaryHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.TeamMemberSalaryHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TeamMemberSalaryHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.TeamMemberSalaryHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        update: {
+          args: Prisma.TeamMemberSalaryHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.TeamMemberSalaryHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TeamMemberSalaryHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TeamMemberSalaryHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.TeamMemberSalaryHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TeamMemberSalaryHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.TeamMemberSalaryHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTeamMemberSalaryHistory>
+        }
+        groupBy: {
+          args: Prisma.TeamMemberSalaryHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMemberSalaryHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TeamMemberSalaryHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TeamMemberSalaryHistoryCountAggregateOutputType> | number
         }
       }
     }
@@ -2078,6 +2153,21 @@ export const TeamMemberScalarFieldEnum = {
 export type TeamMemberScalarFieldEnum = (typeof TeamMemberScalarFieldEnum)[keyof typeof TeamMemberScalarFieldEnum]
 
 
+export const TeamMemberSalaryHistoryScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  previousType: 'previousType',
+  previousAmount: 'previousAmount',
+  newType: 'newType',
+  newAmount: 'newAmount',
+  changedByUserId: 'changedByUserId',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamMemberSalaryHistoryScalarFieldEnum = (typeof TeamMemberSalaryHistoryScalarFieldEnum)[keyof typeof TeamMemberSalaryHistoryScalarFieldEnum]
+
+
 export const InviteCodeScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
@@ -2635,6 +2725,7 @@ export type GlobalOmitConfig = {
   projectPayout?: Prisma.ProjectPayoutOmit
   workLog?: Prisma.WorkLogOmit
   teamMember?: Prisma.TeamMemberOmit
+  teamMemberSalaryHistory?: Prisma.TeamMemberSalaryHistoryOmit
   inviteCode?: Prisma.InviteCodeOmit
   project?: Prisma.ProjectOmit
   expense?: Prisma.ExpenseOmit

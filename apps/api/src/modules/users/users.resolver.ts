@@ -95,5 +95,17 @@ export class UsersResolver {
 		const user = await this.usersService.deleteAvatar(currentUser.id)
 		return user as unknown as User
 	}
+
+	@Mutation(() => User, {
+		description: 'Отключение Telegram от аккаунта',
+	})
+	@UseGuards(AuthGuard)
+	async disconnectTelegram(@CurrentUser() currentUser: CurrentUserData): Promise<User> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		const user = await this.usersService.disconnectTelegram(currentUser.id)
+		return user as unknown as User
+	}
 }
 

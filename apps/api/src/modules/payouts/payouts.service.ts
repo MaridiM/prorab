@@ -147,17 +147,42 @@ export class PayoutsService extends CoreService {
       }
     }
 
-    // 5. Update team member
-    const updated = await this.prisma.teamMember.update({
-      where: { id: input.memberId },
-      data: {
-        salaryType: input.salaryType,
-        salaryAmount: input.salaryAmount || null,
-      },
-      include: {
-        user: true,
-        team: true,
-      },
+    // 5. Check if salary is actually changing
+    const isChanging =
+      teamMember.salaryType !== input.salaryType ||
+      (teamMember.salaryAmount?.toNumber() || null) !== (input.salaryAmount || null);
+
+    // 6. Update team member and log history in a transaction
+    const updated = await this.prisma.$transaction(async (tx) => {
+      // Update the member
+      const updatedMember = await tx.teamMember.update({
+        where: { id: input.memberId },
+        data: {
+          salaryType: input.salaryType,
+          salaryAmount: input.salaryAmount || null,
+        },
+        include: {
+          user: true,
+          team: true,
+        },
+      });
+
+      // Log the change if salary actually changed
+      if (isChanging) {
+        await tx.teamMemberSalaryHistory.create({
+          data: {
+            memberId: input.memberId,
+            previousType: teamMember.salaryType,
+            previousAmount: teamMember.salaryAmount,
+            newType: input.salaryType,
+            newAmount: input.salaryAmount || null,
+            changedByUserId: userId,
+            reason: input.reason || null,
+          },
+        });
+      }
+
+      return updatedMember;
     });
 
     return updated;

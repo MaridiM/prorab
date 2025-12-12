@@ -17,6 +17,15 @@ export class User {
 	@Field({ nullable: true, description: 'URL аватарки пользователя' })
 	avatarUrl?: string
 
+	@Field({ nullable: true, description: 'Telegram Chat ID пользователя' })
+	telegramChatId?: string
+
+	@Field({ nullable: true, description: 'Telegram Username пользователя' })
+	telegramUsername?: string
+
+	@Field({ nullable: true, description: 'URL фото из Telegram' })
+	telegramPhotoUrl?: string
+
 	@Field()
 	emailVerified: boolean
 
