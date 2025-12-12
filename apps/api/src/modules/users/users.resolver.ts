@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql'
 import { UseGuards, UnauthorizedException } from '@nestjs/common'
+import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal'
 
 import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
@@ -66,6 +67,33 @@ export class UsersResolver {
 	@ResolveField(() => NotificationSettings, { nullable: true })
 	async notificationSettings(@Parent() user: User) {
 		return this.usersService.getNotificationSettings(user.id)
+	}
+
+	@Mutation(() => User, {
+		description: 'Загрузка аватара пользователя',
+	})
+	@UseGuards(AuthGuard)
+	async uploadAvatar(
+		@CurrentUser() currentUser: CurrentUserData,
+		@Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,
+	): Promise<User> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		const user = await this.usersService.uploadAvatar(currentUser.id, file)
+		return user as unknown as User
+	}
+
+	@Mutation(() => User, {
+		description: 'Удаление аватара пользователя',
+	})
+	@UseGuards(AuthGuard)
+	async deleteAvatar(@CurrentUser() currentUser: CurrentUserData): Promise<User> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		const user = await this.usersService.deleteAvatar(currentUser.id)
+		return user as unknown as User
 	}
 }
 

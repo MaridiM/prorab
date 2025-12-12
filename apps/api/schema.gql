@@ -419,7 +419,7 @@ type Mutation {
   updateWorkLog(input: UpdateWorkLogInput!): WorkLog!
 
   """Загрузка аватара пользователя"""
-  uploadAvatar: User!
+  uploadAvatar(file: Upload!): User!
 
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!

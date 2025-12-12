@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
+import { FileUpload } from 'graphql-upload-minimal'
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs'
+import { join } from 'path'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
@@ -13,6 +16,9 @@ interface CreateUserData {
 
 @Injectable()
 export class UsersService {
+	private readonly baseUrl = process.env.BASE_URL || 'http://localhost:8080';
+	private readonly uploadPath = join(process.cwd(), 'uploads', 'avatars');
+
 	constructor(private readonly prisma: PrismaService) {}
 
 	async create(data: CreateUserData) {
@@ -141,14 +147,98 @@ export class UsersService {
 	// ==================== Account Management ====================
 
 	async deleteAccount(userId: string) {
+		// Delete avatar file if exists
+		const user = await this.findById(userId)
+		if (user?.avatarUrl) {
+			this.deleteAvatarFile(user.avatarUrl)
+		}
+
 		// Prisma should handle cascading deletes for Sessions, TeamMembers, etc. if configured correctly.
 		// However, we should be careful about Teams where this user is the Owner.
-		// For MVP, we will allow deletion which might delete the Team if they are the only owner and cascade is on, 
-		// or will assume the Schema handles it. 
+		// For MVP, we will allow deletion which might delete the Team if they are the only owner and cascade is on,
+		// or will assume the Schema handles it.
 		// Given the schema isn't fully visible here, we'll assume standard Prisma cascade.
-		
+
 		return this.prisma.user.delete({
 			where: { id: userId },
+		})
+	}
+
+	// ==================== Avatar ====================
+
+	private deleteAvatarFile(avatarUrl: string): void {
+		if (!avatarUrl) return
+
+		// Extract filename from URL
+		const filename = avatarUrl.split('/').pop()
+		const filePath = join(this.uploadPath, filename)
+
+		if (existsSync(filePath)) {
+			try {
+				unlinkSync(filePath)
+			} catch (error) {
+				console.error(`Failed to delete avatar file: ${filename}`, error)
+			}
+		}
+	}
+
+	async uploadAvatar(userId: string, filePromise: Promise<FileUpload>) {
+		const { createReadStream, filename, mimetype } = await filePromise
+
+		// Validate file type
+		const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+		if (!allowedMimes.includes(mimetype)) {
+			throw new BadRequestException('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed')
+		}
+
+		// Create uploads directory if it doesn't exist
+		if (!existsSync(this.uploadPath)) {
+			mkdirSync(this.uploadPath, { recursive: true })
+		}
+
+		// Generate unique filename
+		const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
+		const ext = filename.split('.').pop()
+		const newFilename = `avatar-${uniqueSuffix}.${ext}`
+		const filepath = join(this.uploadPath, newFilename)
+
+		// Get current user to delete old avatar
+		const user = await this.findById(userId)
+		if (user?.avatarUrl) {
+			this.deleteAvatarFile(user.avatarUrl)
+		}
+
+		// Save file
+		await new Promise<void>((resolve, reject) => {
+			const stream = createReadStream()
+			const writeStream = createWriteStream(filepath)
+
+			stream
+				.pipe(writeStream)
+				.on('finish', () => resolve())
+				.on('error', (err) => reject(err))
+		})
+
+		// Generate public URL
+		const avatarUrl = `${this.baseUrl}/uploads/avatars/${newFilename}`
+
+		// Update user with new avatar URL
+		return this.prisma.user.update({
+			where: { id: userId },
+			data: { avatarUrl },
+		})
+	}
+
+	async deleteAvatar(userId: string) {
+		const user = await this.findById(userId)
+
+		if (user?.avatarUrl) {
+			this.deleteAvatarFile(user.avatarUrl)
+		}
+
+		return this.prisma.user.update({
+			where: { id: userId },
+			data: { avatarUrl: null },
 		})
 	}
 

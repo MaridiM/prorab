@@ -203,6 +203,7 @@ import {
 	PasswordInput,
 	UserAvatar,
 	PageHeader,
+	AvatarUpload,
 } from '@/packages/components'
 import { cn } from '@/packages/utils'
 
@@ -685,48 +686,10 @@ export default function SettingsPage() {
 											<form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="divide-y divide-border/30">
 												{/* Avatar Section */}
 												<div className="p-6">
-													<div className="flex flex-col sm:flex-row items-center gap-6">
-														<div className="relative group">
-															<UserAvatar
-																user={me}
-																size="xl"
-																className="w-24 h-24 text-2xl"
-															/>
-															<button
-																type="button"
-																className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-																onClick={() => {
-																	showToast({
-																		title: 'В разработке',
-																		description: 'Загрузка аватарки будет доступна в следующей версии',
-																		type: 'info',
-																	})
-																}}
-															>
-																<Camera className="w-6 h-6 text-white" />
-															</button>
-														</div>
-														<div className="text-center sm:text-left flex-1">
-															<h2 className="text-xl font-bold">{me?.fullName || 'Пользователь'}</h2>
-															<p className="text-muted-foreground">{me?.email}</p>
-															<Button
-																type="button"
-																variant="outline"
-																size="sm"
-																className="mt-3 rounded-xl"
-																onClick={() => {
-																	showToast({
-																		title: 'В разработке',
-																		description: 'Загрузка аватарки будет доступна в следующей версии',
-																		type: 'info',
-																	})
-																}}
-															>
-																<ImagePlus className="w-4 h-4 mr-2" />
-																Загрузить фото
-															</Button>
-														</div>
-													</div>
+													<AvatarUpload
+														user={me}
+														onAvatarChange={() => refetch()}
+													/>
 												</div>
 
 												{/* Form Fields */}

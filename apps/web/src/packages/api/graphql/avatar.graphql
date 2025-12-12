@@ -1,0 +1,17 @@
+mutation UploadAvatar($file: Upload!) {
+  uploadAvatar(file: $file) {
+    id
+    avatarUrl
+    fullName
+    email
+  }
+}
+
+mutation DeleteAvatar {
+  deleteAvatar {
+    id
+    avatarUrl
+    fullName
+    email
+  }
+}
