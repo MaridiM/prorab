@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Home, RefreshCw, AlertTriangle } from "lucide-react"
@@ -12,9 +13,33 @@ export default function Error({
     error: Error & { digest?: string }
     reset: () => void
 }) {
+    const router = useRouter()
+
     useEffect(() => {
         console.error(error)
-    }, [error])
+        
+        // Check if error is authentication-related
+        const errorMessage = error.message || String(error);
+        const isAuthError = 
+            errorMessage.includes('User not authenticated') ||
+            errorMessage.includes('Требуется авторизация') ||
+            errorMessage.includes('Сессия истекла') ||
+            errorMessage.includes('Unauthorized') ||
+            errorMessage.toLowerCase().includes('unauthorized') ||
+            error.digest?.includes('401') ||
+            error.digest?.includes('UNAUTHENTICATED');
+
+        if (isAuthError) {
+            // Clear session token
+            document.cookie.split(";").forEach((c) => {
+                if (c.trim().startsWith('session_token=')) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                }
+            });
+            // Redirect to login
+            router.push('/auth/login');
+        }
+    }, [error, router])
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">

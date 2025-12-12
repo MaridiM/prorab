@@ -42,7 +42,7 @@ model TelegramAuthToken {
   ```typescript
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
-    botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabBot',
+    botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabSpaceBot',
     authTokenTtl: parseInt(process.env.TELEGRAM_AUTH_TOKEN_TTL ?? '600000', 10), // 10 min
   }
   ```
@@ -75,7 +75,7 @@ telegram/
 1. **`generateAuthToken()`**
    - Генерирует nanoid(32) токен (128 bits entropy)
    - Сохраняет в TelegramAuthToken с expiresAt (+10 мин)
-   - Возвращает `{ token, deepLink: 't.me/ProRabBot?start=auth_{token}' }`
+   - Возвращает `{ token, deepLink: 't.me/ProRabSpaceBot?start=auth_{token}' }`
 
 2. **`linkAuthToken(token, chatId)`**
    - Связывает токен с chat_id (вызывается из бота)
@@ -336,7 +336,7 @@ File: `apps/web/src/app/(root)/auth/login/page.tsx`
    ↓
 3. Backend: TelegramAuthService.generateAuthToken()
    → Создаёт token (nanoid, 10 min TTL)
-   → Возвращает { token, deepLink: 't.me/ProRabBot?start=auth_{token}' }
+   → Возвращает { token, deepLink: 't.me/ProRabSpaceBot?start=auth_{token}' }
    ↓
 4. Frontend: window.open(deepLink, '_blank')
    → Открывает Telegram bot
@@ -402,8 +402,8 @@ File: `apps/web/src/app/(root)/auth/login/page.tsx`
 ```bash
 # 1. Открыть Telegram, найти @BotFather
 # 2. Отправить: /newbot
-# 3. Ввести имя: ProRab Bot
-# 4. Ввести username: ProRabBot (или другой доступный)
+# 3. Ввести имя: ProRab Space
+# 4. Ввести username: ProRabSpaceBot
 # 5. Получить token: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
 ```
 
@@ -412,7 +412,7 @@ File: `apps/web/src/app/(root)/auth/login/page.tsx`
 ```env
 # apps/api/.env
 TELEGRAM_BOT_TOKEN=ваш_токен_от_BotFather
-TELEGRAM_BOT_USERNAME=ProRabBot
+TELEGRAM_BOT_USERNAME=ProRabSpaceBot
 TELEGRAM_AUTH_TOKEN_TTL=600000  # 10 minutes
 ```
 
@@ -430,7 +430,7 @@ npm run dev
 
 # Browser: http://localhost:3000/auth/login
 # 1. Нажать "Войти через Telegram"
-# 2. Открыть t.me/ProRabBot?start=auth_{token}
+# 2. Открыть t.me/ProRabSpaceBot?start=auth_{token}
 # 3. Нажать "Start" в боте
 # 4. Проверить автоматический вход на сайте
 ```

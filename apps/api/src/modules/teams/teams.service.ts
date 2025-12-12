@@ -651,4 +651,164 @@ export class TeamsService extends CoreService {
     }
     return code;
   }
+
+  // ==================== ANALYTICS ====================
+
+  /**
+   * Get personnel analytics for a team
+   * Only owner can access
+   */
+  async getPersonnelAnalytics(teamId: string, userId: string): Promise<any> {
+    // Verify team exists and user is owner
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        projects: {
+          include: {
+            workLogs: true,
+            payouts: true,
+          },
+        },
+        members: {
+          include: {
+            user: true,
+            workLogs: true,
+            payouts: true,
+          },
+        },
+      },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец команды может просматривать аналитику');
+    }
+
+    // Calculate member analytics
+    const memberAnalytics = await Promise.all(
+      team.members.map(async (member) => {
+        // Get projects count (unique projects where member has work logs or payouts)
+        const memberProjects = await this.prisma.project.findMany({
+          where: {
+            teamId,
+            OR: [
+              { workLogs: { some: { memberId: member.id } } },
+              { payouts: { some: { memberId: member.id } } },
+            ],
+          },
+        });
+
+        // Total hours worked
+        const hoursResult = await this.prisma.workLog.aggregate({
+          where: { memberId: member.id },
+          _sum: { hours: true },
+        });
+
+        // Total payouts
+        const payoutsResult = await this.prisma.projectPayout.aggregate({
+          where: { memberId: member.id },
+          _sum: { actualAmount: true, calculatedAmount: true },
+          _count: { _all: true },
+        });
+
+        // Completed vs pending payouts
+        const completedPayouts = await this.prisma.projectPayout.count({
+          where: { memberId: member.id, status: 'paid' },
+        });
+
+        const pendingPayouts = await this.prisma.projectPayout.count({
+          where: { memberId: member.id, status: 'pending' },
+        });
+
+        const totalPayouts =
+          Number(payoutsResult._sum.actualAmount || 0) ||
+          Number(payoutsResult._sum.calculatedAmount || 0);
+        const averagePayoutPerProject =
+          memberProjects.length > 0 ? totalPayouts / memberProjects.length : 0;
+
+        return {
+          memberId: member.id,
+          memberName: member.user.fullName,
+          memberEmail: member.user.email,
+          avatarUrl: member.user.avatarUrl,
+          role: member.role,
+          salaryType: member.salaryType,
+          salaryAmount: member.salaryAmount ? Number(member.salaryAmount) : null,
+          projectsCount: memberProjects.length,
+          totalHoursWorked: Number(hoursResult._sum.hours || 0),
+          totalPayouts,
+          averagePayoutPerProject,
+          completedPayoutsCount: completedPayouts,
+          pendingPayoutsCount: pendingPayouts,
+          joinedAt: member.joinedAt,
+        };
+      }),
+    );
+
+    // Calculate project analytics
+    const projectAnalytics = await Promise.all(
+      team.projects.map(async (project) => {
+        // Total hours worked on project
+        const hoursResult = await this.prisma.workLog.aggregate({
+          where: { projectId: project.id },
+          _sum: { hours: true },
+        });
+
+        // Total payouts for project
+        const payoutsResult = await this.prisma.projectPayout.aggregate({
+          where: { projectId: project.id },
+          _sum: { actualAmount: true, calculatedAmount: true },
+        });
+
+        // Unique members who worked on project
+        const membersCount = await this.prisma.teamMember.count({
+          where: {
+            OR: [
+              { workLogs: { some: { projectId: project.id } } },
+              { payouts: { some: { projectId: project.id } } },
+            ],
+          },
+        });
+
+        const totalPayouts =
+          Number(payoutsResult._sum.actualAmount || 0) ||
+          Number(payoutsResult._sum.calculatedAmount || 0);
+
+        return {
+          projectId: project.id,
+          projectName: project.name,
+          budget: project.budget ? Number(project.budget) : null,
+          totalHoursWorked: Number(hoursResult._sum.hours || 0),
+          totalPayouts,
+          membersCount,
+          status: project.status,
+          startDate: project.startDate,
+          endDate: project.endDate,
+        };
+      }),
+    );
+
+    // Calculate team totals
+    const totalHoursWorked = memberAnalytics.reduce((sum, m) => sum + m.totalHoursWorked, 0);
+    const totalPayouts = memberAnalytics.reduce((sum, m) => sum + m.totalPayouts, 0);
+    const totalMembers = team.members.length;
+    const averageHoursPerMember = totalMembers > 0 ? totalHoursWorked / totalMembers : 0;
+    const averagePayoutPerMember = totalMembers > 0 ? totalPayouts / totalMembers : 0;
+
+    return {
+      teamId: team.id,
+      teamName: team.name,
+      totalMembers,
+      totalHoursWorked,
+      totalPayouts,
+      averageHoursPerMember,
+      averagePayoutPerMember,
+      members: memberAnalytics.sort((a, b) => b.totalHoursWorked - a.totalHoursWorked),
+      projects: projectAnalytics.sort((a, b) => b.totalHoursWorked - a.totalHoursWorked),
+      generatedAt: new Date(),
+    };
+  }
 }

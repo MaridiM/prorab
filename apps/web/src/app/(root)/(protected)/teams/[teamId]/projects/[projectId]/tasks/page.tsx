@@ -1,8 +1,9 @@
 'use client'
 
 import { use, useState } from 'react'
-import { useMutation, useQuery } from '@apollo/client'
-import { Loader2Icon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useMutation, useQuery } from '@apollo/client/react'
+import { Loader2Icon, CheckSquare } from 'lucide-react'
 import {
 	ProjectTasksDocument,
 	CreateTaskDocument,
@@ -16,7 +17,7 @@ import {
 	type UpdateTaskInput,
 } from '@/packages/api/graphql/__generated__/output'
 import { KanbanBoard, TaskForm } from '@/app/components/tasks'
-import { Button } from '@/packages/components/ui/button'
+import { Button, PageHeader } from '@/packages/components/ui'
 import { toast } from 'sonner'
 
 interface TasksPageProps {
@@ -33,6 +34,7 @@ interface TasksPageProps {
 export default function TasksPage({ params }: TasksPageProps) {
 	const resolvedParams = use(params)
 	const { projectId, teamId } = resolvedParams
+	const router = useRouter()
 
 	const [selectedTask, setSelectedTask] = useState<TaskFieldsFragment | null>(null)
 	const [isFormOpen, setIsFormOpen] = useState(false)
@@ -184,35 +186,38 @@ export default function TasksPage({ params }: TasksPageProps) {
 	const teamMembers = teamMembersData?.teamMembers || []
 
 	return (
-		<div className="space-y-6 p-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">Задачи</h1>
-					<p className="text-muted-foreground">
-						Управляйте задачами проекта с помощью Kanban доски
-					</p>
+		<div className="min-h-screen bg-background">
+			<PageHeader
+				title="Задачи"
+				subtitle="Управляйте задачами проекта с помощью Kanban доски"
+				icon={<CheckSquare className="w-5 h-5 text-primary" />}
+				backHref={`/teams/${teamId}/projects/${projectId}`}
+			/>
+			
+			<div className="container mx-auto px-4 py-6">
+				<div className="flex items-center justify-end mb-6">
+					<Button onClick={() => handleAddTask('TODO' as TaskStatus)}>
+						Создать задачу
+					</Button>
 				</div>
-				<Button onClick={() => handleAddTask('TODO' as TaskStatus)}>
-					Создать задачу
-				</Button>
+
+				<KanbanBoard
+					tasks={tasks}
+					onTaskMove={handleTaskMove}
+					onTaskClick={handleTaskClick}
+					onAddTask={handleAddTask}
+					isLoading={tasksLoading}
+				/>
+
+				<TaskForm
+					projectId={projectId}
+					task={selectedTask}
+					teamMembers={teamMembers}
+					open={isFormOpen}
+					onOpenChange={setIsFormOpen}
+					onSubmit={handleFormSubmit}
+				/>
 			</div>
-
-			<KanbanBoard
-				tasks={tasks}
-				onTaskMove={handleTaskMove}
-				onTaskClick={handleTaskClick}
-				onAddTask={handleAddTask}
-				isLoading={tasksLoading}
-			/>
-
-			<TaskForm
-				projectId={projectId}
-				task={selectedTask}
-				teamMembers={teamMembers}
-				open={isFormOpen}
-				onOpenChange={setIsFormOpen}
-				onSubmit={handleFormSubmit}
-			/>
 		</div>
 	)
 }

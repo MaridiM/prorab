@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common'
 import { TelegrafModule } from 'nestjs-telegraf'
 import { ConfigService } from '@nestjs/config'
-import { TelegramAuthService } from './telegram-auth.service'
-import { TelegramSupportService } from './telegram-support.service'
-import { FAQService } from './faq.service'
-import { TelegramBot } from './telegram.bot'
-import { TelegramSupportBot } from './telegram-support.bot'
+import { TelegramOAuthBotModule } from './telegram-oauth-bot.module'
+import { TelegramSupportBotModule } from './telegram-support-bot.module'
 import { PrismaModule } from '../../core/prisma/prisma.module'
 import { UsersModule } from '../users/users.module'
+import { session } from 'telegraf'
 
 @Module({
 	imports: [
@@ -25,10 +23,8 @@ import { UsersModule } from '../users/users.module'
 
 				return {
 					token: botToken,
-					launchOptions: {
-						// Development: polling
-						// Production: webhook будет настроен отдельно
-					},
+					middlewares: [session()],
+					include: [TelegramOAuthBotModule], // Only include OAuth bot handlers
 				}
 			},
 			inject: [ConfigService],
@@ -39,33 +35,42 @@ import { UsersModule } from '../users/users.module'
 			useFactory: (config: ConfigService) => {
 				const botToken = config.get<string>('telegramSupport.botToken')
 
-				if (!botToken) {
-					console.warn(
-						'TELEGRAM_SUPPORT_BOT_TOKEN is not set. Support bot will not be available.',
+				if (!botToken || botToken === 'dummy' || botToken.trim() === '') {
+					const logger = new (require('@nestjs/common').Logger)('TelegramModule')
+					logger.error(
+						'❌ TELEGRAM_SUPPORT_BOT_TOKEN is not set or invalid!',
 					)
-					// Return minimal config without launchOptions
+					logger.error(
+						'   Support bot will NOT work. Please set TELEGRAM_SUPPORT_BOT_TOKEN in .env',
+					)
+					// Return dummy token but log error - module will initialize but bot won't work
 					return {
 						token: 'dummy',
 					}
 				}
 
+				const logger = new (require('@nestjs/common').Logger)('TelegramModule')
+				logger.log(`✅ Support Bot token configured (length: ${botToken.length})`)
+
 				return {
 					token: botToken,
-					// launchOptions: {} causes type error, omit it for default polling
+					middlewares: [session()],
+					include: [TelegramSupportBotModule], // Only include Support bot handlers
 				}
 			},
 			inject: [ConfigService],
 		}),
 		PrismaModule,
 		UsersModule,
+		TelegramOAuthBotModule, // Import OAuth bot module (exports TelegramAuthService)
+		TelegramSupportBotModule, // Import Support bot module (exports TelegramSupportService, FAQService)
 	],
 	providers: [
-		TelegramAuthService,
-		TelegramSupportService,
-		FAQService,
-		TelegramBot, // OAuth Bot handler
-		TelegramSupportBot, // Support Bot handler
+		// Services are provided by their respective bot modules
 	],
-	exports: [TelegramAuthService, TelegramSupportService, FAQService],
+	exports: [
+		TelegramOAuthBotModule, // Re-export to make TelegramAuthService available
+		TelegramSupportBotModule, // Re-export to make TelegramSupportService and FAQService available
+	],
 })
 export class TelegramModule {}

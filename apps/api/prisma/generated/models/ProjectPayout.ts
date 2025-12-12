@@ -45,6 +45,8 @@ export type ProjectPayoutMinAggregateOutputType = {
   status: string | null
   paidAt: Date | null
   notes: string | null
+  paymentMethod: string | null
+  receiptUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +60,8 @@ export type ProjectPayoutMaxAggregateOutputType = {
   status: string | null
   paidAt: Date | null
   notes: string | null
+  paymentMethod: string | null
+  receiptUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -71,6 +75,8 @@ export type ProjectPayoutCountAggregateOutputType = {
   status: number
   paidAt: number
   notes: number
+  paymentMethod: number
+  receiptUrl: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -96,6 +102,8 @@ export type ProjectPayoutMinAggregateInputType = {
   status?: true
   paidAt?: true
   notes?: true
+  paymentMethod?: true
+  receiptUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -109,6 +117,8 @@ export type ProjectPayoutMaxAggregateInputType = {
   status?: true
   paidAt?: true
   notes?: true
+  paymentMethod?: true
+  receiptUrl?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -122,6 +132,8 @@ export type ProjectPayoutCountAggregateInputType = {
   status?: true
   paidAt?: true
   notes?: true
+  paymentMethod?: true
+  receiptUrl?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -222,6 +234,8 @@ export type ProjectPayoutGroupByOutputType = {
   status: string
   paidAt: Date | null
   notes: string | null
+  paymentMethod: string | null
+  receiptUrl: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProjectPayoutCountAggregateOutputType | null
@@ -258,6 +272,8 @@ export type ProjectPayoutWhereInput = {
   status?: Prisma.StringFilter<"ProjectPayout"> | string
   paidAt?: Prisma.DateTimeNullableFilter<"ProjectPayout"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  receiptUrl?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
@@ -273,6 +289,8 @@ export type ProjectPayoutOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiptUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   project?: Prisma.ProjectOrderByWithRelationInput
@@ -291,6 +309,8 @@ export type ProjectPayoutWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"ProjectPayout"> | string
   paidAt?: Prisma.DateTimeNullableFilter<"ProjectPayout"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  receiptUrl?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
@@ -306,6 +326,8 @@ export type ProjectPayoutOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  receiptUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProjectPayoutCountOrderByAggregateInput
@@ -327,6 +349,8 @@ export type ProjectPayoutScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"ProjectPayout"> | string
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ProjectPayout"> | Date | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"ProjectPayout"> | string | null
+  paymentMethod?: Prisma.StringNullableWithAggregatesFilter<"ProjectPayout"> | string | null
+  receiptUrl?: Prisma.StringNullableWithAggregatesFilter<"ProjectPayout"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProjectPayout"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProjectPayout"> | Date | string
 }
@@ -338,6 +362,8 @@ export type ProjectPayoutCreateInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutPayoutsInput
@@ -353,6 +379,8 @@ export type ProjectPayoutUncheckedCreateInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -364,6 +392,8 @@ export type ProjectPayoutUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutPayoutsNestedInput
@@ -379,6 +409,8 @@ export type ProjectPayoutUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -392,6 +424,8 @@ export type ProjectPayoutCreateManyInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -403,6 +437,8 @@ export type ProjectPayoutUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -416,6 +452,8 @@ export type ProjectPayoutUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -429,6 +467,8 @@ export type ProjectPayoutCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  receiptUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -447,6 +487,8 @@ export type ProjectPayoutMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  receiptUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -460,6 +502,8 @@ export type ProjectPayoutMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
+  receiptUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -586,6 +630,8 @@ export type ProjectPayoutCreateWithoutMemberInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutPayoutsInput
@@ -599,6 +645,8 @@ export type ProjectPayoutUncheckedCreateWithoutMemberInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -641,6 +689,8 @@ export type ProjectPayoutScalarWhereInput = {
   status?: Prisma.StringFilter<"ProjectPayout"> | string
   paidAt?: Prisma.DateTimeNullableFilter<"ProjectPayout"> | Date | string | null
   notes?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
+  receiptUrl?: Prisma.StringNullableFilter<"ProjectPayout"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProjectPayout"> | Date | string
 }
@@ -652,6 +702,8 @@ export type ProjectPayoutCreateWithoutProjectInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   member: Prisma.TeamMemberCreateNestedOneWithoutPayoutsInput
@@ -665,6 +717,8 @@ export type ProjectPayoutUncheckedCreateWithoutProjectInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -703,6 +757,8 @@ export type ProjectPayoutCreateManyMemberInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -714,6 +770,8 @@ export type ProjectPayoutUpdateWithoutMemberInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutPayoutsNestedInput
@@ -727,6 +785,8 @@ export type ProjectPayoutUncheckedUpdateWithoutMemberInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -739,6 +799,8 @@ export type ProjectPayoutUncheckedUpdateManyWithoutMemberInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -751,6 +813,8 @@ export type ProjectPayoutCreateManyProjectInput = {
   status?: string
   paidAt?: Date | string | null
   notes?: string | null
+  paymentMethod?: string | null
+  receiptUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -762,6 +826,8 @@ export type ProjectPayoutUpdateWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   member?: Prisma.TeamMemberUpdateOneRequiredWithoutPayoutsNestedInput
@@ -775,6 +841,8 @@ export type ProjectPayoutUncheckedUpdateWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -787,6 +855,8 @@ export type ProjectPayoutUncheckedUpdateManyWithoutProjectInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  receiptUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -802,6 +872,8 @@ export type ProjectPayoutSelect<ExtArgs extends runtime.Types.Extensions.Interna
   status?: boolean
   paidAt?: boolean
   notes?: boolean
+  paymentMethod?: boolean
+  receiptUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -817,6 +889,8 @@ export type ProjectPayoutSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   paidAt?: boolean
   notes?: boolean
+  paymentMethod?: boolean
+  receiptUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -832,6 +906,8 @@ export type ProjectPayoutSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   paidAt?: boolean
   notes?: boolean
+  paymentMethod?: boolean
+  receiptUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -847,11 +923,13 @@ export type ProjectPayoutSelectScalar = {
   status?: boolean
   paidAt?: boolean
   notes?: boolean
+  paymentMethod?: boolean
+  receiptUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProjectPayoutOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "memberId" | "calculatedAmount" | "actualAmount" | "status" | "paidAt" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["projectPayout"]>
+export type ProjectPayoutOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "memberId" | "calculatedAmount" | "actualAmount" | "status" | "paidAt" | "notes" | "paymentMethod" | "receiptUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["projectPayout"]>
 export type ProjectPayoutInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   member?: boolean | Prisma.TeamMemberDefaultArgs<ExtArgs>
@@ -880,6 +958,8 @@ export type $ProjectPayoutPayload<ExtArgs extends runtime.Types.Extensions.Inter
     status: string
     paidAt: Date | null
     notes: string | null
+    paymentMethod: string | null
+    receiptUrl: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["projectPayout"]>
@@ -1315,6 +1395,8 @@ export interface ProjectPayoutFieldRefs {
   readonly status: Prisma.FieldRef<"ProjectPayout", 'String'>
   readonly paidAt: Prisma.FieldRef<"ProjectPayout", 'DateTime'>
   readonly notes: Prisma.FieldRef<"ProjectPayout", 'String'>
+  readonly paymentMethod: Prisma.FieldRef<"ProjectPayout", 'String'>
+  readonly receiptUrl: Prisma.FieldRef<"ProjectPayout", 'String'>
   readonly createdAt: Prisma.FieldRef<"ProjectPayout", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProjectPayout", 'DateTime'>
 }

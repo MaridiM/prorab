@@ -620,7 +620,24 @@ export class TelegramSupportBot {
 	private async showFAQCategories(ctx: Context): Promise<void> {
 		const categories = await this.faqService.getCategories()
 
-		const categoryButtons = categories.map((category) => [
+		// Sort categories in a consistent order
+		const categoryOrder: Record<string, number> = {
+			projects: 1,
+			teams: 2,
+			expenses: 3,
+			finances: 3, // Same as expenses
+			photo_reports: 4,
+			'photo-reports': 4, // Support both formats
+			technical: 5,
+		}
+
+		const sortedCategories = [...categories].sort((a, b) => {
+			const orderA = categoryOrder[a] ?? 999
+			const orderB = categoryOrder[b] ?? 999
+			return orderA - orderB
+		})
+
+		const categoryButtons = sortedCategories.map((category) => [
 			Markup.button.callback(
 				this.translateCategory(category),
 				`faq_category_${category}`,
@@ -892,10 +909,20 @@ export class TelegramSupportBot {
 			projects: '1️⃣ Проекты и команды',
 			teams: '2️⃣ Команды',
 			finances: '3️⃣ Расходы и финансы',
+			expenses: '3️⃣ Расходы и финансы', // Альтернативное название для expenses
 			'photo-reports': '4️⃣ Фотоотчёты',
+			photo_reports: '4️⃣ Фотоотчёты', // Поддержка snake_case
 			technical: '5️⃣ Технические проблемы',
 		}
-		return map[category] || category
+		
+		const translated = map[category]
+		if (!translated) {
+			// Если категория не найдена в маппинге, возвращаем с предупреждением
+			this.logger.warn(`[ProRabSupportBot] Unknown category: ${category}`)
+			return category // Fallback to original category name
+		}
+		
+		return translated
 	}
 
 	private formatDate(date: Date): string {

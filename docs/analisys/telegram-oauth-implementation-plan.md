@@ -59,7 +59,7 @@
        ▼
 ┌─────────────────────────────┐
 │ Frontend: Open Deep Link    │
-│ t.me/ProRabBot?start=auth_* │
+│ t.me/ProRabSpaceBot?start=auth_* │
 └──────┬──────────────────────┘
        │
        ▼
@@ -183,7 +183,7 @@ export const appConfig = () => ({
   // НОВАЯ секция: Telegram Bot
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN ?? '',
-    botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabBot',
+    botUsername: process.env.TELEGRAM_BOT_USERNAME ?? 'ProRabSpaceBot',
     authTokenTtl: parseInt(process.env.TELEGRAM_AUTH_TOKEN_TTL ?? '600000', 10), // 10 min
   },
 })
@@ -193,7 +193,7 @@ export const appConfig = () => ({
 ```env
 # ==================== Telegram Bot ====================
 TELEGRAM_BOT_TOKEN=получить_от_@BotFather
-TELEGRAM_BOT_USERNAME=ProRabBot
+TELEGRAM_BOT_USERNAME=ProRabSpaceBot
 TELEGRAM_AUTH_TOKEN_TTL=600000
 ```
 
@@ -201,7 +201,7 @@ TELEGRAM_AUTH_TOKEN_TTL=600000
 1. Открыть Telegram → найти @BotFather
 2. Отправить `/newbot`
 3. Ввести имя: "ProRab.space Bot"
-4. Ввести username: `ProRabBot` (или доступную альтернативу)
+4. Ввести username: `ProRabSpaceBot`
 5. Скопировать токен и добавить в `.env`
 
 ---
@@ -993,7 +993,7 @@ describe('TelegramAuthService', () => {
   it('should generate auth token with valid deepLink', async () => {
     const result = await service.generateAuthToken();
     expect(result.token).toHaveLength(32);
-    expect(result.deepLink).toContain('t.me/ProRabBot?start=auth_');
+    expect(result.deepLink).toContain('t.me/ProRabSpaceBot?start=auth_');
   });
 
   it('should link token to chat ID', async () => {
@@ -1067,7 +1067,7 @@ describe('Telegram OAuth Flow (E2E)', () => {
 
     const { token, deepLink } = body.data.initTelegramAuth;
     expect(token).toBeDefined();
-    expect(deepLink).toContain('t.me/ProRabBot?start=auth_');
+    expect(deepLink).toContain('t.me/ProRabSpaceBot?start=auth_');
 
     // 2. Simulate bot /start (в реальности это делает Telegram)
     await telegramAuthService.linkAuthToken(token, 'mock_chat_id_12345');
@@ -1487,7 +1487,7 @@ curl "https://api.telegram.org/bot<YOUR_TOKEN>/getWebhookInfo"
 
 ### Added
 - **Telegram OAuth Authentication** - Вход через Telegram без пароля
-- Telegram bot integration (@ProRabBot)
+- Telegram bot integration (@ProRabSpaceBot)
 - Deep link auth flow с polling mechanism
 - OAuth provider support в User model (telegram, google, github)
 - `TelegramAuthToken` model для temporary auth tokens

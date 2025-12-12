@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/pac
 import { Alert, AlertDescription } from '@/packages/components/ui/alert';
 import { toast } from 'sonner';
 import { JoinTeamByInviteDocument } from '@/packages/api/graphql/__generated__/output';
-import { useAuth } from '@/packages/providers/auth-provider';
+import { useAuth } from '@/packages/libs/auth';
 
 interface PageProps {
   params: Promise<{

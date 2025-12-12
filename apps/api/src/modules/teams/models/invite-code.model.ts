@@ -31,16 +31,10 @@ export class InviteCode {
   @Field(() => Team, { nullable: true, description: 'Команда' })
   team?: Team;
 
-  // Computed fields
+  // Computed fields - будут разрешены через FieldResolver
   @Field(() => Boolean, { description: 'Является ли код активным (не истёк и не использован)' })
-  get isActive(): boolean {
-    const now = new Date();
-    return !this.usedBy && this.expiresAt > now;
-  }
+  isActive: boolean;
 
   @Field(() => String, { description: 'Полная ссылка приглашения' })
-  get inviteUrl(): string {
-    // URL будет формироваться на фронтенде с правильным хостом
-    return `/invite/${this.code}`;
-  }
+  inviteUrl: string;
 }

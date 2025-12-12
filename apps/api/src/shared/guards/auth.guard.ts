@@ -28,8 +28,22 @@ export class AuthGuard implements CanActivate {
 			return true
 		}
 
+		// Get GraphQL context (works for both HTTP and GraphQL contexts)
 		const ctx = GqlExecutionContext.create(context)
-		const { req } = ctx.getContext()
+		const gqlContext = ctx.getContext()
+
+		// If no GraphQL context (e.g., Telegram bot, WebSocket, RPC), skip auth
+		if (!gqlContext || !gqlContext.req) {
+			// For non-HTTP contexts (Telegram, WebSocket, RPC), skip auth
+			const contextType = context.getType()
+			if (contextType !== 'http') {
+				return true // Skip for non-HTTP contexts
+			}
+			// For HTTP without context, require auth
+			throw new UnauthorizedException('Требуется авторизация')
+		}
+
+		const { req } = gqlContext
 
 		const sessionToken = this.extractSessionToken(req)
 		if (!sessionToken) {

@@ -65,6 +65,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     fetchPolicy: 'network-only'
   })
 
+  // Check if session token exists (quick check before loading user)
+  const hasSessionToken = useCallback(() => {
+    if (typeof document === 'undefined') return false
+    return document.cookie.split(';').some(c => c.trim().startsWith('session_token='))
+  }, [])
+
   const refreshUser = useCallback(async () => {
     try {
       const { data, error } = await fetchMe()
@@ -92,6 +98,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshUser()
   }, [refreshUser])
 
+  // Quick redirect for authenticated users on auth pages (before user loads)
+  useEffect(() => {
+    if (isLoading && hasSessionToken()) {
+      const pathname = window.location.pathname
+      // If we have a session token but user is still loading, and we're on auth pages
+      // redirect immediately to prevent showing login page
+      if (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) {
+        router.replace('/dashboard')
+      }
+    }
+  }, [isLoading, hasSessionToken, router])
+
   // Auto-redirect based on onboarding status and auth pages
   useEffect(() => {
     if (isLoading) return
@@ -103,13 +121,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Redirect from auth pages if already authenticated
       if (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) {
         const redirectPath = !user.hasCompletedOnboarding ? '/onboarding' : '/dashboard'
-        router.push(redirectPath)
+        // Use replace to avoid adding to history and prevent loops
+        router.replace(redirectPath)
         return
       }
 
       // If on /onboarding and already completed - redirect to dashboard
       if (pathname.startsWith('/onboarding') && user.hasCompletedOnboarding) {
-        router.push('/dashboard')
+        router.replace('/dashboard')
         return
       }
 
@@ -118,7 +137,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         (pathname.startsWith('/dashboard') || pathname.startsWith('/teams')) &&
         !user.hasCompletedOnboarding
       ) {
-        router.push('/onboarding')
+        router.replace('/onboarding')
+        return
+      }
+    } else {
+      // If user is not authenticated and on protected pages - redirect to login
+      // But don't redirect if already on auth pages or public pages
+      if (
+        !pathname.startsWith('/auth') &&
+        !pathname.startsWith('/api') &&
+        pathname !== '/' &&
+        (pathname.startsWith('/dashboard') || pathname.startsWith('/teams') || pathname.startsWith('/onboarding'))
+      ) {
+        router.replace('/auth/login')
         return
       }
     }

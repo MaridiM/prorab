@@ -152,6 +152,23 @@ input CreateTaskInput {
   title: String!
 }
 
+input CreateWorkLogInput {
+  """Date of work (ISO string)"""
+  date: String!
+
+  """Description of work done"""
+  description: String
+
+  """Hours worked (0.01 - 24.00)"""
+  hours: Float!
+
+  """Team member ID"""
+  memberId: ID!
+
+  """Project ID"""
+  projectId: ID!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -185,6 +202,34 @@ type Expense {
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+type InviteCode {
+  """Уникальный код приглашения"""
+  code: String!
+
+  """Дата создания"""
+  createdAt: DateTime!
+
+  """Дата истечения срока действия"""
+  expiresAt: DateTime!
+  id: ID!
+
+  """Полная ссылка приглашения"""
+  inviteUrl: String!
+
+  """Является ли код активным (не истёк и не использован)"""
+  isActive: Boolean!
+
+  """Команда"""
+  team: Team
+  teamId: ID!
+
+  """Дата использования кода"""
+  usedAt: DateTime
+
+  """ID пользователя, использовавшего код"""
+  usedBy: ID
 }
 
 """
@@ -251,6 +296,9 @@ type Mutation {
   """Создать расход"""
   createExpense(input: CreateExpenseInput!): Expense!
 
+  """Создание ссылки-приглашения в команду (только для владельца)"""
+  createInviteLink(expiresInDays: Int = 7, teamId: ID!): InviteCode!
+
   """Create or update payout (mark as paid) (owner only)"""
   createPayout(input: CreatePayoutInput!): ProjectPayout!
 
@@ -264,11 +312,17 @@ type Mutation {
   """Создать задачу"""
   createTask(input: CreateTaskInput!): Task!
 
+  """Create a new work log entry (owner or self)"""
+  createWorkLog(input: CreateWorkLogInput!): WorkLog!
+
   """Удаление аккаунта пользователя"""
   deleteAccount: Boolean!
 
   """Удалить расход"""
   deleteExpense(id: ID!): Expense!
+
+  """Удаление кода приглашения (только для владельца)"""
+  deleteInviteCode(codeId: ID!): Boolean!
 
   """Удалить фото из фотоотчёта"""
   deletePhotoFromReport(photoId: String!): Boolean!
@@ -278,9 +332,15 @@ type Mutation {
 
   """Удалить задачу"""
   deleteTask(id: ID!): Task!
+
+  """Delete a work log entry (owner or creator)"""
+  deleteWorkLog(id: ID!): Boolean!
   forgotPassword(email: String!): Boolean!
   initTelegramAuth: TelegramAuthPayload!
   initializePayment(subscriptionId: String!): PaymentUrl!
+
+  """Присоединение к команде по коду приглашения"""
+  joinTeamByInvite(code: String!): TeamMember!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
 
@@ -311,6 +371,9 @@ type Mutation {
   updateMemberSalary(input: UpdateMemberSalaryInput!): TeamMember!
   updateNotificationSettings(input: UpdateNotificationSettingsInput!): NotificationSettings!
 
+  """Update payment method and receipt for payout (owner only)"""
+  updatePayoutPayment(input: UpdatePayoutPaymentInput!): ProjectPayout!
+
   """Обновить подпись фото"""
   updatePhotoCaption(caption: String!, photoId: String!): ReportPhoto!
 
@@ -331,6 +394,9 @@ type Mutation {
 
   """Обновление настроек команды (только для владельца)"""
   updateTeam(input: UpdateTeamInput!): Team!
+
+  """Update a work log entry (owner or creator)"""
+  updateWorkLog(input: UpdateWorkLogInput!): WorkLog!
 
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
@@ -378,6 +444,21 @@ type Payment {
   teamId: String!
   updatedAt: DateTime!
   yookassaPaymentId: String!
+}
+
+"""Метод оплаты для выплат персоналу"""
+enum PaymentMethod {
+  """Банковская карта"""
+  CARD
+
+  """Наличные"""
+  CASH
+
+  """Система быстрых платежей (СБП)"""
+  SBP
+
+  """Банковский перевод"""
+  TRANSFER
 }
 
 enum PaymentStatus {
@@ -533,9 +614,15 @@ type ProjectPayout {
   """Date when payout was paid"""
   paidAt: DateTime
 
+  """Payment method used for this payout"""
+  paymentMethod: PaymentMethod
+
   """Project this payout belongs to"""
   project: Project!
   projectId: ID!
+
+  """URL to receipt/proof of payment"""
+  receiptUrl: String
 
   """Payout status: pending, paid"""
   status: String!
@@ -611,6 +698,9 @@ type Query {
 
   """Получить задачи, назначенные участнику"""
   memberTasks(assigneeId: ID!): [Task!]!
+
+  """Get all work logs for a team member (owner or self)"""
+  memberWorkLogs(memberId: ID!): [WorkLog!]!
   mySubscription: Subscription
 
   """Получить все задачи пользователя (созданные или назначенные)"""
@@ -641,6 +731,9 @@ type Query {
   """Получить задачи проекта, сгруппированные по статусу (для Kanban)"""
   projectTasks(projectId: ID!): TasksByStatus!
 
+  """Get all work logs for a project (owner or team member)"""
+  projectWorkLogs(projectId: ID!): [WorkLog!]!
+
   """Получить проекты команды"""
   projectsByTeam(filter: ProjectFilterInput, teamId: ID!): [Project!]!
 
@@ -655,9 +748,15 @@ type Query {
   """Получение команды по ID"""
   team(id: ID!): Team
 
+  """Получение кодов приглашения команды (только для владельца)"""
+  teamInvites(teamId: ID!): [InviteCode!]!
+
   """Получение участников команды"""
   teamMembers(teamId: ID!): [TeamMember!]!
   usageStats(teamId: String!): UsageStats!
+
+  """Get work logs for a date range"""
+  workLogsByDateRange(endDate: DateTime!, projectId: ID!, startDate: DateTime!): [WorkLog!]!
 }
 
 input RegisterInput {
@@ -840,6 +939,9 @@ type TeamMember {
   """Тип зарплаты: fixed, percentage, none"""
   salaryType: String!
 
+  """Статистика участника"""
+  stats: TeamMemberStats
+
   """Команда"""
   team: Team
   teamId: ID!
@@ -847,6 +949,23 @@ type TeamMember {
   """Пользователь"""
   user: User
   userId: ID!
+}
+
+type TeamMemberStats {
+  """Средняя выплата на проект"""
+  averagePayoutPerProject: Float!
+
+  """Количество завершённых выплат"""
+  completedPayoutsCount: Int!
+
+  """Количество ожидающих выплат"""
+  pendingPayoutsCount: Int!
+
+  """Количество проектов, в которых участвует"""
+  projectCount: Int!
+
+  """Общая сумма всех выплат за всё время"""
+  totalPayouts: Float!
 }
 
 type TelegramAuthPayload {
@@ -899,6 +1018,17 @@ input UpdateNotificationSettingsInput {
   appSms: Boolean
   marketingEmail: Boolean
   marketingPush: Boolean
+}
+
+input UpdatePayoutPaymentInput {
+  """Метод оплаты"""
+  paymentMethod: PaymentMethod!
+
+  """ID выплаты"""
+  payoutId: ID!
+
+  """URL чека/квитанции об оплате"""
+  receiptUrl: String
 }
 
 input UpdatePhotoReportInput {
@@ -973,6 +1103,20 @@ input UpdateTeamInput {
   teamId: ID!
 }
 
+input UpdateWorkLogInput {
+  """Date of work (ISO string)"""
+  date: String
+
+  """Description of work done"""
+  description: String
+
+  """Hours worked (0.01 - 24.00)"""
+  hours: Float
+
+  """Work log ID"""
+  id: ID!
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -1001,5 +1145,23 @@ type User {
   id: ID!
   notificationSettings: NotificationSettings
   phone: String
+  updatedAt: DateTime!
+}
+
+type WorkLog {
+  createdAt: DateTime!
+  createdById: ID!
+  date: DateTime!
+
+  """Description of work done"""
+  description: String
+
+  """Hours worked (max 999.99)"""
+  hours: Float!
+  id: ID!
+  member: TeamMember
+  memberId: ID!
+  project: Project
+  projectId: ID!
   updatedAt: DateTime!
 }

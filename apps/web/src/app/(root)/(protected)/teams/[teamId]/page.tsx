@@ -337,6 +337,13 @@ export default function TeamDashboardPage() {
 
 						{/* Actions */}
 						<div className="flex items-center gap-2">
+							<Button
+								variant="outline"
+								onClick={() => router.push(`/teams/${teamId}/people`)}
+							>
+								<Users className="w-4 h-4 mr-2" />
+								Люди
+							</Button>
 							<Button onClick={handleCreateProject}>
 								<Plus className="w-4 h-4 mr-2" />
 								Новый проект

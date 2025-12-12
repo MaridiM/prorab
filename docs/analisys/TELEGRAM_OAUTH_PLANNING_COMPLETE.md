@@ -57,7 +57,7 @@ User clicks "Войти через Telegram" on website
   ↓
 Backend generates auth token (nanoid, 10 min TTL)
   ↓
-Frontend opens deep link: t.me/ProRabBot?start=auth_{token}
+Frontend opens deep link: t.me/ProRabSpaceBot?start=auth_{token}
   ↓
 User clicks "Start" in Telegram bot
   ↓

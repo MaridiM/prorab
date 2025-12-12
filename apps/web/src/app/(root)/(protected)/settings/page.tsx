@@ -187,6 +187,7 @@ import {
 } from '@/packages/api/graphql'
 import { useAuth } from '@/packages/libs/auth'
 import { useToast } from '@/packages/hooks'
+import { APP_VERSION } from '@/packages/constants/app'
 import {
 	Button,
 	Input,
@@ -648,14 +649,14 @@ export default function SettingsPage() {
 										key={tab.id}
 										onClick={() => setActiveTab(tab.id)}
 										className={cn(
-											'flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap text-sm',
+											'flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap text-sm shrink-0',
 											activeTab === tab.id
 												? 'bg-card text-foreground shadow-sm'
 												: 'text-muted-foreground hover:text-foreground'
 										)}
 									>
-										<tab.icon className="w-4 h-4" />
-										<span className="hidden xs:inline sm:inline">{tab.label}</span>
+										<tab.icon className="w-4 h-4 shrink-0" />
+										<span>{tab.label}</span>
 									</button>
 								))}
 							</div>
@@ -1821,7 +1822,7 @@ export default function SettingsPage() {
 
 										<div className="p-6 grid gap-4 sm:grid-cols-2">
 											<a
-												href="https://t.me/prorab_support"
+												href="https://t.me/ProRabSupportBot"
 												target="_blank"
 												rel="noopener noreferrer"
 												className="p-4 rounded-xl border border-border/50 hover:border-[#2AABEE]/50 hover:bg-[#2AABEE]/5 transition-all flex items-center gap-4"
@@ -1833,7 +1834,7 @@ export default function SettingsPage() {
 												</div>
 												<div>
 													<p className="font-medium">Telegram</p>
-													<p className="text-sm text-muted-foreground">@prorab_support</p>
+													<p className="text-sm text-muted-foreground">@ProRabSupportBot</p>
 												</div>
 												<ExternalLink className="w-4 h-4 text-muted-foreground ml-auto" />
 											</a>
@@ -1928,7 +1929,7 @@ export default function SettingsPage() {
 												<Building2 className="w-10 h-10 text-white" />
 											</div>
 											<h1 className="text-2xl font-bold mb-1">ProRab</h1>
-											<p className="text-muted-foreground mb-4">Версия 1.0.0</p>
+											<p className="text-muted-foreground mb-4">Версия {APP_VERSION}</p>
 											<p className="text-sm text-muted-foreground max-w-md mx-auto">
 												Приложение для малых строительных и ремонтных бригад. Учёт расходов, фотоотчёты клиентам, расчёт зарплаты — всё в одном месте.
 											</p>

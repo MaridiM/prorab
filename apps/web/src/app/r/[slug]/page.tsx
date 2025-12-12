@@ -59,18 +59,32 @@ export default async function PublicPhotoReportPage({ params }: PageProps) {
 	const client = getServerClient()
 
 	try {
-		const { data } = await client.query({
+		const { data, errors } = await client.query({
 			query: PublicPhotoReportDocument,
 			variables: { slug },
 		})
 
+		// Check for GraphQL errors
+		if (errors && errors.length > 0) {
+			console.error('[PublicPhotoReportPage] GraphQL errors:', errors);
+			notFound()
+		}
+
 		if (!data || !data.publicPhotoReport) {
+			console.warn(`[PublicPhotoReportPage] Report not found for slug: ${slug}`);
 			notFound()
 		}
 
 		return <PublicReportView report={data.publicPhotoReport as any} />
-	} catch (error) {
-		console.error('[PublicPhotoReportPage] Error fetching report:', error);
+	} catch (error: any) {
+		// Log more details about the error
+		if (error?.networkError) {
+			console.error('[PublicPhotoReportPage] Network error:', error.networkError);
+		} else if (error?.graphQLErrors) {
+			console.error('[PublicPhotoReportPage] GraphQL errors:', error.graphQLErrors);
+		} else {
+			console.error('[PublicPhotoReportPage] Error fetching report:', error);
+		}
 		notFound()
 	}
 }

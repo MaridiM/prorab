@@ -58,6 +58,7 @@ export const ModelName = {
   TelegramAuthToken: 'TelegramAuthToken',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
+  WorkLog: 'WorkLog',
   TeamMember: 'TeamMember',
   InviteCode: 'InviteCode',
   Project: 'Project',
@@ -187,11 +188,28 @@ export const ProjectPayoutScalarFieldEnum = {
   status: 'status',
   paidAt: 'paidAt',
   notes: 'notes',
+  paymentMethod: 'paymentMethod',
+  receiptUrl: 'receiptUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProjectPayoutScalarFieldEnum = (typeof ProjectPayoutScalarFieldEnum)[keyof typeof ProjectPayoutScalarFieldEnum]
+
+
+export const WorkLogScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  memberId: 'memberId',
+  date: 'date',
+  hours: 'hours',
+  description: 'description',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkLogScalarFieldEnum = (typeof WorkLogScalarFieldEnum)[keyof typeof WorkLogScalarFieldEnum]
 
 
 export const TeamMemberScalarFieldEnum = {

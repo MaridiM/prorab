@@ -10,8 +10,8 @@
 Для полноценной работы ProRab.space нужно создать **2 Telegram бота**:
 
 ### 1. **ProRab OAuth Bot** (основной)
-- **Назначение:** OAuth авторизация пользователей
-- **Username:** `@ProRabBot` или `@ProRabSpaceBot`
+- **Назначение:** OAuth авторизация пользователей и уведомления
+- **Username:** `@ProRabSpaceBot`
 - **Функции:**
   - Passwordless авторизация через deep links
   - Команды: /start, /help
@@ -35,15 +35,15 @@
 ```
 1. Открыть Telegram → найти @BotFather
 2. Отправить: /newbot
-3. Ввести имя: ProRab Bot
-4. Ввести username: ProRabBot (или ProRabSpaceBot, если занят)
+3. Ввести имя: ProRab Space
+4. Ввести username: ProRabSpaceBot
 5. Получить токен: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
 6. Сохранить токен!
 ```
 
 **Настройка команд:**
 ```
-/setcommands → выбрать @ProRabBot
+/setcommands → выбрать @ProRabSpaceBot
 
 Отправить:
 start - Начать работу с ботом
@@ -52,7 +52,7 @@ help - Справка по использованию
 
 **Настройка описания:**
 ```
-/setdescription → выбрать @ProRabBot
+/setdescription → выбрать @ProRabSpaceBot
 
 Отправить:
 ProRab.space - управление строительными проектами.
@@ -61,7 +61,7 @@ ProRab.space - управление строительными проектам�
 
 **Настройка короткого описания:**
 ```
-/setabouttext → выбрать @ProRabBot
+/setabouttext → выбрать @ProRabSpaceBot
 
 Отправить:
 Бот для авторизации и уведомлений ProRab.space
@@ -69,7 +69,7 @@ ProRab.space - управление строительными проектам�
 
 **Настройка аватара (опционально):**
 ```
-/setuserpic → выбрать @ProRabBot
+/setuserpic → выбрать @ProRabSpaceBot
 → Отправить изображение (логотип ProRab)
 ```
 
@@ -112,7 +112,7 @@ cancel - Отменить текущее обращение
 ```env
 # ProRab OAuth Bot
 TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
-TELEGRAM_BOT_USERNAME=ProRabBot
+TELEGRAM_BOT_USERNAME=ProRabSpaceBot
 TELEGRAM_AUTH_TOKEN_TTL=600000  # 10 минут
 
 # ProRab Support Bot
@@ -125,13 +125,13 @@ TELEGRAM_SUPPORT_CHAT_ID=-1001234567890  # ID группы поддержки (�
 
 ## 🎯 Использование ботов
 
-### ProRab OAuth Bot (@ProRabBot)
+### ProRab OAuth Bot (@ProRabSpaceBot)
 
 **Сценарий 1: OAuth авторизация**
 ```
 User → Сайт prorab.space/auth/login
      → Нажимает "Войти через Telegram"
-     → Открывается t.me/ProRabBot?start=auth_XXXXX
+     → Открывается t.me/ProRabSpaceBot?start=auth_XXXXX
      → User нажимает "Start" в боте
      → Бот: "✅ Авторизация успешна!"
      → User автоматически залогинен на сайте
@@ -243,14 +243,14 @@ npm run start:dev
 # Должно быть: "TelegramBot initialized"
 
 # 3. Test bot manually
-# Открыть @ProRabBot в Telegram
+# Открыть @ProRabSpaceBot в Telegram
 # Отправить: /start
 # Проверить: Бот отвечает welcome message
 
 # 4. Test OAuth flow
 # Открыть: http://localhost:3000/auth/login
 # Нажать "Войти через Telegram"
-# Проверить: Открывается t.me/ProRabBot?start=auth_XXXXX
+# Проверить: Открывается t.me/ProRabSpaceBot?start=auth_XXXXX
 # Нажать "Start" в боте
 # Проверить: Бот отвечает "✅ Авторизация успешна!"
 # Проверить: Сайт автоматически логинит пользователя

@@ -181,6 +181,12 @@ export default function ProjectDetailsPage() {
 
 	// Update URL when tab changes
 	const handleTabChange = (tab: 'info' | 'expenses' | 'tasks' | 'reports' | 'payouts') => {
+		// Redirect to tasks page for tasks tab
+		if (tab === 'tasks') {
+			router.push(`/teams/${teamId}/projects/${projectId}/tasks`)
+			return
+		}
+		
 		setActiveTab(tab)
 		const newParams = new URLSearchParams(searchParams.toString())
 		newParams.set('tab', tab)
@@ -659,7 +665,7 @@ export default function ProjectDetailsPage() {
 		{ id: 'expenses' as const, label: 'Расходы', icon: Wallet },
 		{ id: 'reports' as const, label: 'Фотоотчёты', icon: Camera },
         ...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator }] : []),
-		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare, disabled: true },
+		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare },
 	]
 
 	return (
@@ -1026,30 +1032,6 @@ export default function ProjectDetailsPage() {
 						</motion.div>
 					)}
 
-					{/* Tasks Tab */}
-					{activeTab === 'tasks' && (
-						<motion.div
-							key="tasks"
-							initial="hidden"
-							animate="visible"
-							exit="hidden"
-							variants={fadeIn}
-						>
-							<Card>
-								<CardContent className="py-12">
-									<div className="text-center text-muted-foreground">
-										<CheckSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-										<p className="text-lg font-medium mb-2">
-											Раздел задач скоро будет доступен
-										</p>
-										<p className="text-sm">
-											Kanban-доска для управления задачами проекта
-										</p>
-									</div>
-								</CardContent>
-							</Card>
-						</motion.div>
-					)}
 
 					{/* Reports Tab */}
 					{activeTab === 'reports' && (

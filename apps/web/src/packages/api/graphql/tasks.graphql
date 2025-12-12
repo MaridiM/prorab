@@ -61,10 +61,6 @@ query MemberTasks($assigneeId: ID!) {
 query MyTasks {
 	myTasks {
 		...TaskFields
-		project {
-			id
-			name
-		}
 	}
 }
 

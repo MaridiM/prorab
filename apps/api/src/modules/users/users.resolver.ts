@@ -1,5 +1,5 @@
 import { Args, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql'
-import { UseGuards } from '@nestjs/common'
+import { UseGuards, UnauthorizedException } from '@nestjs/common'
 
 import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
@@ -15,7 +15,11 @@ export class UsersResolver {
 	constructor(private readonly usersService: UsersService) {}
 
 	@Query(() => User, { nullable: true })
+	@UseGuards(AuthGuard)
 	async me(@CurrentUser() currentUser: CurrentUserData): Promise<User | null> {
+		if (!currentUser?.id) {
+			return null
+		}
 		const user = await this.usersService.findById(currentUser.id)
 		return user as unknown as User | null
 	}
@@ -28,6 +32,9 @@ export class UsersResolver {
 		@CurrentUser() currentUser: CurrentUserData,
 		@Args('input') input: UpdateProfileInput,
 	): Promise<User> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
 		const user = await this.usersService.updateProfile(currentUser.id, input)
 		return user as unknown as User
 	}
@@ -37,6 +44,9 @@ export class UsersResolver {
 	})
 	@UseGuards(AuthGuard)
 	async deleteAccount(@CurrentUser() currentUser: CurrentUserData): Promise<boolean> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
 		await this.usersService.deleteAccount(currentUser.id)
 		return true
 	}
@@ -47,6 +57,9 @@ export class UsersResolver {
 		@CurrentUser() currentUser: CurrentUserData,
 		@Args('input') input: UpdateNotificationSettingsInput,
 	) {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
 		return this.usersService.updateNotificationSettings(currentUser.id, input)
 	}
 

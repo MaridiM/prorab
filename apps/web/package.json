@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.0.5",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
@@ -17,6 +17,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-popover": "^1.1.15",

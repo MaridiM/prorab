@@ -38,17 +38,17 @@ export function KanbanColumn({
 	const columnTitle = getColumnTitle(status)
 	const taskIds = tasks.map((task) => task.id)
 
-	// Цвета для разных статусов
+	// Цвета для разных статусов (верхняя граница)
 	const columnColors = {
-		TODO: 'border-l-slate-500',
-		IN_PROGRESS: 'border-l-blue-500',
-		DONE: 'border-l-green-500',
+		TODO: 'border-t-slate-500',
+		IN_PROGRESS: 'border-t-blue-500',
+		DONE: 'border-t-green-500',
 	}
 
 	return (
 		<Card
 			className={cn(
-				'flex flex-col h-full border-l-4 transition-colors',
+				'flex flex-col h-full border-t-4 transition-colors',
 				columnColors[status],
 				isOver && 'bg-accent/50'
 			)}

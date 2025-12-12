@@ -1,4 +1,5 @@
 export * from "./alert";
+export * from "./alert-dialog";
 export * from "./avatar";
 export * from "./badge";
 export * from "./button";
@@ -20,6 +21,7 @@ export * from "./select";
 export * from "./skeleton";
 export * from "./spinner";
 export * from "./stepper";
+export * from "./table";
 export * from "./team-logo";
 export * from "./textarea";
 export * from "./toast";

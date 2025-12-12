@@ -9,9 +9,9 @@
 
 Для ProRab.space создаются **2 Telegram бота**:
 
-### 1. ✅ ProRab OAuth Bot (@ProRabBot)
+### 1. ✅ ProRab OAuth Bot (@ProRabSpaceBot)
 **Статус:** Phase 1-4 завершены (готов к тестированию)
-**Назначение:** Passwordless авторизация пользователей
+**Назначение:** OAuth авторизация пользователей и уведомления
 **Время реализации:** 4 часа
 
 ### 2. 📋 ProRab Support Bot (@ProRabSupportBot)
@@ -41,7 +41,7 @@
 ```
 User → Click "Войти через Telegram"
      → Bot generates token
-     → Opens t.me/ProRabBot?start=auth_TOKEN
+     → Opens t.me/ProRabSpaceBot?start=auth_TOKEN
      → User clicks "Start" in bot
      → Bot links token with chat_id
      → Frontend polling detects completion
@@ -55,15 +55,15 @@ User → Click "Войти через Telegram"
 ```
 1. Открыть Telegram → @BotFather
 2. /newbot
-3. Имя: ProRab Bot
-4. Username: ProRabBot (или ProRabSpaceBot)
+3. Имя: ProRab Space
+4. Username: ProRabSpaceBot
 5. Получить токен: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
 ```
 
 #### Шаг 2: Настроить команды
 
 ```
-@BotFather → /setcommands → выбрать @ProRabBot
+@BotFather → /setcommands → выбрать @ProRabSpaceBot
 
 Отправить:
 start - Начать работу с ботом
@@ -75,7 +75,7 @@ help - Справка по использованию
 ```env
 # apps/api/.env
 TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
-TELEGRAM_BOT_USERNAME=ProRabBot
+TELEGRAM_BOT_USERNAME=ProRabSpaceBot
 TELEGRAM_AUTH_TOKEN_TTL=600000
 ```
 
@@ -163,7 +163,7 @@ Username: ProRabSupportBot
 | **Статус** | ✅ Реализован | 📋 Спланирован |
 | **Время реализации** | 4 часа | 24 часа (3 дня) |
 | **Назначение** | Авторизация | Поддержка |
-| **Username** | @ProRabBot | @ProRabSupportBot |
+| **Username** | @ProRabSpaceBot | @ProRabSupportBot |
 | **Команды** | /start, /help | /start, /help, /status, /cancel |
 | **Database models** | 1 (TelegramAuthToken) | 3 (Ticket, Message, FAQ) |
 | **Файлов кода** | 17 | ~25 (оценка) |
@@ -255,7 +255,7 @@ Bot: "📝 Обращение #1234 создано. Ожидайте ответ�
 ### Порядок действий
 
 **Сейчас (готово к тестированию):**
-1. ✅ Создать @ProRabBot через @BotFather
+1. ✅ Создать @ProRabSpaceBot через @BotFather
 2. ✅ Добавить токен в .env
 3. ✅ Протестировать OAuth flow
 4. ✅ Если работает → деплой на production

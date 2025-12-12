@@ -13,15 +13,8 @@ export default function TeamLayout({
   const { user, isLoading } = useAuth()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/auth/login')
-    }
-
-    if (!isLoading && user && !user.hasCompletedOnboarding) {
-      router.push('/onboarding')
-    }
-  }, [user, isLoading, router])
+  // Don't handle redirects here - AuthProvider handles all redirects
+  // This layout only checks if user exists before rendering children
 
   if (isLoading) {
     return (

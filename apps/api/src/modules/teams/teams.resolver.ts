@@ -1,4 +1,4 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Mutation, Query, Resolver, ResolveField } from '@nestjs/graphql';
 import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
@@ -9,6 +9,7 @@ import { OnboardingResult } from './models/onboarding-result.model';
 import { Team } from './models/team.model';
 import { TeamMember } from './models/team-member.model';
 import { InviteCode } from './models/invite-code.model';
+import { PersonnelAnalytics } from './models/personnel-analytics.model';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 
@@ -160,5 +161,50 @@ export class TeamsResolver {
     @CurrentUser() user: { id: string },
   ): Promise<boolean> {
     return this.teamsService.deleteInviteCode(user.id, codeId);
+  }
+
+  // ==================== ANALYTICS ====================
+
+  /**
+   * Query: получить аналитику по персоналу команды
+   * Только для владельца команды
+   */
+  @Query(() => PersonnelAnalytics, {
+    description: 'Get personnel analytics for a team (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async personnelAnalytics(
+    @Args('teamId', { type: () => ID }) teamId: string,
+    @CurrentUser() user: any,
+  ): Promise<PersonnelAnalytics> {
+    return this.teamsService.getPersonnelAnalytics(teamId, user.id);
+  }
+}
+
+/**
+ * GraphQL Resolver для InviteCode (вычисляемые поля)
+ */
+@Resolver(() => InviteCode)
+export class InviteCodeResolver {
+  /**
+   * Resolve поле isActive: проверяет, активен ли код (не использован и не истёк)
+   */
+  @ResolveField(() => Boolean)
+  isActive(inviteCode: InviteCode): boolean {
+    const now = new Date();
+    // expiresAt может быть Date или строкой из Prisma
+    const expiresAt = inviteCode.expiresAt instanceof Date 
+      ? inviteCode.expiresAt 
+      : new Date(inviteCode.expiresAt);
+    return !inviteCode.usedBy && expiresAt > now;
+  }
+
+  /**
+   * Resolve поле inviteUrl: возвращает полную ссылку приглашения
+   */
+  @ResolveField(() => String)
+  inviteUrl(inviteCode: InviteCode): string {
+    // URL будет формироваться на фронтенде с правильным хостом
+    return `/invite/${inviteCode.code}`;
   }
 }

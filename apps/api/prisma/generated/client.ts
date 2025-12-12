@@ -73,6 +73,11 @@ export type Team = Prisma.TeamModel
  */
 export type ProjectPayout = Prisma.ProjectPayoutModel
 /**
+ * Model WorkLog
+ * 
+ */
+export type WorkLog = Prisma.WorkLogModel
+/**
  * Model TeamMember
  * 
  */

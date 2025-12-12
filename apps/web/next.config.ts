@@ -52,7 +52,12 @@ const nextConfig: NextConfig = {
   //   "dev": "next dev --no-turbo"
   // or simply avoid passing `--experimental-turbopack`.
 
-  webpack(config) {
+  webpack(config, { dev }) {
+    // Disable source maps in development to avoid warnings
+    if (dev) {
+      config.devtool = false;
+    }
+
     // config.watchOptions = {
     //     poll: 1000, // Check for changes every 1000ms
     //     aggregateTimeout: 300, // Delay before rebuilding

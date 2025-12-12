@@ -33,7 +33,7 @@ export class TelegramAuthService {
 			data: { token, expiresAt },
 		})
 
-		const botUsername = this.config.get<string>('telegram.botUsername', 'ProRabBot')
+		const botUsername = this.config.get<string>('telegram.botUsername', 'ProRabSpaceBot')
 		const deepLink = `https://t.me/${botUsername}?start=auth_${token}`
 
 		this.logger.log(`Generated auth token: ${token.substring(0, 8)}...`)
