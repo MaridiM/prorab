@@ -157,6 +157,47 @@
 
 ---
 
+**Stage 9 Phase 2 Day 9: Time Tracking Frontend (2025-12-12)**
+
+**Frontend (3 files, ~350 строк):**
+- `apps/web/src/packages/api/graphql/work-logs.graphql` - GraphQL operations (70 lines)
+  - Fragment: WorkLogFields (id, projectId, memberId, date, hours, description, relations)
+  - Queries: ProjectWorkLogs, MemberWorkLogs, WorkLogsByDateRange
+  - Mutations: CreateWorkLog, UpdateWorkLog, DeleteWorkLog
+- `apps/web/src/app/(root)/(protected)/teams/[teamId]/projects/[projectId]/time-tracking/page.tsx` - Time Tracking page (280 lines)
+  - **URL:** `/teams/[teamId]/projects/[projectId]/time-tracking`
+  - **Stats Cards:** Total hours, Members count, Records count
+  - **Grouped Display:** Work logs grouped by team member
+  - **Table per Member:** Date, Hours, Description, Actions (Edit/Delete)
+  - **Empty State:** Call-to-action для первой записи
+  - **CRUD Operations:** Create, Update, Delete с toast notifications
+  - **Sorting:** По дате (newest first)
+  - **Member Stats:** Total hours per member
+- `apps/web/src/app/components/work-logs/work-log-dialog.tsx` - Dialog component (200 lines)
+  - Form fields: Member select, Date picker, Hours input (0.01-24), Description textarea
+  - Validation: Required fields, hours range (0.01-24), description max 2000 chars
+  - Modes: Create new / Edit existing
+  - Character counter для description
+  - Loading states
+
+**Features:**
+- ✅ Time tracking по проектам
+- ✅ Группировка по участникам
+- ✅ Создание/редактирование/удаление записей
+- ✅ Валидация на клиенте (0.01-24 hours)
+- ✅ Статистика (total hours per member + project)
+- ✅ Responsive design
+- ✅ Toast notifications (sonner)
+- ✅ Empty states
+- ⏳ TeamMembers integration (TODO - placeholder в Select)
+
+**GraphQL Codegen:**
+- ✅ Successful generation (no errors)
+- ✅ Types: WorkLog, CreateWorkLogInput, UpdateWorkLogInput
+- ✅ Hooks: useProjectWorkLogsQuery, useCreateWorkLogMutation, etc.
+
+---
+
 **Stage 9 Phase 1 Day 7: Testing and Bug Fixes (2025-12-12)**
 
 **Bugs Fixed:**

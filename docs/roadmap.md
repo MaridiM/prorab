@@ -119,13 +119,23 @@
   - [x] Validation (0.01-24 hours, max 2000 chars description)
   - [x] WorkLogsModule зарегистрирован в AppModule
   - [x] TypeScript компиляция успешна
-- [ ] День 9-10: Учёт рабочего времени - Frontend
-  - [ ] GraphQL operations (fragments, queries, mutations)
-  - [ ] Страница `/teams/[teamId]/projects/[projectId]/time-tracking`
-  - [ ] Компонент `<TimeTrackingCalendar />` или `<TimeTrackingTable />`
-  - [ ] Форма создания/редактирования записей
-  - [ ] Фильтры по датам и участникам
-  - [ ] Display total hours
+- [x] День 9: Учёт рабочего времени - Frontend ✅ (2025-12-12)
+  - [x] GraphQL operations (work-logs.graphql с fragments, queries, mutations)
+  - [x] Страница `/teams/[teamId]/projects/[projectId]/time-tracking` (280 lines)
+  - [x] Time Tracking Table с группировкой по участникам
+  - [x] WorkLogDialog component (форма создания/редактирования, 200 lines)
+  - [x] CRUD operations (Create, Update, Delete)
+  - [x] Stats cards (Total hours, Members, Records)
+  - [x] Empty state с call-to-action
+  - [x] Toast notifications
+  - [x] Validation (0.01-24 hours, description max 2000 chars)
+  - ⏳ TeamMembers integration в Select (TODO - placeholder)
+- [ ] День 10: Time Tracking - Improvements & Testing
+  - [ ] Fix TeamMembers query integration в WorkLogDialog
+  - [ ] Add date range filters
+  - [ ] Add export to CSV
+  - [ ] Add calendar view (optional)
+  - [ ] Testing all CRUD operations
 - [ ] День 11-12: Отчёты по персоналу
   - [ ] Страница `/teams/[teamId]/analytics/personnel`
   - [ ] KPI cards + графики (recharts)

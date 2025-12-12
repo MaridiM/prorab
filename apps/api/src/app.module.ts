@@ -10,6 +10,7 @@ import { TeamsModule } from './modules/teams/teams.module'
 import { ExpensesModule } from './modules/expenses/expenses.module'
 import { PhotoReportsModule } from './modules/photo-reports/photo-reports.module'
 import { PayoutsModule } from './modules/payouts/payouts.module'
+import { WorkLogsModule } from './modules/work-logs/work-logs.module'
 import { TasksModule } from './modules/tasks/tasks.module'
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module'
 import { PaymentsModule } from './modules/payments/payments.module'
@@ -28,6 +29,7 @@ import { AuthGuard } from './shared/guards/auth.guard'
 		ExpensesModule,
 		PhotoReportsModule,
 		PayoutsModule,
+		WorkLogsModule,
 		TasksModule,
 		SubscriptionsModule,
 		PaymentsModule,

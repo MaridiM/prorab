@@ -1,0 +1,68 @@
+# ==================== FRAGMENTS ====================
+
+fragment WorkLogFields on WorkLog {
+  id
+  projectId
+  memberId
+  date
+  hours
+  description
+  createdById
+  createdAt
+  updatedAt
+  project {
+    id
+    name
+  }
+  member {
+    id
+    userId
+    role
+    salaryType
+    salaryAmount
+    user {
+      id
+      fullName
+      email
+      avatarUrl
+    }
+  }
+}
+
+# ==================== QUERIES ====================
+
+query ProjectWorkLogs($projectId: ID!) {
+  projectWorkLogs(projectId: $projectId) {
+    ...WorkLogFields
+  }
+}
+
+query MemberWorkLogs($memberId: ID!) {
+  memberWorkLogs(memberId: $memberId) {
+    ...WorkLogFields
+  }
+}
+
+query WorkLogsByDateRange($projectId: ID!, $startDate: DateTime!, $endDate: DateTime!) {
+  workLogsByDateRange(projectId: $projectId, startDate: $startDate, endDate: $endDate) {
+    ...WorkLogFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation CreateWorkLog($input: CreateWorkLogInput!) {
+  createWorkLog(input: $input) {
+    ...WorkLogFields
+  }
+}
+
+mutation UpdateWorkLog($input: UpdateWorkLogInput!) {
+  updateWorkLog(input: $input) {
+    ...WorkLogFields
+  }
+}
+
+mutation DeleteWorkLog($id: ID!) {
+  deleteWorkLog(id: $id)
+}
