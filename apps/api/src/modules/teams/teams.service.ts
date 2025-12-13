@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CoreService } from '../../core/core.service';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { RedisService } from '../../core/redis/redis.service';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
 import { UpdateTeamInput } from './dto/update-team.input';
 import { OnboardingResult } from './models/onboarding-result.model';
@@ -21,6 +22,7 @@ export class TeamsService extends CoreService {
     redis: RedisService,
     config: ConfigService,
     private storageService: StorageService,
+    private csvExportService: CsvExportService,
   ) {
     super(prisma, redis, config);
   }
@@ -735,6 +737,7 @@ export class TeamsService extends CoreService {
           memberEmail: member.user.email,
           avatarUrl: member.user.avatarUrl,
           role: member.role,
+          position: member.position,
           salaryType: member.salaryType,
           salaryAmount: member.salaryAmount ? Number(member.salaryAmount) : null,
           projectsCount: memberProjects.length,
@@ -849,5 +852,92 @@ export class TeamsService extends CoreService {
     });
 
     return history;
+  }
+
+  /**
+   * Update team member position
+   * Only owner can update
+   */
+  async updateMemberPosition(memberId: string, position: string | null | undefined, userId: string): Promise<any> {
+    // Get member with team
+    const member = await this.prisma.teamMember.findUnique({
+      where: { id: memberId },
+      include: { team: true },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Team member not found');
+    }
+
+    // Verify owner access
+    if (member.team.ownerId !== userId) {
+      throw new ForbiddenException('Only team owner can update member position');
+    }
+
+    // Update position
+    const updated = await this.prisma.teamMember.update({
+      where: { id: memberId },
+      data: {
+        position: position || null,
+      },
+      include: {
+        user: true,
+        team: true,
+      },
+    });
+
+    return updated;
+  }
+
+  // ==================== EXPORT ====================
+
+  /**
+   * Export personnel analytics to CSV
+   * Owner only
+   */
+  async exportPersonnelAnalyticsToCsv(teamId: string, userId: string): Promise<string> {
+    // Get analytics with access check
+    const analytics = await this.getPersonnelAnalytics(teamId, userId);
+
+    // Transform member data for CSV
+    const csvData = analytics.members.map((member: any) => ({
+      memberName: member.memberName,
+      memberEmail: member.memberEmail,
+      role: member.role === 'owner' ? 'Владелец' : 'Участник',
+      position: member.position || '—',
+      salaryType:
+        member.salaryType === 'FIXED'
+          ? 'Фиксированная'
+          : member.salaryType === 'PERCENTAGE'
+          ? 'Процент'
+          : 'Не установлена',
+      salaryAmount: member.salaryAmount || 0,
+      projectsCount: member.projectsCount,
+      totalHoursWorked: member.totalHoursWorked.toFixed(2),
+      totalPayouts: member.totalPayouts.toFixed(2),
+      averagePayoutPerProject: member.averagePayoutPerProject.toFixed(2),
+      completedPayoutsCount: member.completedPayoutsCount,
+      pendingPayoutsCount: member.pendingPayoutsCount,
+      joinedAt: member.joinedAt.toISOString().split('T')[0],
+    }));
+
+    // Define columns
+    const columns = [
+      { key: 'memberName' as const, label: 'Участник' },
+      { key: 'memberEmail' as const, label: 'Email' },
+      { key: 'role' as const, label: 'Роль' },
+      { key: 'position' as const, label: 'Должность' },
+      { key: 'salaryType' as const, label: 'Тип зарплаты' },
+      { key: 'salaryAmount' as const, label: 'Размер зарплаты' },
+      { key: 'projectsCount' as const, label: 'Проектов' },
+      { key: 'totalHoursWorked' as const, label: 'Всего часов' },
+      { key: 'totalPayouts' as const, label: 'Всего выплат (₽)' },
+      { key: 'averagePayoutPerProject' as const, label: 'Средняя выплата (₽)' },
+      { key: 'completedPayoutsCount' as const, label: 'Завершённых выплат' },
+      { key: 'pendingPayoutsCount' as const, label: 'Ожидающих выплат' },
+      { key: 'joinedAt' as const, label: 'Дата присоединения' },
+    ];
+
+    return this.csvExportService.exportToCsv(csvData, columns);
   }
 }

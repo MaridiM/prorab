@@ -20,6 +20,9 @@ export class TeamMember {
   @Field({ description: 'Роль в команде (owner/member)' })
   role: string;
 
+  @Field({ nullable: true, description: 'Должность/специализация (например, "Прораб", "Электрик", "Маляр")' })
+  position?: string;
+
   @Field(() => Date, { description: 'Дата присоединения к команде' })
   joinedAt: Date;
 

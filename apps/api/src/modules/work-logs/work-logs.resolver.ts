@@ -5,7 +5,9 @@ import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { WorkLogsService } from './work-logs.service';
 import { WorkLog } from './models/work-log.model';
 import { CreateWorkLogInput } from './dto/create-work-log.input';
+import { BulkCreateWorkLogInput } from './dto/bulk-create-work-log.input';
 import { UpdateWorkLogInput } from './dto/update-work-log.input';
+import { BulkUpdateResult } from '../payouts/models/bulk-update-result.model';
 
 @Resolver(() => WorkLog)
 export class WorkLogsResolver {
@@ -66,6 +68,17 @@ export class WorkLogsResolver {
     return this.workLogsService.createWorkLog(input, user.id);
   }
 
+  @Mutation(() => BulkUpdateResult, {
+    description: 'Bulk create work log entries (owner or self)',
+  })
+  @UseGuards(AuthGuard)
+  async bulkCreateWorkLogs(
+    @Args('input') input: BulkCreateWorkLogInput,
+    @CurrentUser() user: any,
+  ): Promise<BulkUpdateResult> {
+    return this.workLogsService.bulkCreateWorkLogs(input, user.id);
+  }
+
   @Mutation(() => WorkLog, {
     description: 'Update a work log entry (owner or creator)',
   })
@@ -86,5 +99,18 @@ export class WorkLogsResolver {
     @CurrentUser() user: any,
   ): Promise<boolean> {
     return this.workLogsService.deleteWorkLog(id, user.id);
+  }
+
+  // ==================== EXPORT ====================
+
+  @Query(() => String, {
+    description: 'Export project work logs to CSV (owner or team member)',
+  })
+  @UseGuards(AuthGuard)
+  async exportProjectWorkLogs(
+    @Args('projectId', { type: () => ID }) projectId: string,
+    @CurrentUser() user: any,
+  ): Promise<string> {
+    return this.workLogsService.exportProjectWorkLogsToCsv(projectId, user.id);
   }
 }

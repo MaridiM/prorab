@@ -1,20 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
+import { useMutation } from  '@apollo/client/react'
 import { gql } from '@apollo/client'
 import { Send, Unlink, CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
 
-import { Button } from '../ui/button'
 import {
+	Button,
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from '../ui/card'
-import { Badge } from '../ui/badge'
-import {
+	Badge,
 	AlertDialog,
 	AlertDialogAction,
 	AlertDialogCancel,
@@ -24,8 +22,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from '../ui/alert-dialog'
-import { useToast } from '../ui/use-toast'
+} from '@/packages/ui'
+import { toast } from 'sonner'
 
 const DISCONNECT_TELEGRAM = gql`
 	mutation DisconnectTelegram {
@@ -54,19 +52,12 @@ export function TelegramIntegration({ user, onDisconnect }: TelegramIntegrationP
 
 	const [disconnectTelegram, { loading: disconnecting }] = useMutation(DISCONNECT_TELEGRAM, {
 		onCompleted: () => {
-			toast({
-				title: 'Успех!',
-				description: 'Telegram отключён от аккаунта',
-			})
+			toast.success('Telegram отключён от аккаунта')
 			setShowDisconnectDialog(false)
 			onDisconnect?.()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось отключить Telegram',
-				variant: 'destructive',
-			})
+			toast.error(error.message || 'Не удалось отключить Telegram')
 		},
 		refetchQueries: ['Me'],
 	})
@@ -77,10 +68,7 @@ export function TelegramIntegration({ user, onDisconnect }: TelegramIntegrationP
 		const telegramUrl = `https://t.me/${botUsername}?start=connect`
 		window.open(telegramUrl, '_blank')
 
-		toast({
-			title: 'Подключение к Telegram',
-			description: 'Откройте бота и нажмите /start для подключения',
-		})
+		toast.info('Откройте бота и нажмите /start для подключения')
 	}
 
 	const handleDisconnect = async () => {

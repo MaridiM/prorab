@@ -1,12 +1,17 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { CsvExportService } from '../../shared/services/csv-export.service';
 import { WorkLog } from './models/work-log.model';
 import { CreateWorkLogInput } from './dto/create-work-log.input';
+import { BulkCreateWorkLogInput } from './dto/bulk-create-work-log.input';
 import { UpdateWorkLogInput } from './dto/update-work-log.input';
 
 @Injectable()
 export class WorkLogsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly csvExportService: CsvExportService,
+  ) {}
 
   // ==================== QUERIES ====================
 
@@ -210,6 +215,43 @@ export class WorkLogsService {
   }
 
   /**
+   * Bulk create work log entries
+   * Owner or member can create logs
+   */
+  async bulkCreateWorkLogs(
+    input: BulkCreateWorkLogInput,
+    userId: string,
+  ): Promise<{ success: number; failed: number; results: any[] }> {
+    const results: any[] = [];
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const workLog of input.workLogs) {
+      try {
+        const result = await this.createWorkLog(workLog, userId);
+        results.push({
+          success: true,
+          data: result,
+        });
+        successCount++;
+      } catch (error) {
+        results.push({
+          success: false,
+          error: error.message,
+          input: workLog,
+        });
+        failedCount++;
+      }
+    }
+
+    return {
+      success: successCount,
+      failed: failedCount,
+      results,
+    };
+  }
+
+  /**
    * Update a work log entry
    * Only the creator or owner can update
    */
@@ -307,5 +349,38 @@ export class WorkLogsService {
     });
 
     return Number(result._sum.hours || 0);
+  }
+
+  // ==================== EXPORT ====================
+
+  /**
+   * Export project work logs to CSV
+   * Owner only
+   */
+  async exportProjectWorkLogsToCsv(projectId: string, userId: string): Promise<string> {
+    // Get work logs with access check
+    const workLogs = await this.getProjectWorkLogs(projectId, userId);
+
+    // Transform data for CSV
+    const csvData = workLogs.map((log: any) => ({
+      date: log.date.toISOString().split('T')[0],
+      memberName: log.member.user.fullName || log.member.user.email,
+      hours: Number(log.hours),
+      description: log.description || '',
+      projectName: log.project.name,
+      createdAt: log.createdAt.toISOString(),
+    }));
+
+    // Define columns
+    const columns = [
+      { key: 'date' as const, label: 'Дата' },
+      { key: 'memberName' as const, label: 'Участник' },
+      { key: 'hours' as const, label: 'Часы' },
+      { key: 'description' as const, label: 'Описание' },
+      { key: 'projectName' as const, label: 'Проект' },
+      { key: 'createdAt' as const, label: 'Создано' },
+    ];
+
+    return this.csvExportService.exportToCsv(csvData, columns);
   }
 }

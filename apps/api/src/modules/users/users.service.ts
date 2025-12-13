@@ -1,7 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common'
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common'
 import { FileUpload } from 'graphql-upload-minimal'
 import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
+import * as argon2 from 'argon2'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
@@ -146,19 +147,58 @@ export class UsersService {
 
 	// ==================== Account Management ====================
 
-	async deleteAccount(userId: string) {
-		// Delete avatar file if exists
+	private async verifyPassword(hash: string, password: string): Promise<boolean> {
+		return argon2.verify(hash, password)
+	}
+
+	async deleteAccount(userId: string, password: string) {
+		// Verify password first
 		const user = await this.findById(userId)
-		if (user?.avatarUrl) {
+		if (!user) {
+			throw new BadRequestException('Пользователь не найден')
+		}
+
+		const isValidPassword = await this.verifyPassword(user.passwordHash, password)
+		if (!isValidPassword) {
+			throw new UnauthorizedException('Неверный пароль')
+		}
+		// Safety check: find all teams where user is the owner
+		const ownedTeams = await this.prisma.team.findMany({
+			where: { ownerId: userId },
+			include: {
+				members: true,
+				projects: true,
+				subscription: true,
+			},
+		})
+
+		// Check if user owns any teams with other members or active projects
+		const hasActiveTeams = ownedTeams.some(
+			team => team.members.length > 1 || team.projects.length > 0
+		)
+
+		if (hasActiveTeams) {
+			throw new BadRequestException(
+				'Невозможно удалить аккаунт. У вас есть команды с участниками или проектами. Пожалуйста, удалите команды или передайте право владения другому участнику.'
+			)
+		}
+
+		// Cancel all active subscriptions before deleting
+		for (const team of ownedTeams) {
+			if (team.subscription && team.subscription.status === 'ACTIVE') {
+				await this.prisma.subscription.update({
+					where: { id: team.subscription.id },
+					data: { status: 'CANCELLED' },
+				})
+			}
+		}
+
+		// Delete avatar file if exists
+		if (user.avatarUrl) {
 			this.deleteAvatarFile(user.avatarUrl)
 		}
 
-		// Prisma should handle cascading deletes for Sessions, TeamMembers, etc. if configured correctly.
-		// However, we should be careful about Teams where this user is the Owner.
-		// For MVP, we will allow deletion which might delete the Team if they are the only owner and cascade is on,
-		// or will assume the Schema handles it.
-		// Given the schema isn't fully visible here, we'll assume standard Prisma cascade.
-
+		// Delete the user (Prisma cascade will handle related records)
 		return this.prisma.user.delete({
 			where: { id: userId },
 		})

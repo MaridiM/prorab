@@ -63,7 +63,7 @@ import {
     Calculator, // NEW
 } from 'lucide-react'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 
 const fadeIn = {
 	hidden: { opacity: 0, y: 20 },

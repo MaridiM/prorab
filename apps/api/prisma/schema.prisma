@@ -24,24 +24,30 @@ model User {
   currentTeamId          String?   @map("current_team_id")
 
   // OAuth fields
-  oauthProvider          String?   @map("oauth_provider") // "telegram", "google", etc.
-  oauthProviderId        String?   @map("oauth_provider_id") // Provider's user ID
-  telegramChatId         String?   @unique @map("telegram_chat_id")
-  telegramUsername       String?   @map("telegram_username")
-  telegramPhotoUrl       String?   @map("telegram_photo_url")
+  oauthProvider    String? @map("oauth_provider") // "telegram", "google", etc.
+  oauthProviderId  String? @map("oauth_provider_id") // Provider's user ID
+  telegramChatId   String? @unique @map("telegram_chat_id")
+  telegramUsername String? @map("telegram_username")
+  telegramPhotoUrl String? @map("telegram_photo_url")
 
-  createdAt              DateTime  @default(now()) @map("created_at")
-  updatedAt              DateTime  @updatedAt @map("updated_at")
+  // Two-Factor Authentication
+  twoFactorEnabled     Boolean  @default(false) @map("two_factor_enabled")
+  twoFactorSecret      String?  @map("two_factor_secret") // Encrypted TOTP secret
+  twoFactorBackupCodes String[] @default([]) @map("two_factor_backup_codes") // Hashed backup codes
 
-  verificationTokens      VerificationToken[]
-  passwordResetTokens     PasswordResetToken[]
-  notificationSettings    NotificationSettings?
-  ownedTeams              Team[]                      @relation("TeamOwner")
-  teamMemberships         TeamMember[]
-  currentTeam             Team?                       @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
-  createdTasks            Task[]                      @relation("CreatedTasks")
-  supportTickets          SupportTicket[]
-  salaryChanges           TeamMemberSalaryHistory[]   @relation("SalaryChangedBy")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  verificationTokens   VerificationToken[]
+  passwordResetTokens  PasswordResetToken[]
+  notificationSettings NotificationSettings?
+  ownedTeams           Team[]                    @relation("TeamOwner")
+  teamMemberships      TeamMember[]
+  currentTeam          Team?                     @relation("CurrentTeam", fields: [currentTeamId], references: [id], onDelete: SetNull)
+  createdTasks         Task[]                    @relation("CreatedTasks")
+  supportTickets       SupportTicket[]
+  salaryChanges        TeamMemberSalaryHistory[] @relation("SalaryChangedBy")
+  adminRole            AdminRole?
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -50,24 +56,58 @@ model User {
 }
 
 model NotificationSettings {
-  id        String   @id @default(uuid())
-  userId    String   @unique @map("user_id")
-  
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+
   // App
-  appPush     Boolean @default(true) @map("app_push")
-  appEmail    Boolean @default(true) @map("app_email")
-  appSms      Boolean @default(false) @map("app_sms")
-  
+  appPush  Boolean @default(true) @map("app_push")
+  appEmail Boolean @default(true) @map("app_email")
+  appSms   Boolean @default(false) @map("app_sms")
+
+  // Telegram
+  telegramEnabled       Boolean @default(true) @map("telegram_enabled")
+  telegramSalaryChanges Boolean @default(true) @map("telegram_salary_changes")
+  telegramPayouts       Boolean @default(true) @map("telegram_payouts")
+
   // Marketing
-  marketingPush   Boolean @default(false) @map("marketing_push")
-  marketingEmail  Boolean @default(true) @map("marketing_email")
-  
+  marketingPush  Boolean @default(false) @map("marketing_push")
+  marketingEmail Boolean @default(true) @map("marketing_email")
+
+  // Event-specific notifications (detailed control)
+  notifyProjectCreated       Boolean @default(true) @map("notify_project_created")
+  notifyProjectCompleted     Boolean @default(true) @map("notify_project_completed")
+  notifyExpenseAdded         Boolean @default(true) @map("notify_expense_added")
+  notifyPayoutCalculated     Boolean @default(true) @map("notify_payout_calculated")
+  notifyPayoutPaid           Boolean @default(true) @map("notify_payout_paid")
+  notifyMemberInvited        Boolean @default(true) @map("notify_member_invited")
+  notifyMemberJoined         Boolean @default(true) @map("notify_member_joined")
+  notifyMemberRemoved        Boolean @default(true) @map("notify_member_removed")
+  notifyTaskAssigned         Boolean @default(true) @map("notify_task_assigned")
+  notifyTaskCompleted        Boolean @default(true) @map("notify_task_completed")
+  notifyPhotoReportCreated   Boolean @default(true) @map("notify_photo_report_created")
+  notifySubscriptionExpiring Boolean @default(true) @map("notify_subscription_expiring")
+
+  // Notification frequency
+  emailFrequency NotificationFrequency @default(INSTANT) @map("email_frequency")
+  pushFrequency  NotificationFrequency @default(INSTANT) @map("push_frequency")
+
+  // Quiet hours (Don't disturb period)
+  quietHoursEnabled Boolean @default(false) @map("quiet_hours_enabled")
+  quietHoursStart   String? @map("quiet_hours_start") // Format: "HH:mm" (e.g., "22:00")
+  quietHoursEnd     String? @map("quiet_hours_end") // Format: "HH:mm" (e.g., "08:00")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_settings")
+}
+
+enum NotificationFrequency {
+  INSTANT // Send immediately
+  DAILY // Digest once per day
+  WEEKLY // Digest once per week
 }
 
 model VerificationToken {
@@ -156,11 +196,11 @@ model ProjectPayout {
   notes            String?   @db.Text
 
   // Payment method fields
-  paymentMethod    String?   @default("cash") @map("payment_method") // "cash", "card", "transfer", "sbp"
-  receiptUrl       String?   @map("receipt_url")
+  paymentMethod String? @default("cash") @map("payment_method") // "cash", "card", "transfer", "sbp"
+  receiptUrl    String? @map("receipt_url")
 
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   project Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   member  TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
@@ -198,6 +238,7 @@ model TeamMember {
   teamId   String   @map("team_id")
   userId   String   @map("user_id")
   role     String   @default("member")
+  position String?  @db.VarChar(100) // Job position/specialization (e.g., "Прораб", "Электрик", "Маляр")
   joinedAt DateTime @default(now()) @map("joined_at")
 
   // Salary fields
@@ -215,19 +256,20 @@ model TeamMember {
   @@index([userId])
   @@index([teamId])
   @@index([teamId, salaryType])
+  @@index([teamId, position])
   @@map("team_members")
 }
 
 model TeamMemberSalaryHistory {
-  id               String   @id @default(uuid())
-  memberId         String   @map("member_id")
-  previousType     String?  @map("previous_type") // "fixed", "percentage", "none" (null for first entry)
-  previousAmount   Decimal? @map("previous_amount") @db.Decimal(12, 2)
-  newType          String   @map("new_type") // "fixed", "percentage", "none"
-  newAmount        Decimal? @map("new_amount") @db.Decimal(12, 2)
-  changedByUserId  String   @map("changed_by_user_id")
-  reason           String?  @db.Text // Optional reason for change
-  createdAt        DateTime @default(now()) @map("created_at")
+  id              String   @id @default(uuid())
+  memberId        String   @map("member_id")
+  previousType    String?  @map("previous_type") // "fixed", "percentage", "none" (null for first entry)
+  previousAmount  Decimal? @map("previous_amount") @db.Decimal(12, 2)
+  newType         String   @map("new_type") // "fixed", "percentage", "none"
+  newAmount       Decimal? @map("new_amount") @db.Decimal(12, 2)
+  changedByUserId String   @map("changed_by_user_id")
+  reason          String?  @db.Text // Optional reason for change
+  createdAt       DateTime @default(now()) @map("created_at")
 
   member    TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
   changedBy User       @relation("SalaryChangedBy", fields: [changedByUserId], references: [id])
@@ -367,11 +409,11 @@ model ReportPhoto {
 // ==================== TASKS ====================
 
 model Task {
-  id          String       @id @default(uuid())
-  projectId   String       @map("project_id")
-  title       String       @db.VarChar(200)
-  description String?      @db.Text
-  status      TaskStatus   @default(TODO)
+  id          String     @id @default(uuid())
+  projectId   String     @map("project_id")
+  title       String     @db.VarChar(200)
+  description String?    @db.Text
+  status      TaskStatus @default(TODO)
 
   // Assignment
   assigneeId String? @map("assignee_id")
@@ -496,16 +538,16 @@ enum PaymentStatus {
 // ==================== TELEGRAM SUPPORT ====================
 
 model SupportTicket {
-  id             String                 @id @default(uuid())
-  userId         String                 @map("user_id")
-  telegramChatId String                 @map("telegram_chat_id")
+  id             String                @id @default(uuid())
+  userId         String                @map("user_id")
+  telegramChatId String                @map("telegram_chat_id")
   subject        String?
-  status         SupportTicketStatus    @default(OPEN)
-  priority       SupportTicketPriority  @default(MEDIUM)
+  status         SupportTicketStatus   @default(OPEN)
+  priority       SupportTicketPriority @default(MEDIUM)
   category       String?
-  createdAt      DateTime               @default(now()) @map("created_at")
-  updatedAt      DateTime               @updatedAt @map("updated_at")
-  closedAt       DateTime?              @map("closed_at")
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+  closedAt       DateTime?             @map("closed_at")
 
   user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages SupportMessage[]
@@ -558,4 +600,140 @@ enum SupportTicketPriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+// ==================== ADMIN PANEL ====================
+
+model AdminRole {
+  id          String        @id @default(uuid())
+  userId      String        @unique @map("user_id")
+  role        AdminRoleType
+  permissions String[]      @default([]) // Array of permission strings
+  assignedBy  String?       @map("assigned_by") // Admin who assigned this role
+  assignedAt  DateTime      @default(now()) @map("assigned_at")
+
+  // 2FA enforcement for admins
+  twoFactorEnforced Boolean @default(true) @map("two_factor_enforced")
+
+  // IP whitelist (optional)
+  ipWhitelist String[] @default([]) @map("ip_whitelist")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([role])
+  @@map("admin_roles")
+}
+
+enum AdminRoleType {
+  SUPER_ADMIN // Full system access
+  ADMIN // Most admin features
+  MODERATOR // Content moderation, user support
+  SUPPORT // User support only
+}
+
+model SystemSettings {
+  id           String           @id @default(uuid())
+  key          String           @unique
+  category     SettingCategory
+  name         String
+  description  String?          @db.Text
+  valueType    SettingValueType @map("value_type")
+  value        String?          @db.Text
+  defaultValue String?          @map("default_value") @db.Text
+  isEncrypted  Boolean          @default(false) @map("is_encrypted")
+  isRequired   Boolean          @default(false) @map("is_required")
+
+  // Validation
+  validationRules Json? @map("validation_rules") // JSON schema for validation
+
+  // Metadata
+  updatedBy String?  @map("updated_by") // Admin user ID
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([category])
+  @@index([key])
+  @@map("system_settings")
+}
+
+enum SettingCategory {
+  PAYMENT // Yookassa settings
+  EMAIL // Brevo settings
+  TELEGRAM // Telegram bot settings
+  STORAGE // R2 storage settings
+  AI // AI service settings
+  SECURITY // Security configurations
+  GENERAL // General app settings
+}
+
+enum SettingValueType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+  ENCRYPTED
+}
+
+model AdminActionLog {
+  id          String   @id @default(uuid())
+  adminUserId String   @map("admin_user_id")
+  action      String // Action type (e.g., "UPDATE_SETTING", "DELETE_USER")
+  resource    String // Resource affected (e.g., "SystemSettings", "User")
+  resourceId  String?  @map("resource_id") // ID of affected resource
+  details     Json? // Additional details
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([adminUserId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("admin_action_logs")
+}
+
+model SystemStatistics {
+  id   String   @id @default(uuid())
+  date DateTime @unique // Daily statistics
+
+  // User stats
+  totalUsers  Int @default(0) @map("total_users")
+  activeUsers Int @default(0) @map("active_users")
+  newUsers    Int @default(0) @map("new_users")
+
+  // Team stats
+  totalTeams  Int @default(0) @map("total_teams")
+  activeTeams Int @default(0) @map("active_teams")
+  newTeams    Int @default(0) @map("new_teams")
+
+  // Project stats
+  totalProjects     Int @default(0) @map("total_projects")
+  activeProjects    Int @default(0) @map("active_projects")
+  completedProjects Int @default(0) @map("completed_projects")
+
+  // Financial stats
+  totalRevenue Decimal @default(0) @map("total_revenue") @db.Decimal(12, 2)
+  mrr          Decimal @default(0) @map("mrr") @db.Decimal(12, 2) // Monthly Recurring Revenue
+
+  // Subscription stats
+  trialingSubscriptions  Int @default(0) @map("trialing_subscriptions")
+  activeSubscriptions    Int @default(0) @map("active_subscriptions")
+  cancelledSubscriptions Int @default(0) @map("cancelled_subscriptions")
+
+  // Storage stats
+  totalStorageUsed BigInt @default(0) @map("total_storage_used")
+
+  // Support stats
+  openTickets   Int @default(0) @map("open_tickets")
+  closedTickets Int @default(0) @map("closed_tickets")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@map("system_statistics")
 }

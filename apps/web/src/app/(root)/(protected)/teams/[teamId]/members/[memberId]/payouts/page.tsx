@@ -5,7 +5,7 @@ import { useQuery } from '@apollo/client/react';
 import { useParams, useRouter } from 'next/navigation';
 import { Download, Filter, ArrowLeft, Calendar, CreditCard, FileText } from 'lucide-react';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru } from 'date-fns/locale/ru';
 
 import {
   MemberPayoutsDocument,

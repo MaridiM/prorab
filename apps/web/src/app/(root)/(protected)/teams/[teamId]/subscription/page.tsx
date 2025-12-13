@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import {
 	SubscriptionStatus,
 	PaymentHistory,

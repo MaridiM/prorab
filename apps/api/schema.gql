@@ -13,9 +13,75 @@ input AddPhotoInput {
   width: Int
 }
 
+type AdminActionLog {
+  action: String!
+  adminUserId: ID!
+  createdAt: DateTime!
+  details: JSON
+  id: ID!
+  ipAddress: String
+  resource: String!
+  resourceId: String
+  userAgent: String
+}
+
+input AdminActionLogFilterInput {
+  action: String
+  adminUserId: String
+  endDate: DateTime
+  limit: Int = 50
+  offset: Int = 0
+  resource: String
+  startDate: DateTime
+}
+
+type AdminActionLogsResult {
+  logs: [AdminActionLog!]!
+  total: Int!
+}
+
+type AdminActionStatistics {
+  actionsByAdmin: JSON!
+  actionsByResource: JSON!
+  actionsByType: JSON!
+  totalActions: Int!
+}
+
 type AuthPayload {
   message: String
   user: User!
+}
+
+type BackupCodesResponse {
+  backupCodes: [String!]!
+}
+
+input BulkCreateWorkLogInput {
+  """Array of work logs to create"""
+  workLogs: [CreateWorkLogInput!]!
+}
+
+type BulkUpdateResult {
+  """Number of failed updates"""
+  failed: Int!
+
+  """Detailed results for each update"""
+  results: JSON!
+
+  """Number of successful updates"""
+  success: Int!
+}
+
+input BulkUpdateSalaryInput {
+  """Optional reason for bulk update"""
+  reason: String
+
+  """Array of salary updates to apply"""
+  updates: [UpdateMemberSalaryInput!]!
+}
+
+input BulkUpdateSystemSettingsInput {
+  settings: [UpdateSystemSettingInput!]!
 }
 
 input ChangePasswordInput {
@@ -54,6 +120,11 @@ input CompleteOnboardingInput {
 
   """Название бригады"""
   teamName: String!
+}
+
+type ConnectionTestResult {
+  message: String!
+  success: Boolean!
 }
 
 input CreateExpenseInput {
@@ -132,6 +203,19 @@ input CreateSubscriptionInput {
   useEarlyBird: Boolean
 }
 
+input CreateSystemSettingInput {
+  category: SettingCategory!
+  defaultValue: String
+  description: String
+  isEncrypted: Boolean! = false
+  isRequired: Boolean! = false
+  key: String!
+  name: String!
+  validationRules: JSON
+  value: String
+  valueType: SettingValueType!
+}
+
 input CreateTaskInput {
   """ID назначенного участника команды"""
   assigneeId: String
@@ -173,6 +257,20 @@ input CreateWorkLogInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeleteAccountInput {
+  """Пароль пользователя для подтверждения удаления"""
+  password: String!
+}
+
+input Disable2FAInput {
+  token: String!
+}
+
+input Enable2FAInput {
+  secret: String!
+  token: String!
+}
 
 type Expense {
   """Сумма расхода"""
@@ -235,7 +333,7 @@ type InviteCode {
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 input LoginInput {
   email: String!
@@ -258,6 +356,7 @@ type MemberAnalytics {
   memberId: String!
   memberName: String!
   pendingPayoutsCount: Int!
+  position: String
   projectsCount: Int!
   role: String!
   salaryAmount: Float
@@ -299,6 +398,15 @@ type Mutation {
 
   """Архивировать проект"""
   archiveProject(id: ID!): Project!
+
+  """Bulk create work log entries (owner or self)"""
+  bulkCreateWorkLogs(input: BulkCreateWorkLogInput!): BulkUpdateResult!
+
+  """Bulk update member salaries (owner only)"""
+  bulkUpdateMemberSalaries(input: BulkUpdateSalaryInput!): BulkUpdateResult!
+
+  """Bulk update system settings (admin only)"""
+  bulkUpdateSystemSettings(input: BulkUpdateSystemSettingsInput!): [SystemSetting!]!
   cancelSubscription(subscriptionId: String!): Subscription!
   changePassword(input: ChangePasswordInput!): Boolean!
   changePlan(input: ChangePlanInput!): Subscription!
@@ -326,6 +434,9 @@ type Mutation {
   createProject(input: CreateProjectInput!): Project!
   createSubscription(input: CreateSubscriptionInput!): Subscription!
 
+  """Create a new system setting (super admin only)"""
+  createSystemSetting(input: CreateSystemSettingInput!): SystemSetting!
+
   """Создать задачу"""
   createTask(input: CreateTaskInput!): Task!
 
@@ -333,7 +444,7 @@ type Mutation {
   createWorkLog(input: CreateWorkLogInput!): WorkLog!
 
   """Удаление аккаунта пользователя"""
-  deleteAccount: Boolean!
+  deleteAccount(input: DeleteAccountInput!): Boolean!
 
   """Удаление аватара пользователя"""
   deleteAvatar: User!
@@ -350,16 +461,25 @@ type Mutation {
   """Удалить фотоотчёт"""
   deletePhotoReport(id: String!): Boolean!
 
+  """Delete a system setting (super admin only)"""
+  deleteSystemSetting(key: String!): Boolean!
+
   """Удалить задачу"""
   deleteTask(id: ID!): Task!
 
   """Delete a work log entry (owner or creator)"""
   deleteWorkLog(id: ID!): Boolean!
+  disable2FA(input: Disable2FAInput!): TwoFactorDisableResponse!
 
   """Отключение Telegram от аккаунта"""
   disconnectTelegram: User!
+  enable2FA(input: Enable2FAInput!): TwoFactorEnableResponse!
   forgotPassword(email: String!): Boolean!
+  generate2FASecret: TwoFactorSetup!
   initTelegramAuth: TelegramAuthPayload!
+
+  """Initialize default system settings (super admin only)"""
+  initializeDefaultSettings: Boolean!
   initializePayment(subscriptionId: String!): PaymentUrl!
 
   """Присоединение к команде по коду приглашения"""
@@ -371,6 +491,7 @@ type Mutation {
   moveTask(input: MoveTaskInput!): Task!
   reactivateSubscription(subscriptionId: String!): Subscription!
   refreshSession: AuthPayload
+  regenerate2FABackupCodes(input: RegenerateBackupCodesInput!): BackupCodesResponse!
   register(input: RegisterInput!): AuthPayload!
 
   """Удаление участника из команды (только для владельца)"""
@@ -387,8 +508,14 @@ type Mutation {
   revokeAllSessionsIncludingCurrent: Boolean!
   revokeSession(sessionId: String!): Boolean!
 
+  """Test connection for a service category (admin only)"""
+  testServiceConnection(category: SettingCategory!): ConnectionTestResult!
+
   """Обновить расход"""
   updateExpense(input: UpdateExpenseInput!): Expense!
+
+  """Update team member position/specialization (owner only)"""
+  updateMemberPosition(input: UpdateMemberPositionInput!): TeamMember!
 
   """Update team member salary settings (owner only)"""
   updateMemberSalary(input: UpdateMemberSalaryInput!): TeamMember!
@@ -411,6 +538,9 @@ type Mutation {
 
   """Обновить прогресс проекта"""
   updateProjectProgress(id: ID!, progress: Int!): Project!
+
+  """Update a system setting value (admin only)"""
+  updateSystemSetting(input: UpdateSystemSettingInput!): SystemSetting!
 
   """Обновить задачу"""
   updateTask(id: ID!, input: UpdateTaskInput!): Task!
@@ -727,6 +857,17 @@ type PublicProject {
 }
 
 type Query {
+  """Get actions by resource (admin only)"""
+  actionsByResource(limit: Float! = 50, resource: String!, resourceId: ID!): [AdminActionLog!]!
+
+  """Get admin action log by ID (admin only)"""
+  adminActionLog(id: ID!): AdminActionLog
+
+  """Get admin action logs with filters (admin only)"""
+  adminActionLogs(filter: AdminActionLogFilterInput): AdminActionLogsResult!
+
+  """Get admin action statistics (admin only)"""
+  adminActionStatistics(endDate: DateTime!, startDate: DateTime!): AdminActionStatistics!
   availablePlans: [PlanLimits!]!
   canAddProject(teamId: String!): Boolean!
   currentPlanLimits(teamId: String!): PlanLimits!
@@ -739,6 +880,12 @@ type Query {
 
   """Получить все расходы проекта"""
   expensesByProject(projectId: ID!): [Expense!]!
+
+  """Export personnel analytics to CSV (owner only)"""
+  exportPersonnelAnalytics(teamId: ID!): String!
+
+  """Export project work logs to CSV (owner or team member)"""
+  exportProjectWorkLogs(projectId: ID!): String!
 
   """Simple health check"""
   health: String!
@@ -796,8 +943,17 @@ type Query {
 
   """Публичный эндпоинт: получить фотоотчёт по slug (без аутентификации)"""
   publicPhotoReport(slug: String!): PublicPhotoReport!
+
+  """Get recent actions by admin user (admin only)"""
+  recentAdminActions(adminUserId: ID!, limit: Float! = 20): [AdminActionLog!]!
   sessions: [Session!]!
   subscription(id: String!): Subscription!
+
+  """Get a single system setting by key (admin only)"""
+  systemSetting(key: String!): SystemSetting
+
+  """Get all system settings (admin only)"""
+  systemSettings(category: SettingCategory): [SystemSetting!]!
 
   """Получить задачу по ID"""
   task(id: ID!): Task!
@@ -810,10 +966,15 @@ type Query {
 
   """Получение участников команды"""
   teamMembers(teamId: ID!): [TeamMember!]!
+  twoFactorStatus: TwoFactorStatus!
   usageStats(teamId: String!): UsageStats!
 
   """Get work logs for a date range"""
   workLogsByDateRange(endDate: DateTime!, projectId: ID!, startDate: DateTime!): [WorkLog!]!
+}
+
+input RegenerateBackupCodesInput {
+  token: String!
 }
 
 input RegisterInput {
@@ -849,6 +1010,26 @@ type Session {
   userAgent: String
 }
 
+"""System setting categories"""
+enum SettingCategory {
+  AI
+  EMAIL
+  GENERAL
+  PAYMENT
+  SECURITY
+  STORAGE
+  TELEGRAM
+}
+
+"""System setting value types"""
+enum SettingValueType {
+  BOOLEAN
+  ENCRYPTED
+  JSON
+  NUMBER
+  STRING
+}
+
 type Subscription {
   cancelAtPeriodEnd: Boolean!
   cancelledAt: DateTime
@@ -878,6 +1059,23 @@ enum SubscriptionStatus {
   EXPIRED
   PAST_DUE
   TRIALING
+}
+
+type SystemSetting {
+  category: SettingCategory!
+  createdAt: DateTime!
+  defaultValue: String
+  description: String
+  id: ID!
+  isEncrypted: Boolean!
+  isRequired: Boolean!
+  key: String!
+  name: String!
+  updatedAt: DateTime!
+  updatedBy: String
+  validationRules: JSON
+  value: String
+  valueType: SettingValueType!
 }
 
 type Task {
@@ -987,6 +1185,9 @@ type TeamMember {
   """Дата присоединения к команде"""
   joinedAt: DateTime!
 
+  """Должность/специализация (например, "Прораб", "Электрик", "Маляр")"""
+  position: String
+
   """Роль в команде (owner/member)"""
   role: String!
 
@@ -1064,6 +1265,26 @@ type TelegramAuthStatusPayload {
   user: User
 }
 
+type TwoFactorDisableResponse {
+  success: Boolean!
+}
+
+type TwoFactorEnableResponse {
+  backupCodes: [String!]!
+  success: Boolean!
+}
+
+type TwoFactorSetup {
+  manualEntryCode: String!
+  qrCodeUrl: String!
+  secret: String!
+}
+
+type TwoFactorStatus {
+  backupCodesRemaining: Float!
+  enabled: Boolean!
+}
+
 input UpdateExpenseInput {
   """Сумма расхода"""
   amount: Float
@@ -1082,6 +1303,14 @@ input UpdateExpenseInput {
 
   """Массив URL фотографий"""
   photos: [String!]
+}
+
+input UpdateMemberPositionInput {
+  """Team member ID"""
+  memberId: ID!
+
+  """Position/specialization (null to remove)"""
+  position: String
 }
 
 input UpdateMemberSalaryInput {
@@ -1159,6 +1388,11 @@ input UpdateProjectInput {
 
   """Дата начала проекта"""
   startDate: DateTime
+}
+
+input UpdateSystemSettingInput {
+  key: String!
+  value: String!
 }
 
 input UpdateTaskInput {

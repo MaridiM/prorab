@@ -9,7 +9,7 @@ import { Button } from '@/packages/components/ui/button'
 import { Alert, AlertDescription } from '@/packages/components/ui/alert'
 import { CheckCircle2, Download, ArrowRight, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import Link from 'next/link'
 
 const PAYMENT_QUERY = gql`

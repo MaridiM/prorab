@@ -5,6 +5,7 @@ import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
 import { UpdateTeamInput } from './dto/update-team.input';
 import { CreateInviteLinkInput } from './dto/create-invite-link.input';
 import { JoinTeamByInviteInput } from './dto/join-team-by-invite.input';
+import { UpdateMemberPositionInput } from './dto/update-member-position.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { Team } from './models/team.model';
 import { TeamMember } from './models/team-member.model';
@@ -190,6 +191,30 @@ export class TeamsResolver {
     @CurrentUser() user: any,
   ): Promise<TeamMemberSalaryHistory[]> {
     return this.teamsService.getMemberSalaryHistory(memberId, user.id);
+  }
+
+  @Mutation(() => TeamMember, {
+    description: 'Update team member position/specialization (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async updateMemberPosition(
+    @Args('input') input: UpdateMemberPositionInput,
+    @CurrentUser() user: any,
+  ): Promise<TeamMember> {
+    return this.teamsService.updateMemberPosition(input.memberId, input.position, user.id);
+  }
+
+  // ==================== EXPORT ====================
+
+  @Query(() => String, {
+    description: 'Export personnel analytics to CSV (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async exportPersonnelAnalytics(
+    @Args('teamId', { type: () => ID }) teamId: string,
+    @CurrentUser() user: any,
+  ): Promise<string> {
+    return this.teamsService.exportPersonnelAnalyticsToCsv(teamId, user.id);
   }
 }
 

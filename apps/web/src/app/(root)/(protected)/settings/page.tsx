@@ -67,68 +67,6 @@ import Link from 'next/link'
 import { gql } from '@apollo/client'
 
 // Inline GraphQL
-const GET_MY_SUBSCRIPTION_AND_PAYMENTS = gql`
-  query MySubscriptionAndPayments($id: String!) {
-    mySubscription {
-      id
-      plan
-      status
-      startDate
-      endDate
-      price
-      limits {
-        maxActiveProjects
-        maxMembers
-        storageGB
-      }
-    }
-    availablePlans {
-      name
-      price
-      maxActiveProjects
-      maxMembers
-      storageGB
-      features
-    }
-    paymentsBySubscription(subscriptionId: $id) {
-      id
-      amount
-      status
-      createdAt
-      description
-    }
-  }
-`
-
-const CHANGE_PLAN_MUTATION = gql`
-  mutation ChangePlan($input: ChangePlanInput!) {
-    changePlan(input: $input) {
-      id
-      plan
-      status
-    }
-  }
-`
-
-const CANCEL_SUBSCRIPTION_MUTATION = gql`
-  mutation CancelSubscription($subscriptionId: String!) {
-    cancelSubscription(subscriptionId: $subscriptionId) {
-      id
-      status
-      endDate
-    }
-  }
-`
-
-const GENERATE_PAYMENT_LINK_MUTATION = gql`
-  mutation InitializePayment($subscriptionId: String!) {
-    initializePayment(subscriptionId: $subscriptionId) {
-      url
-      paymentId
-    }
-  }
-`
-
 const UPDATE_PROFILE_MUTATION = gql`
   mutation UpdateProfile($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
@@ -136,12 +74,6 @@ const UPDATE_PROFILE_MUTATION = gql`
       fullName
       phone
     }
-  }
-`
-
-const DELETE_ACCOUNT_MUTATION = gql`
-  mutation DeleteAccount {
-    deleteAccount
   }
 `
 
@@ -205,6 +137,11 @@ import {
 	PageHeader,
 	AvatarUpload,
 	TelegramIntegration,
+	SubscriptionManagement,
+	TwoFactorAuth,
+	NotificationPreferences,
+	DeleteAccountDialog,
+	Switch,
 } from '@/packages/components'
 import { cn } from '@/packages/utils'
 
@@ -283,8 +220,6 @@ export default function SettingsPage() {
 
 	const [activeTab, setActiveTab] = useState<TabId>('profile')
 	const [showPasswordForm, setShowPasswordForm] = useState(false)
-	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-	const [deleteConfirmText, setDeleteConfirmText] = useState('')
 	const [emailCooldown, setEmailCooldown] = useState(0)
 
 	// Queries
@@ -296,65 +231,6 @@ export default function SettingsPage() {
 	const me = meData?.me
 	const notificationSettings = me?.notificationSettings
 	const sessions = sessionsData?.sessions || []
-
-	// Subscriptions & Payments Queries
-	// Note: We need a subscriptionId to fetch payments, but we only have it after mySubscription loads.
-	// For now, let's fetch mySubscription separately or use a composed query if the backend supports it.
-	// The `mySubscription` query on backend doesn't take arguments, so we can't easily fetch payments in one go 
-	// unless we use the subscription ID. 
-	// Let's modify the strategy: Fetch Subscription first, then enable Payment fetch.
-	
-	const { data: subData, loading: subLoading, refetch: refetchSub } = useQuery(
-		gql`
-			query MySubscriptionData {
-				mySubscription {
-					id
-					plan
-					status
-					startDate
-					endDate
-					price
-					limits {
-						maxActiveProjects
-						maxMembers
-						storageGB
-					}
-				}
-				availablePlans {
-					name
-					price
-					maxActiveProjects
-					maxMembers
-					storageGB
-					features
-				}
-			}
-		`
-	)
-
-	const mySubscription = subData?.mySubscription
-	const availablePlans = subData?.availablePlans || []
-
-	const { data: paymentsData, loading: paymentsLoading } = useQuery(
-		gql`
-			query MyPayments($subscriptionId: String!) {
-				paymentsBySubscription(subscriptionId: $subscriptionId) {
-					id
-					amount
-					status
-					createdAt
-					description
-				}
-			}
-		`, 
-		{
-			skip: !mySubscription?.id,
-			variables: { subscriptionId: mySubscription?.id },
-			fetchPolicy: 'network-only' // Always get fresh payments
-		}
-	)
-
-	const payments = paymentsData?.paymentsBySubscription || []
 
 	// Mutations
 	const [updateProfile, { loading: updatingProfile }] = useMutation(UPDATE_PROFILE_MUTATION, {
@@ -532,16 +408,6 @@ export default function SettingsPage() {
 	const handleResendEmail = async () => {
 		if (emailCooldown > 0) return
 		await resendVerificationEmail()
-	}
-
-	const handleDeleteAccount = async () => {
-		showToast({
-			title: 'В разработке',
-			description: 'Удаление аккаунта будет доступно в следующей версии',
-			type: 'info',
-		})
-		setShowDeleteConfirm(false)
-		setDeleteConfirmText('')
 	}
 
 	const formatDate = (date: string) => {
@@ -1030,6 +896,9 @@ export default function SettingsPage() {
 										)}
 									</motion.section>
 
+									{/* Two-Factor Authentication */}
+									<TwoFactorAuth />
+
 									{/* Sessions Section */}
 									<motion.section
 										variants={fadeIn}
@@ -1128,81 +997,8 @@ export default function SettingsPage() {
 										</div>
 									</motion.section>
 
-									{/* Danger Zone */}
-									<motion.section
-										variants={fadeIn}
-										className="rounded-2xl border border-destructive/30 bg-destructive/5 overflow-hidden"
-									>
-										<div className="p-6 border-b border-destructive/20 flex items-center gap-3">
-											<div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-												<AlertTriangle className="w-5 h-5 text-destructive" />
-											</div>
-											<div>
-												<h2 className="font-semibold text-destructive">Опасная зона</h2>
-												<p className="text-sm text-muted-foreground">Необратимые действия</p>
-											</div>
-										</div>
-
-										<div className="p-6">
-											{!showDeleteConfirm ? (
-												<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-													<div>
-														<h3 className="font-medium">Удалить аккаунт</h3>
-														<p className="text-sm text-muted-foreground">
-															Все данные будут безвозвратно удалены
-														</p>
-													</div>
-													<Button
-														variant="destructive"
-														onClick={() => setShowDeleteConfirm(true)}
-														className="rounded-xl self-start sm:self-auto"
-													>
-														<Trash2 className="w-4 h-4 mr-2" />
-														Удалить аккаунт
-													</Button>
-												</div>
-											) : (
-												<div className="space-y-4">
-													<div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
-														<p className="text-sm font-medium text-destructive mb-1">
-															⚠️ Внимание! Это действие необратимо!
-														</p>
-														<p className="text-sm text-muted-foreground">
-															Для подтверждения введите слово <strong>УДАЛИТЬ</strong>
-														</p>
-													</div>
-													<Input
-														type="text"
-														value={deleteConfirmText}
-														onChange={(e) => setDeleteConfirmText(e.target.value)}
-														placeholder="Введите УДАЛИТЬ для подтверждения"
-														className="h-12 rounded-xl"
-													/>
-													<div className="flex flex-col sm:flex-row gap-3">
-														<Button
-															variant="outline"
-															onClick={() => {
-																setShowDeleteConfirm(false)
-																setDeleteConfirmText('')
-															}}
-															className="h-12 rounded-xl sm:flex-1"
-														>
-															Отмена
-														</Button>
-														<Button
-															variant="destructive"
-															onClick={handleDeleteAccount}
-															disabled={deleteConfirmText !== 'УДАЛИТЬ'}
-															className="h-12 rounded-xl sm:flex-1"
-														>
-															<Trash2 className="w-4 h-4 mr-2" />
-															Удалить навсегда
-														</Button>
-													</div>
-												</div>
-											)}
-										</div>
-									</motion.section>
+									{/* Danger Zone - Delete Account */}
+									<DeleteAccountDialog userEmail={data?.me?.email} />
 								</motion.div>
 							</motion.div>
 						)}
@@ -1397,6 +1193,32 @@ export default function SettingsPage() {
 											onDisconnect={() => refetchMe()}
 										/>
 									</motion.section>
+
+									{/* Detailed Notification Preferences */}
+									<motion.section variants={fadeIn}>
+										<NotificationPreferences
+											settings={{
+												notifyProjectCreated: notificationSettings?.notifyProjectCreated,
+												notifyProjectCompleted: notificationSettings?.notifyProjectCompleted,
+												notifyExpenseAdded: notificationSettings?.notifyExpenseAdded,
+												notifyPayoutCalculated: notificationSettings?.notifyPayoutCalculated,
+												notifyPayoutPaid: notificationSettings?.notifyPayoutPaid,
+												notifyMemberInvited: notificationSettings?.notifyMemberInvited,
+												notifyMemberJoined: notificationSettings?.notifyMemberJoined,
+												notifyMemberRemoved: notificationSettings?.notifyMemberRemoved,
+												notifyTaskAssigned: notificationSettings?.notifyTaskAssigned,
+												notifyTaskCompleted: notificationSettings?.notifyTaskCompleted,
+												notifyPhotoReportCreated: notificationSettings?.notifyPhotoReportCreated,
+												notifySubscriptionExpiring: notificationSettings?.notifySubscriptionExpiring,
+												emailFrequency: notificationSettings?.emailFrequency,
+												pushFrequency: notificationSettings?.pushFrequency,
+												quietHoursEnabled: notificationSettings?.quietHoursEnabled,
+												quietHoursStart: notificationSettings?.quietHoursStart,
+												quietHoursEnd: notificationSettings?.quietHoursEnd,
+											}}
+											onUpdate={() => refetchMe()}
+										/>
+									</motion.section>
 								</motion.div>
 							</motion.div>
 						)}
@@ -1410,247 +1232,17 @@ export default function SettingsPage() {
 								exit="exit"
 								variants={fadeIn}
 							>
-								<motion.div variants={stagger} className="space-y-6">
-											{/* Current Plan */}
-									<motion.section
-										variants={fadeIn}
-										className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden"
-									>
-										<div className="p-6">
-											{subLoading ? (
-												<div className="space-y-4">
-													<Skeleton className="h-14 w-full" />
-													<Skeleton className="h-20 w-full" />
-												</div>
-											) : !mySubscription ? (
-												<div className="text-center py-6">
-													<p className="text-lg font-medium">Нет активной подписки</p>
-													<p className="text-muted-foreground">Выберите тарифный план ниже</p>
-												</div>
-											) : (
-												<>
-													<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-														<div className="flex items-center gap-4">
-															<div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-																<Crown className="w-7 h-7 text-primary" />
-															</div>
-															<div>
-																<div className="flex items-center gap-2">
-																	<h2 className="text-xl font-bold capitalize">{mySubscription.plan.toLowerCase()}</h2>
-																	<Badge variant="default" className="bg-primary/20 text-primary border-primary/30 uppercase">
-																		{mySubscription.status}
-																	</Badge>
-																</div>
-																<p className="text-sm text-muted-foreground">
-																	До {mySubscription.limits?.maxActiveProjects === 9999 ? 'Безлимит' : mySubscription.limits?.maxActiveProjects} проектов • 
-																	До {mySubscription.limits?.maxMembers} участников
-																</p>
-															</div>
-														</div>
-														<div className="text-right">
-															<p className="text-2xl font-bold">{mySubscription.price || 0} ₽<span className="text-sm font-normal text-muted-foreground">/мес</span></p>
-															{mySubscription.endDate && (
-																<p className="text-sm text-muted-foreground">
-																	Обновится: {new Date(mySubscription.endDate).toLocaleDateString()}
-																</p>
-															)}
-														</div>
-													</div>
-
-													{/* Usage Stats (Mock data for now as specific usage stats endpoint is separate, can be added later) */}
-													<div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-														{[
-															{ label: 'Проектов', value: '0', max: mySubscription.limits?.maxActiveProjects === 9999 ? '∞' : mySubscription.limits?.maxActiveProjects, icon: FolderKanban },
-															{ label: 'Участников', value: '1', max: mySubscription.limits?.maxMembers, icon: Users },
-															{ label: 'Хранилище', value: '0 ГБ', max: `${mySubscription.limits?.storageGB} ГБ`, icon: Building2 },
-															{ label: 'Расходов', value: '0', max: '∞', icon: Receipt },
-														].map((stat) => (
-															<div key={stat.label} className="p-3 rounded-xl bg-card/50 border border-border/30">
-																<div className="flex items-center gap-2 mb-2">
-																	<stat.icon className="w-4 h-4 text-muted-foreground" />
-																	<span className="text-xs text-muted-foreground">{stat.label}</span>
-																</div>
-																<p className="text-lg font-semibold">
-																	{stat.value}<span className="text-sm font-normal text-muted-foreground">/{stat.max}</span>
-																</p>
-															</div>
-														))}
-													</div>
-												</>
-											)}
-										</div>
-									</motion.section>
-
-									{/* Available Plans */}
-									<motion.section variants={fadeIn}>
-										<h3 className="text-lg font-semibold mb-4">Доступные тарифы</h3>
-										{subLoading ? (
-											<div className="space-y-4">
-												<Skeleton className="h-24 w-full" />
-												<Skeleton className="h-24 w-full" />
-											</div>
-										) : (
-											<div className="grid gap-4">
-												{availablePlans.map((plan: any) => {
-													const isCurrent = mySubscription?.plan === plan.name;
-													return (
-														<div
-															key={plan.name}
-															className={cn(
-																'p-4 rounded-2xl border transition-all',
-																isCurrent
-																	? 'border-primary bg-primary/5'
-																	: 'border-border/50 bg-card hover:border-primary/30'
-															)}
-														>
-															<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-																<div className="flex items-center gap-4">
-																	<div className={cn(
-																		'w-12 h-12 rounded-xl flex items-center justify-center',
-																		plan.name === 'LITE' && 'bg-blue-500/10 text-blue-500',
-																		plan.name === 'FOREMAN' && 'bg-amber-500/10 text-amber-500',
-																		plan.name === 'BRIGADE' && 'bg-primary/10 text-primary'
-																	)}>
-																		{plan.name === 'LITE' && <Zap className="w-6 h-6" />}
-																		{plan.name === 'FOREMAN' && <Star className="w-6 h-6" />}
-																		{plan.name === 'BRIGADE' && <Crown className="w-6 h-6" />}
-																	</div>
-																	<div>
-																		<div className="flex items-center gap-2">
-																			<h4 className="font-semibold capitalize">{plan.name.toLowerCase()}</h4>
-																			{plan.name === 'BRIGADE' && (
-																				<Badge variant="default" className="text-xs">Популярный</Badge>
-																			)}
-																			{isCurrent && (
-																				<Badge variant="outline" className="text-xs border-primary text-primary">Текущий</Badge>
-																			)}
-																		</div>
-																		<div className="flex flex-wrap gap-2 mt-1">
-																			{[
-																				`${plan.maxActiveProjects === 9999 ? 'Безлимит' : plan.maxActiveProjects} проектов`,
-																				`До ${plan.maxMembers} участников`,
-																				`${plan.storageGB} ГБ хранилище`
-																			].map((feature) => (
-																				<span key={feature} className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-																					{feature}
-																				</span>
-																			))}
-																		</div>
-																	</div>
-																</div>
-																<div className="flex items-center gap-4">
-																	<div className="text-right">
-																		<p className="font-bold">{plan.price} ₽<span className="text-xs font-normal text-muted-foreground">/мес</span></p>
-																	</div>
-																	{!isCurrent && (
-																		<Button
-																			variant="outline"
-																			size="sm"
-																			className="rounded-xl"
-																			onClick={() => {
-																				showToast({
-																					title: 'В разработке',
-																					description: 'Смена тарифа будет доступна после подключения эквайринга',
-																					type: 'info',
-																				})
-																			}}
-																		>
-																			Выбрать
-																		</Button>
-																	)}
-																</div>
-															</div>
-														</div>
-													)
-												})}
-											</div>
-										)}
-									</motion.section>
-
-									{/* Payment History */}
-									<motion.section
-										variants={fadeIn}
-										className="rounded-2xl border border-border/50 bg-card overflow-hidden"
-									>
-										<div className="p-6 border-b border-border/30 flex items-center justify-between">
-											<div className="flex items-center gap-3">
-												<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-													<Receipt className="w-5 h-5 text-primary" />
-												</div>
-												<div>
-													<h2 className="font-semibold">История платежей</h2>
-													<p className="text-sm text-muted-foreground">Последние транзакции</p>
-												</div>
-											</div>
-										</div>
-
-										<div className="divide-y divide-border/30">
-											{paymentsLoading ? (
-												<div className="p-4 space-y-3">
-													<Skeleton className="h-10 w-full" />
-													<Skeleton className="h-10 w-full" />
-												</div>
-											) : payments.length === 0 ? (
-												<div className="p-8 text-center text-muted-foreground">
-													<Receipt className="w-10 h-10 mx-auto mb-2 opacity-50" />
-													<p>История платежей пуста</p>
-												</div>
-											) : (
-												payments.map((payment: any) => (
-													<div key={payment.id} className="p-4 flex items-center justify-between">
-														<div className="flex items-center gap-4">
-															<div className={cn(
-																'w-10 h-10 rounded-full flex items-center justify-center',
-																payment.status === 'succeeded' ? 'bg-emerald-500/10' : 'bg-destructive/10'
-															)}>
-																{payment.status === 'succeeded' ? (
-																	<CheckCircle className="w-5 h-5 text-emerald-500" />
-																) : (
-																	<AlertCircle className="w-5 h-5 text-destructive" />
-																)}
-															</div>
-															<div>
-																<p className="font-medium">{payment.description || 'Оплата подписки'}</p>
-																<p className="text-sm text-muted-foreground">
-																	{new Date(payment.createdAt).toLocaleDateString()}
-																</p>
-															</div>
-														</div>
-														<p className="font-semibold">{payment.amount} ₽</p>
-													</div>
-												))
-											)}
-										</div>
-									</motion.section>
-
-									{/* Cancel Subscription */}
-									<motion.section
-										variants={fadeIn}
-										className="rounded-2xl border border-border/50 bg-card overflow-hidden"
-									>
-										<div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-											<div>
-												<h3 className="font-medium">Управление подпиской</h3>
-												<p className="text-sm text-muted-foreground">
-													Отмените подписку в любое время. Доступ сохранится до конца оплаченного периода.
-												</p>
-											</div>
-											<Button
-												variant="ghost"
-												className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl self-start sm:self-auto"
-												onClick={() => {
-													showToast({
-														title: 'В разработке',
-														description: 'Управление подпиской будет доступно после подключения платежей',
-														type: 'info',
-													})
-												}}
-											>
-												Отменить подписку
-											</Button>
-										</div>
-									</motion.section>
-								</motion.div>
+								<motion.section variants={fadeIn}>
+									<SubscriptionManagement
+										onUpgrade={() => {
+											showToast({
+												title: 'В разработке',
+												description: 'Смена тарифа будет доступна после подключения эквайринга',
+												type: 'info',
+											})
+										}}
+									/>
+								</motion.section>
 							</motion.div>
 						)}
 

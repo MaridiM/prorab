@@ -10,6 +10,7 @@ import { NotificationSettings } from './models/notification-settings.model'
 import { UsersService } from './users.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
 import { UpdateNotificationSettingsInput } from './dto/update-notification-settings.input'
+import { DeleteAccountInput } from './dto/delete-account.input'
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -44,11 +45,14 @@ export class UsersResolver {
 		description: 'Удаление аккаунта пользователя',
 	})
 	@UseGuards(AuthGuard)
-	async deleteAccount(@CurrentUser() currentUser: CurrentUserData): Promise<boolean> {
+	async deleteAccount(
+		@CurrentUser() currentUser: CurrentUserData,
+		@Args('input') input: DeleteAccountInput,
+	): Promise<boolean> {
 		if (!currentUser?.id) {
 			throw new UnauthorizedException('User not authenticated');
 		}
-		await this.usersService.deleteAccount(currentUser.id)
+		await this.usersService.deleteAccount(currentUser.id, input.password)
 		return true
 	}
 

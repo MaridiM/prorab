@@ -17,6 +17,9 @@ export class MemberAnalytics {
   @Field()
   role: string;
 
+  @Field({ nullable: true })
+  position?: string;
+
   @Field()
   salaryType: string;
 

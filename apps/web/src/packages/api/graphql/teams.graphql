@@ -38,6 +38,7 @@ query TeamMembers($teamId: ID!) {
     teamId
     userId
     role
+    position
     salaryType
     salaryAmount
     joinedAt
@@ -151,4 +152,15 @@ query TeamInvites($teamId: ID!) {
 
 mutation DeleteInviteCode($codeId: ID!) {
   deleteInviteCode(codeId: $codeId)
+}
+
+mutation UpdateMemberPosition($input: UpdateMemberPositionInput!) {
+  updateMemberPosition(input: $input) {
+    id
+    teamId
+    userId
+    role
+    position
+    joinedAt
+  }
 }

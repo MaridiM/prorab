@@ -1,0 +1,99 @@
+# System Settings Queries
+query SystemSettings($category: SettingCategory) {
+	systemSettings(category: $category) {
+		id
+		key
+		category
+		name
+		description
+		valueType
+		value
+		defaultValue
+		isEncrypted
+		isRequired
+		updatedBy
+		updatedAt
+		createdAt
+	}
+}
+
+query SystemSetting($key: String!) {
+	systemSetting(key: $key) {
+		id
+		key
+		category
+		name
+		description
+		valueType
+		value
+		defaultValue
+		isEncrypted
+		isRequired
+		updatedBy
+		updatedAt
+		createdAt
+	}
+}
+
+# System Settings Mutations
+mutation CreateSystemSetting($input: CreateSystemSettingInput!) {
+	createSystemSetting(input: $input) {
+		id
+		key
+		category
+		name
+		description
+		valueType
+		value
+		defaultValue
+		isEncrypted
+		isRequired
+		updatedBy
+		updatedAt
+		createdAt
+	}
+}
+
+mutation UpdateSystemSetting($input: UpdateSystemSettingInput!) {
+	updateSystemSetting(input: $input) {
+		id
+		key
+		category
+		name
+		description
+		valueType
+		value
+		defaultValue
+		isEncrypted
+		isRequired
+		updatedBy
+		updatedAt
+		createdAt
+	}
+}
+
+mutation BulkUpdateSystemSettings($input: BulkUpdateSystemSettingsInput!) {
+	bulkUpdateSystemSettings(input: $input) {
+		id
+		key
+		category
+		name
+		value
+		updatedAt
+	}
+}
+
+mutation DeleteSystemSetting($key: String!) {
+	deleteSystemSetting(key: $key)
+}
+
+mutation TestServiceConnection($category: SettingCategory!) {
+	testServiceConnection(category: $category) {
+		success
+		message
+	}
+}
+
+mutation InitializeDefaultSettings {
+	initializeDefaultSettings
+}

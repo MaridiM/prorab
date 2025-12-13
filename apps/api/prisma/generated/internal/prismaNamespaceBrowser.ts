@@ -71,7 +71,11 @@ export const ModelName = {
   Payment: 'Payment',
   SupportTicket: 'SupportTicket',
   SupportMessage: 'SupportMessage',
-  FAQEntry: 'FAQEntry'
+  FAQEntry: 'FAQEntry',
+  AdminRole: 'AdminRole',
+  SystemSettings: 'SystemSettings',
+  AdminActionLog: 'AdminActionLog',
+  SystemStatistics: 'SystemStatistics'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -107,6 +111,9 @@ export const UserScalarFieldEnum = {
   telegramChatId: 'telegramChatId',
   telegramUsername: 'telegramUsername',
   telegramPhotoUrl: 'telegramPhotoUrl',
+  twoFactorEnabled: 'twoFactorEnabled',
+  twoFactorSecret: 'twoFactorSecret',
+  twoFactorBackupCodes: 'twoFactorBackupCodes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -120,8 +127,28 @@ export const NotificationSettingsScalarFieldEnum = {
   appPush: 'appPush',
   appEmail: 'appEmail',
   appSms: 'appSms',
+  telegramEnabled: 'telegramEnabled',
+  telegramSalaryChanges: 'telegramSalaryChanges',
+  telegramPayouts: 'telegramPayouts',
   marketingPush: 'marketingPush',
   marketingEmail: 'marketingEmail',
+  notifyProjectCreated: 'notifyProjectCreated',
+  notifyProjectCompleted: 'notifyProjectCompleted',
+  notifyExpenseAdded: 'notifyExpenseAdded',
+  notifyPayoutCalculated: 'notifyPayoutCalculated',
+  notifyPayoutPaid: 'notifyPayoutPaid',
+  notifyMemberInvited: 'notifyMemberInvited',
+  notifyMemberJoined: 'notifyMemberJoined',
+  notifyMemberRemoved: 'notifyMemberRemoved',
+  notifyTaskAssigned: 'notifyTaskAssigned',
+  notifyTaskCompleted: 'notifyTaskCompleted',
+  notifyPhotoReportCreated: 'notifyPhotoReportCreated',
+  notifySubscriptionExpiring: 'notifySubscriptionExpiring',
+  emailFrequency: 'emailFrequency',
+  pushFrequency: 'pushFrequency',
+  quietHoursEnabled: 'quietHoursEnabled',
+  quietHoursStart: 'quietHoursStart',
+  quietHoursEnd: 'quietHoursEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -218,6 +245,7 @@ export const TeamMemberScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   role: 'role',
+  position: 'position',
   joinedAt: 'joinedAt',
   salaryType: 'salaryType',
   salaryAmount: 'salaryAmount'
@@ -431,6 +459,84 @@ export const FAQEntryScalarFieldEnum = {
 } as const
 
 export type FAQEntryScalarFieldEnum = (typeof FAQEntryScalarFieldEnum)[keyof typeof FAQEntryScalarFieldEnum]
+
+
+export const AdminRoleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  role: 'role',
+  permissions: 'permissions',
+  assignedBy: 'assignedBy',
+  assignedAt: 'assignedAt',
+  twoFactorEnforced: 'twoFactorEnforced',
+  ipWhitelist: 'ipWhitelist',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminRoleScalarFieldEnum = (typeof AdminRoleScalarFieldEnum)[keyof typeof AdminRoleScalarFieldEnum]
+
+
+export const SystemSettingsScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  category: 'category',
+  name: 'name',
+  description: 'description',
+  valueType: 'valueType',
+  value: 'value',
+  defaultValue: 'defaultValue',
+  isEncrypted: 'isEncrypted',
+  isRequired: 'isRequired',
+  validationRules: 'validationRules',
+  updatedBy: 'updatedBy',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
+
+
+export const AdminActionLogScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  action: 'action',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminActionLogScalarFieldEnum = (typeof AdminActionLogScalarFieldEnum)[keyof typeof AdminActionLogScalarFieldEnum]
+
+
+export const SystemStatisticsScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  totalUsers: 'totalUsers',
+  activeUsers: 'activeUsers',
+  newUsers: 'newUsers',
+  totalTeams: 'totalTeams',
+  activeTeams: 'activeTeams',
+  newTeams: 'newTeams',
+  totalProjects: 'totalProjects',
+  activeProjects: 'activeProjects',
+  completedProjects: 'completedProjects',
+  totalRevenue: 'totalRevenue',
+  mrr: 'mrr',
+  trialingSubscriptions: 'trialingSubscriptions',
+  activeSubscriptions: 'activeSubscriptions',
+  cancelledSubscriptions: 'cancelledSubscriptions',
+  totalStorageUsed: 'totalStorageUsed',
+  openTickets: 'openTickets',
+  closedTickets: 'closedTickets',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemStatisticsScalarFieldEnum = (typeof SystemStatisticsScalarFieldEnum)[keyof typeof SystemStatisticsScalarFieldEnum]
 
 
 export const SortOrder = {

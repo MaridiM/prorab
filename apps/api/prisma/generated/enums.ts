@@ -9,6 +9,15 @@
 * 🟢 You can import this file directly.
 */
 
+export const NotificationFrequency = {
+  INSTANT: 'INSTANT',
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY'
+} as const
+
+export type NotificationFrequency = (typeof NotificationFrequency)[keyof typeof NotificationFrequency]
+
+
 export const LogoType = {
   UPLOADED: 'UPLOADED',
   GENERATED: 'GENERATED',
@@ -96,3 +105,37 @@ export const SupportTicketPriority = {
 } as const
 
 export type SupportTicketPriority = (typeof SupportTicketPriority)[keyof typeof SupportTicketPriority]
+
+
+export const AdminRoleType = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  MODERATOR: 'MODERATOR',
+  SUPPORT: 'SUPPORT'
+} as const
+
+export type AdminRoleType = (typeof AdminRoleType)[keyof typeof AdminRoleType]
+
+
+export const SettingCategory = {
+  PAYMENT: 'PAYMENT',
+  EMAIL: 'EMAIL',
+  TELEGRAM: 'TELEGRAM',
+  STORAGE: 'STORAGE',
+  AI: 'AI',
+  SECURITY: 'SECURITY',
+  GENERAL: 'GENERAL'
+} as const
+
+export type SettingCategory = (typeof SettingCategory)[keyof typeof SettingCategory]
+
+
+export const SettingValueType = {
+  STRING: 'STRING',
+  NUMBER: 'NUMBER',
+  BOOLEAN: 'BOOLEAN',
+  JSON: 'JSON',
+  ENCRYPTED: 'ENCRYPTED'
+} as const
+
+export type SettingValueType = (typeof SettingValueType)[keyof typeof SettingValueType]

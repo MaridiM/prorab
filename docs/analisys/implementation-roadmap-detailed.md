@@ -683,7 +683,7 @@ type Mutation {
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@apollo/client';
+import { useMutation } from  '@apollo/client/react';
 import { Camera, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -888,7 +888,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Trash2, Edit, CheckCircle2 } from 'lucide-react';
-import { useMutation } from '@apollo/client';
+import { useMutation } from  '@apollo/client/react';
 
 import { Badge, Button } from '@/packages/components/ui';
 import { DeleteExpenseDocument, ProjectExpensesDocument } from '@/packages/api/output';

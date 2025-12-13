@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TelegramBot } from './telegram.bot'
 import { TelegramAuthService } from './telegram-auth.service'
+import { TelegramNotificationService } from './telegram-notification.service'
 import { PrismaModule } from '../../core/prisma/prisma.module'
 
 /**
@@ -9,7 +10,7 @@ import { PrismaModule } from '../../core/prisma/prisma.module'
  */
 @Module({
 	imports: [PrismaModule],
-	providers: [TelegramBot, TelegramAuthService],
-	exports: [TelegramAuthService],
+	providers: [TelegramBot, TelegramAuthService, TelegramNotificationService],
+	exports: [TelegramAuthService, TelegramNotificationService],
 })
 export class TelegramOAuthBotModule {}

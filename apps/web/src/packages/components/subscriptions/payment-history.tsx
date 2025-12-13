@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import { Download, ExternalLink } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'

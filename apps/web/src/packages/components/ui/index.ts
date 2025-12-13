@@ -21,6 +21,7 @@ export * from "./select";
 export * from "./skeleton";
 export * from "./spinner";
 export * from "./stepper";
+export * from "./switch";
 export * from "./table";
 export * from "./team-logo";
 export * from "./textarea";

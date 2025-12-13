@@ -1,12 +1,26 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { CoreService } from '../../core/core.service';
+import { PrismaService } from '../../core/prisma/prisma.service';
+import { RedisService } from '../../core/redis/redis.service';
+import { ConfigService } from '@nestjs/config';
 import { UpdateMemberSalaryInput } from './dto/update-member-salary.input';
+import { BulkUpdateSalaryInput } from './dto/bulk-update-salary.input';
 import { CreatePayoutInput } from './dto/create-payout.input';
 import { PayoutSummary, MemberPayoutDetail } from './models/payout-summary.model';
 import { ProjectPayout } from './models/project-payout.model';
+import { TelegramNotificationService } from '../telegram/telegram-notification.service';
 
 @Injectable()
 export class PayoutsService extends CoreService {
+  constructor(
+    prisma: PrismaService,
+    redis: RedisService,
+    config: ConfigService,
+    @Inject(forwardRef(() => TelegramNotificationService))
+    private readonly telegramNotificationService: TelegramNotificationService,
+  ) {
+    super(prisma, redis, config);
+  }
   /**
    * Calculate payouts for all team members of a project
    * Business logic:
@@ -185,7 +199,64 @@ export class PayoutsService extends CoreService {
       return updatedMember;
     });
 
+    // 7. Send Telegram notification if salary changed
+    if (isChanging && updated.user) {
+      await this.telegramNotificationService.sendSalaryChangeNotification({
+        userId: updated.userId,
+        memberName: updated.user.fullName,
+        teamName: updated.team.name,
+        oldSalaryType: teamMember.salaryType,
+        newSalaryType: input.salaryType,
+        oldAmount: teamMember.salaryAmount?.toNumber(),
+        newAmount: input.salaryAmount || undefined,
+      });
+    }
+
     return updated;
+  }
+
+  /**
+   * Bulk update member salaries
+   * Only owner can update
+   */
+  async bulkUpdateMemberSalaries(
+    input: BulkUpdateSalaryInput,
+    userId: string,
+  ): Promise<{ success: number; failed: number; results: any[] }> {
+    const results: any[] = [];
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (const update of input.updates) {
+      try {
+        // Add reason from bulk input if not provided in individual update
+        const updateWithReason = {
+          ...update,
+          reason: update.reason || input.reason,
+        };
+
+        const result = await this.updateMemberSalary(updateWithReason, userId);
+        results.push({
+          memberId: update.memberId,
+          success: true,
+          data: result,
+        });
+        successCount++;
+      } catch (error) {
+        results.push({
+          memberId: update.memberId,
+          success: false,
+          error: error.message,
+        });
+        failedCount++;
+      }
+    }
+
+    return {
+      success: successCount,
+      failed: failedCount,
+      results,
+    };
   }
 
   /**
@@ -244,6 +315,18 @@ export class PayoutsService extends CoreService {
         },
       });
 
+      // Send Telegram notification for updated payout
+      if (updated.member?.user) {
+        await this.telegramNotificationService.sendPayoutNotification({
+          userId: updated.member.userId,
+          memberName: updated.member.user.fullName,
+          projectName: updated.project.name,
+          amount: input.amount,
+          status: 'COMPLETED',
+          description: input.notes,
+        });
+      }
+
       return updated as any;
     }
 
@@ -267,6 +350,18 @@ export class PayoutsService extends CoreService {
         },
       },
     });
+
+    // 5. Send Telegram notification for new payout
+    if (payout.member?.user) {
+      await this.telegramNotificationService.sendPayoutNotification({
+        userId: payout.member.userId,
+        memberName: payout.member.user.fullName,
+        projectName: payout.project.name,
+        amount: input.amount,
+        status: 'COMPLETED',
+        description: input.notes,
+      });
+    }
 
     return payout as any;
   }

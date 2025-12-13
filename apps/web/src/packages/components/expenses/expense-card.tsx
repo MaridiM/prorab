@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { ru } from "date-fns/locale"
+import { ru } from "date-fns/locale/ru"
 import { Trash2, Edit, DollarSign } from "lucide-react"
 
 import { cn } from "@/packages/utils"

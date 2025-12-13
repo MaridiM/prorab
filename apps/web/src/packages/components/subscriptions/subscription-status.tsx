@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import { AlertCircle, Calendar, CreditCard, TrendingUp } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 import { Badge } from '../ui/badge'

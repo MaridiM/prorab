@@ -1,0 +1,33 @@
+query TwoFactorStatus {
+  twoFactorStatus {
+    enabled
+    backupCodesRemaining
+  }
+}
+
+mutation Generate2FASecret {
+  generate2FASecret {
+    secret
+    qrCodeUrl
+    manualEntryCode
+  }
+}
+
+mutation Enable2FA($input: Enable2FAInput!) {
+  enable2FA(input: $input) {
+    success
+    backupCodes
+  }
+}
+
+mutation Disable2FA($input: Disable2FAInput!) {
+  disable2FA(input: $input) {
+    success
+  }
+}
+
+mutation Regenerate2FABackupCodes($input: RegenerateBackupCodesInput!) {
+  regenerate2FABackupCodes(input: $input) {
+    backupCodes
+  }
+}

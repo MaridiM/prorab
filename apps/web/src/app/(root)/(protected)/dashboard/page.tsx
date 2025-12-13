@@ -1000,6 +1000,7 @@ export default function DashboardPage() {
 		data: teamsData,
 		loading: teamsLoading,
 		error: teamsError,
+		refetch: refetchTeams,
 	} = useQuery(MyTeamsDocument, {
 		fetchPolicy: 'cache-and-network',
 	})
@@ -1233,21 +1234,64 @@ export default function DashboardPage() {
 
 	// Error state
 	if (teamsError) {
+		const isNetworkError = teamsError.message === 'Failed to fetch' || 
+			teamsError.networkError || 
+			teamsError.message?.includes('Failed to fetch');
+		
+		const errorMessage = isNetworkError 
+			? 'Не удалось подключиться к серверу. Проверьте, что API сервер запущен на порту 8080.'
+			: teamsError.message || 'Произошла ошибка при загрузке данных';
+		
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
+			<div className="min-h-screen bg-background flex items-center justify-center p-4">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="text-center max-w-md px-4"
+					className="text-center max-w-md"
 				>
 					<div className="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-6">
 						<AlertCircle className="w-10 h-10 text-red-500" />
 					</div>
 					<h2 className="text-2xl font-bold mb-3">Ошибка загрузки</h2>
-					<p className="text-muted-foreground mb-6">{teamsError.message}</p>
-					<Button onClick={() => window.location.reload()} size="lg">
-						Попробовать снова
-					</Button>
+					<p className="text-muted-foreground mb-2">{errorMessage}</p>
+					{isNetworkError && teamsError.message && (
+						<p className="text-sm text-muted-foreground/70 mb-6 font-mono bg-muted/50 p-2 rounded">
+							{teamsError.message}
+						</p>
+					)}
+					<div className="flex flex-col gap-2 mb-4">
+						<Button 
+							onClick={() => refetchTeams()} 
+							size="lg"
+						>
+							Попробовать снова
+						</Button>
+						{isNetworkError && (
+							<Button 
+								onClick={() => window.location.reload()} 
+								variant="outline"
+								size="lg"
+							>
+								Перезагрузить страницу
+							</Button>
+						)}
+					</div>
+					{isNetworkError && (
+						<div className="mt-6 p-4 bg-muted/30 rounded-lg text-left">
+							<p className="text-sm font-semibold mb-2">Возможные причины:</p>
+							<ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+								<li>API сервер не запущен (проверьте порт 8080)</li>
+								<li>Проблема с CORS настройками</li>
+								<li>Проблемы с сетью или файрволом</li>
+								<li>Неправильный URL сервера в настройках</li>
+							</ul>
+							{process.env.NODE_ENV === 'development' && (
+								<p className="text-xs text-muted-foreground mt-3 pt-3 border-t">
+									<strong>Для разработки:</strong> Запустите API сервер командой <code className="bg-background px-1 rounded">pnpm --filter api dev</code>
+								</p>
+							)}
+						</div>
+					)}
 				</motion.div>
 			</div>
 		)

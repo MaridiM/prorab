@@ -17,6 +17,7 @@ import { PaymentsModule } from './modules/payments/payments.module'
 import { TelegramModule } from './modules/telegram/telegram.module'
 import { MailModule } from './core/mail/mail.module'
 import { StorageModule } from './core/storage/storage.module'
+import { AdminModule } from './modules/admin/admin.module'
 import { AuthGuard } from './shared/guards/auth.guard'
 
 @Module({
@@ -36,6 +37,7 @@ import { AuthGuard } from './shared/guards/auth.guard'
 		TelegramModule,
 		MailModule,
 		StorageModule,
+		AdminModule,
 	],
 	providers: [
 		AppResolver,

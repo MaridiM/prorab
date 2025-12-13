@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { Camera, X, Upload, Loader2, Trash2 } from 'lucide-react'
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { gql } from '@apollo/client'
 
 import {
@@ -15,10 +15,10 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from '../ui/dialog'
-import { Button } from '../ui/button'
-import { UserAvatar } from '../ui/user-avatar'
-import { useToast } from '../ui/use-toast'
+	Button,
+	UserAvatar,
+} from '@/packages/ui'
+import { toast } from 'sonner'
 
 // GraphQL Mutations
 const UPLOAD_AVATAR = gql`
@@ -65,42 +65,27 @@ export function AvatarUpload({ user, onAvatarChange }: AvatarUploadProps) {
 	})
 	const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null)
 	const imgRef = useRef<HTMLImageElement>(null)
-	const { toast } = useToast()
 
 	const [uploadAvatar, { loading: uploading }] = useMutation(UPLOAD_AVATAR, {
 		onCompleted: () => {
-			toast({
-				title: 'Успех!',
-				description: 'Аватар успешно загружен',
-			})
+			toast.success('Аватар успешно загружен')
 			setShowCropDialog(false)
 			setImageSrc(null)
 			onAvatarChange?.()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось загрузить аватар',
-				variant: 'destructive',
-			})
+			toast.error(error.message || 'Не удалось загрузить аватар')
 		},
 		refetchQueries: ['Me'],
 	})
 
 	const [deleteAvatar, { loading: deleting }] = useMutation(DELETE_AVATAR, {
 		onCompleted: () => {
-			toast({
-				title: 'Успех!',
-				description: 'Аватар удалён',
-			})
+			toast.success('Аватар удалён')
 			onAvatarChange?.()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось удалить аватар',
-				variant: 'destructive',
-			})
+			toast.error(error.message || 'Не удалось удалить аватар')
 		},
 		refetchQueries: ['Me'],
 	})
@@ -111,22 +96,14 @@ export function AvatarUpload({ user, onAvatarChange }: AvatarUploadProps) {
 
 		// Validate file type
 		if (!file.type.startsWith('image/')) {
-			toast({
-				title: 'Ошибка',
-				description: 'Можно загружать только изображения',
-				variant: 'destructive',
-			})
+			toast.error('Можно загружать только изображения')
 			return
 		}
 
 		// Validate file size (5MB max)
 		const maxSize = 5 * 1024 * 1024
 		if (file.size > maxSize) {
-			toast({
-				title: 'Ошибка',
-				description: 'Размер файла не должен превышать 5 МБ',
-				variant: 'destructive',
-			})
+			toast.error('Размер файла не должен превышать 5 МБ')
 			return
 		}
 
@@ -136,7 +113,7 @@ export function AvatarUpload({ user, onAvatarChange }: AvatarUploadProps) {
 			setShowCropDialog(true)
 		}
 		reader.readAsDataURL(file)
-	}, [toast])
+	}, [])
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		onDrop,
@@ -193,11 +170,7 @@ export function AvatarUpload({ user, onAvatarChange }: AvatarUploadProps) {
 
 	const handleSaveCrop = async () => {
 		if (!completedCrop || !imgRef.current) {
-			toast({
-				title: 'Ошибка',
-				description: 'Пожалуйста, выберите область для обрезки',
-				variant: 'destructive',
-			})
+			toast.error('Пожалуйста, выберите область для обрезки')
 			return
 		}
 
@@ -210,11 +183,7 @@ export function AvatarUpload({ user, onAvatarChange }: AvatarUploadProps) {
 			})
 		} catch (error) {
 			console.error('Error cropping image:', error)
-			toast({
-				title: 'Ошибка',
-				description: 'Не удалось обрезать изображение',
-				variant: 'destructive',
-			})
+			toast.error('Не удалось обрезать изображение')
 		}
 	}
 

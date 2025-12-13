@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DayPicker, type DayPickerSingleProps } from 'react-day-picker'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import { cn } from '@/packages/utils/tw-merge'
 import { buttonVariants } from './button'
 

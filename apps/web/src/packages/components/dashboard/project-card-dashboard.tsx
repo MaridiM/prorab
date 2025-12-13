@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru } from 'date-fns/locale/ru'
 import {
 	MapPin,
 	TrendingUp,

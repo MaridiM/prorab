@@ -1,0 +1,68 @@
+# Admin Action Logs Queries
+query AdminActionLogs($filter: AdminActionLogFilterInput) {
+	adminActionLogs(filter: $filter) {
+		logs {
+			id
+			adminUserId
+			action
+			resource
+			resourceId
+			details
+			ipAddress
+			userAgent
+			createdAt
+		}
+		total
+	}
+}
+
+query AdminActionLog($id: ID!) {
+	adminActionLog(id: $id) {
+		id
+		adminUserId
+		action
+		resource
+		resourceId
+		details
+		ipAddress
+		userAgent
+		createdAt
+	}
+}
+
+query RecentAdminActions($adminUserId: ID!, $limit: Float = 20) {
+	recentAdminActions(adminUserId: $adminUserId, limit: $limit) {
+		id
+		adminUserId
+		action
+		resource
+		resourceId
+		details
+		ipAddress
+		userAgent
+		createdAt
+	}
+}
+
+query ActionsByResource($resource: String!, $resourceId: ID!, $limit: Float = 50) {
+	actionsByResource(resource: $resource, resourceId: $resourceId, limit: $limit) {
+		id
+		adminUserId
+		action
+		resource
+		resourceId
+		details
+		ipAddress
+		userAgent
+		createdAt
+	}
+}
+
+query AdminActionStatistics($startDate: DateTime!, $endDate: DateTime!) {
+	adminActionStatistics(startDate: $startDate, endDate: $endDate) {
+		totalActions
+		actionsByType
+		actionsByResource
+		actionsByAdmin
+	}
+}

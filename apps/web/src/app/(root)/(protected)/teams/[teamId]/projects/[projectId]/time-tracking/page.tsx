@@ -1,16 +1,17 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client/react';
+import { use, useState, useMemo } from 'react';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Clock, Calendar, Users } from 'lucide-react';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ArrowLeft, Plus, Clock, Calendar as CalendarIcon, Users, Download, X, Table as TableIcon, CalendarDays } from 'lucide-react';
+import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import {
   ProjectWorkLogsDocument,
   CreateWorkLogDocument,
   UpdateWorkLogDocument,
   DeleteWorkLogDocument,
+  ExportProjectWorkLogsDocument,
   type ProjectWorkLogsQuery,
 } from '@/packages/api/graphql/__generated__/output';
 import {
@@ -22,6 +23,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Calendar,
+  Badge,
 } from '@/packages/components';
 import { toast } from 'sonner';
 import { WorkLogDialog } from '@/app/components/work-logs/work-log-dialog';
@@ -40,6 +46,11 @@ export default function TimeTrackingPage({ params }: PageProps) {
   const { teamId, projectId } = use(params);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<WorkLog | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
 
   const { data, loading, refetch } = useQuery(ProjectWorkLogsDocument, {
     variables: { projectId },
@@ -55,24 +66,75 @@ export default function TimeTrackingPage({ params }: PageProps) {
     },
   });
 
-  const workLogs = data?.projectWorkLogs || [];
+  const [exportWorkLogs, { loading: exporting }] = useLazyQuery(ExportProjectWorkLogsDocument, {
+    variables: { projectId },
+    onCompleted: (data) => {
+      const blob = new Blob([data.exportProjectWorkLogs], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `work-logs-${projectId}-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV экспортирован');
+    },
+    onError: (error) => {
+      toast.error('Ошибка экспорта', { description: error.message });
+    },
+  });
 
-  // Group work logs by member
-  const groupedByMember = workLogs.reduce((acc, log) => {
-    const memberId = log.memberId;
-    if (!acc[memberId]) {
-      acc[memberId] = {
-        member: log.member,
-        logs: [],
-        totalHours: 0,
-      };
-    }
-    acc[memberId].logs.push(log);
-    acc[memberId].totalHours += log.hours;
-    return acc;
-  }, {} as Record<string, { member: any; logs: WorkLog[]; totalHours: number }>);
+  const allWorkLogs = data?.projectWorkLogs || [];
 
-  const totalProjectHours = workLogs.reduce((sum, log) => sum + log.hours, 0);
+  // Filter work logs by date range with useMemo
+  const workLogs = useMemo(() => {
+    return allWorkLogs.filter((log) => {
+      if (!dateRange.from && !dateRange.to) return true;
+      const logDate = new Date(log.date);
+
+      if (dateRange.from && dateRange.to) {
+        return isWithinInterval(logDate, {
+          start: startOfDay(dateRange.from),
+          end: endOfDay(dateRange.to),
+        });
+      }
+
+      if (dateRange.from) {
+        return logDate >= startOfDay(dateRange.from);
+      }
+
+      if (dateRange.to) {
+        return logDate <= endOfDay(dateRange.to);
+      }
+
+      return true;
+    });
+  }, [allWorkLogs, dateRange]);
+
+  // Group work logs by member with useMemo
+  const groupedByMember = useMemo(() => {
+    return workLogs.reduce((acc, log) => {
+      const memberId = log.memberId;
+      if (!acc[memberId]) {
+        acc[memberId] = {
+          member: log.member,
+          logs: [],
+          totalHours: 0,
+        };
+      }
+      acc[memberId].logs.push(log);
+      acc[memberId].totalHours += log.hours;
+      return acc;
+    }, {} as Record<string, { member: any; logs: WorkLog[]; totalHours: number }>);
+  }, [workLogs]);
+
+  const totalProjectHours = useMemo(() =>
+    workLogs.reduce((sum, log) => sum + log.hours, 0),
+    [workLogs]
+  );
+
+  const handleClearDateRange = () => {
+    setDateRange({ from: undefined, to: undefined });
+  };
 
   const handleEdit = (log: WorkLog) => {
     setSelectedLog(log);
@@ -119,10 +181,97 @@ export default function TimeTrackingPage({ params }: PageProps) {
           </div>
         </div>
 
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Добавить запись
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              <TableIcon className="w-4 h-4 mr-1" />
+              Таблица
+            </Button>
+            <Button
+              variant={viewMode === 'calendar' ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('calendar')}
+            >
+              <CalendarDays className="w-4 h-4 mr-1" />
+              Календарь
+            </Button>
+          </div>
+
+          {/* Date Range Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="default">
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                {dateRange.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, 'dd.MM.yy')} - {format(dateRange.to, 'dd.MM.yy')}
+                    </>
+                  ) : (
+                    format(dateRange.from, 'dd MMM yyyy', { locale: ru })
+                  )
+                ) : (
+                  'Выбрать период'
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <div className="p-3 border-b">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">Фильтр по датам</p>
+                  {(dateRange.from || dateRange.to) && (
+                    <Button variant="ghost" size="sm" onClick={handleClearDateRange}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <Calendar
+                mode="range"
+                selected={{
+                  from: dateRange.from,
+                  to: dateRange.to,
+                }}
+                onSelect={(range: any) =>
+                  setDateRange({
+                    from: range?.from,
+                    to: range?.to,
+                  })
+                }
+                locale={ru}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+
+          {(dateRange.from || dateRange.to) && (
+            <Badge variant="secondary" className="gap-1">
+              Фильтр активен
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 p-0 hover:bg-transparent"
+                onClick={handleClearDateRange}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </Badge>
+          )}
+
+          <Button variant="outline" onClick={() => exportWorkLogs()} disabled={exporting}>
+            <Download className="w-4 h-4 mr-2" />
+            {exporting ? 'Экспорт...' : 'Экспорт CSV'}
+          </Button>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Добавить запись
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -164,7 +313,93 @@ export default function TimeTrackingPage({ params }: PageProps) {
         </Card>
       </div>
 
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Календарный вид</h2>
+          {workLogs.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <CalendarDays className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p>Нет записей для отображения</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(
+                workLogs.reduce((acc, log) => {
+                  const dateKey = format(new Date(log.date), 'yyyy-MM-dd');
+                  if (!acc[dateKey]) {
+                    acc[dateKey] = [];
+                  }
+                  acc[dateKey].push(log);
+                  return acc;
+                }, {} as Record<string, WorkLog[]>)
+              )
+                .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+                .map(([dateKey, logs]) => {
+                  const totalDayHours = logs.reduce((sum, log) => sum + log.hours, 0);
+                  return (
+                    <div key={dateKey} className="border-l-4 border-primary pl-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <CalendarIcon className="w-5 h-5 text-primary" />
+                          <div>
+                            <h3 className="font-semibold">
+                              {format(new Date(dateKey), 'EEEE, d MMMM yyyy', { locale: ru })}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {logs.length} {logs.length === 1 ? 'запись' : 'записей'} • {totalDayHours.toFixed(2)} ч
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2 ml-8">
+                        {logs.map((log) => (
+                          <div
+                            key={log.id}
+                            className="p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-semibold">{log.member.user.fullName}</p>
+                                  <Badge variant="secondary">{log.hours}ч</Badge>
+                                </div>
+                                {log.description && (
+                                  <p className="text-sm text-muted-foreground">{log.description}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(log)}
+                                >
+                                  Изменить
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(log.id)}
+                                  disabled={deleting}
+                                >
+                                  Удалить
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* Work Logs by Member */}
+      {viewMode === 'table' && (
+        <>
       {Object.values(groupedByMember).map(({ member, logs, totalHours }) => (
         <Card key={member.id}>
           <div className="p-4 border-b bg-muted/30">
@@ -267,6 +502,8 @@ export default function TimeTrackingPage({ params }: PageProps) {
             Добавить первую запись
           </Button>
         </Card>
+      )}
+      </>
       )}
 
       {/* Dialog */}

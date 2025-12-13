@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru } from 'date-fns/locale/ru';
 import {
   MoreHorizontal,
   Pencil,
@@ -13,6 +13,7 @@ import {
   Briefcase,
   Calendar,
   DollarSign,
+  UserCog,
 } from 'lucide-react';
 import { Button } from '@/packages/components/ui/button';
 import {
@@ -41,10 +42,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/packages/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/packages/components/ui/dialog';
+import { Input } from '@/packages/components/ui/input';
+import { Label } from '@/packages/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/packages/components/ui/avatar';
 import { Badge } from '@/packages/components/ui/badge';
 import { toast } from 'sonner';
-import { RemoveTeamMemberDocument, type TeamMembersQuery } from '@/packages/api/graphql/__generated__/output';
+import { RemoveTeamMemberDocument, UpdateMemberPositionDocument, type TeamMembersQuery } from '@/packages/api/graphql/__generated__/output';
 import { MemberSalaryBadge } from '@/packages/components/payouts/MemberSalaryBadge';
 
 type TeamMember = TeamMembersQuery['teamMembers'][0];
@@ -59,6 +70,24 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
   const router = useRouter();
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
+  const [memberToEditPosition, setMemberToEditPosition] = useState<TeamMember | null>(null);
+  const [positionValue, setPositionValue] = useState('');
+
+  const [updatePosition, { loading: updatingPosition }] = useMutation(UpdateMemberPositionDocument, {
+    onCompleted: () => {
+      toast.success('Должность обновлена', {
+        description: 'Должность участника успешно обновлена',
+      });
+      onRefetch();
+      setMemberToEditPosition(null);
+      setPositionValue('');
+    },
+    onError: (error: any) => {
+      toast.error('Ошибка', {
+        description: error.message,
+      });
+    },
+  });
 
   const [removeTeamMember, { loading: removing }] = useMutation(RemoveTeamMemberDocument, {
     onCompleted: () => {
@@ -84,6 +113,24 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
         memberId: memberToDelete.id,
       },
     });
+  };
+
+  const handleUpdatePosition = async () => {
+    if (!memberToEditPosition) return;
+
+    await updatePosition({
+      variables: {
+        input: {
+          memberId: memberToEditPosition.id,
+          position: positionValue.trim() || null,
+        },
+      },
+    });
+  };
+
+  const openPositionDialog = (member: TeamMember) => {
+    setMemberToEditPosition(member);
+    setPositionValue(member.position || '');
   };
 
   const formatCurrency = (amount: number) => {
@@ -112,6 +159,7 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
             <TableRow>
               <TableHead>Участник</TableHead>
               <TableHead>Роль</TableHead>
+              <TableHead>Должность</TableHead>
               <TableHead>Условия оплаты</TableHead>
               <TableHead>Проекты</TableHead>
               <TableHead>Выплаты</TableHead>
@@ -122,7 +170,7 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
           <TableBody>
             {members.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   Нет участников в команде
                 </TableCell>
               </TableRow>
@@ -158,6 +206,13 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
                       ) : (
                         <Badge variant="secondary">Участник</Badge>
                       )}
+                    </TableCell>
+
+                    {/* Position */}
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">
+                        {member.position || '—'}
+                      </span>
                     </TableCell>
 
                     {/* Salary */}
@@ -214,6 +269,12 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
                             <DropdownMenuLabel>Действия</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
+                              onClick={() => openPositionDialog(member)}
+                            >
+                              <UserCog className="mr-2 h-4 w-4" />
+                              Изменить должность
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => setSelectedMember(member)}
                             >
                               <Pencil className="mr-2 h-4 w-4" />
@@ -249,6 +310,57 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
 
       {/* TODO: Salary Edit Dialog - будет реализован позже */}
       {/* Временно отключено для тестирования */}
+
+      {/* Position Edit Dialog */}
+      <Dialog
+        open={!!memberToEditPosition}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMemberToEditPosition(null);
+            setPositionValue('');
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Изменить должность</DialogTitle>
+            <DialogDescription>
+              Измените должность или специализацию участника команды
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="position">Должность</Label>
+              <Input
+                id="position"
+                placeholder="Например: Прораб, Электрик, Маляр..."
+                value={positionValue}
+                onChange={(e) => setPositionValue(e.target.value)}
+                maxLength={100}
+                disabled={updatingPosition}
+              />
+              <p className="text-xs text-muted-foreground">
+                Оставьте пустым, чтобы удалить должность
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMemberToEditPosition(null);
+                setPositionValue('');
+              }}
+              disabled={updatingPosition}
+            >
+              Отмена
+            </Button>
+            <Button onClick={handleUpdatePosition} disabled={updatingPosition}>
+              {updatingPosition ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog

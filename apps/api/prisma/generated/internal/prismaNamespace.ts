@@ -404,7 +404,11 @@ export const ModelName = {
   Payment: 'Payment',
   SupportTicket: 'SupportTicket',
   SupportMessage: 'SupportMessage',
-  FAQEntry: 'FAQEntry'
+  FAQEntry: 'FAQEntry',
+  AdminRole: 'AdminRole',
+  SystemSettings: 'SystemSettings',
+  AdminActionLog: 'AdminActionLog',
+  SystemStatistics: 'SystemStatistics'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1978,6 +1982,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminRole: {
+      payload: Prisma.$AdminRolePayload<ExtArgs>
+      fields: Prisma.AdminRoleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminRoleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminRoleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        findFirst: {
+          args: Prisma.AdminRoleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminRoleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        findMany: {
+          args: Prisma.AdminRoleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+        }
+        create: {
+          args: Prisma.AdminRoleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        createMany: {
+          args: Prisma.AdminRoleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminRoleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+        }
+        delete: {
+          args: Prisma.AdminRoleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        update: {
+          args: Prisma.AdminRoleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminRoleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminRoleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminRoleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminRoleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminRolePayload>
+        }
+        aggregate: {
+          args: Prisma.AdminRoleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminRole>
+        }
+        groupBy: {
+          args: Prisma.AdminRoleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminRoleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminRoleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminRoleCountAggregateOutputType> | number
+        }
+      }
+    }
+    SystemSettings: {
+      payload: Prisma.$SystemSettingsPayload<ExtArgs>
+      fields: Prisma.SystemSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SystemSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SystemSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.SystemSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SystemSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.SystemSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.SystemSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.SystemSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SystemSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.SystemSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        update: {
+          args: Prisma.SystemSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.SystemSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SystemSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SystemSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.SystemSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.SystemSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemSettings>
+        }
+        groupBy: {
+          args: Prisma.SystemSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SystemSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    AdminActionLog: {
+      payload: Prisma.$AdminActionLogPayload<ExtArgs>
+      fields: Prisma.AdminActionLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminActionLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminActionLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminActionLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminActionLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        findMany: {
+          args: Prisma.AdminActionLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>[]
+        }
+        create: {
+          args: Prisma.AdminActionLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        createMany: {
+          args: Prisma.AdminActionLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminActionLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminActionLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        update: {
+          args: Prisma.AdminActionLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminActionLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminActionLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminActionLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminActionLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminActionLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminActionLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminActionLog>
+        }
+        groupBy: {
+          args: Prisma.AdminActionLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminActionLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminActionLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminActionLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    SystemStatistics: {
+      payload: Prisma.$SystemStatisticsPayload<ExtArgs>
+      fields: Prisma.SystemStatisticsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SystemStatisticsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SystemStatisticsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        findFirst: {
+          args: Prisma.SystemStatisticsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SystemStatisticsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        findMany: {
+          args: Prisma.SystemStatisticsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>[]
+        }
+        create: {
+          args: Prisma.SystemStatisticsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        createMany: {
+          args: Prisma.SystemStatisticsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SystemStatisticsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>[]
+        }
+        delete: {
+          args: Prisma.SystemStatisticsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        update: {
+          args: Prisma.SystemStatisticsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        deleteMany: {
+          args: Prisma.SystemStatisticsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SystemStatisticsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SystemStatisticsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>[]
+        }
+        upsert: {
+          args: Prisma.SystemStatisticsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemStatisticsPayload>
+        }
+        aggregate: {
+          args: Prisma.SystemStatisticsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemStatistics>
+        }
+        groupBy: {
+          args: Prisma.SystemStatisticsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemStatisticsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SystemStatisticsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemStatisticsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2034,6 +2334,9 @@ export const UserScalarFieldEnum = {
   telegramChatId: 'telegramChatId',
   telegramUsername: 'telegramUsername',
   telegramPhotoUrl: 'telegramPhotoUrl',
+  twoFactorEnabled: 'twoFactorEnabled',
+  twoFactorSecret: 'twoFactorSecret',
+  twoFactorBackupCodes: 'twoFactorBackupCodes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2047,8 +2350,28 @@ export const NotificationSettingsScalarFieldEnum = {
   appPush: 'appPush',
   appEmail: 'appEmail',
   appSms: 'appSms',
+  telegramEnabled: 'telegramEnabled',
+  telegramSalaryChanges: 'telegramSalaryChanges',
+  telegramPayouts: 'telegramPayouts',
   marketingPush: 'marketingPush',
   marketingEmail: 'marketingEmail',
+  notifyProjectCreated: 'notifyProjectCreated',
+  notifyProjectCompleted: 'notifyProjectCompleted',
+  notifyExpenseAdded: 'notifyExpenseAdded',
+  notifyPayoutCalculated: 'notifyPayoutCalculated',
+  notifyPayoutPaid: 'notifyPayoutPaid',
+  notifyMemberInvited: 'notifyMemberInvited',
+  notifyMemberJoined: 'notifyMemberJoined',
+  notifyMemberRemoved: 'notifyMemberRemoved',
+  notifyTaskAssigned: 'notifyTaskAssigned',
+  notifyTaskCompleted: 'notifyTaskCompleted',
+  notifyPhotoReportCreated: 'notifyPhotoReportCreated',
+  notifySubscriptionExpiring: 'notifySubscriptionExpiring',
+  emailFrequency: 'emailFrequency',
+  pushFrequency: 'pushFrequency',
+  quietHoursEnabled: 'quietHoursEnabled',
+  quietHoursStart: 'quietHoursStart',
+  quietHoursEnd: 'quietHoursEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2145,6 +2468,7 @@ export const TeamMemberScalarFieldEnum = {
   teamId: 'teamId',
   userId: 'userId',
   role: 'role',
+  position: 'position',
   joinedAt: 'joinedAt',
   salaryType: 'salaryType',
   salaryAmount: 'salaryAmount'
@@ -2360,6 +2684,84 @@ export const FAQEntryScalarFieldEnum = {
 export type FAQEntryScalarFieldEnum = (typeof FAQEntryScalarFieldEnum)[keyof typeof FAQEntryScalarFieldEnum]
 
 
+export const AdminRoleScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  role: 'role',
+  permissions: 'permissions',
+  assignedBy: 'assignedBy',
+  assignedAt: 'assignedAt',
+  twoFactorEnforced: 'twoFactorEnforced',
+  ipWhitelist: 'ipWhitelist',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminRoleScalarFieldEnum = (typeof AdminRoleScalarFieldEnum)[keyof typeof AdminRoleScalarFieldEnum]
+
+
+export const SystemSettingsScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  category: 'category',
+  name: 'name',
+  description: 'description',
+  valueType: 'valueType',
+  value: 'value',
+  defaultValue: 'defaultValue',
+  isEncrypted: 'isEncrypted',
+  isRequired: 'isRequired',
+  validationRules: 'validationRules',
+  updatedBy: 'updatedBy',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SystemSettingsScalarFieldEnum = (typeof SystemSettingsScalarFieldEnum)[keyof typeof SystemSettingsScalarFieldEnum]
+
+
+export const AdminActionLogScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  action: 'action',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminActionLogScalarFieldEnum = (typeof AdminActionLogScalarFieldEnum)[keyof typeof AdminActionLogScalarFieldEnum]
+
+
+export const SystemStatisticsScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  totalUsers: 'totalUsers',
+  activeUsers: 'activeUsers',
+  newUsers: 'newUsers',
+  totalTeams: 'totalTeams',
+  activeTeams: 'activeTeams',
+  newTeams: 'newTeams',
+  totalProjects: 'totalProjects',
+  activeProjects: 'activeProjects',
+  completedProjects: 'completedProjects',
+  totalRevenue: 'totalRevenue',
+  mrr: 'mrr',
+  trialingSubscriptions: 'trialingSubscriptions',
+  activeSubscriptions: 'activeSubscriptions',
+  cancelledSubscriptions: 'cancelledSubscriptions',
+  totalStorageUsed: 'totalStorageUsed',
+  openTickets: 'openTickets',
+  closedTickets: 'closedTickets',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemStatisticsScalarFieldEnum = (typeof SystemStatisticsScalarFieldEnum)[keyof typeof SystemStatisticsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2439,6 +2841,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'NotificationFrequency'
+ */
+export type EnumNotificationFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationFrequency'>
+    
+
+
+/**
+ * Reference to a field of type 'NotificationFrequency[]'
+ */
+export type ListEnumNotificationFrequencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationFrequency[]'>
     
 
 
@@ -2625,6 +3041,48 @@ export type ListEnumSupportTicketPriorityFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'AdminRoleType'
+ */
+export type EnumAdminRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminRoleType'>
+    
+
+
+/**
+ * Reference to a field of type 'AdminRoleType[]'
+ */
+export type ListEnumAdminRoleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminRoleType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SettingCategory'
+ */
+export type EnumSettingCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettingCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'SettingCategory[]'
+ */
+export type ListEnumSettingCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettingCategory[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SettingValueType'
+ */
+export type EnumSettingValueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettingValueType'>
+    
+
+
+/**
+ * Reference to a field of type 'SettingValueType[]'
+ */
+export type ListEnumSettingValueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettingValueType[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2737,6 +3195,10 @@ export type GlobalOmitConfig = {
   supportTicket?: Prisma.SupportTicketOmit
   supportMessage?: Prisma.SupportMessageOmit
   fAQEntry?: Prisma.FAQEntryOmit
+  adminRole?: Prisma.AdminRoleOmit
+  systemSettings?: Prisma.SystemSettingsOmit
+  adminActionLog?: Prisma.AdminActionLogOmit
+  systemStatistics?: Prisma.SystemStatisticsOmit
 }
 
 /* Types for Logging */

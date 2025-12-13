@@ -142,3 +142,23 @@ export type SupportMessage = Prisma.SupportMessageModel
  * 
  */
 export type FAQEntry = Prisma.FAQEntryModel
+/**
+ * Model AdminRole
+ * 
+ */
+export type AdminRole = Prisma.AdminRoleModel
+/**
+ * Model SystemSettings
+ * 
+ */
+export type SystemSettings = Prisma.SystemSettingsModel
+/**
+ * Model AdminActionLog
+ * 
+ */
+export type AdminActionLog = Prisma.AdminActionLogModel
+/**
+ * Model SystemStatistics
+ * 
+ */
+export type SystemStatistics = Prisma.SystemStatisticsModel

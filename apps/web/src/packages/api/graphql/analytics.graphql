@@ -6,6 +6,7 @@ fragment MemberAnalyticsFields on MemberAnalytics {
   memberEmail
   avatarUrl
   role
+  position
   salaryType
   salaryAmount
   projectsCount
@@ -52,4 +53,10 @@ query PersonnelAnalytics($teamId: ID!) {
   personnelAnalytics(teamId: $teamId) {
     ...PersonnelAnalyticsFields
   }
+}
+
+# ==================== EXPORT ====================
+
+query ExportPersonnelAnalytics($teamId: ID!) {
+  exportPersonnelAnalytics(teamId: $teamId)
 }

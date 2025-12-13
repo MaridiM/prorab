@@ -1058,7 +1058,7 @@ input CreateSupportTicketInput {
 // apps/web/src/app/(root)/(protected)/support/page.tsx
 'use client'
 
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { Button, Card } from '@/packages/components'
 
 export default function SupportPage() {

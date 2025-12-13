@@ -5,7 +5,9 @@ import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { PayoutsService } from './payouts.service';
 import { ProjectPayout } from './models/project-payout.model';
 import { PayoutSummary } from './models/payout-summary.model';
+import { BulkUpdateResult } from './models/bulk-update-result.model';
 import { UpdateMemberSalaryInput } from './dto/update-member-salary.input';
+import { BulkUpdateSalaryInput } from './dto/bulk-update-salary.input';
 import { CreatePayoutInput } from './dto/create-payout.input';
 import { UpdatePayoutPaymentInput } from './dto/update-payout-payment.input';
 import { TeamMember } from '../teams/models/team-member.model';
@@ -61,6 +63,17 @@ export class PayoutsResolver {
     @CurrentUser() user: any
   ): Promise<TeamMember> {
     return this.payoutsService.updateMemberSalary(input, user.id);
+  }
+
+  @Mutation(() => BulkUpdateResult, {
+    description: 'Bulk update member salaries (owner only)',
+  })
+  @UseGuards(AuthGuard)
+  async bulkUpdateMemberSalaries(
+    @Args('input') input: BulkUpdateSalaryInput,
+    @CurrentUser() user: any
+  ): Promise<BulkUpdateResult> {
+    return this.payoutsService.bulkUpdateMemberSalaries(input, user.id);
   }
 
   @Mutation(() => ProjectPayout, {

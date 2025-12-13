@@ -1,15 +1,17 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { use, useState, useMemo } from 'react';
+import { useQuery, useLazyQuery } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Users, Clock, DollarSign, TrendingUp, Search } from 'lucide-react';
+import { ArrowLeft, Users, Clock, DollarSign, TrendingUp, Search, Download, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru } from 'date-fns/locale/ru';
 import {
   PersonnelAnalyticsDocument,
+  ExportPersonnelAnalyticsDocument,
   type PersonnelAnalyticsQuery,
 } from '@/packages/api/graphql/__generated__/output';
+import { toast } from 'sonner';
 import {
   Button,
   Card,
@@ -22,6 +24,21 @@ import {
   TableRow,
   Badge,
 } from '@/packages/components';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from 'recharts';
 
 type PersonnelAnalytics = PersonnelAnalyticsQuery['personnelAnalytics'];
 type MemberAnalytics = PersonnelAnalytics['members'][0];
@@ -43,18 +60,81 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
     variables: { teamId },
   });
 
+  const [exportAnalytics, { loading: exporting }] = useLazyQuery(ExportPersonnelAnalyticsDocument, {
+    variables: { teamId },
+    onCompleted: (data) => {
+      const blob = new Blob([data.exportPersonnelAnalytics], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `personnel-analytics-${teamId}-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('CSV экспортирован');
+    },
+    onError: (error) => {
+      toast.error('Ошибка экспорта', { description: error.message });
+    },
+  });
+
   const analytics = data?.personnelAnalytics;
 
-  // Filter members
-  const filteredMembers = analytics?.members.filter((member) =>
-    member.memberName.toLowerCase().includes(memberSearch.toLowerCase()) ||
-    member.memberEmail.toLowerCase().includes(memberSearch.toLowerCase())
-  ) || [];
+  // Filter members with useMemo for performance
+  const filteredMembers = useMemo(
+    () =>
+      analytics?.members.filter((member) =>
+        member.memberName.toLowerCase().includes(memberSearch.toLowerCase()) ||
+        member.memberEmail.toLowerCase().includes(memberSearch.toLowerCase())
+      ) || [],
+    [analytics?.members, memberSearch]
+  );
 
-  // Filter projects
-  const filteredProjects = analytics?.projects.filter((project) =>
-    project.projectName.toLowerCase().includes(projectSearch.toLowerCase())
-  ) || [];
+  // Filter projects with useMemo for performance
+  const filteredProjects = useMemo(
+    () =>
+      analytics?.projects.filter((project) =>
+        project.projectName.toLowerCase().includes(projectSearch.toLowerCase())
+      ) || [],
+    [analytics?.projects, projectSearch]
+  );
+
+  // Memoize chart data
+  const chartData = useMemo(() => {
+    if (!analytics?.members.length) return null;
+
+    return {
+      hoursData: analytics.members.slice(0, 10).map(m => ({
+        name: m.memberName.split(' ')[0],
+        hours: m.totalHoursWorked,
+      })),
+      payoutsData: analytics.members.slice(0, 10).map(m => ({
+        name: m.memberName.split(' ')[0],
+        payouts: m.totalPayouts,
+      })),
+      salaryTypeData: [
+        {
+          name: 'Фиксированная',
+          value: analytics.members.filter(m => m.salaryType === 'FIXED').length,
+          color: 'hsl(var(--primary))'
+        },
+        {
+          name: 'Процент',
+          value: analytics.members.filter(m => m.salaryType === 'PERCENTAGE').length,
+          color: '#10b981'
+        },
+        {
+          name: 'Не установлена',
+          value: analytics.members.filter(m => m.salaryType === 'NONE').length,
+          color: '#6b7280'
+        }
+      ],
+      projectsData: analytics.projects.slice(0, 10).map(p => ({
+        name: p.projectName.substring(0, 15) + (p.projectName.length > 15 ? '...' : ''),
+        hours: p.totalHoursWorked,
+        payouts: p.totalPayouts / 1000,
+      })),
+    };
+  }, [analytics]);
 
   if (loading) {
     return (
@@ -151,9 +231,15 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
             </p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Обновлено: {format(new Date(analytics.generatedAt), 'dd MMM yyyy, HH:mm', { locale: ru })}
-        </p>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => exportAnalytics()} disabled={exporting}>
+            <Download className="w-4 h-4 mr-2" />
+            {exporting ? 'Экспорт...' : 'Экспорт CSV'}
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Обновлено: {format(new Date(analytics.generatedAt), 'dd MMM yyyy, HH:mm', { locale: ru })}
+          </p>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -211,6 +297,110 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
         </Card>
       </div>
 
+      {/* Charts */}
+      {chartData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Members Hours Chart */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-semibold">Часы работы по участникам</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData.hoursData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="hours" fill="hsl(var(--primary))" name="Часы" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          {/* Members Payouts Chart */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-green-600" />
+              <h3 className="text-lg font-semibold">Выплаты по участникам</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData.payoutsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="payouts" fill="#10b981" name="Выплаты (₽)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          {/* Salary Type Distribution */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              <h3 className="text-lg font-semibold">Распределение типов зарплат</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={chartData.salaryTypeData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={(entry) => `${entry.name}: ${entry.value}`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {[
+                    { name: 'FIXED', color: 'hsl(var(--primary))' },
+                    { name: 'PERCENTAGE', color: '#10b981' },
+                    { name: 'NONE', color: '#6b7280' }
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+
+          {/* Projects Performance Chart */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              <h3 className="text-lg font-semibold">Производительность проектов</h3>
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData.projectsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Legend />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="hours"
+                  stroke="hsl(var(--primary))"
+                  name="Часы"
+                  strokeWidth={2}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="payouts"
+                  stroke="#10b981"
+                  name="Выплаты (тыс. ₽)"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+      )}
+
       {/* Member Performance Table */}
       <Card>
         <div className="p-4 border-b">
@@ -233,6 +423,7 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
             <TableRow>
               <TableHead>Участник</TableHead>
               <TableHead>Роль</TableHead>
+              <TableHead>Должность</TableHead>
               <TableHead>Зарплата</TableHead>
               <TableHead className="text-right">Проектов</TableHead>
               <TableHead className="text-right">Часов</TableHead>
@@ -244,7 +435,7 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
           <TableBody>
             {filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   {memberSearch ? 'Участники не найдены' : 'Нет участников'}
                 </TableCell>
               </TableRow>
@@ -274,6 +465,11 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{member.role}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground">
+                      {member.position || '—'}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

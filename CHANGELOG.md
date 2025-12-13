@@ -9,6 +9,48 @@
 
 ### Added
 
+- **Stage 9 Phase 3 - Day 17: Export Functionality Backend:**
+  - ✅ **CSV Export Service:**
+    - CsvExportService с универсальным экспортом в CSV
+    - Поддержка экранирования спецсимволов (запятые, кавычки, переносы)
+    - Автоматическое форматирование дат, чисел, булевых значений
+  - ✅ **Work Logs Export:**
+    - exportProjectWorkLogsToCsv метод в WorkLogsService
+    - exportProjectWorkLogs GraphQL query
+    - CSV columns: Дата, Участник, Часы, Описание, Проект, Создано
+    - Access control: owner или team member
+  - ✅ **Personnel Analytics Export:**
+    - exportPersonnelAnalyticsToCsv метод в TeamsService
+    - exportPersonnelAnalytics GraphQL query
+    - CSV columns: 13 полей (участник, email, роль, должность, зарплата, статистика)
+    - Access control: owner only
+  - ✅ **GraphQL Frontend Operations:**
+    - ExportProjectWorkLogs query в work-logs.graphql
+    - ExportPersonnelAnalytics query в analytics.graphql
+  - **Files Created:** 1 new (csv-export.service.ts)
+  - **Files Modified:** 8 files (work-logs service/resolver/module, teams service/resolver/module, work-logs.graphql, analytics.graphql)
+  - **Features:** CSV export для work logs и personnel analytics
+
+- **Stage 9 Phase 3 - Day 16: Member Positions & Specializations Frontend:**
+  - ✅ **Frontend Implementation:**
+    - Position column добавлена в People Management table
+    - Position column добавлена в Personnel Analytics table
+    - Position edit dialog с inline редактированием
+    - GraphQL mutation `UpdateMemberPosition`
+    - Client-side validation (max 100 chars)
+    - Toast notifications для успеха/ошибок
+    - Empty state handling (отображается "—" если должность не указана)
+  - ✅ **Backend Updates:**
+    - Position field добавлено в MemberAnalytics GraphQL model
+    - Position включено в personnel analytics calculation
+    - GraphQL schema обновлена
+  - ✅ **GraphQL Operations:**
+    - position добавлена в TeamMembers fragment
+    - position добавлена в MemberAnalytics fragment
+    - UpdateMemberPosition mutation
+  - **Files Modified:** 6 files (people-table.tsx, personnel/page.tsx, teams.graphql, analytics.graphql, personnel-analytics.model.ts, teams.service.ts)
+  - **Features:** Edit position, Display position, Analytics with position filtering capability
+
 - **Stage 11: Settings Page - Avatar Upload Feature:**
   - ✅ **Backend Implementation:**
     - GraphQL mutations: `uploadAvatar(file: Upload!)` и `deleteAvatar`
@@ -415,6 +457,43 @@
 - **Database:** 2 new models (WorkLog, TeamMemberSalaryHistory)
 - **GraphQL:** 15+ operations
 - **Status:** ✅ **PRODUCTION READY**
+
+---
+
+**Stage 9 Phase 3 Day 15: Member Positions & Specializations - Backend (2025-12-12)**
+
+**Backend (4 files, ~80 строк):**
+- `apps/api/prisma/schema.prisma` - Added position field to TeamMember
+  - **Field:** position String? @db.VarChar(100)
+  - **Description:** Job position/specialization (e.g., "Прораб", "Электрик", "Маляр")
+  - **Index:** Added (teamId, position) for filtering
+- `apps/api/src/modules/teams/models/team-member.model.ts` - Added position to GraphQL model
+  - @Field({ nullable: true }) position?: string
+- `apps/api/src/modules/teams/dto/update-member-position.input.ts` - New DTO (15 lines)
+  - Fields: memberId (UUID), position (string, max 100 chars, optional)
+  - Validation: @IsUUID, @IsString, @MaxLength(100), @IsOptional
+- `apps/api/src/modules/teams/teams.service.ts` - Added updateMemberPosition method (30 lines)
+  - **Method:** `async updateMemberPosition(memberId, position, userId): Promise<any>`
+  - **Access Control:** Owner-only (ForbiddenException)
+  - **Update:** Sets position or null
+  - **Includes:** user, team
+- `apps/api/src/modules/teams/teams.resolver.ts` - Added updateMemberPosition mutation (10 lines)
+  - Mutation: `updateMemberPosition(input: UpdateMemberPositionInput!): TeamMember!`
+  - Decorator: @UseGuards(AuthGuard)
+
+**Database:**
+- ✅ Migration applied: `prisma db push`
+- ✅ Client generated: `prisma generate`
+- ✅ Index created for filtering
+
+**Features:**
+- ✅ Position field (optional, max 100 chars)
+- ✅ Owner-only update access
+- ✅ Null to remove position
+- ✅ Ready for UI integration
+
+**TypeScript:**
+- ✅ Компиляция успешна (0 errors)
 
 ---
 

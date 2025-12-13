@@ -30,8 +30,28 @@ export type NotificationSettingsMinAggregateOutputType = {
   appPush: boolean | null
   appEmail: boolean | null
   appSms: boolean | null
+  telegramEnabled: boolean | null
+  telegramSalaryChanges: boolean | null
+  telegramPayouts: boolean | null
   marketingPush: boolean | null
   marketingEmail: boolean | null
+  notifyProjectCreated: boolean | null
+  notifyProjectCompleted: boolean | null
+  notifyExpenseAdded: boolean | null
+  notifyPayoutCalculated: boolean | null
+  notifyPayoutPaid: boolean | null
+  notifyMemberInvited: boolean | null
+  notifyMemberJoined: boolean | null
+  notifyMemberRemoved: boolean | null
+  notifyTaskAssigned: boolean | null
+  notifyTaskCompleted: boolean | null
+  notifyPhotoReportCreated: boolean | null
+  notifySubscriptionExpiring: boolean | null
+  emailFrequency: $Enums.NotificationFrequency | null
+  pushFrequency: $Enums.NotificationFrequency | null
+  quietHoursEnabled: boolean | null
+  quietHoursStart: string | null
+  quietHoursEnd: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,8 +62,28 @@ export type NotificationSettingsMaxAggregateOutputType = {
   appPush: boolean | null
   appEmail: boolean | null
   appSms: boolean | null
+  telegramEnabled: boolean | null
+  telegramSalaryChanges: boolean | null
+  telegramPayouts: boolean | null
   marketingPush: boolean | null
   marketingEmail: boolean | null
+  notifyProjectCreated: boolean | null
+  notifyProjectCompleted: boolean | null
+  notifyExpenseAdded: boolean | null
+  notifyPayoutCalculated: boolean | null
+  notifyPayoutPaid: boolean | null
+  notifyMemberInvited: boolean | null
+  notifyMemberJoined: boolean | null
+  notifyMemberRemoved: boolean | null
+  notifyTaskAssigned: boolean | null
+  notifyTaskCompleted: boolean | null
+  notifyPhotoReportCreated: boolean | null
+  notifySubscriptionExpiring: boolean | null
+  emailFrequency: $Enums.NotificationFrequency | null
+  pushFrequency: $Enums.NotificationFrequency | null
+  quietHoursEnabled: boolean | null
+  quietHoursStart: string | null
+  quietHoursEnd: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,8 +94,28 @@ export type NotificationSettingsCountAggregateOutputType = {
   appPush: number
   appEmail: number
   appSms: number
+  telegramEnabled: number
+  telegramSalaryChanges: number
+  telegramPayouts: number
   marketingPush: number
   marketingEmail: number
+  notifyProjectCreated: number
+  notifyProjectCompleted: number
+  notifyExpenseAdded: number
+  notifyPayoutCalculated: number
+  notifyPayoutPaid: number
+  notifyMemberInvited: number
+  notifyMemberJoined: number
+  notifyMemberRemoved: number
+  notifyTaskAssigned: number
+  notifyTaskCompleted: number
+  notifyPhotoReportCreated: number
+  notifySubscriptionExpiring: number
+  emailFrequency: number
+  pushFrequency: number
+  quietHoursEnabled: number
+  quietHoursStart: number
+  quietHoursEnd: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -68,8 +128,28 @@ export type NotificationSettingsMinAggregateInputType = {
   appPush?: true
   appEmail?: true
   appSms?: true
+  telegramEnabled?: true
+  telegramSalaryChanges?: true
+  telegramPayouts?: true
   marketingPush?: true
   marketingEmail?: true
+  notifyProjectCreated?: true
+  notifyProjectCompleted?: true
+  notifyExpenseAdded?: true
+  notifyPayoutCalculated?: true
+  notifyPayoutPaid?: true
+  notifyMemberInvited?: true
+  notifyMemberJoined?: true
+  notifyMemberRemoved?: true
+  notifyTaskAssigned?: true
+  notifyTaskCompleted?: true
+  notifyPhotoReportCreated?: true
+  notifySubscriptionExpiring?: true
+  emailFrequency?: true
+  pushFrequency?: true
+  quietHoursEnabled?: true
+  quietHoursStart?: true
+  quietHoursEnd?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -80,8 +160,28 @@ export type NotificationSettingsMaxAggregateInputType = {
   appPush?: true
   appEmail?: true
   appSms?: true
+  telegramEnabled?: true
+  telegramSalaryChanges?: true
+  telegramPayouts?: true
   marketingPush?: true
   marketingEmail?: true
+  notifyProjectCreated?: true
+  notifyProjectCompleted?: true
+  notifyExpenseAdded?: true
+  notifyPayoutCalculated?: true
+  notifyPayoutPaid?: true
+  notifyMemberInvited?: true
+  notifyMemberJoined?: true
+  notifyMemberRemoved?: true
+  notifyTaskAssigned?: true
+  notifyTaskCompleted?: true
+  notifyPhotoReportCreated?: true
+  notifySubscriptionExpiring?: true
+  emailFrequency?: true
+  pushFrequency?: true
+  quietHoursEnabled?: true
+  quietHoursStart?: true
+  quietHoursEnd?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -92,8 +192,28 @@ export type NotificationSettingsCountAggregateInputType = {
   appPush?: true
   appEmail?: true
   appSms?: true
+  telegramEnabled?: true
+  telegramSalaryChanges?: true
+  telegramPayouts?: true
   marketingPush?: true
   marketingEmail?: true
+  notifyProjectCreated?: true
+  notifyProjectCompleted?: true
+  notifyExpenseAdded?: true
+  notifyPayoutCalculated?: true
+  notifyPayoutPaid?: true
+  notifyMemberInvited?: true
+  notifyMemberJoined?: true
+  notifyMemberRemoved?: true
+  notifyTaskAssigned?: true
+  notifyTaskCompleted?: true
+  notifyPhotoReportCreated?: true
+  notifySubscriptionExpiring?: true
+  emailFrequency?: true
+  pushFrequency?: true
+  quietHoursEnabled?: true
+  quietHoursStart?: true
+  quietHoursEnd?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -177,8 +297,28 @@ export type NotificationSettingsGroupByOutputType = {
   appPush: boolean
   appEmail: boolean
   appSms: boolean
+  telegramEnabled: boolean
+  telegramSalaryChanges: boolean
+  telegramPayouts: boolean
   marketingPush: boolean
   marketingEmail: boolean
+  notifyProjectCreated: boolean
+  notifyProjectCompleted: boolean
+  notifyExpenseAdded: boolean
+  notifyPayoutCalculated: boolean
+  notifyPayoutPaid: boolean
+  notifyMemberInvited: boolean
+  notifyMemberJoined: boolean
+  notifyMemberRemoved: boolean
+  notifyTaskAssigned: boolean
+  notifyTaskCompleted: boolean
+  notifyPhotoReportCreated: boolean
+  notifySubscriptionExpiring: boolean
+  emailFrequency: $Enums.NotificationFrequency
+  pushFrequency: $Enums.NotificationFrequency
+  quietHoursEnabled: boolean
+  quietHoursStart: string | null
+  quietHoursEnd: string | null
   createdAt: Date
   updatedAt: Date
   _count: NotificationSettingsCountAggregateOutputType | null
@@ -210,8 +350,28 @@ export type NotificationSettingsWhereInput = {
   appPush?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   appEmail?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   appSms?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramEnabled?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramSalaryChanges?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramPayouts?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   marketingPush?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   marketingEmail?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyProjectCreated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyProjectCompleted?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyExpenseAdded?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPayoutCalculated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPayoutPaid?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberInvited?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberJoined?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberRemoved?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyTaskAssigned?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyTaskCompleted?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  quietHoursStart?: Prisma.StringNullableFilter<"NotificationSettings"> | string | null
+  quietHoursEnd?: Prisma.StringNullableFilter<"NotificationSettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"NotificationSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"NotificationSettings"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -223,8 +383,28 @@ export type NotificationSettingsOrderByWithRelationInput = {
   appPush?: Prisma.SortOrder
   appEmail?: Prisma.SortOrder
   appSms?: Prisma.SortOrder
+  telegramEnabled?: Prisma.SortOrder
+  telegramSalaryChanges?: Prisma.SortOrder
+  telegramPayouts?: Prisma.SortOrder
   marketingPush?: Prisma.SortOrder
   marketingEmail?: Prisma.SortOrder
+  notifyProjectCreated?: Prisma.SortOrder
+  notifyProjectCompleted?: Prisma.SortOrder
+  notifyExpenseAdded?: Prisma.SortOrder
+  notifyPayoutCalculated?: Prisma.SortOrder
+  notifyPayoutPaid?: Prisma.SortOrder
+  notifyMemberInvited?: Prisma.SortOrder
+  notifyMemberJoined?: Prisma.SortOrder
+  notifyMemberRemoved?: Prisma.SortOrder
+  notifyTaskAssigned?: Prisma.SortOrder
+  notifyTaskCompleted?: Prisma.SortOrder
+  notifyPhotoReportCreated?: Prisma.SortOrder
+  notifySubscriptionExpiring?: Prisma.SortOrder
+  emailFrequency?: Prisma.SortOrder
+  pushFrequency?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStart?: Prisma.SortOrderInput | Prisma.SortOrder
+  quietHoursEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -239,8 +419,28 @@ export type NotificationSettingsWhereUniqueInput = Prisma.AtLeast<{
   appPush?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   appEmail?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   appSms?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramEnabled?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramSalaryChanges?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  telegramPayouts?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   marketingPush?: Prisma.BoolFilter<"NotificationSettings"> | boolean
   marketingEmail?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyProjectCreated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyProjectCompleted?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyExpenseAdded?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPayoutCalculated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPayoutPaid?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberInvited?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberJoined?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyMemberRemoved?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyTaskAssigned?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyTaskCompleted?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFilter<"NotificationSettings"> | boolean
+  quietHoursStart?: Prisma.StringNullableFilter<"NotificationSettings"> | string | null
+  quietHoursEnd?: Prisma.StringNullableFilter<"NotificationSettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"NotificationSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"NotificationSettings"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -252,8 +452,28 @@ export type NotificationSettingsOrderByWithAggregationInput = {
   appPush?: Prisma.SortOrder
   appEmail?: Prisma.SortOrder
   appSms?: Prisma.SortOrder
+  telegramEnabled?: Prisma.SortOrder
+  telegramSalaryChanges?: Prisma.SortOrder
+  telegramPayouts?: Prisma.SortOrder
   marketingPush?: Prisma.SortOrder
   marketingEmail?: Prisma.SortOrder
+  notifyProjectCreated?: Prisma.SortOrder
+  notifyProjectCompleted?: Prisma.SortOrder
+  notifyExpenseAdded?: Prisma.SortOrder
+  notifyPayoutCalculated?: Prisma.SortOrder
+  notifyPayoutPaid?: Prisma.SortOrder
+  notifyMemberInvited?: Prisma.SortOrder
+  notifyMemberJoined?: Prisma.SortOrder
+  notifyMemberRemoved?: Prisma.SortOrder
+  notifyTaskAssigned?: Prisma.SortOrder
+  notifyTaskCompleted?: Prisma.SortOrder
+  notifyPhotoReportCreated?: Prisma.SortOrder
+  notifySubscriptionExpiring?: Prisma.SortOrder
+  emailFrequency?: Prisma.SortOrder
+  pushFrequency?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStart?: Prisma.SortOrderInput | Prisma.SortOrder
+  quietHoursEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.NotificationSettingsCountOrderByAggregateInput
@@ -270,8 +490,28 @@ export type NotificationSettingsScalarWhereWithAggregatesInput = {
   appPush?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
   appEmail?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
   appSms?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  telegramEnabled?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  telegramSalaryChanges?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  telegramPayouts?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
   marketingPush?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
   marketingEmail?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyProjectCreated?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyProjectCompleted?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyExpenseAdded?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyPayoutCalculated?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyPayoutPaid?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyMemberInvited?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyMemberJoined?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyMemberRemoved?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyTaskAssigned?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyTaskCompleted?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifyPhotoReportCreated?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  notifySubscriptionExpiring?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyWithAggregatesFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyWithAggregatesFilter<"NotificationSettings"> | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolWithAggregatesFilter<"NotificationSettings"> | boolean
+  quietHoursStart?: Prisma.StringNullableWithAggregatesFilter<"NotificationSettings"> | string | null
+  quietHoursEnd?: Prisma.StringNullableWithAggregatesFilter<"NotificationSettings"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"NotificationSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"NotificationSettings"> | Date | string
 }
@@ -281,8 +521,28 @@ export type NotificationSettingsCreateInput = {
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: $Enums.NotificationFrequency
+  pushFrequency?: $Enums.NotificationFrequency
+  quietHoursEnabled?: boolean
+  quietHoursStart?: string | null
+  quietHoursEnd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutNotificationSettingsInput
@@ -294,8 +554,28 @@ export type NotificationSettingsUncheckedCreateInput = {
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: $Enums.NotificationFrequency
+  pushFrequency?: $Enums.NotificationFrequency
+  quietHoursEnabled?: boolean
+  quietHoursStart?: string | null
+  quietHoursEnd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -305,8 +585,28 @@ export type NotificationSettingsUpdateInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutNotificationSettingsNestedInput
@@ -318,8 +618,28 @@ export type NotificationSettingsUncheckedUpdateInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,8 +650,28 @@ export type NotificationSettingsCreateManyInput = {
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: $Enums.NotificationFrequency
+  pushFrequency?: $Enums.NotificationFrequency
+  quietHoursEnabled?: boolean
+  quietHoursStart?: string | null
+  quietHoursEnd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -341,8 +681,28 @@ export type NotificationSettingsUpdateManyMutationInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,8 +713,28 @@ export type NotificationSettingsUncheckedUpdateManyInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -370,8 +750,28 @@ export type NotificationSettingsCountOrderByAggregateInput = {
   appPush?: Prisma.SortOrder
   appEmail?: Prisma.SortOrder
   appSms?: Prisma.SortOrder
+  telegramEnabled?: Prisma.SortOrder
+  telegramSalaryChanges?: Prisma.SortOrder
+  telegramPayouts?: Prisma.SortOrder
   marketingPush?: Prisma.SortOrder
   marketingEmail?: Prisma.SortOrder
+  notifyProjectCreated?: Prisma.SortOrder
+  notifyProjectCompleted?: Prisma.SortOrder
+  notifyExpenseAdded?: Prisma.SortOrder
+  notifyPayoutCalculated?: Prisma.SortOrder
+  notifyPayoutPaid?: Prisma.SortOrder
+  notifyMemberInvited?: Prisma.SortOrder
+  notifyMemberJoined?: Prisma.SortOrder
+  notifyMemberRemoved?: Prisma.SortOrder
+  notifyTaskAssigned?: Prisma.SortOrder
+  notifyTaskCompleted?: Prisma.SortOrder
+  notifyPhotoReportCreated?: Prisma.SortOrder
+  notifySubscriptionExpiring?: Prisma.SortOrder
+  emailFrequency?: Prisma.SortOrder
+  pushFrequency?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStart?: Prisma.SortOrder
+  quietHoursEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -382,8 +782,28 @@ export type NotificationSettingsMaxOrderByAggregateInput = {
   appPush?: Prisma.SortOrder
   appEmail?: Prisma.SortOrder
   appSms?: Prisma.SortOrder
+  telegramEnabled?: Prisma.SortOrder
+  telegramSalaryChanges?: Prisma.SortOrder
+  telegramPayouts?: Prisma.SortOrder
   marketingPush?: Prisma.SortOrder
   marketingEmail?: Prisma.SortOrder
+  notifyProjectCreated?: Prisma.SortOrder
+  notifyProjectCompleted?: Prisma.SortOrder
+  notifyExpenseAdded?: Prisma.SortOrder
+  notifyPayoutCalculated?: Prisma.SortOrder
+  notifyPayoutPaid?: Prisma.SortOrder
+  notifyMemberInvited?: Prisma.SortOrder
+  notifyMemberJoined?: Prisma.SortOrder
+  notifyMemberRemoved?: Prisma.SortOrder
+  notifyTaskAssigned?: Prisma.SortOrder
+  notifyTaskCompleted?: Prisma.SortOrder
+  notifyPhotoReportCreated?: Prisma.SortOrder
+  notifySubscriptionExpiring?: Prisma.SortOrder
+  emailFrequency?: Prisma.SortOrder
+  pushFrequency?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStart?: Prisma.SortOrder
+  quietHoursEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -394,8 +814,28 @@ export type NotificationSettingsMinOrderByAggregateInput = {
   appPush?: Prisma.SortOrder
   appEmail?: Prisma.SortOrder
   appSms?: Prisma.SortOrder
+  telegramEnabled?: Prisma.SortOrder
+  telegramSalaryChanges?: Prisma.SortOrder
+  telegramPayouts?: Prisma.SortOrder
   marketingPush?: Prisma.SortOrder
   marketingEmail?: Prisma.SortOrder
+  notifyProjectCreated?: Prisma.SortOrder
+  notifyProjectCompleted?: Prisma.SortOrder
+  notifyExpenseAdded?: Prisma.SortOrder
+  notifyPayoutCalculated?: Prisma.SortOrder
+  notifyPayoutPaid?: Prisma.SortOrder
+  notifyMemberInvited?: Prisma.SortOrder
+  notifyMemberJoined?: Prisma.SortOrder
+  notifyMemberRemoved?: Prisma.SortOrder
+  notifyTaskAssigned?: Prisma.SortOrder
+  notifyTaskCompleted?: Prisma.SortOrder
+  notifyPhotoReportCreated?: Prisma.SortOrder
+  notifySubscriptionExpiring?: Prisma.SortOrder
+  emailFrequency?: Prisma.SortOrder
+  pushFrequency?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStart?: Prisma.SortOrder
+  quietHoursEnd?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -432,13 +872,37 @@ export type NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.NotificationSettingsUpdateToOneWithWhereWithoutUserInput, Prisma.NotificationSettingsUpdateWithoutUserInput>, Prisma.NotificationSettingsUncheckedUpdateWithoutUserInput>
 }
 
+export type EnumNotificationFrequencyFieldUpdateOperationsInput = {
+  set?: $Enums.NotificationFrequency
+}
+
 export type NotificationSettingsCreateWithoutUserInput = {
   id?: string
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: $Enums.NotificationFrequency
+  pushFrequency?: $Enums.NotificationFrequency
+  quietHoursEnabled?: boolean
+  quietHoursStart?: string | null
+  quietHoursEnd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -448,8 +912,28 @@ export type NotificationSettingsUncheckedCreateWithoutUserInput = {
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: $Enums.NotificationFrequency
+  pushFrequency?: $Enums.NotificationFrequency
+  quietHoursEnabled?: boolean
+  quietHoursStart?: string | null
+  quietHoursEnd?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -475,8 +959,28 @@ export type NotificationSettingsUpdateWithoutUserInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -486,8 +990,28 @@ export type NotificationSettingsUncheckedUpdateWithoutUserInput = {
   appPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
   appSms?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramSalaryChanges?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  telegramPayouts?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingPush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   marketingEmail?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyProjectCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyExpenseAdded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutCalculated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPayoutPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberInvited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberJoined?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyMemberRemoved?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskAssigned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyTaskCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifyPhotoReportCreated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notifySubscriptionExpiring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  pushFrequency?: Prisma.EnumNotificationFrequencyFieldUpdateOperationsInput | $Enums.NotificationFrequency
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStart?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quietHoursEnd?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -500,8 +1024,28 @@ export type NotificationSettingsSelect<ExtArgs extends runtime.Types.Extensions.
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: boolean
+  pushFrequency?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStart?: boolean
+  quietHoursEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -513,8 +1057,28 @@ export type NotificationSettingsSelectCreateManyAndReturn<ExtArgs extends runtim
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: boolean
+  pushFrequency?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStart?: boolean
+  quietHoursEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -526,8 +1090,28 @@ export type NotificationSettingsSelectUpdateManyAndReturn<ExtArgs extends runtim
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: boolean
+  pushFrequency?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStart?: boolean
+  quietHoursEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -539,13 +1123,33 @@ export type NotificationSettingsSelectScalar = {
   appPush?: boolean
   appEmail?: boolean
   appSms?: boolean
+  telegramEnabled?: boolean
+  telegramSalaryChanges?: boolean
+  telegramPayouts?: boolean
   marketingPush?: boolean
   marketingEmail?: boolean
+  notifyProjectCreated?: boolean
+  notifyProjectCompleted?: boolean
+  notifyExpenseAdded?: boolean
+  notifyPayoutCalculated?: boolean
+  notifyPayoutPaid?: boolean
+  notifyMemberInvited?: boolean
+  notifyMemberJoined?: boolean
+  notifyMemberRemoved?: boolean
+  notifyTaskAssigned?: boolean
+  notifyTaskCompleted?: boolean
+  notifyPhotoReportCreated?: boolean
+  notifySubscriptionExpiring?: boolean
+  emailFrequency?: boolean
+  pushFrequency?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStart?: boolean
+  quietHoursEnd?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type NotificationSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "appPush" | "appEmail" | "appSms" | "marketingPush" | "marketingEmail" | "createdAt" | "updatedAt", ExtArgs["result"]["notificationSettings"]>
+export type NotificationSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "appPush" | "appEmail" | "appSms" | "telegramEnabled" | "telegramSalaryChanges" | "telegramPayouts" | "marketingPush" | "marketingEmail" | "notifyProjectCreated" | "notifyProjectCompleted" | "notifyExpenseAdded" | "notifyPayoutCalculated" | "notifyPayoutPaid" | "notifyMemberInvited" | "notifyMemberJoined" | "notifyMemberRemoved" | "notifyTaskAssigned" | "notifyTaskCompleted" | "notifyPhotoReportCreated" | "notifySubscriptionExpiring" | "emailFrequency" | "pushFrequency" | "quietHoursEnabled" | "quietHoursStart" | "quietHoursEnd" | "createdAt" | "updatedAt", ExtArgs["result"]["notificationSettings"]>
 export type NotificationSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -567,8 +1171,28 @@ export type $NotificationSettingsPayload<ExtArgs extends runtime.Types.Extension
     appPush: boolean
     appEmail: boolean
     appSms: boolean
+    telegramEnabled: boolean
+    telegramSalaryChanges: boolean
+    telegramPayouts: boolean
     marketingPush: boolean
     marketingEmail: boolean
+    notifyProjectCreated: boolean
+    notifyProjectCompleted: boolean
+    notifyExpenseAdded: boolean
+    notifyPayoutCalculated: boolean
+    notifyPayoutPaid: boolean
+    notifyMemberInvited: boolean
+    notifyMemberJoined: boolean
+    notifyMemberRemoved: boolean
+    notifyTaskAssigned: boolean
+    notifyTaskCompleted: boolean
+    notifyPhotoReportCreated: boolean
+    notifySubscriptionExpiring: boolean
+    emailFrequency: $Enums.NotificationFrequency
+    pushFrequency: $Enums.NotificationFrequency
+    quietHoursEnabled: boolean
+    quietHoursStart: string | null
+    quietHoursEnd: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["notificationSettings"]>
@@ -1000,8 +1624,28 @@ export interface NotificationSettingsFieldRefs {
   readonly appPush: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
   readonly appEmail: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
   readonly appSms: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly telegramEnabled: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly telegramSalaryChanges: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly telegramPayouts: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
   readonly marketingPush: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
   readonly marketingEmail: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyProjectCreated: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyProjectCompleted: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyExpenseAdded: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyPayoutCalculated: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyPayoutPaid: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyMemberInvited: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyMemberJoined: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyMemberRemoved: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyTaskAssigned: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyTaskCompleted: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifyPhotoReportCreated: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly notifySubscriptionExpiring: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly emailFrequency: Prisma.FieldRef<"NotificationSettings", 'NotificationFrequency'>
+  readonly pushFrequency: Prisma.FieldRef<"NotificationSettings", 'NotificationFrequency'>
+  readonly quietHoursEnabled: Prisma.FieldRef<"NotificationSettings", 'Boolean'>
+  readonly quietHoursStart: Prisma.FieldRef<"NotificationSettings", 'String'>
+  readonly quietHoursEnd: Prisma.FieldRef<"NotificationSettings", 'String'>
   readonly createdAt: Prisma.FieldRef<"NotificationSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"NotificationSettings", 'DateTime'>
 }

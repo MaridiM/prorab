@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { Copy, Check, Trash2, Plus, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru } from 'date-fns/locale/ru';
 import {
   Dialog,
   DialogContent,
