@@ -139,27 +139,41 @@ export default function TasksPage({ params }: TasksPageProps) {
 		setIsFormOpen(true)
 	}
 
-	const handleFormSubmit = async (data: CreateTaskInput | UpdateTaskInput) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const handleFormSubmit = async (data: any) => {
+		// Prepare data for API: convert Date to ISO string, remove empty strings
+		const prepareInput = (input: Record<string, unknown>) => {
+			const prepared = { ...input }
+			
+			// Convert Date to ISO string for GraphQL
+			if (prepared.dueDate instanceof Date) {
+				prepared.dueDate = prepared.dueDate.toISOString()
+			} else if (prepared.dueDate === undefined || prepared.dueDate === null) {
+				delete prepared.dueDate
+			}
+			
+			// Remove empty assigneeId (GraphQL expects string or null, not empty string)
+			if (prepared.assigneeId === '' || prepared.assigneeId === undefined) {
+				delete prepared.assigneeId
+			}
+			
+			return prepared
+		}
+
 		if (selectedTask) {
 			// Update existing task
 			await updateTask({
 				variables: {
 					id: selectedTask.id,
-					input: data as UpdateTaskInput,
+					input: prepareInput(data) as UpdateTaskInput,
 				},
 			})
 		} else {
 			// Create new task
-			const createData: CreateTaskInput = {
+			const createData = prepareInput({
 				...data,
 				projectId,
-			} as CreateTaskInput
-
-			// If status is provided from column "+" button, use it
-			if (initialStatus && !('status' in data)) {
-				// Status is only in UpdateTaskInput, so set it via backend logic
-				// Backend will use TODO as default for new tasks
-			}
+			}) as CreateTaskInput
 
 			await createTask({
 				variables: {

@@ -29,8 +29,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 	// Show loading state while checking permissions
 	if (loading) {
 		return (
-			<div className="flex h-screen bg-background">
-				<div className="w-64 border-r border-border/30 bg-card/50">
+			<div className="flex h-screen bg-background w-full">
+				<div className="w-64 border-r border-border/30 bg-card/50 flex-shrink-0">
 					<Skeleton className="h-full w-full" />
 				</div>
 				<main className="flex-1 flex items-center justify-center">
@@ -65,10 +65,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
 	// User has admin access, render admin layout
 	return (
-		<div className="flex h-screen bg-background">
+		<div className="flex h-screen bg-background w-full">
 			<AdminSidebar />
 			<main className="flex-1 overflow-y-auto">
-				<div className="container mx-auto p-6">{children}</div>
+				<div className="w-full max-w-[1200px] mx-auto p-6">{children}</div>
 			</main>
 		</div>
 	)

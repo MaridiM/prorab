@@ -114,6 +114,9 @@ export const UserScalarFieldEnum = {
   twoFactorEnabled: 'twoFactorEnabled',
   twoFactorSecret: 'twoFactorSecret',
   twoFactorBackupCodes: 'twoFactorBackupCodes',
+  storagePreference: 'storagePreference',
+  storageMigratedFrom: 'storageMigratedFrom',
+  storageMigratedAt: 'storageMigratedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

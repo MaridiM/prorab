@@ -67,7 +67,7 @@ export class TeamsService extends CoreService {
     // Выполняем всё в транзакции
     const result = await this.prisma.$transaction(async (tx) => {
       // 1. Обрабатываем логотип
-      const logoData = await this.processLogo(input);
+      const logoData = await this.processLogo(input, userId);
 
       // 2. Создаём команду
       const team = await tx.team.create({
@@ -133,7 +133,7 @@ export class TeamsService extends CoreService {
   /**
    * Обработка логотипа: загрузка файла ИЛИ сохранение iconId + colorId
    */
-  private async processLogo(input: CompleteOnboardingInput): Promise<{
+  private async processLogo(input: CompleteOnboardingInput, userId: string): Promise<{
     logoType: LogoType;
     logoUrl?: string;
     iconId?: string;
@@ -146,6 +146,7 @@ export class TeamsService extends CoreService {
       const logoFile = await input.logoFile;
       const logoUrl = await this.storageService.uploadTeamLogo(
         logoFile,
+        userId,
       );
 
       return {
@@ -305,7 +306,7 @@ export class TeamsService extends CoreService {
     if (input.logoFile) {
       this.logger.log('Processing uploaded logo file for team update');
       const logoFile = await input.logoFile;
-      const logoUrl = await this.storageService.uploadTeamLogo(logoFile);
+      const logoUrl = await this.storageService.uploadTeamLogo(logoFile, userId, input.teamId);
       updateData.logoType = LogoType.UPLOADED;
       updateData.logoUrl = logoUrl;
       updateData.iconId = null;

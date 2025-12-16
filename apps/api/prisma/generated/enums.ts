@@ -27,6 +27,15 @@ export const LogoType = {
 export type LogoType = (typeof LogoType)[keyof typeof LogoType]
 
 
+export const StorageProviderType = {
+  LOCAL: 'LOCAL',
+  CLOUDINARY: 'CLOUDINARY',
+  R2: 'R2'
+} as const
+
+export type StorageProviderType = (typeof StorageProviderType)[keyof typeof StorageProviderType]
+
+
 export const ProjectStatus = {
   ACTIVE: 'ACTIVE',
   ARCHIVED: 'ARCHIVED',

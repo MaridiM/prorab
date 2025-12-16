@@ -35,6 +35,11 @@ model User {
   twoFactorSecret      String?  @map("two_factor_secret") // Encrypted TOTP secret
   twoFactorBackupCodes String[] @default([]) @map("two_factor_backup_codes") // Hashed backup codes
 
+  // Storage Provider Settings
+  storagePreference   StorageProviderType? @map("storage_preference")
+  storageMigratedFrom StorageProviderType? @map("storage_migrated_from")
+  storageMigratedAt   DateTime?            @map("storage_migrated_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -177,6 +182,12 @@ enum LogoType {
   UPLOADED
   GENERATED
   DEFAULT
+}
+
+enum StorageProviderType {
+  LOCAL
+  CLOUDINARY
+  R2
 }
 
 enum ProjectStatus {

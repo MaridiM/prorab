@@ -60,6 +60,13 @@ export type DateTimeNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
 }
 
+export type EnumStorageProviderTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.StorageProviderType | Prisma.EnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel> | $Enums.StorageProviderType | null
+}
+
 export type DateTimeFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel>
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel>
@@ -132,6 +139,16 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type EnumStorageProviderTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StorageProviderType | Prisma.EnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStorageProviderTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.StorageProviderType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel>
 }
 
 export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -599,6 +616,13 @@ export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
 }
 
+export type NestedEnumStorageProviderTypeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.StorageProviderType | Prisma.EnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel> | $Enums.StorageProviderType | null
+}
+
 export type NestedDateTimeFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel>
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel>
@@ -686,6 +710,16 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumStorageProviderTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.StorageProviderType | Prisma.EnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.StorageProviderType[] | Prisma.ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumStorageProviderTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.StorageProviderType | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStorageProviderTypeNullableFilter<$PrismaModel>
 }
 
 export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {

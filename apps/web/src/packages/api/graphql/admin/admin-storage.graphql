@@ -1,0 +1,186 @@
+# ==========================================
+# Admin Storage Management
+# ==========================================
+
+# Enums
+
+enum StorageProviderType {
+  local
+  cloudinary
+  r2
+}
+
+# Types
+
+type StorageSettings {
+  adminMode: String!
+  defaultProvider: String!
+  autoMigrate: Boolean!
+
+  # Cloudinary
+  cloudinaryCloudName: String
+  cloudinaryApiKey: String
+  cloudinaryApiSecretSet: Boolean!
+
+  # R2
+  r2AccountId: String
+  r2AccessKeyIdSet: Boolean!
+  r2SecretAccessKeySet: Boolean!
+  r2BucketName: String
+  r2PublicUrl: String
+}
+
+type StorageStats {
+  totalFiles: Int!
+  totalSize: Float!
+  filesByProvider: [ProviderFileStats!]!
+  filesByType: [FileTypeStats!]!
+}
+
+type ProviderFileStats {
+  provider: String!
+  fileCount: Int!
+  totalSize: Float!
+}
+
+type FileTypeStats {
+  fileType: String!
+  count: Int!
+  totalSize: Float!
+}
+
+type ProviderTestResult {
+  provider: StorageProviderType!
+  success: Boolean!
+  message: String!
+  latency: Int
+}
+
+type StorageMigrationResult {
+  userId: String!
+  fromProvider: StorageProviderType!
+  toProvider: StorageProviderType!
+  totalFiles: Int!
+  successCount: Int!
+  failedCount: Int!
+  failures: [MigrationFailure!]!
+}
+
+type MigrationFailure {
+  url: String!
+  error: String!
+}
+
+# Inputs
+
+input UpdateStorageSettingsInput {
+  adminMode: String
+  defaultProvider: String
+  autoMigrate: Boolean
+
+  # Cloudinary
+  cloudinaryCloudName: String
+  cloudinaryApiKey: String
+  cloudinaryApiSecret: String
+
+  # R2
+  r2AccountId: String
+  r2AccessKeyId: String
+  r2SecretAccessKey: String
+  r2BucketName: String
+  r2PublicUrl: String
+}
+
+# Queries
+
+query GetStorageSettings {
+  storageSettings {
+    adminMode
+    defaultProvider
+    autoMigrate
+    cloudinaryCloudName
+    cloudinaryApiKey
+    cloudinaryApiSecretSet
+    r2AccountId
+    r2AccessKeyIdSet
+    r2SecretAccessKeySet
+    r2BucketName
+    r2PublicUrl
+  }
+}
+
+query GetStorageStats {
+  storageStats {
+    totalFiles
+    totalSize
+    filesByProvider {
+      provider
+      fileCount
+      totalSize
+    }
+    filesByType {
+      fileType
+      count
+      totalSize
+    }
+  }
+}
+
+query TestStorageProviders {
+  testStorageProviders {
+    provider
+    success
+    message
+    latency
+  }
+}
+
+# Mutations
+
+mutation UpdateStorageSettings($input: UpdateStorageSettingsInput!) {
+  updateStorageSettings(input: $input) {
+    adminMode
+    defaultProvider
+    autoMigrate
+    cloudinaryCloudName
+    cloudinaryApiKey
+    cloudinaryApiSecretSet
+    r2AccountId
+    r2AccessKeyIdSet
+    r2SecretAccessKeySet
+    r2BucketName
+    r2PublicUrl
+  }
+}
+
+mutation TestStorageProvider($provider: StorageProviderType!) {
+  testStorageProvider(provider: $provider) {
+    provider
+    success
+    message
+    latency
+  }
+}
+
+mutation MigrateUserStorage(
+  $userId: String!
+  $fromProvider: StorageProviderType!
+  $toProvider: StorageProviderType!
+) {
+  migrateUserStorage(
+    userId: $userId
+    fromProvider: $fromProvider
+    toProvider: $toProvider
+  ) {
+    userId
+    fromProvider
+    toProvider
+    totalFiles
+    successCount
+    failedCount
+    failures {
+      url
+      error
+    }
+  }
+}

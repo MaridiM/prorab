@@ -175,7 +175,7 @@ export function WorkLogDialog({
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="__no_members__" disabled>
                         Нет участников
                       </SelectItem>
                     )}

@@ -7,10 +7,12 @@ import { AuthGuard } from '../../shared/guards/auth.guard'
 
 import { User } from './models/user.model'
 import { NotificationSettings } from './models/notification-settings.model'
+import { UserStoragePreference, StorageProviderOption } from './models/user-storage.model'
 import { UsersService } from './users.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
 import { UpdateNotificationSettingsInput } from './dto/update-notification-settings.input'
 import { DeleteAccountInput } from './dto/delete-account.input'
+import { UpdateStoragePreferenceInput } from './dto/update-storage-preference.input'
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -110,6 +112,51 @@ export class UsersResolver {
 		}
 		const user = await this.usersService.disconnectTelegram(currentUser.id)
 		return user as unknown as User
+	}
+
+	/**
+	 * Get user's storage preference and available options
+	 */
+	@Query(() => UserStoragePreference, {
+		description: 'Получить настройки хранилища пользователя',
+	})
+	@UseGuards(AuthGuard)
+	async myStoragePreference(@CurrentUser() currentUser: CurrentUserData): Promise<UserStoragePreference> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		return this.usersService.getStoragePreference(currentUser.id)
+	}
+
+	/**
+	 * Get available storage provider options for user
+	 */
+	@Query(() => [StorageProviderOption], {
+		description: 'Получить доступные варианты хранилища',
+	})
+	@UseGuards(AuthGuard)
+	async availableStorageProviders(@CurrentUser() currentUser: CurrentUserData): Promise<StorageProviderOption[]> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		return this.usersService.getAvailableStorageProviders(currentUser.id)
+	}
+
+	/**
+	 * Update user's storage preference
+	 */
+	@Mutation(() => UserStoragePreference, {
+		description: 'Обновить предпочтение хранилища пользователя',
+	})
+	@UseGuards(AuthGuard)
+	async updateStoragePreference(
+		@CurrentUser() currentUser: CurrentUserData,
+		@Args('input') input: UpdateStoragePreferenceInput,
+	): Promise<UserStoragePreference> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		return this.usersService.updateStoragePreference(currentUser.id, input.provider)
 	}
 }
 

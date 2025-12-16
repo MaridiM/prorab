@@ -1,8 +1,9 @@
-import { PrismaClient, ProjectStatus, LogoType } from './generated/client'
+import { PrismaClient, ProjectStatus, LogoType, AdminRoleType } from './generated/client'
 import * as argon2 from 'argon2'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import * as dotenv from 'dotenv'
+import { RolePermissions } from '../src/shared/constants/admin-permissions'
 
 // Load environment variables
 dotenv.config({ path: '../../.env' })
@@ -56,10 +57,32 @@ async function main() {
 	// Проверяем, существует ли уже демо пользователь
 	const existingUser = await prisma.user.findUnique({
 		where: { email: DEMO_USER.email },
+		include: { adminRole: true },
 	})
 
+	let demoUser: any = existingUser
+
 	if (existingUser) {
-		console.log('⚠️ Demo user already exists, skipping seed')
+		console.log('⚠️ Demo user already exists')
+		
+		// Проверяем, есть ли у пользователя админ роль
+		if (!existingUser.adminRole) {
+			console.log('👑 Creating admin role for existing demo user...')
+			await prisma.adminRole.create({
+				data: {
+					userId: existingUser.id,
+					role: AdminRoleType.ADMIN as any,
+					permissions: [...RolePermissions.ADMIN],
+					twoFactorEnforced: false, // Отключаем 2FA для демо аккаунта
+					ipWhitelist: [],
+				},
+			})
+			console.log(`   ✅ Admin role created: ${AdminRoleType.ADMIN}`)
+		} else {
+			console.log(`   ℹ️  User already has admin role: ${existingUser.adminRole.role}`)
+		}
+		
+		console.log('⚠️ Skipping seed (user already exists)')
 		return
 	}
 
@@ -67,7 +90,7 @@ async function main() {
 	console.log('👤 Creating demo user...')
 	const passwordHash = await argon2.hash(DEMO_USER.password)
 
-	const demoUser = await prisma.user.create({
+	demoUser = await prisma.user.create({
 		data: {
 			email: DEMO_USER.email,
 			emailNormalized: DEMO_USER.email.toLowerCase(),
@@ -81,6 +104,19 @@ async function main() {
 	})
 
 	console.log(`   ✅ User created: ${demoUser.email}`)
+
+	// 1.1. Создаём админ роль для демо пользователя
+	console.log('👑 Creating admin role for demo user...')
+	await prisma.adminRole.create({
+		data: {
+			userId: demoUser.id,
+			role: AdminRoleType.ADMIN as any,
+			permissions: [...RolePermissions.ADMIN],
+			twoFactorEnforced: false, // Отключаем 2FA для демо аккаунта
+			ipWhitelist: [],
+		},
+	})
+	console.log(`   ✅ Admin role created: ${AdminRoleType.ADMIN}`)
 
 	// 2. Создаём команду
 	console.log('👥 Creating team...')
@@ -533,7 +569,7 @@ async function main() {
 	console.log(`   Password: ${DEMO_USER.password}`)
 	console.log('')
 	console.log('📊 Created data:')
-	console.log('   - 1 demo user')
+	console.log('   - 1 demo user (with ADMIN role)')
 	console.log('   - 1 team')
 	console.log('   - 7 projects (3 active, 2 completed, 2 archived)')
 	console.log('   - 27 expenses')

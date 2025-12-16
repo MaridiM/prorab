@@ -43,6 +43,9 @@ export type UserMinAggregateOutputType = {
   telegramPhotoUrl: string | null
   twoFactorEnabled: boolean | null
   twoFactorSecret: string | null
+  storagePreference: $Enums.StorageProviderType | null
+  storageMigratedFrom: $Enums.StorageProviderType | null
+  storageMigratedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +69,9 @@ export type UserMaxAggregateOutputType = {
   telegramPhotoUrl: string | null
   twoFactorEnabled: boolean | null
   twoFactorSecret: string | null
+  storagePreference: $Enums.StorageProviderType | null
+  storageMigratedFrom: $Enums.StorageProviderType | null
+  storageMigratedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,6 +96,9 @@ export type UserCountAggregateOutputType = {
   twoFactorEnabled: number
   twoFactorSecret: number
   twoFactorBackupCodes: number
+  storagePreference: number
+  storageMigratedFrom: number
+  storageMigratedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -115,6 +124,9 @@ export type UserMinAggregateInputType = {
   telegramPhotoUrl?: true
   twoFactorEnabled?: true
   twoFactorSecret?: true
+  storagePreference?: true
+  storageMigratedFrom?: true
+  storageMigratedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -138,6 +150,9 @@ export type UserMaxAggregateInputType = {
   telegramPhotoUrl?: true
   twoFactorEnabled?: true
   twoFactorSecret?: true
+  storagePreference?: true
+  storageMigratedFrom?: true
+  storageMigratedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -162,6 +177,9 @@ export type UserCountAggregateInputType = {
   twoFactorEnabled?: true
   twoFactorSecret?: true
   twoFactorBackupCodes?: true
+  storagePreference?: true
+  storageMigratedFrom?: true
+  storageMigratedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -259,6 +277,9 @@ export type UserGroupByOutputType = {
   twoFactorEnabled: boolean
   twoFactorSecret: string | null
   twoFactorBackupCodes: string[]
+  storagePreference: $Enums.StorageProviderType | null
+  storageMigratedFrom: $Enums.StorageProviderType | null
+  storageMigratedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -304,6 +325,9 @@ export type UserWhereInput = {
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   twoFactorSecret?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorBackupCodes?: Prisma.StringNullableListFilter<"User">
+  storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -338,6 +362,9 @@ export type UserOrderByWithRelationInput = {
   twoFactorEnabled?: Prisma.SortOrder
   twoFactorSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorBackupCodes?: Prisma.SortOrder
+  storagePreference?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageMigratedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageMigratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   verificationTokens?: Prisma.VerificationTokenOrderByRelationAggregateInput
@@ -375,6 +402,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   twoFactorSecret?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorBackupCodes?: Prisma.StringNullableListFilter<"User">
+  storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -409,6 +439,9 @@ export type UserOrderByWithAggregationInput = {
   twoFactorEnabled?: Prisma.SortOrder
   twoFactorSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorBackupCodes?: Prisma.SortOrder
+  storagePreference?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageMigratedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  storageMigratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -439,6 +472,9 @@ export type UserScalarWhereWithAggregatesInput = {
   twoFactorEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   twoFactorSecret?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   twoFactorBackupCodes?: Prisma.StringNullableListFilter<"User">
+  storagePreference?: Prisma.EnumStorageProviderTypeNullableWithAggregatesFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableWithAggregatesFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -462,6 +498,9 @@ export type UserCreateInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -496,6 +535,9 @@ export type UserUncheckedCreateInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -528,6 +570,9 @@ export type UserUpdateInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -562,6 +607,9 @@ export type UserUncheckedUpdateInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -595,6 +643,9 @@ export type UserCreateManyInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -618,6 +669,9 @@ export type UserUpdateManyMutationInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -642,6 +696,9 @@ export type UserUncheckedUpdateManyInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -674,6 +731,9 @@ export type UserCountOrderByAggregateInput = {
   twoFactorEnabled?: Prisma.SortOrder
   twoFactorSecret?: Prisma.SortOrder
   twoFactorBackupCodes?: Prisma.SortOrder
+  storagePreference?: Prisma.SortOrder
+  storageMigratedFrom?: Prisma.SortOrder
+  storageMigratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -697,6 +757,9 @@ export type UserMaxOrderByAggregateInput = {
   telegramPhotoUrl?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   twoFactorSecret?: Prisma.SortOrder
+  storagePreference?: Prisma.SortOrder
+  storageMigratedFrom?: Prisma.SortOrder
+  storageMigratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -720,6 +783,9 @@ export type UserMinOrderByAggregateInput = {
   telegramPhotoUrl?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   twoFactorSecret?: Prisma.SortOrder
+  storagePreference?: Prisma.SortOrder
+  storageMigratedFrom?: Prisma.SortOrder
+  storageMigratedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -762,6 +828,10 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 export type UserUpdatetwoFactorBackupCodesInput = {
   set?: string[]
   push?: string | string[]
+}
+
+export type NullableEnumStorageProviderTypeFieldUpdateOperationsInput = {
+  set?: $Enums.StorageProviderType | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -955,6 +1025,9 @@ export type UserCreateWithoutNotificationSettingsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -988,6 +1061,9 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1035,6 +1111,9 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1068,6 +1147,9 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1099,6 +1181,9 @@ export type UserCreateWithoutVerificationTokensInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1132,6 +1217,9 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1179,6 +1267,9 @@ export type UserUpdateWithoutVerificationTokensInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1212,6 +1303,9 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1243,6 +1337,9 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1276,6 +1373,9 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1323,6 +1423,9 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1356,6 +1459,9 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1387,6 +1493,9 @@ export type UserCreateWithoutOwnedTeamsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1420,6 +1529,9 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1456,6 +1568,9 @@ export type UserCreateWithoutCurrentTeamInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1488,6 +1603,9 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1541,6 +1659,9 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1574,6 +1695,9 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1625,6 +1749,9 @@ export type UserScalarWhereInput = {
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   twoFactorSecret?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorBackupCodes?: Prisma.StringNullableListFilter<"User">
+  storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
@@ -1648,6 +1775,9 @@ export type UserCreateWithoutTeamMembershipsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1681,6 +1811,9 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1728,6 +1861,9 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1761,6 +1897,9 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1792,6 +1931,9 @@ export type UserCreateWithoutSalaryChangesInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1825,6 +1967,9 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1872,6 +2017,9 @@ export type UserUpdateWithoutSalaryChangesInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1905,6 +2053,9 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1936,6 +2087,9 @@ export type UserCreateWithoutCreatedTasksInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1969,6 +2123,9 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2016,6 +2173,9 @@ export type UserUpdateWithoutCreatedTasksInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2049,6 +2209,9 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2080,6 +2243,9 @@ export type UserCreateWithoutSupportTicketsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2113,6 +2279,9 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2160,6 +2329,9 @@ export type UserUpdateWithoutSupportTicketsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2193,6 +2365,9 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2224,6 +2399,9 @@ export type UserCreateWithoutAdminRoleInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2257,6 +2435,9 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2304,6 +2485,9 @@ export type UserUpdateWithoutAdminRoleInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2337,6 +2521,9 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2368,6 +2555,9 @@ export type UserCreateManyCurrentTeamInput = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: string | null
   twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2391,6 +2581,9 @@ export type UserUpdateWithoutCurrentTeamInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2423,6 +2616,9 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2455,6 +2651,9 @@ export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2564,6 +2763,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   twoFactorEnabled?: boolean
   twoFactorSecret?: boolean
   twoFactorBackupCodes?: boolean
+  storagePreference?: boolean
+  storageMigratedFrom?: boolean
+  storageMigratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
@@ -2599,6 +2801,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   twoFactorEnabled?: boolean
   twoFactorSecret?: boolean
   twoFactorBackupCodes?: boolean
+  storagePreference?: boolean
+  storageMigratedFrom?: boolean
+  storageMigratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -2624,6 +2829,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   twoFactorEnabled?: boolean
   twoFactorSecret?: boolean
   twoFactorBackupCodes?: boolean
+  storagePreference?: boolean
+  storageMigratedFrom?: boolean
+  storageMigratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -2649,11 +2857,14 @@ export type UserSelectScalar = {
   twoFactorEnabled?: boolean
   twoFactorSecret?: boolean
   twoFactorBackupCodes?: boolean
+  storagePreference?: boolean
+  storageMigratedFrom?: boolean
+  storageMigratedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -2708,6 +2919,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     twoFactorEnabled: boolean
     twoFactorSecret: string | null
     twoFactorBackupCodes: string[]
+    storagePreference: $Enums.StorageProviderType | null
+    storageMigratedFrom: $Enums.StorageProviderType | null
+    storageMigratedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -3162,6 +3376,9 @@ export interface UserFieldRefs {
   readonly twoFactorEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly twoFactorSecret: Prisma.FieldRef<"User", 'String'>
   readonly twoFactorBackupCodes: Prisma.FieldRef<"User", 'String[]'>
+  readonly storagePreference: Prisma.FieldRef<"User", 'StorageProviderType'>
+  readonly storageMigratedFrom: Prisma.FieldRef<"User", 'StorageProviderType'>
+  readonly storageMigratedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

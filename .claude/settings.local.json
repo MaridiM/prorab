@@ -121,7 +121,17 @@
       "Bash(node --loader ts-node/esm:*)",
       "Bash(NODE_ENV=development pnpm build:*)",
       "Bash(pnpm start:dev)",
-      "Bash(npx dotenv:*)"
+      "Bash(npx dotenv:*)",
+      "Bash(git push:*)",
+      "Bash(git branch:*)",
+      "Bash(pnpm add cloudinary @aws-sdk/client-s3)",
+      "Bash(touch:*)",
+      "Bash(timeout 30 bash -c 'while ! curl -s http://localhost:3000/graphql > /dev/null 2>&1; do sleep 2; done; echo \"\"API server is ready!\"\"')",
+      "Bash(git checkout:*)",
+      "Bash(timeout 30 npm run dev:api:*)",
+      "Bash(npm run)",
+      "Bash(timeout 20 npm run start:dev:*)",
+      "Bash(timeout 35 npm run start:dev)"
     ],
     "deny": [],
     "ask": []

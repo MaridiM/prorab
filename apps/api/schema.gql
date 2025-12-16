@@ -2,6 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ActivityLog {
+  """Action performed"""
+  action: String!
+
+  """Admin user email"""
+  adminUserEmail: String!
+
+  """Action timestamp"""
+  createdAt: DateTime!
+
+  """Log ID"""
+  id: String!
+
+  """Resource type"""
+  resource: String!
+
+  """Resource ID"""
+  resourceId: String!
+}
+
 input AddPhotoInput {
   caption: String
   fileSize: Int
@@ -45,6 +65,248 @@ type AdminActionStatistics {
   actionsByResource: JSON!
   actionsByType: JSON!
   totalActions: Int!
+}
+
+type AdminPayment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  id: ID!
+  status: String!
+  subscriptionId: String!
+  updatedAt: DateTime!
+  yookassaPaymentId: String
+}
+
+input AdminPaymentFilters {
+  """Created after date"""
+  createdAfter: DateTime
+
+  """Created before date"""
+  createdBefore: DateTime
+
+  """Maximum amount"""
+  maxAmount: Float
+
+  """Minimum amount"""
+  minAmount: Float
+
+  """Search by team name, owner email, or payment ID"""
+  search: String
+
+  """Filter by status (PENDING, SUCCEEDED, FAILED, CANCELLED)"""
+  status: String
+}
+
+type AdminPaymentsConnection {
+  """List of payments"""
+  nodes: [AdminPayment!]!
+
+  """Pagination information"""
+  pageInfo: PageInfo!
+
+  """Total count of payments"""
+  totalCount: Int!
+}
+
+input AdminSubscriptionFilters {
+  """Created after date"""
+  createdAfter: DateTime
+
+  """Created before date"""
+  createdBefore: DateTime
+
+  """Expiring before date"""
+  expiringBefore: DateTime
+
+  """Filter by plan (LITE, FOREMAN, BRIGADE)"""
+  plan: String
+
+  """Search by team name or owner email"""
+  search: String
+
+  """Filter by status"""
+  status: String
+}
+
+type AdminSubscriptionsConnection {
+  """List of subscriptions"""
+  nodes: [Subscription!]!
+
+  """Pagination information"""
+  pageInfo: PageInfo!
+
+  """Total count of subscriptions"""
+  totalCount: Int!
+}
+
+type AdminTeamCounts {
+  """Number of team members"""
+  members: Int!
+
+  """Number of projects"""
+  projects: Int!
+}
+
+type AdminTeamDetails {
+  """Aggregated counts"""
+  _count: AdminTeamCounts!
+
+  """Team members"""
+  members: [TeamMemberDetails!]!
+
+  """Team owner"""
+  owner: User!
+
+  """Team projects"""
+  projects: [Project!]!
+
+  """Team subscription"""
+  subscription: Subscription
+
+  """Team data"""
+  team: Team!
+}
+
+input AdminTeamFilters {
+  """Created after date"""
+  createdAfter: DateTime
+
+  """Created before date"""
+  createdBefore: DateTime
+
+  """Maximum number of members"""
+  maxMembers: Int
+
+  """Maximum number of projects"""
+  maxProjects: Int
+
+  """Minimum number of members"""
+  minMembers: Int
+
+  """Minimum number of projects"""
+  minProjects: Int
+
+  """Filter by plan type"""
+  planType: String
+
+  """Search by team name or owner email"""
+  search: String
+
+  """Filter by subscription status"""
+  subscriptionStatus: String
+}
+
+type AdminTeamStats {
+  """Number of active projects"""
+  activeProjects: Int!
+
+  """Number of completed projects"""
+  completedProjects: Int!
+
+  """Total expense amount"""
+  totalExpenseAmount: Float!
+
+  """Total number of expenses"""
+  totalExpenses: Int!
+
+  """Total number of members"""
+  totalMembers: Int!
+
+  """Total number of projects"""
+  totalProjects: Int!
+}
+
+type AdminTeamsConnection {
+  """List of teams"""
+  nodes: [Team!]!
+
+  """Pagination info"""
+  pageInfo: PageInfo!
+
+  """Total count of teams"""
+  totalCount: Int!
+}
+
+input AdminUpdateTeamInput {
+  """Team logo URL"""
+  logoUrl: String
+
+  """Team name"""
+  name: String
+}
+
+input AdminUpdateUserInput {
+  """User avatar URL"""
+  avatarUrl: String
+
+  """User email address"""
+  email: String
+
+  """Email verification status"""
+  emailVerified: Boolean
+
+  """User full name"""
+  fullName: String
+
+  """User phone number"""
+  phone: String
+}
+
+type AdminUserCounts {
+  """Number of teams owned"""
+  ownedTeams: Int!
+
+  """Number of payments made"""
+  payments: Int!
+
+  """Number of team memberships"""
+  teamMemberships: Int!
+}
+
+type AdminUserDetails {
+  """Aggregated counts"""
+  _count: AdminUserCounts!
+
+  """Teams owned by this user"""
+  ownedTeams: [Team!]!
+
+  """Teams where user is a member"""
+  teamMemberships: [TeamMemberInfo!]!
+
+  """User data"""
+  user: User!
+}
+
+input AdminUserFilters {
+  """Created after date"""
+  createdAfter: DateTime
+
+  """Created before date"""
+  createdBefore: DateTime
+
+  """Filter by email verification status"""
+  emailVerified: Boolean
+
+  """Last login after date"""
+  lastLoginAfter: DateTime
+
+  """Last login before date"""
+  lastLoginBefore: DateTime
+
+  """Search by email, name, or phone"""
+  search: String
+}
+
+type AdminUsersConnection {
+  """List of users"""
+  nodes: [User!]!
+
+  """Pagination info"""
+  pageInfo: PageInfo!
+
+  """Total count of users"""
+  totalCount: Int!
 }
 
 type AuthPayload {
@@ -93,6 +355,14 @@ input ChangePlanInput {
   immediate: Boolean! = false
   newPlan: String!
   subscriptionId: String!
+}
+
+type ChartData {
+  """Chart data points"""
+  data: [Float!]!
+
+  """Chart labels"""
+  labels: [String!]!
 }
 
 input CheckTelegramAuthInput {
@@ -253,6 +523,127 @@ input CreateWorkLogInput {
   projectId: ID!
 }
 
+type DashboardPaymentStats {
+  """Average payment amount"""
+  averagePayment: Float!
+
+  """Succeeded payments"""
+  succeeded: Int!
+
+  """Revenue this month"""
+  thisMonthRevenue: Float!
+
+  """Total payments"""
+  total: Int!
+
+  """Total revenue"""
+  totalRevenue: Float!
+}
+
+type DashboardProjectStats {
+  """Active projects"""
+  active: Int!
+
+  """Archived projects"""
+  archived: Int!
+
+  """Completed projects"""
+  completed: Int!
+
+  """Total number of projects"""
+  total: Int!
+}
+
+type DashboardStats {
+  """Payment statistics"""
+  payments: DashboardPaymentStats!
+
+  """Project statistics"""
+  projects: DashboardProjectStats!
+
+  """Storage statistics"""
+  storage: DashboardStorageStats!
+
+  """Subscription statistics"""
+  subscriptions: DashboardSubscriptionStats!
+
+  """Team statistics"""
+  teams: DashboardTeamStats!
+
+  """User statistics"""
+  users: DashboardUserStats!
+}
+
+type DashboardStorageStats {
+  """Average storage per team in bytes"""
+  averagePerTeam: Float!
+
+  """Total storage used in bytes"""
+  totalUsedBytes: Float!
+
+  """Total storage used in GB"""
+  totalUsedGB: Float!
+}
+
+type DashboardSubscriptionStats {
+  """Active subscriptions"""
+  active: Int!
+
+  """Subscriptions by plan"""
+  byPlan: DashboardSubscriptionsByPlan!
+
+  """Cancelled subscriptions"""
+  cancelled: Int!
+
+  """Total subscriptions"""
+  total: Int!
+
+  """Trialing subscriptions"""
+  trialing: Int!
+}
+
+type DashboardSubscriptionsByPlan {
+  """BRIGADE subscriptions"""
+  BRIGADE: Int!
+
+  """FOREMAN subscriptions"""
+  FOREMAN: Int!
+
+  """LITE subscriptions"""
+  LITE: Int!
+}
+
+type DashboardTeamStats {
+  """Average members per team"""
+  averageMembers: Float!
+
+  """New teams this month"""
+  newThisMonth: Int!
+
+  """Total number of teams"""
+  total: Int!
+
+  """Teams with active subscription"""
+  withActiveSubscription: Int!
+}
+
+type DashboardUserStats {
+  """Number of admin users"""
+  admins: Int!
+
+  """Growth rate percentage"""
+  growthRate: Float!
+
+  """New users this month"""
+  newThisMonth: Int!
+
+  """Total number of users"""
+  total: Int!
+
+  """Number of verified users"""
+  verified: Int!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -300,6 +691,17 @@ type Expense {
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+type FileTypeStats {
+  """Number of files"""
+  count: Int!
+
+  """File type (avatars, team-logos, etc.)"""
+  fileType: String!
+
+  """Total size in bytes"""
+  totalSize: Float!
 }
 
 type InviteCode {
@@ -381,6 +783,14 @@ type MemberPayoutDetail {
   status: String!
 }
 
+type MigrationFailure {
+  """Error message"""
+  error: String!
+
+  """File URL"""
+  url: String!
+}
+
 input MoveTaskInput {
   """Новый индекс позиции (orderIndex)"""
   newOrderIndex: Int!
@@ -395,6 +805,51 @@ input MoveTaskInput {
 type Mutation {
   """Добавить фото к фотоотчёту"""
   addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
+
+  """Cancel subscription (Admin only)"""
+  adminCancelSubscription(cancelAtPeriodEnd: Boolean! = true, id: String!): Subscription!
+
+  """Change team subscription plan (Admin only)"""
+  adminChangeTeamPlan(planType: String!, teamId: String!): Team!
+
+  """Delete payment (Admin only)"""
+  adminDeletePayment(id: String!): Boolean!
+
+  """Delete subscription (Admin only)"""
+  adminDeleteSubscription(id: String!): Boolean!
+
+  """Delete a team (Admin only)"""
+  adminDeleteTeam(id: String!): Boolean!
+
+  """Delete a user account (Admin only)"""
+  adminDeleteUser(id: String!): Boolean!
+
+  """Reactivate cancelled subscription (Admin only)"""
+  adminReactivateSubscription(id: String!): Subscription!
+
+  """Issue refund for payment (Admin only)"""
+  adminRefundPayment(id: String!, input: RefundPaymentInput!): AdminPayment!
+
+  """Remove a member from a team (Admin only)"""
+  adminRemoveTeamMember(memberId: String!, teamId: String!): Boolean!
+
+  """Send password reset link to user (Admin only)"""
+  adminResetUserPassword(id: String!): Boolean!
+
+  """Update payment status (Admin only)"""
+  adminUpdatePaymentStatus(id: String!, status: String!): AdminPayment!
+
+  """Update subscription (Admin only)"""
+  adminUpdateSubscription(id: String!, input: UpdateSubscriptionInput!): Subscription!
+
+  """Update team information (Admin only)"""
+  adminUpdateTeam(id: String!, input: AdminUpdateTeamInput!): Team!
+
+  """Update user information (Admin only)"""
+  adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
+
+  """Manually verify user email (Admin only)"""
+  adminVerifyUserEmail(id: String!): User!
 
   """Архивировать проект"""
   archiveProject(id: ID!): Project!
@@ -487,6 +942,9 @@ type Mutation {
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
 
+  """Migrate a user's files from one provider to another"""
+  migrateUserStorage(fromProvider: StorageProviderType!, toProvider: StorageProviderType!, userId: String!): StorageMigrationResult!
+
   """Переместить задачу (drag & drop)"""
   moveTask(input: MoveTaskInput!): Task!
   reactivateSubscription(subscriptionId: String!): Subscription!
@@ -510,6 +968,9 @@ type Mutation {
 
   """Test connection for a service category (admin only)"""
   testServiceConnection(category: SettingCategory!): ConnectionTestResult!
+
+  """Test connection to a specific storage provider"""
+  testStorageProvider(provider: StorageProviderType!): ProviderTestResult!
 
   """Обновить расход"""
   updateExpense(input: UpdateExpenseInput!): Expense!
@@ -538,6 +999,12 @@ type Mutation {
 
   """Обновить прогресс проекта"""
   updateProjectProgress(id: ID!, progress: Int!): Project!
+
+  """Обновить предпочтение хранилища пользователя"""
+  updateStoragePreference(input: UpdateStoragePreferenceInput!): UserStoragePreference!
+
+  """Update storage provider settings"""
+  updateStorageSettings(input: UpdateStorageSettingsInput!): StorageSettings!
 
   """Update a system setting value (admin only)"""
   updateSystemSetting(input: UpdateSystemSettingInput!): SystemSetting!
@@ -585,6 +1052,28 @@ type OnboardingResult {
   team: Team!
 }
 
+type PageInfo {
+  """Current page number"""
+  currentPage: Int!
+
+  """Has next page"""
+  hasNextPage: Boolean!
+
+  """Has previous page"""
+  hasPreviousPage: Boolean!
+
+  """Total pages"""
+  totalPages: Int!
+}
+
+input PaginationInput {
+  """Items per page"""
+  limit: Int! = 50
+
+  """Page number (starts at 1)"""
+  page: Int! = 1
+}
+
 type Payment {
   amount: Float!
   createdAt: DateTime!
@@ -617,6 +1106,29 @@ enum PaymentMethod {
   TRANSFER
 }
 
+type PaymentStats {
+  """Average payment amount"""
+  averagePayment: Float!
+
+  """Payments count by status"""
+  byStatus: PaymentsByStatus!
+
+  """Number of failed payments"""
+  failedPayments: Int!
+
+  """Number of pending payments"""
+  pendingPayments: Int!
+
+  """Number of succeeded payments"""
+  succeededPayments: Int!
+
+  """Total number of payments"""
+  totalPayments: Int!
+
+  """Total revenue from succeeded payments"""
+  totalRevenue: Float!
+}
+
 enum PaymentStatus {
   CANCELLED
   FAILED
@@ -628,6 +1140,20 @@ enum PaymentStatus {
 type PaymentUrl {
   paymentId: String!
   url: String!
+}
+
+type PaymentsByStatus {
+  """Number of CANCELLED payments"""
+  CANCELLED: Int!
+
+  """Number of FAILED payments"""
+  FAILED: Int!
+
+  """Number of PENDING payments"""
+  PENDING: Int!
+
+  """Number of SUCCEEDED payments"""
+  SUCCEEDED: Int!
 }
 
 type PayoutSummary {
@@ -839,6 +1365,31 @@ enum ProjectStatus {
   COMPLETED
 }
 
+type ProviderFileStats {
+  """Number of files"""
+  fileCount: Int!
+
+  """Provider name"""
+  provider: String!
+
+  """Total size in bytes"""
+  totalSize: Float!
+}
+
+type ProviderTestResult {
+  """Test latency in milliseconds"""
+  latency: Int
+
+  """Test result message"""
+  message: String!
+
+  """Provider type"""
+  provider: StorageProviderType!
+
+  """Whether test was successful"""
+  success: Boolean!
+}
+
 type PublicPhotoReport {
   coverPhotoUrl: String
   createdAt: DateTime!
@@ -868,7 +1419,64 @@ type Query {
 
   """Get admin action statistics (admin only)"""
   adminActionStatistics(endDate: DateTime!, startDate: DateTime!): AdminActionStatistics!
+
+  """Get comprehensive dashboard statistics (Admin only)"""
+  adminDashboardStats: DashboardStats!
+
+  """Get detailed information about a specific payment (Admin only)"""
+  adminPayment(id: String!): AdminPayment!
+
+  """Get payment statistics (Admin only)"""
+  adminPaymentStats: PaymentStats!
+
+  """Get paginated list of payments with filters (Admin only)"""
+  adminPayments(filters: AdminPaymentFilters, pagination: PaginationInput!): AdminPaymentsConnection!
+
+  """Get recent admin activity logs (Admin only)"""
+  adminRecentActivity(limit: Int! = 50): [ActivityLog!]!
+
+  """Get revenue chart data for the last 12 months (Admin only)"""
+  adminRevenueChart: ChartData!
+
+  """Get detailed information about a specific subscription (Admin only)"""
+  adminSubscription(id: String!): Subscription!
+
+  """Get subscription statistics (Admin only)"""
+  adminSubscriptionStats: SubscriptionStats!
+
+  """Get paginated list of subscriptions with filters (Admin only)"""
+  adminSubscriptions(filters: AdminSubscriptionFilters, pagination: PaginationInput!): AdminSubscriptionsConnection!
+
+  """Get system health status (Admin only)"""
+  adminSystemHealth: SystemHealth!
+
+  """Get detailed information about a specific team (Admin only)"""
+  adminTeam(id: String!): AdminTeamDetails!
+
+  """Get statistics for a specific team (Admin only)"""
+  adminTeamStats(teamId: String!): AdminTeamStats!
+
+  """Get paginated list of teams with filters (Admin only)"""
+  adminTeams(filters: AdminTeamFilters, pagination: PaginationInput!): AdminTeamsConnection!
+
+  """Get detailed information about a specific user (Admin only)"""
+  adminUser(id: String!): AdminUserDetails!
+
+  """Get activity logs for a specific user (Admin only)"""
+  adminUserActivity(limit: Float = 50, userId: String!): [UserActivity!]!
+
+  """Get user growth chart data for the last 12 months (Admin only)"""
+  adminUserGrowthChart: ChartData!
+
+  """Get active sessions for a specific user (Admin only)"""
+  adminUserSessions(userId: String!): [UserSession!]!
+
+  """Get paginated list of users with filters (Admin only)"""
+  adminUsers(filters: AdminUserFilters, pagination: PaginationInput!): AdminUsersConnection!
   availablePlans: [PlanLimits!]!
+
+  """Получить доступные варианты хранилища"""
+  availableStorageProviders: [StorageProviderOption!]!
   canAddProject(teamId: String!): Boolean!
   currentPlanLimits(teamId: String!): PlanLimits!
 
@@ -902,6 +1510,9 @@ type Query {
 
   """Get all work logs for a team member (owner or self)"""
   memberWorkLogs(memberId: ID!): [WorkLog!]!
+
+  """Получить настройки хранилища пользователя"""
+  myStoragePreference: UserStoragePreference!
   mySubscription: Subscription
 
   """Получить все задачи пользователя (созданные или назначенные)"""
@@ -947,6 +1558,12 @@ type Query {
   """Get recent actions by admin user (admin only)"""
   recentAdminActions(adminUserId: ID!, limit: Float! = 20): [AdminActionLog!]!
   sessions: [Session!]!
+
+  """Get current storage provider settings"""
+  storageSettings: StorageSettings!
+
+  """Get storage usage statistics"""
+  storageStats: StorageStats!
   subscription(id: String!): Subscription!
 
   """Get a single system setting by key (admin only)"""
@@ -966,11 +1583,22 @@ type Query {
 
   """Получение участников команды"""
   teamMembers(teamId: ID!): [TeamMember!]!
+
+  """Test connection to all storage providers"""
+  testStorageProviders: [ProviderTestResult!]!
   twoFactorStatus: TwoFactorStatus!
   usageStats(teamId: String!): UsageStats!
 
   """Get work logs for a date range"""
   workLogsByDateRange(endDate: DateTime!, projectId: ID!, startDate: DateTime!): [WorkLog!]!
+}
+
+input RefundPaymentInput {
+  """Refund amount"""
+  amount: Float!
+
+  """Refund reason"""
+  reason: String!
 }
 
 input RegenerateBackupCodesInput {
@@ -1030,6 +1658,102 @@ enum SettingValueType {
   STRING
 }
 
+type StorageMigrationResult {
+  """Failed migrations"""
+  failedCount: Int!
+
+  """List of failures"""
+  failures: [MigrationFailure!]!
+
+  """Source provider"""
+  fromProvider: StorageProviderType!
+
+  """Successfully migrated files"""
+  successCount: Int!
+
+  """Destination provider"""
+  toProvider: StorageProviderType!
+
+  """Total files to migrate"""
+  totalFiles: Int!
+
+  """User ID"""
+  userId: String!
+}
+
+type StorageProviderOption {
+  """Whether this provider is available"""
+  available: Boolean!
+
+  """Whether this is currently selected"""
+  current: Boolean!
+
+  """Provider description"""
+  description: String!
+
+  """Provider display name"""
+  name: String!
+
+  """Provider type"""
+  provider: UserStorageProviderType!
+}
+
+"""Available storage provider types"""
+enum StorageProviderType {
+  CLOUDINARY
+  LOCAL
+  R2
+}
+
+type StorageSettings {
+  """Storage admin mode (local | cloudinary | r2 | user_choice)"""
+  adminMode: String!
+
+  """Auto-migrate files on provider switch"""
+  autoMigrate: Boolean!
+
+  """Cloudinary API key"""
+  cloudinaryApiKey: String
+
+  """Whether Cloudinary API secret is set"""
+  cloudinaryApiSecretSet: Boolean!
+
+  """Cloudinary cloud name"""
+  cloudinaryCloudName: String
+
+  """Default storage provider (local | cloudinary | r2)"""
+  defaultProvider: String!
+
+  """Whether R2 access key ID is set"""
+  r2AccessKeyIdSet: Boolean!
+
+  """Cloudflare account ID"""
+  r2AccountId: String
+
+  """R2 bucket name"""
+  r2BucketName: String
+
+  """R2 public URL"""
+  r2PublicUrl: String
+
+  """Whether R2 secret access key is set"""
+  r2SecretAccessKeySet: Boolean!
+}
+
+type StorageStats {
+  """Files grouped by provider"""
+  filesByProvider: [ProviderFileStats!]!
+
+  """Files grouped by type"""
+  filesByType: [FileTypeStats!]!
+
+  """Total number of files"""
+  totalFiles: Int!
+
+  """Total size in bytes"""
+  totalSize: Float!
+}
+
 type Subscription {
   cancelAtPeriodEnd: Boolean!
   cancelledAt: DateTime
@@ -1053,12 +1777,54 @@ enum SubscriptionPlan {
   LITE
 }
 
+type SubscriptionStats {
+  """Number of active subscriptions"""
+  activeSubscriptions: Int!
+
+  """Subscriptions count by plan"""
+  byPlan: SubscriptionsByPlan!
+
+  """Number of cancelled subscriptions"""
+  cancelledSubscriptions: Int!
+
+  """Total revenue from all subscriptions"""
+  totalRevenue: Float!
+
+  """Total number of subscriptions"""
+  totalSubscriptions: Int!
+
+  """Number of trialing subscriptions"""
+  trialingSubscriptions: Int!
+}
+
 enum SubscriptionStatus {
   ACTIVE
   CANCELLED
   EXPIRED
   PAST_DUE
   TRIALING
+}
+
+type SubscriptionsByPlan {
+  """Number of BRIGADE subscriptions"""
+  BRIGADE: Int!
+
+  """Number of FOREMAN subscriptions"""
+  FOREMAN: Int!
+
+  """Number of LITE subscriptions"""
+  LITE: Int!
+}
+
+type SystemHealth {
+  """Database health status"""
+  database: Boolean!
+
+  """Last backup timestamp"""
+  lastBackup: DateTime
+
+  """Storage availability"""
+  storageAvailable: Boolean!
 }
 
 type SystemSetting {
@@ -1207,6 +1973,20 @@ type TeamMember {
   """Пользователь"""
   user: User
   userId: ID!
+}
+
+type TeamMemberDetails {
+  createdAt: DateTime!
+  id: ID!
+  role: String!
+  user: User!
+}
+
+type TeamMemberInfo {
+  createdAt: DateTime!
+  id: ID!
+  role: String!
+  team: Team!
 }
 
 type TeamMemberSalaryHistory {
@@ -1390,6 +2170,39 @@ input UpdateProjectInput {
   startDate: DateTime
 }
 
+input UpdateStoragePreferenceInput {
+  """Preferred storage provider (local, cloudinary, or r2)"""
+  provider: UserStorageProviderType!
+}
+
+input UpdateStorageSettingsInput {
+  adminMode: String
+  autoMigrate: Boolean
+  cloudinaryApiKey: String
+  cloudinaryApiSecret: String
+  cloudinaryCloudName: String
+  defaultProvider: String
+  r2AccessKeyId: String
+  r2AccountId: String
+  r2BucketName: String
+  r2PublicUrl: String
+  r2SecretAccessKey: String
+}
+
+input UpdateSubscriptionInput {
+  """Cancel at period end"""
+  cancelAtPeriodEnd: Boolean
+
+  """Current period end date"""
+  currentPeriodEnd: DateTime
+
+  """Subscription plan"""
+  plan: String
+
+  """Subscription status"""
+  status: String
+}
+
 input UpdateSystemSettingInput {
   key: String!
   value: String!
@@ -1475,6 +2288,67 @@ type User {
   """Telegram Username пользователя"""
   telegramUsername: String
   updatedAt: DateTime!
+}
+
+type UserActivity {
+  """Action type (e.g., UPDATE_USER, DELETE_USER)"""
+  action: String!
+
+  """When the action occurred"""
+  createdAt: DateTime!
+  id: ID!
+
+  """IP address of the actor"""
+  ipAddress: String
+
+  """Resource type affected"""
+  resource: String!
+
+  """Resource ID affected"""
+  resourceId: String!
+}
+
+type UserSession {
+  """Session creation date"""
+  createdAt: DateTime!
+
+  """Session expiration date"""
+  expiresAt: DateTime!
+  id: ID!
+
+  """IP address"""
+  ipAddress: String
+
+  """Session token (masked)"""
+  token: String!
+
+  """User agent string"""
+  userAgent: String
+  userId: String!
+}
+
+type UserStoragePreference {
+  """Currently active storage provider for this user"""
+  activeProvider: UserStorageProviderType!
+
+  """Whether user can change storage preference (admin allows user_choice)"""
+  canChangeProvider: Boolean!
+
+  """Date of last migration"""
+  migratedAt: DateTime
+
+  """Previous provider if migrated"""
+  migratedFrom: UserStorageProviderType
+
+  """User's preferred storage provider (null = use system default)"""
+  preferredProvider: UserStorageProviderType
+}
+
+"""Available storage provider types for users"""
+enum UserStorageProviderType {
+  CLOUDINARY
+  LOCAL
+  R2
 }
 
 type WorkLog {

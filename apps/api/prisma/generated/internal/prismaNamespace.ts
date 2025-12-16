@@ -2337,6 +2337,9 @@ export const UserScalarFieldEnum = {
   twoFactorEnabled: 'twoFactorEnabled',
   twoFactorSecret: 'twoFactorSecret',
   twoFactorBackupCodes: 'twoFactorBackupCodes',
+  storagePreference: 'storagePreference',
+  storageMigratedFrom: 'storageMigratedFrom',
+  storageMigratedAt: 'storageMigratedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2841,6 +2844,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StorageProviderType'
+ */
+export type EnumStorageProviderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StorageProviderType'>
+    
+
+
+/**
+ * Reference to a field of type 'StorageProviderType[]'
+ */
+export type ListEnumStorageProviderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StorageProviderType[]'>
     
 
 

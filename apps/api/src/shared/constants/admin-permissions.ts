@@ -50,6 +50,11 @@ export const AdminPermissions = {
   SETTINGS_AI: 'settings:ai', // AI service settings
   SETTINGS_SECURITY: 'settings:security', // Security configurations
 
+  // ==================== STORAGE MANAGEMENT ====================
+  STORAGE_VIEW: 'storage:view',
+  STORAGE_MANAGE: 'storage:manage',
+  STORAGE_MIGRATE: 'storage:migrate',
+
   // ==================== ADMIN ROLE MANAGEMENT ====================
   ADMIN_ROLES_VIEW: 'admin_roles:view',
   ADMIN_ROLES_CREATE: 'admin_roles:create',
@@ -118,6 +123,11 @@ export const RolePermissions = {
 
     // System Settings (view only)
     AdminPermissions.SETTINGS_VIEW,
+
+    // Storage Management
+    AdminPermissions.STORAGE_VIEW,
+    AdminPermissions.STORAGE_MANAGE,
+    AdminPermissions.STORAGE_MIGRATE,
 
     // Support Management
     AdminPermissions.SUPPORT_TICKETS_VIEW,

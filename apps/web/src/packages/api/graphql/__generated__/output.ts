@@ -282,6 +282,16 @@ export type Expense = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type FileTypeStats = {
+  __typename?: 'FileTypeStats';
+  /** Number of files */
+  count: Scalars['Int']['output'];
+  /** File type (avatars, team-logos, etc.) */
+  fileType: Scalars['String']['output'];
+  /** Total size in bytes */
+  totalSize: Scalars['Float']['output'];
+};
+
 export type InviteCode = {
   __typename?: 'InviteCode';
   /** Уникальный код приглашения */
@@ -347,6 +357,14 @@ export type MemberPayoutDetail = {
   salaryType: Scalars['String']['output'];
   /** Payout status: pending, paid */
   status: Scalars['String']['output'];
+};
+
+export type MigrationFailure = {
+  __typename?: 'MigrationFailure';
+  /** Error message */
+  error: Scalars['String']['output'];
+  /** File URL */
+  url: Scalars['String']['output'];
 };
 
 export type MoveTaskInput = {
@@ -427,6 +445,8 @@ export type Mutation = {
   joinTeamByInvite: TeamMember;
   login: AuthPayload;
   logout: Scalars['Boolean']['output'];
+  /** Migrate a user's files from one provider to another */
+  migrateUserStorage: StorageMigrationResult;
   /** Переместить задачу (drag & drop) */
   moveTask: Task;
   reactivateSubscription: Subscription;
@@ -446,6 +466,8 @@ export type Mutation = {
   revokeSession: Scalars['Boolean']['output'];
   /** Test connection for a service category (admin only) */
   testServiceConnection: ConnectionTestResult;
+  /** Test connection to a specific storage provider */
+  testStorageProvider: ProviderTestResult;
   /** Обновить расход */
   updateExpense: Expense;
   /** Update team member position/specialization (owner only) */
@@ -465,6 +487,10 @@ export type Mutation = {
   updateProject: Project;
   /** Обновить прогресс проекта */
   updateProjectProgress: Project;
+  /** Обновить предпочтение хранилища пользователя */
+  updateStoragePreference: UserStoragePreference;
+  /** Update storage provider settings */
+  updateStorageSettings: StorageSettings;
   /** Update a system setting value (admin only) */
   updateSystemSetting: SystemSetting;
   /** Обновить задачу */
@@ -652,6 +678,13 @@ export type MutationLoginArgs = {
 };
 
 
+export type MutationMigrateUserStorageArgs = {
+  fromProvider: StorageProviderType;
+  toProvider: StorageProviderType;
+  userId: Scalars['String']['input'];
+};
+
+
 export type MutationMoveTaskArgs = {
   input: MoveTaskInput;
 };
@@ -701,6 +734,11 @@ export type MutationRevokeSessionArgs = {
 
 export type MutationTestServiceConnectionArgs = {
   category: SettingCategory;
+};
+
+
+export type MutationTestStorageProviderArgs = {
+  provider: StorageProviderType;
 };
 
 
@@ -754,6 +792,16 @@ export type MutationUpdateProjectArgs = {
 export type MutationUpdateProjectProgressArgs = {
   id: Scalars['ID']['input'];
   progress: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateStoragePreferenceArgs = {
+  input: UpdateStoragePreferenceInput;
+};
+
+
+export type MutationUpdateStorageSettingsArgs = {
+  input: UpdateStorageSettingsInput;
 };
 
 
@@ -1038,6 +1086,28 @@ export enum ProjectStatus {
   Completed = 'COMPLETED'
 }
 
+export type ProviderFileStats = {
+  __typename?: 'ProviderFileStats';
+  /** Number of files */
+  fileCount: Scalars['Int']['output'];
+  /** Provider name */
+  provider: Scalars['String']['output'];
+  /** Total size in bytes */
+  totalSize: Scalars['Float']['output'];
+};
+
+export type ProviderTestResult = {
+  __typename?: 'ProviderTestResult';
+  /** Test latency in milliseconds */
+  latency: Maybe<Scalars['Int']['output']>;
+  /** Test result message */
+  message: Scalars['String']['output'];
+  /** Provider type */
+  provider: StorageProviderType;
+  /** Whether test was successful */
+  success: Scalars['Boolean']['output'];
+};
+
 export type PublicPhotoReport = {
   __typename?: 'PublicPhotoReport';
   coverPhotoUrl: Maybe<Scalars['String']['output']>;
@@ -1068,6 +1138,8 @@ export type Query = {
   /** Get admin action statistics (admin only) */
   adminActionStatistics: AdminActionStatistics;
   availablePlans: Array<PlanLimits>;
+  /** Получить доступные варианты хранилища */
+  availableStorageProviders: Array<StorageProviderOption>;
   canAddProject: Scalars['Boolean']['output'];
   currentPlanLimits: PlanLimits;
   /** Получить расход по ID */
@@ -1091,6 +1163,8 @@ export type Query = {
   memberTasks: Array<Task>;
   /** Get all work logs for a team member (owner or self) */
   memberWorkLogs: Array<WorkLog>;
+  /** Получить настройки хранилища пользователя */
+  myStoragePreference: UserStoragePreference;
   mySubscription: Maybe<Subscription>;
   /** Получить все задачи пользователя (созданные или назначенные) */
   myTasks: Array<Task>;
@@ -1122,6 +1196,10 @@ export type Query = {
   /** Get recent actions by admin user (admin only) */
   recentAdminActions: Array<AdminActionLog>;
   sessions: Array<Session>;
+  /** Get current storage provider settings */
+  storageSettings: StorageSettings;
+  /** Get storage usage statistics */
+  storageStats: StorageStats;
   subscription: Subscription;
   /** Get a single system setting by key (admin only) */
   systemSetting: Maybe<SystemSetting>;
@@ -1135,6 +1213,8 @@ export type Query = {
   teamInvites: Array<InviteCode>;
   /** Получение участников команды */
   teamMembers: Array<TeamMember>;
+  /** Test connection to all storage providers */
+  testStorageProviders: Array<ProviderTestResult>;
   twoFactorStatus: TwoFactorStatus;
   usageStats: UsageStats;
   /** Get work logs for a date range */
@@ -1392,6 +1472,83 @@ export enum SettingValueType {
   Number = 'NUMBER',
   String = 'STRING'
 }
+
+export type StorageMigrationResult = {
+  __typename?: 'StorageMigrationResult';
+  /** Failed migrations */
+  failedCount: Scalars['Int']['output'];
+  /** List of failures */
+  failures: Array<MigrationFailure>;
+  /** Source provider */
+  fromProvider: StorageProviderType;
+  /** Successfully migrated files */
+  successCount: Scalars['Int']['output'];
+  /** Destination provider */
+  toProvider: StorageProviderType;
+  /** Total files to migrate */
+  totalFiles: Scalars['Int']['output'];
+  /** User ID */
+  userId: Scalars['String']['output'];
+};
+
+export type StorageProviderOption = {
+  __typename?: 'StorageProviderOption';
+  /** Whether this provider is available */
+  available: Scalars['Boolean']['output'];
+  /** Whether this is currently selected */
+  current: Scalars['Boolean']['output'];
+  /** Provider description */
+  description: Scalars['String']['output'];
+  /** Provider display name */
+  name: Scalars['String']['output'];
+  /** Provider type */
+  provider: UserStorageProviderType;
+};
+
+/** Available storage provider types */
+export enum StorageProviderType {
+  Cloudinary = 'CLOUDINARY',
+  Local = 'LOCAL',
+  R2 = 'R2'
+}
+
+export type StorageSettings = {
+  __typename?: 'StorageSettings';
+  /** Storage admin mode (local | cloudinary | r2 | user_choice) */
+  adminMode: Scalars['String']['output'];
+  /** Auto-migrate files on provider switch */
+  autoMigrate: Scalars['Boolean']['output'];
+  /** Cloudinary API key */
+  cloudinaryApiKey: Maybe<Scalars['String']['output']>;
+  /** Whether Cloudinary API secret is set */
+  cloudinaryApiSecretSet: Scalars['Boolean']['output'];
+  /** Cloudinary cloud name */
+  cloudinaryCloudName: Maybe<Scalars['String']['output']>;
+  /** Default storage provider (local | cloudinary | r2) */
+  defaultProvider: Scalars['String']['output'];
+  /** Whether R2 access key ID is set */
+  r2AccessKeyIdSet: Scalars['Boolean']['output'];
+  /** Cloudflare account ID */
+  r2AccountId: Maybe<Scalars['String']['output']>;
+  /** R2 bucket name */
+  r2BucketName: Maybe<Scalars['String']['output']>;
+  /** R2 public URL */
+  r2PublicUrl: Maybe<Scalars['String']['output']>;
+  /** Whether R2 secret access key is set */
+  r2SecretAccessKeySet: Scalars['Boolean']['output'];
+};
+
+export type StorageStats = {
+  __typename?: 'StorageStats';
+  /** Files grouped by provider */
+  filesByProvider: Array<ProviderFileStats>;
+  /** Files grouped by type */
+  filesByType: Array<FileTypeStats>;
+  /** Total number of files */
+  totalFiles: Scalars['Int']['output'];
+  /** Total size in bytes */
+  totalSize: Scalars['Float']['output'];
+};
 
 export type Subscription = {
   __typename?: 'Subscription';
@@ -1706,6 +1863,25 @@ export type UpdateProjectInput = {
   startDate: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+export type UpdateStoragePreferenceInput = {
+  /** Preferred storage provider (local, cloudinary, or r2) */
+  provider: UserStorageProviderType;
+};
+
+export type UpdateStorageSettingsInput = {
+  adminMode: InputMaybe<Scalars['String']['input']>;
+  autoMigrate: InputMaybe<Scalars['Boolean']['input']>;
+  cloudinaryApiKey: InputMaybe<Scalars['String']['input']>;
+  cloudinaryApiSecret: InputMaybe<Scalars['String']['input']>;
+  cloudinaryCloudName: InputMaybe<Scalars['String']['input']>;
+  defaultProvider: InputMaybe<Scalars['String']['input']>;
+  r2AccessKeyId: InputMaybe<Scalars['String']['input']>;
+  r2AccountId: InputMaybe<Scalars['String']['input']>;
+  r2BucketName: InputMaybe<Scalars['String']['input']>;
+  r2PublicUrl: InputMaybe<Scalars['String']['input']>;
+  r2SecretAccessKey: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateSystemSettingInput = {
   key: Scalars['String']['input'];
   value: Scalars['String']['input'];
@@ -1780,6 +1956,27 @@ export type User = {
   telegramUsername: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
+
+export type UserStoragePreference = {
+  __typename?: 'UserStoragePreference';
+  /** Currently active storage provider for this user */
+  activeProvider: UserStorageProviderType;
+  /** Whether user can change storage preference (admin allows user_choice) */
+  canChangeProvider: Scalars['Boolean']['output'];
+  /** Date of last migration */
+  migratedAt: Maybe<Scalars['DateTime']['output']>;
+  /** Previous provider if migrated */
+  migratedFrom: Maybe<UserStorageProviderType>;
+  /** User's preferred storage provider (null = use system default) */
+  preferredProvider: Maybe<UserStorageProviderType>;
+};
+
+/** Available storage provider types for users */
+export enum UserStorageProviderType {
+  Cloudinary = 'CLOUDINARY',
+  Local = 'LOCAL',
+  R2 = 'R2'
+}
 
 export type WorkLog = {
   __typename?: 'WorkLog';
@@ -1890,6 +2087,44 @@ export type InitializeDefaultSettingsMutationVariables = Exact<{ [key: string]: 
 
 
 export type InitializeDefaultSettingsMutation = { __typename?: 'Mutation', initializeDefaultSettings: boolean };
+
+export type GetStorageSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStorageSettingsQuery = { __typename?: 'Query', storageSettings: { __typename?: 'StorageSettings', adminMode: string, defaultProvider: string, autoMigrate: boolean, cloudinaryCloudName: string | null, cloudinaryApiKey: string | null, cloudinaryApiSecretSet: boolean, r2AccountId: string | null, r2AccessKeyIdSet: boolean, r2SecretAccessKeySet: boolean, r2BucketName: string | null, r2PublicUrl: string | null } };
+
+export type GetStorageStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetStorageStatsQuery = { __typename?: 'Query', storageStats: { __typename?: 'StorageStats', totalFiles: number, totalSize: number, filesByProvider: Array<{ __typename?: 'ProviderFileStats', provider: string, fileCount: number, totalSize: number }>, filesByType: Array<{ __typename?: 'FileTypeStats', fileType: string, count: number, totalSize: number }> } };
+
+export type TestStorageProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TestStorageProvidersQuery = { __typename?: 'Query', testStorageProviders: Array<{ __typename?: 'ProviderTestResult', provider: StorageProviderType, success: boolean, message: string, latency: number | null }> };
+
+export type UpdateStorageSettingsMutationVariables = Exact<{
+  input: UpdateStorageSettingsInput;
+}>;
+
+
+export type UpdateStorageSettingsMutation = { __typename?: 'Mutation', updateStorageSettings: { __typename?: 'StorageSettings', adminMode: string, defaultProvider: string, autoMigrate: boolean, cloudinaryCloudName: string | null, cloudinaryApiKey: string | null, cloudinaryApiSecretSet: boolean, r2AccountId: string | null, r2AccessKeyIdSet: boolean, r2SecretAccessKeySet: boolean, r2BucketName: string | null, r2PublicUrl: string | null } };
+
+export type TestStorageProviderMutationVariables = Exact<{
+  provider: StorageProviderType;
+}>;
+
+
+export type TestStorageProviderMutation = { __typename?: 'Mutation', testStorageProvider: { __typename?: 'ProviderTestResult', provider: StorageProviderType, success: boolean, message: string, latency: number | null } };
+
+export type MigrateUserStorageMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+  fromProvider: StorageProviderType;
+  toProvider: StorageProviderType;
+}>;
+
+
+export type MigrateUserStorageMutation = { __typename?: 'Mutation', migrateUserStorage: { __typename?: 'StorageMigrationResult', userId: string, fromProvider: StorageProviderType, toProvider: StorageProviderType, totalFiles: number, successCount: number, failedCount: number, failures: Array<{ __typename?: 'MigrationFailure', url: string, error: string }> } };
 
 export type MemberAnalyticsFieldsFragment = { __typename?: 'MemberAnalytics', memberId: string, memberName: string, memberEmail: string, avatarUrl: string | null, role: string, position: string | null, salaryType: string, salaryAmount: number | null, projectsCount: number, totalHoursWorked: number, totalPayouts: number, averagePayoutPerProject: number, completedPayoutsCount: number, pendingPayoutsCount: number, joinedAt: string };
 
@@ -2604,6 +2839,12 @@ export const BulkUpdateSystemSettingsDocument = {"kind":"Document","definitions"
 export const DeleteSystemSettingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteSystemSetting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteSystemSetting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}]}]}}]} as unknown as DocumentNode<DeleteSystemSettingMutation, DeleteSystemSettingMutationVariables>;
 export const TestServiceConnectionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TestServiceConnection"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"category"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SettingCategory"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"testServiceConnection"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"category"},"value":{"kind":"Variable","name":{"kind":"Name","value":"category"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<TestServiceConnectionMutation, TestServiceConnectionMutationVariables>;
 export const InitializeDefaultSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"InitializeDefaultSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"initializeDefaultSettings"}}]}}]} as unknown as DocumentNode<InitializeDefaultSettingsMutation, InitializeDefaultSettingsMutationVariables>;
+export const GetStorageSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetStorageSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminMode"}},{"kind":"Field","name":{"kind":"Name","value":"defaultProvider"}},{"kind":"Field","name":{"kind":"Name","value":"autoMigrate"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryCloudName"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiKey"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiSecretSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccountId"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccessKeyIdSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2SecretAccessKeySet"}},{"kind":"Field","name":{"kind":"Name","value":"r2BucketName"}},{"kind":"Field","name":{"kind":"Name","value":"r2PublicUrl"}}]}}]}}]} as unknown as DocumentNode<GetStorageSettingsQuery, GetStorageSettingsQueryVariables>;
+export const GetStorageStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetStorageStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"storageStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalFiles"}},{"kind":"Field","name":{"kind":"Name","value":"totalSize"}},{"kind":"Field","name":{"kind":"Name","value":"filesByProvider"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"provider"}},{"kind":"Field","name":{"kind":"Name","value":"fileCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalSize"}}]}},{"kind":"Field","name":{"kind":"Name","value":"filesByType"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fileType"}},{"kind":"Field","name":{"kind":"Name","value":"count"}},{"kind":"Field","name":{"kind":"Name","value":"totalSize"}}]}}]}}]}}]} as unknown as DocumentNode<GetStorageStatsQuery, GetStorageStatsQueryVariables>;
+export const TestStorageProvidersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TestStorageProviders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"testStorageProviders"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"provider"}},{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"latency"}}]}}]}}]} as unknown as DocumentNode<TestStorageProvidersQuery, TestStorageProvidersQueryVariables>;
+export const UpdateStorageSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateStorageSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateStorageSettingsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateStorageSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminMode"}},{"kind":"Field","name":{"kind":"Name","value":"defaultProvider"}},{"kind":"Field","name":{"kind":"Name","value":"autoMigrate"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryCloudName"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiKey"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiSecretSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccountId"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccessKeyIdSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2SecretAccessKeySet"}},{"kind":"Field","name":{"kind":"Name","value":"r2BucketName"}},{"kind":"Field","name":{"kind":"Name","value":"r2PublicUrl"}}]}}]}}]} as unknown as DocumentNode<UpdateStorageSettingsMutation, UpdateStorageSettingsMutationVariables>;
+export const TestStorageProviderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TestStorageProvider"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"provider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"testStorageProvider"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"provider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"provider"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"provider"}},{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"latency"}}]}}]}}]} as unknown as DocumentNode<TestStorageProviderMutation, TestStorageProviderMutationVariables>;
+export const MigrateUserStorageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MigrateUserStorage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fromProvider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toProvider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"migrateUserStorage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"Argument","name":{"kind":"Name","value":"fromProvider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fromProvider"}}},{"kind":"Argument","name":{"kind":"Name","value":"toProvider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toProvider"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"fromProvider"}},{"kind":"Field","name":{"kind":"Name","value":"toProvider"}},{"kind":"Field","name":{"kind":"Name","value":"totalFiles"}},{"kind":"Field","name":{"kind":"Name","value":"successCount"}},{"kind":"Field","name":{"kind":"Name","value":"failedCount"}},{"kind":"Field","name":{"kind":"Name","value":"failures"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]}}]} as unknown as DocumentNode<MigrateUserStorageMutation, MigrateUserStorageMutationVariables>;
 export const PersonnelAnalyticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PersonnelAnalytics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"personnelAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PersonnelAnalyticsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"memberEmail"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerProject"}},{"kind":"Field","name":{"kind":"Name","value":"completedPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"pendingPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"membersCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PersonnelAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PersonnelAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"teamName"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averageHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"generatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberAnalyticsFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectAnalyticsFields"}}]}}]}}]} as unknown as DocumentNode<PersonnelAnalyticsQuery, PersonnelAnalyticsQueryVariables>;
 export const ExportPersonnelAnalyticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ExportPersonnelAnalytics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"exportPersonnelAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}]}]}}]} as unknown as DocumentNode<ExportPersonnelAnalyticsQuery, ExportPersonnelAnalyticsQueryVariables>;
 export const RegisterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Register"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"register"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>;

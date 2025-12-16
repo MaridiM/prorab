@@ -13,10 +13,11 @@ import {
 	Shield,
 	FileText,
 	BarChart3,
+	HardDrive,
 	ChevronRight,
 } from 'lucide-react'
-import { cn } from '@/packages/utils/cn'
-import { useAuth } from '@/packages/auth/auth-provider'
+import { cn } from '@/packages/utils'
+import { useAuth } from '@/packages/libs/auth'
 
 interface NavItem {
 	label: string
@@ -36,6 +37,12 @@ const navItems: NavItem[] = [
 		href: '/admin/settings',
 		icon: Settings,
 		permission: 'settings:view',
+	},
+	{
+		label: 'Storage',
+		href: '/admin/storage',
+		icon: HardDrive,
+		permission: 'storage:view',
 	},
 	{
 		label: 'Users',
@@ -96,8 +103,8 @@ export function AdminSidebar() {
 	const visibleItems = navItems
 
 	return (
-		<aside className="w-64 border-r bg-card">
-			<div className="flex h-16 items-center border-b px-6">
+		<aside className="w-64 border-r bg-card flex-shrink-0 sticky top-0 h-screen flex flex-col">
+			<div className="flex h-16 items-center border-b px-6 flex-shrink-0">
 				<div className="flex items-center gap-2">
 					<Shield className="h-6 w-6 text-primary" />
 					<div>
@@ -107,7 +114,7 @@ export function AdminSidebar() {
 				</div>
 			</div>
 
-			<nav className="space-y-1 p-4">
+			<nav className="space-y-1 p-4 flex-1 overflow-y-auto">
 				{visibleItems.map((item) => {
 					const Icon = item.icon
 					const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
@@ -131,7 +138,7 @@ export function AdminSidebar() {
 				})}
 			</nav>
 
-			<div className="absolute bottom-0 left-0 right-0 border-t bg-card p-4">
+			<div className="border-t bg-card p-4 flex-shrink-0">
 				<div className="flex items-center gap-3">
 					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
 						{user?.fullName?.charAt(0) || 'A'}

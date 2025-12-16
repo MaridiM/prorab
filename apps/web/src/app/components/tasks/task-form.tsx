@@ -191,14 +191,14 @@ export function TaskForm({
 							<div className="grid gap-2">
 								<Label htmlFor="assigneeId">Исполнитель</Label>
 								<Select
-									value={selectedAssignee || undefined}
-									onValueChange={(value) => setValue('assigneeId', value)}
+									value={selectedAssignee || '__none__'}
+									onValueChange={(value) => setValue('assigneeId', value === '__none__' ? '' : value)}
 								>
 									<SelectTrigger>
 										<SelectValue placeholder="Не назначено" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="">Не назначено</SelectItem>
+										<SelectItem value="__none__">Не назначено</SelectItem>
 										{teamMembers.map((member) => (
 											<SelectItem key={member.id} value={member.id}>
 												{member.user?.fullName || 'Без имени'}

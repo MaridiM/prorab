@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common'
+import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common'
 import { FileUpload } from 'graphql-upload-minimal'
 import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
@@ -6,6 +6,8 @@ import * as argon2 from 'argon2'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
+import { UserStoragePreference, StorageProviderOption, UserStorageProviderType } from './models/user-storage.model'
+import { StorageProviderType } from '../../core/storage/interfaces/storage-provider.interface'
 
 interface CreateUserData {
 	email: string
@@ -17,6 +19,7 @@ interface CreateUserData {
 
 @Injectable()
 export class UsersService {
+	private readonly logger = new Logger(UsersService.name);
 	private readonly baseUrl = process.env.BASE_URL || 'http://localhost:8080';
 	private readonly uploadPath = join(process.cwd(), 'uploads', 'avatars');
 
@@ -319,6 +322,160 @@ export class UsersService {
 			where: { userId },
 			data: { ...input },
 		})
+	}
+
+	// ==================== Storage Preference ====================
+
+	/**
+	 * Get user's storage preference
+	 */
+	async getStoragePreference(userId: string): Promise<UserStoragePreference> {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				storagePreference: true,
+				storageMigratedFrom: true,
+				storageMigratedAt: true,
+			},
+		})
+
+		// Get admin mode setting
+		const adminModeSetting = await this.prisma.systemSettings.findUnique({
+			where: { key: 'storage.admin_mode' },
+		})
+
+		const adminMode = adminModeSetting?.value || 'local'
+		const canChangeProvider = adminMode === 'user_choice'
+
+		// Determine active provider
+		let activeProvider: UserStorageProviderType
+		if (adminMode !== 'user_choice') {
+			// Admin forces a provider
+			activeProvider = this.mapToUserProviderType(adminMode)
+		} else if (user?.storagePreference) {
+			// User has preference and admin allows choice
+			activeProvider = user.storagePreference as UserStorageProviderType
+		} else {
+			// Use default provider
+			const defaultProviderSetting = await this.prisma.systemSettings.findUnique({
+				where: { key: 'storage.default_provider' },
+			})
+			activeProvider = this.mapToUserProviderType(defaultProviderSetting?.value || 'local')
+		}
+
+		return {
+			preferredProvider: user?.storagePreference as UserStorageProviderType | null,
+			canChangeProvider,
+			activeProvider,
+			migratedFrom: user?.storageMigratedFrom as UserStorageProviderType | null,
+			migratedAt: user?.storageMigratedAt || null,
+		}
+	}
+
+	/**
+	 * Get available storage provider options
+	 */
+	async getAvailableStorageProviders(userId: string): Promise<StorageProviderOption[]> {
+		const preference = await this.getStoragePreference(userId)
+
+		const providers: StorageProviderOption[] = [
+			{
+				provider: UserStorageProviderType.LOCAL,
+				name: 'Локальное хранилище',
+				description: 'Файлы хранятся на сервере приложения',
+				available: true,
+				current: preference.activeProvider === UserStorageProviderType.LOCAL,
+			},
+			{
+				provider: UserStorageProviderType.CLOUDINARY,
+				name: 'Cloudinary',
+				description: 'Облачное хранилище с CDN и трансформациями',
+				available: preference.canChangeProvider,
+				current: preference.activeProvider === UserStorageProviderType.CLOUDINARY,
+			},
+			{
+				provider: UserStorageProviderType.R2,
+				name: 'Cloudflare R2',
+				description: 'S3-совместимое хранилище с нулевыми комиссиями за трафик',
+				available: preference.canChangeProvider,
+				current: preference.activeProvider === UserStorageProviderType.R2,
+			},
+		]
+
+		return providers
+	}
+
+	/**
+	 * Update user's storage preference
+	 */
+	async updateStoragePreference(
+		userId: string,
+		provider: UserStorageProviderType,
+	): Promise<UserStoragePreference> {
+		this.logger.log(`User ${userId} updating storage preference to: ${provider}`)
+
+		// Check if user can change provider
+		const adminModeSetting = await this.prisma.systemSettings.findUnique({
+			where: { key: 'storage.admin_mode' },
+		})
+
+		const adminMode = adminModeSetting?.value || 'local'
+
+		if (adminMode !== 'user_choice') {
+			throw new BadRequestException(
+				'Изменение провайдера хранилища запрещено администратором',
+			)
+		}
+
+		// Validate provider
+		const validProviders = ['local', 'cloudinary', 'r2']
+		if (!validProviders.includes(provider)) {
+			throw new BadRequestException(
+				`Неверный провайдер. Допустимые значения: ${validProviders.join(', ')}`,
+			)
+		}
+
+		// Get current preference to track migration
+		const currentUser = await this.prisma.user.findUnique({
+			where: { id: userId },
+			select: { storagePreference: true },
+		})
+
+		const updateData: any = {
+			storagePreference: provider,
+		}
+
+		// Track migration if changing provider (compare string values since enums are different types)
+		if (currentUser?.storagePreference && currentUser.storagePreference !== (provider as any)) {
+			updateData.storageMigratedFrom = currentUser.storagePreference
+			updateData.storageMigratedAt = new Date()
+		}
+
+		// Update user preference
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: updateData,
+		})
+
+		this.logger.log(`Storage preference updated for user ${userId}`)
+
+		// Return updated preference
+		return this.getStoragePreference(userId)
+	}
+
+	/**
+	 * Map string provider type to enum
+	 */
+	private mapToUserProviderType(provider: string): UserStorageProviderType {
+		switch (provider.toLowerCase()) {
+			case 'cloudinary':
+				return UserStorageProviderType.CLOUDINARY
+			case 'r2':
+				return UserStorageProviderType.R2
+			case 'local':
+			default:
+				return UserStorageProviderType.LOCAL
+		}
 	}
 }
 

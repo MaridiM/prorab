@@ -434,7 +434,12 @@ export class PhotoReportsService {
 
     // Загружаем файл через StorageService
     const file = await input.file;
-    const uploadResult = await this.storageService.uploadReportPhoto(file);
+    const uploadResult = await this.storageService.uploadReportPhoto(
+      file,
+      userId,
+      report.project.teamId,
+      report.projectId,
+    );
 
     // Создаём запись в БД
     const photo = await this.prisma.reportPhoto.create({
