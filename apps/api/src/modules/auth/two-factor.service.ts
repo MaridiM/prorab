@@ -23,6 +23,24 @@ export class TwoFactorService {
 	}
 
 	/**
+	 * Get 2FA status for a user
+	 */
+	async getStatus(userId: string): Promise<{ enabled: boolean; backupCodesRemaining: number }> {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				twoFactorEnabled: true,
+				twoFactorBackupCodes: true,
+			},
+		})
+
+		return {
+			enabled: user?.twoFactorEnabled || false,
+			backupCodesRemaining: user?.twoFactorBackupCodes?.length || 0,
+		}
+	}
+
+	/**
 	 * Generate a new TOTP secret and QR code URL for the user
 	 */
 	async generateSecret(userId: string) {

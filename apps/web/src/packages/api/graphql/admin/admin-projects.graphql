@@ -1,0 +1,90 @@
+# Admin Projects Queries and Mutations
+
+query AdminProjects($filter: AdminProjectFilterInput, $pagination: PaginationInput) {
+	adminProjects(filter: $filter, pagination: $pagination) {
+		projects {
+			id
+			name
+			description
+			status
+			budget
+			actualCost
+			startDate
+			endDate
+			completedAt
+			createdAt
+			updatedAt
+			team
+			owner
+			_count {
+				expenses
+				photoReports
+				tasks
+			}
+		}
+		total
+		hasMore
+	}
+}
+
+query AdminProject($id: ID!) {
+	adminProject(id: $id) {
+		id
+		name
+		description
+		status
+		budget
+		actualCost
+		startDate
+		endDate
+		completedAt
+		createdAt
+		updatedAt
+		team
+		owner
+		_count {
+			expenses
+			photoReports
+			tasks
+		}
+	}
+}
+
+mutation AdminUpdateProjectStatus($projectId: ID!, $status: String!) {
+	adminUpdateProjectStatus(projectId: $projectId, status: $status) {
+		id
+		status
+		updatedAt
+	}
+}
+
+mutation AdminDeleteProject($projectId: ID!) {
+	adminDeleteProject(projectId: $projectId) {
+		success
+		message
+	}
+}
+
+mutation AdminArchiveProject($projectId: ID!) {
+	adminArchiveProject(projectId: $projectId) {
+		id
+		status
+		updatedAt
+	}
+}
+
+# Input Types (will be defined in backend schema)
+input AdminProjectFilterInput {
+	status: String
+	teamId: ID
+	ownerId: ID
+	search: String
+	startDateFrom: DateTime
+	startDateTo: DateTime
+}
+
+input PaginationInput {
+	page: Int
+	limit: Int
+}
+

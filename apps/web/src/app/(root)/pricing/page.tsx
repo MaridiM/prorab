@@ -25,6 +25,7 @@ const PLANS = [
 			'Базовый функционал',
 			'Email поддержка',
 		],
+		popular: false,
 	},
 	{
 		id: 'FOREMAN',
@@ -61,8 +62,9 @@ const PLANS = [
 			'Dedicated support',
 			'Кастомизация',
 		],
+		popular: false,
 	},
-] as const
+]
 
 const FAQ_ITEMS = [
 	{

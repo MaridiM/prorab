@@ -23,102 +23,17 @@ import {
 } from '@/packages/components/ui/dialog'
 import { Alert, AlertDescription } from '@/packages/components/ui/alert'
 import { Loader2, CreditCard, Settings, AlertCircle } from 'lucide-react'
-import { gql } from '@apollo/client'
 import { toast } from 'sonner'
-
-const MY_SUBSCRIPTION_QUERY = gql`
-	query MySubscription {
-		mySubscription {
-			id
-			plan
-			status
-			currentPeriodStart
-			currentPeriodEnd
-			trialEndsAt
-			cancelAtPeriodEnd
-			isEarlyBird
-			createdAt
-		}
-		currentPlanLimits {
-			name
-			price
-			earlyBirdPrice
-			maxActiveProjects
-			maxMembers
-			storageGB
-			features
-		}
-		usageStats {
-			projectCount
-			memberCount
-			storageUsedGB
-		}
-	}
-`
-
-const PAYMENTS_QUERY = gql`
-	query MyPayments {
-		myPayments {
-			id
-			amount
-			currency
-			status
-			paymentMethod
-			description
-			failureReason
-			paidAt
-			refundedAt
-			createdAt
-		}
-	}
-`
-
-const AVAILABLE_PLANS_QUERY = gql`
-	query AvailablePlans {
-		availablePlans {
-			plan
-			name
-			price
-			earlyBirdPrice
-			maxActiveProjects
-			maxMembers
-			storageGB
-			features
-			isActive
-		}
-	}
-`
-
-const CHANGE_PLAN_MUTATION = gql`
-	mutation ChangePlan($newPlan: SubscriptionPlan!) {
-		changePlan(newPlan: $newPlan) {
-			id
-			plan
-			status
-			currentPeriodEnd
-		}
-	}
-`
-
-const CANCEL_SUBSCRIPTION_MUTATION = gql`
-	mutation CancelSubscription {
-		cancelSubscription {
-			id
-			status
-			cancelAtPeriodEnd
-		}
-	}
-`
-
-const REACTIVATE_SUBSCRIPTION_MUTATION = gql`
-	mutation ReactivateSubscription {
-		reactivateSubscription {
-			id
-			status
-			cancelAtPeriodEnd
-		}
-	}
-`
+import {
+	MySubscriptionDocument,
+	CurrentPlanLimitsDocument,
+	UsageStatsDocument,
+	PaymentsBySubscriptionDocument,
+	AvailablePlansDocument,
+	ChangePlanDocument,
+	CancelSubscriptionDocument,
+	ReactivateSubscriptionDocument,
+} from '@/packages/api/graphql'
 
 export default function SubscriptionPage() {
 	const params = useParams()
@@ -134,21 +49,43 @@ export default function SubscriptionPage() {
 		data: subscriptionData,
 		loading: subscriptionLoading,
 		refetch: refetchSubscription,
-	} = useQuery(MY_SUBSCRIPTION_QUERY)
+	} = useQuery(MySubscriptionDocument)
+
+	const subscription = subscriptionData?.mySubscription
+	const subscriptionId = subscription?.id
+
+	const {
+		data: limitsData,
+		loading: limitsLoading,
+	} = useQuery(CurrentPlanLimitsDocument, {
+		variables: { teamId },
+		skip: !teamId,
+	})
+
+	const {
+		data: usageData,
+		loading: usageLoading,
+	} = useQuery(UsageStatsDocument, {
+		variables: { teamId },
+		skip: !teamId,
+	})
 
 	const {
 		data: paymentsData,
 		loading: paymentsLoading,
 		refetch: refetchPayments,
-	} = useQuery(PAYMENTS_QUERY)
+	} = useQuery(PaymentsBySubscriptionDocument, {
+		variables: { subscriptionId: subscriptionId || '' },
+		skip: !subscriptionId,
+	})
 
 	const { data: plansData, loading: plansLoading } = useQuery(
-		AVAILABLE_PLANS_QUERY
+		AvailablePlansDocument
 	)
 
 	// Mutations
 	const [changePlan, { loading: changingPlan }] = useMutation(
-		CHANGE_PLAN_MUTATION,
+		ChangePlanDocument,
 		{
 			onCompleted: () => {
 				toast.success('Тариф успешно изменён!')
@@ -162,8 +99,8 @@ export default function SubscriptionPage() {
 		}
 	)
 
-	const [cancelSubscription, { loading: cancelling }] = useMutation(
-		CANCEL_SUBSCRIPTION_MUTATION,
+	const [cancelSubscriptionMutation, { loading: cancelling }] = useMutation(
+		CancelSubscriptionDocument,
 		{
 			onCompleted: () => {
 				toast.success('Подписка будет отменена в конце периода')
@@ -176,8 +113,8 @@ export default function SubscriptionPage() {
 		}
 	)
 
-	const [reactivateSubscription, { loading: reactivating }] = useMutation(
-		REACTIVATE_SUBSCRIPTION_MUTATION,
+	const [reactivateSubscriptionMutation, { loading: reactivating }] = useMutation(
+		ReactivateSubscriptionDocument,
 		{
 			onCompleted: () => {
 				toast.success('Подписка восстановлена!')
@@ -195,23 +132,33 @@ export default function SubscriptionPage() {
 	}
 
 	const handleChangePlan = () => {
-		if (!selectedPlan) return
-		changePlan({ variables: { newPlan: selectedPlan } })
+		if (!selectedPlan || !subscriptionId) return
+		changePlan({
+			variables: {
+				input: {
+					subscriptionId,
+					newPlan: selectedPlan,
+					immediate: false,
+				}
+			}
+		})
 	}
 
 	const handleCancelSubscription = () => {
-		cancelSubscription()
+		if (!subscriptionId) return
+		cancelSubscriptionMutation({ variables: { subscriptionId } })
 	}
 
 	const handleReactivate = () => {
-		reactivateSubscription()
+		if (!subscriptionId) return
+		reactivateSubscriptionMutation({ variables: { subscriptionId } })
 	}
 
 	const handleUpgrade = () => {
 		setShowChangePlanDialog(true)
 	}
 
-	if (subscriptionLoading || plansLoading) {
+	if (subscriptionLoading || plansLoading || limitsLoading || usageLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -219,10 +166,9 @@ export default function SubscriptionPage() {
 		)
 	}
 
-	const subscription = subscriptionData?.mySubscription
-	const limits = subscriptionData?.currentPlanLimits
-	const usageStats = subscriptionData?.usageStats
-	const payments = paymentsData?.myPayments || []
+	const limits = limitsData?.currentPlanLimits
+	const usageStats = usageData?.usageStats
+	const payments = paymentsData?.paymentsBySubscription || []
 	const availablePlans = plansData?.availablePlans || []
 
 	if (!subscription) {
@@ -271,20 +217,19 @@ export default function SubscriptionPage() {
 					plan: subscription.plan,
 					status: subscription.status,
 					currentPeriodEnd: subscription.currentPeriodEnd,
-					trialEndsAt: subscription.trialEndsAt,
+					trialEndsAt: subscription.trialEndsAt || undefined,
 					cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
 					isEarlyBird: subscription.isEarlyBird,
 				}}
 				usageStats={{
-					projectCount: usageStats?.projectCount || 0,
-					memberCount: usageStats?.memberCount || 0,
+					projectCount: usageStats?.activeProjects || 0,
+					memberCount: usageStats?.totalMembers || 0,
 					storageUsedGB: usageStats?.storageUsedGB || 0,
 				}}
 				limits={{
 					name: limits?.name || '',
 					price: limits?.price || 0,
-					earlyBirdPrice: limits?.earlyBirdPrice,
-					maxActiveProjects: limits?.maxActiveProjects,
+					maxActiveProjects: limits?.maxActiveProjects || 1,
 					maxMembers: limits?.maxMembers || 1,
 					storageGB: limits?.storageGB || 0.5,
 				}}
@@ -325,7 +270,8 @@ export default function SubscriptionPage() {
 							</Button>
 						) : (
 							<Button
-								variant="destructive"
+								variant="outline"
+								className="text-destructive hover:bg-destructive/10"
 								onClick={() => setShowCancelDialog(true)}
 							>
 								Отменить подписку
@@ -438,7 +384,8 @@ export default function SubscriptionPage() {
 							Не отменять
 						</Button>
 						<Button
-							variant="destructive"
+							variant="default"
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							onClick={handleCancelSubscription}
 							disabled={cancelling}
 						>

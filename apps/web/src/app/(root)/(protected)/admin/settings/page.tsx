@@ -6,6 +6,7 @@ import {
 	SystemSettingsDocument,
 	BulkUpdateSystemSettingsDocument,
 	TestServiceConnectionDocument,
+	SettingCategory,
 } from '@/packages/api/graphql'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
@@ -32,20 +33,18 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/packages/hooks'
 
-const categoryIcons = {
-	PAYMENT: CreditCard,
-	EMAIL: Mail,
-	TELEGRAM: MessageSquare,
-	STORAGE: Database,
-	AI: Brain,
-	SECURITY: Shield,
-	GENERAL: SettingsIcon,
-} as const
-
-type Category = keyof typeof categoryIcons
+const categoryIcons: Record<SettingCategory, any> = {
+	[SettingCategory.Payment]: CreditCard,
+	[SettingCategory.Email]: Mail,
+	[SettingCategory.Telegram]: MessageSquare,
+	[SettingCategory.Storage]: Database,
+	[SettingCategory.Ai]: Brain,
+	[SettingCategory.Security]: Shield,
+	[SettingCategory.General]: SettingsIcon,
+}
 
 export default function SystemSettingsPage() {
-	const [selectedCategory, setSelectedCategory] = useState<Category>('PAYMENT')
+	const [selectedCategory, setSelectedCategory] = useState<SettingCategory>(SettingCategory.Payment)
 	const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
 	const [testingConnection, setTestingConnection] = useState(false)
 	const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -127,14 +126,14 @@ export default function SystemSettingsPage() {
 		}
 
 		try {
-			const updates = Object.entries(editedValues).map(([key, value]) => ({
+			const settings = Object.entries(editedValues).map(([key, value]) => ({
 				key,
 				value,
 			}))
 
 			await bulkUpdateSettings({
 				variables: {
-					input: { updates },
+					input: { settings },
 				},
 			})
 
@@ -188,15 +187,15 @@ export default function SystemSettingsPage() {
 				<p className="text-muted-foreground mt-1">Manage system-wide configuration and integrations</p>
 			</div>
 
-			<Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as Category)}>
+			<Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as SettingCategory)}>
 				<TabsList className="grid grid-cols-7 w-full">
-					<TabsTrigger value="PAYMENT">Payment</TabsTrigger>
-					<TabsTrigger value="EMAIL">Email</TabsTrigger>
-					<TabsTrigger value="TELEGRAM">Telegram</TabsTrigger>
-					<TabsTrigger value="STORAGE">Storage</TabsTrigger>
-					<TabsTrigger value="AI">AI</TabsTrigger>
-					<TabsTrigger value="SECURITY">Security</TabsTrigger>
-					<TabsTrigger value="GENERAL">General</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Payment}>Payment</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Email}>Email</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Telegram}>Telegram</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Storage}>Storage</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Ai}>AI</TabsTrigger>
+					<TabsTrigger value={SettingCategory.Security}>Security</TabsTrigger>
+					<TabsTrigger value={SettingCategory.General}>General</TabsTrigger>
 				</TabsList>
 
 				{Object.keys(categoryIcons).map((category) => (
@@ -231,7 +230,7 @@ export default function SystemSettingsPage() {
 												<div className="flex items-center justify-between">
 													<Label htmlFor={setting.key} className="flex items-center gap-2">
 														{setting.name}
-														{setting.isRequired && <Badge variant="destructive">Required</Badge>}
+														{setting.isRequired && <Badge variant="danger">Required</Badge>}
 														{setting.isEncrypted && (
 															<Badge variant="secondary" className="gap-1">
 																<Shield className="h-3 w-3" />

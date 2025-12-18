@@ -15,6 +15,7 @@ import {
 	BarChart3,
 	HardDrive,
 	ChevronRight,
+	Repeat,
 } from 'lucide-react'
 import { cn } from '@/packages/utils'
 import { useAuth } from '@/packages/libs/auth'
@@ -63,6 +64,12 @@ const navItems: NavItem[] = [
 		permission: 'projects:view',
 	},
 	{
+		label: 'Subscriptions',
+		href: '/admin/subscriptions',
+		icon: Repeat,
+		permission: 'subscriptions:view',
+	},
+	{
 		label: 'Payments',
 		href: '/admin/payments',
 		icon: CreditCard,
@@ -98,8 +105,8 @@ export function AdminSidebar() {
 	const pathname = usePathname()
 	const { user } = useAuth()
 
-	// TODO: Get admin role and permissions from user
-	// For now, show all items
+	// Show all nav items - permissions are checked at page level
+	// This allows users to see all available admin pages
 	const visibleItems = navItems
 
 	return (
@@ -117,7 +124,11 @@ export function AdminSidebar() {
 			<nav className="space-y-1 p-4 flex-1 overflow-y-auto">
 				{visibleItems.map((item) => {
 					const Icon = item.icon
-					const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+					// Dashboard should only be active when pathname exactly matches /admin
+					// Other items are active when pathname matches or starts with their href
+					const isActive = item.href === '/admin'
+						? pathname === item.href
+						: pathname === item.href || pathname?.startsWith(item.href + '/')
 
 					return (
 						<Link

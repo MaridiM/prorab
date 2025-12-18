@@ -9,6 +9,8 @@ mutation Register($input: RegisterInput!) {
       phone
       emailVerified
       hasCompletedOnboarding
+      businessRole
+      businessRoleAssignedAt
     }
     message
   }
@@ -23,6 +25,8 @@ mutation Login($input: LoginInput!) {
       phone
       emailVerified
       hasCompletedOnboarding
+      businessRole
+      businessRoleAssignedAt
     }
   }
 }
@@ -40,6 +44,8 @@ mutation RefreshSession {
       phone
       emailVerified
       hasCompletedOnboarding
+      businessRole
+      businessRoleAssignedAt
     }
   }
 }
@@ -70,6 +76,16 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
     email
     fullName
     phone
+  }
+}
+
+mutation UpdateNotificationSettings($input: UpdateNotificationSettingsInput!) {
+  updateNotificationSettings(input: $input) {
+    appPush
+    appEmail
+    appSms
+    marketingPush
+    marketingEmail
   }
 }
 
@@ -107,6 +123,8 @@ mutation CheckTelegramAuth($input: CheckTelegramAuthInput!) {
       phone
       emailVerified
       hasCompletedOnboarding
+      businessRole
+      businessRoleAssignedAt
     }
     sessionToken
     refreshToken
@@ -124,7 +142,21 @@ query Me {
     avatarUrl
     emailVerified
     hasCompletedOnboarding
+    businessRole
+    businessRoleAssignedAt
     createdAt
+    notificationSettings {
+      appPush
+      appEmail
+      appSms
+      marketingPush
+      marketingEmail
+    }
+    adminRole {
+      id
+      role
+      permissions
+    }
   }
 }
 

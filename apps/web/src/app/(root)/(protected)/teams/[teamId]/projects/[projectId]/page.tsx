@@ -23,6 +23,7 @@ import {
     DeletePhotoFromReportDocument,
     ReorderReportPhotosDocument,
     MyTeamsDocument,
+	PayoutSummaryDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
 import {
@@ -193,7 +194,7 @@ export default function ProjectDetailsPage() {
 		router.replace(`/teams/${teamId}/projects/${projectId}?${newParams.toString()}`, { scroll: false })
 	}
 
-    const { data: payoutData, loading: payoutLoading } = useQuery(PAYOUT_SUMMARY_QUERY, {
+    const { data: payoutData, loading: payoutLoading } = useQuery(PayoutSummaryDocument, {
         variables: { projectId },
         skip: activeTab !== 'payouts'
     })
@@ -661,11 +662,11 @@ export default function ProjectDetailsPage() {
 	const isProfitable = profit >= 0
 
 	const tabs = [
-		{ id: 'info' as const, label: 'Информация', icon: FileText },
-		{ id: 'expenses' as const, label: 'Расходы', icon: Wallet },
-		{ id: 'reports' as const, label: 'Фотоотчёты', icon: Camera },
-        ...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator }] : []),
-		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare },
+		{ id: 'info' as const, label: 'Информация', icon: FileText, disabled: false },
+		{ id: 'expenses' as const, label: 'Расходы', icon: Wallet, disabled: false },
+		{ id: 'reports' as const, label: 'Фотоотчёты', icon: Camera, disabled: false },
+        ...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator, disabled: false }] : []),
+		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare, disabled: false },
 	]
 
 	return (

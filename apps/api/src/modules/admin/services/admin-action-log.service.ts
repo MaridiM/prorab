@@ -55,7 +55,7 @@ export class AdminActionLogService {
    * Get admin action logs with filters
    */
   async getActionLogs(filter: AdminActionLogFilter): Promise<{
-    logs: AdminActionLog[];
+    logs: any[];
     total: number;
   }> {
     const where: any = {};
@@ -88,11 +88,24 @@ export class AdminActionLogService {
         orderBy: { createdAt: 'desc' },
         take: filter.limit || 50,
         skip: filter.offset || 0,
+        include: {
+          adminUser: {
+            select: {
+              email: true,
+            },
+          },
+        },
       }),
       this.prisma.adminActionLog.count({ where }),
     ]);
 
-    return { logs, total };
+    // Map to include adminUserEmail from relation
+    const logsWithEmail = logs.map(log => ({
+      ...log,
+      adminUserEmail: log.adminUser?.email || 'Unknown',
+    }));
+
+    return { logs: logsWithEmail, total };
   }
 
   /**

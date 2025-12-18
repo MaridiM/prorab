@@ -66,22 +66,25 @@ export default function TimeTrackingPage({ params }: PageProps) {
     },
   });
 
-  const [exportWorkLogs, { loading: exporting }] = useLazyQuery(ExportProjectWorkLogsDocument, {
-    variables: { projectId },
-    onCompleted: (data) => {
-      const blob = new Blob([data.exportProjectWorkLogs], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `work-logs-${projectId}-${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      toast.success('CSV экспортирован');
-    },
-    onError: (error) => {
+  const [exportWorkLogs, { loading: exporting }] = useLazyQuery(ExportProjectWorkLogsDocument);
+
+  const handleExport = async () => {
+    try {
+      const result = await exportWorkLogs({ variables: { projectId } });
+      if (result.data) {
+        const blob = new Blob([result.data.exportProjectWorkLogs], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `work-logs-${projectId}-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('CSV экспортирован');
+      }
+    } catch (error: any) {
       toast.error('Ошибка экспорта', { description: error.message });
-    },
-  });
+    }
+  };
 
   const allWorkLogs = data?.projectWorkLogs || [];
 
@@ -205,7 +208,7 @@ export default function TimeTrackingPage({ params }: PageProps) {
           {/* Date Range Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="default">
+              <Button variant="outline">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 {dateRange.from ? (
                   dateRange.to ? (
@@ -232,19 +235,17 @@ export default function TimeTrackingPage({ params }: PageProps) {
                 </div>
               </div>
               <Calendar
-                mode="range"
-                selected={{
+                mode={"range" as any}
+                selected={({
                   from: dateRange.from,
                   to: dateRange.to,
-                }}
+                }) as any}
                 onSelect={(range: any) =>
                   setDateRange({
                     from: range?.from,
                     to: range?.to,
                   })
                 }
-                locale={ru}
-                numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
@@ -263,7 +264,7 @@ export default function TimeTrackingPage({ params }: PageProps) {
             </Badge>
           )}
 
-          <Button variant="outline" onClick={() => exportWorkLogs()} disabled={exporting}>
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
             <Download className="w-4 h-4 mr-2" />
             {exporting ? 'Экспорт...' : 'Экспорт CSV'}
           </Button>
@@ -303,7 +304,7 @@ export default function TimeTrackingPage({ params }: PageProps) {
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-green-500/10 rounded-lg">
-              <Calendar className="w-6 h-6 text-green-600" />
+              <CalendarIcon className="w-6 h-6 text-green-600" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Записей</p>
@@ -361,7 +362,7 @@ export default function TimeTrackingPage({ params }: PageProps) {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-semibold">{log.member.user.fullName}</p>
+                                  <p className="font-semibold">{log.member?.user?.fullName || 'Unknown Member'}</p>
                                   <Badge variant="secondary">{log.hours}ч</Badge>
                                 </div>
                                 {log.description && (
@@ -445,7 +446,7 @@ export default function TimeTrackingPage({ params }: PageProps) {
                     <TableRow key={log.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
                           {format(new Date(log.date), 'dd MMM yyyy', { locale: ru })}
                         </div>
                       </TableCell>

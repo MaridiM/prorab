@@ -64,59 +64,16 @@ import {
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
-import { gql } from '@apollo/client'
-
-// Inline GraphQL
-const UPDATE_PROFILE_MUTATION = gql`
-  mutation UpdateProfile($input: UpdateProfileInput!) {
-    updateProfile(input: $input) {
-      id
-      fullName
-      phone
-    }
-  }
-`
-
-const UPDATE_NOTIFICATION_SETTINGS_MUTATION = gql`
-  mutation UpdateNotificationSettings($input: UpdateNotificationSettingsInput!) {
-    updateNotificationSettings(input: $input) {
-      appPush
-      appEmail
-      appSms
-      marketingPush
-      marketingEmail
-    }
-  }
-`
-
-// Update Me query to include notificationSettings
-const ME_QUERY_WITH_NOTIFICATIONS = gql`
-  query MeWithNotifications {
-    me {
-      id
-      email
-      fullName
-      phone
-      avatarUrl
-      notificationSettings {
-        appPush
-        appEmail
-        appSms
-        marketingPush
-        marketingEmail
-      }
-    }
-  }
-`
-
 import {
-	MeDocument,
-	ChangePasswordDocument,
-	SessionsDocument,
-	RevokeSessionDocument,
-	RevokeAllSessionsDocument,
-	ResendVerificationEmailDocument,
-} from '@/packages/api/graphql'
+  MeDocument,
+  SessionsDocument,
+  UpdateProfileDocument,
+  UpdateNotificationSettingsDocument,
+  RevokeSessionDocument,
+  RevokeAllSessionsDocument,
+  ChangePasswordDocument,
+  ResendVerificationEmailDocument,
+} from '@/packages/api/graphql/__generated__/output'
 import { useAuth } from '@/packages/libs/auth'
 import { useToast } from '@/packages/hooks'
 import { APP_VERSION } from '@/packages/constants/app'
@@ -185,7 +142,7 @@ const fadeIn = {
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] },
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as any },
 	},
 	exit: {
 		opacity: 0,
@@ -223,7 +180,7 @@ export default function SettingsPage() {
 	const [emailCooldown, setEmailCooldown] = useState(0)
 
 	// Queries
-	const { data: meData, loading: meLoading, refetch: refetchMe } = useQuery(ME_QUERY_WITH_NOTIFICATIONS)
+	const { data: meData, loading: meLoading, refetch: refetchMe } = useQuery(MeDocument)
 	const { data: sessionsData, loading: sessionsLoading, refetch: refetchSessions } = useQuery(
 		SessionsDocument
 	)
@@ -233,7 +190,7 @@ export default function SettingsPage() {
 	const sessions = sessionsData?.sessions || []
 
 	// Mutations
-	const [updateProfile, { loading: updatingProfile }] = useMutation(UPDATE_PROFILE_MUTATION, {
+	const [updateProfile, { loading: updatingProfile }] = useMutation(UpdateProfileDocument, {
 		onCompleted: () => {
 			showToast({
 				title: 'Профиль обновлён',
@@ -328,7 +285,7 @@ export default function SettingsPage() {
 	})
 
 	// Notifications Mutation
-	const [updateNotifications] = useMutation(UPDATE_NOTIFICATION_SETTINGS_MUTATION, {
+	const [updateNotifications] = useMutation(UpdateNotificationSettingsDocument, {
 		onError: (error) => {
 			showToast({
 				title: 'Ошибка обновления настроек',
@@ -340,11 +297,20 @@ export default function SettingsPage() {
 
 	const onNotificationChange = (key: string, value: boolean) => {
 		// Optimistic update logic could go here, but for now relying on refetch/cache update
-		updateNotifications({
-			variables: {
-				input: { [key]: value },
-			},
-		})
+		if (notificationSettings) {
+			updateNotifications({
+				variables: {
+					input: {
+						appEmail: notificationSettings.appEmail,
+						appPush: notificationSettings.appPush,
+						appSms: notificationSettings.appSms,
+						marketingEmail: notificationSettings.marketingEmail,
+						marketingPush: notificationSettings.marketingPush,
+						[key]: value
+					},
+				},
+			})
+		}
 	}
 
 	// Email cooldown timer
@@ -388,7 +354,7 @@ export default function SettingsPage() {
 			variables: {
 				input: {
 					fullName: data.fullName,
-					phone: data.phone,
+					phone: data.phone || null,
 				},
 			},
 		})
@@ -552,12 +518,14 @@ export default function SettingsPage() {
 										<Form {...profileForm}>
 											<form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="divide-y divide-border/30">
 												{/* Avatar Section */}
-												<div className="p-6">
-													<AvatarUpload
-														user={me}
-														onAvatarChange={() => refetch()}
-													/>
-												</div>
+												{me && (
+													<div className="p-6">
+														<AvatarUpload
+															user={me}
+															onAvatarChange={() => refetchMe()}
+														/>
+													</div>
+												)}
 
 												{/* Form Fields */}
 												<div className="p-6 space-y-6">
@@ -998,7 +966,7 @@ export default function SettingsPage() {
 									</motion.section>
 
 									{/* Danger Zone - Delete Account */}
-									<DeleteAccountDialog userEmail={data?.me?.email} />
+									<DeleteAccountDialog userEmail={me?.email} />
 								</motion.div>
 							</motion.div>
 						)}
@@ -1130,7 +1098,7 @@ export default function SettingsPage() {
 														</div>
 													</div>
 													<Switch
-														checked={notificationSettings ? notificationSettings[item.id] : false}
+														checked={notificationSettings ? (notificationSettings as any)[item.id] : false}
 														onCheckedChange={(checked) => onNotificationChange(item.id, checked)}
 														disabled={meLoading}
 													/>
@@ -1172,7 +1140,7 @@ export default function SettingsPage() {
 														</div>
 													</div>
 													<Switch
-														checked={notificationSettings ? notificationSettings[item.id] : false}
+														checked={notificationSettings ? (notificationSettings as any)[item.id] : false}
 														onCheckedChange={(checked) => onNotificationChange(item.id, checked)}
 														disabled={meLoading}
 													/>
@@ -1186,39 +1154,39 @@ export default function SettingsPage() {
 										<TelegramIntegration
 											user={{
 												id: me?.id || '',
-												telegramChatId: me?.telegramChatId,
-												telegramUsername: me?.telegramUsername,
-												telegramPhotoUrl: me?.telegramPhotoUrl,
+												telegramChatId: (me as any)?.telegramChatId,
+												telegramUsername: (me as any)?.telegramUsername,
+												telegramPhotoUrl: (me as any)?.telegramPhotoUrl,
 											}}
 											onDisconnect={() => refetchMe()}
 										/>
 									</motion.section>
 
-									{/* Detailed Notification Preferences */}
-									<motion.section variants={fadeIn}>
+									{/* TODO: Detailed Notification Preferences - requires backend schema update */}
+									{/* <motion.section variants={fadeIn}>
 										<NotificationPreferences
 											settings={{
-												notifyProjectCreated: notificationSettings?.notifyProjectCreated,
-												notifyProjectCompleted: notificationSettings?.notifyProjectCompleted,
-												notifyExpenseAdded: notificationSettings?.notifyExpenseAdded,
-												notifyPayoutCalculated: notificationSettings?.notifyPayoutCalculated,
-												notifyPayoutPaid: notificationSettings?.notifyPayoutPaid,
-												notifyMemberInvited: notificationSettings?.notifyMemberInvited,
-												notifyMemberJoined: notificationSettings?.notifyMemberJoined,
-												notifyMemberRemoved: notificationSettings?.notifyMemberRemoved,
-												notifyTaskAssigned: notificationSettings?.notifyTaskAssigned,
-												notifyTaskCompleted: notificationSettings?.notifyTaskCompleted,
-												notifyPhotoReportCreated: notificationSettings?.notifyPhotoReportCreated,
-												notifySubscriptionExpiring: notificationSettings?.notifySubscriptionExpiring,
-												emailFrequency: notificationSettings?.emailFrequency,
-												pushFrequency: notificationSettings?.pushFrequency,
-												quietHoursEnabled: notificationSettings?.quietHoursEnabled,
-												quietHoursStart: notificationSettings?.quietHoursStart,
-												quietHoursEnd: notificationSettings?.quietHoursEnd,
+												notifyProjectCreated: (notificationSettings as any)?.notifyProjectCreated,
+												notifyProjectCompleted: (notificationSettings as any)?.notifyProjectCompleted,
+												notifyExpenseAdded: (notificationSettings as any)?.notifyExpenseAdded,
+												notifyPayoutCalculated: (notificationSettings as any)?.notifyPayoutCalculated,
+												notifyPayoutPaid: (notificationSettings as any)?.notifyPayoutPaid,
+												notifyMemberInvited: (notificationSettings as any)?.notifyMemberInvited,
+												notifyMemberJoined: (notificationSettings as any)?.notifyMemberJoined,
+												notifyMemberRemoved: (notificationSettings as any)?.notifyMemberRemoved,
+												notifyTaskAssigned: (notificationSettings as any)?.notifyTaskAssigned,
+												notifyTaskCompleted: (notificationSettings as any)?.notifyTaskCompleted,
+												notifyPhotoReportCreated: (notificationSettings as any)?.notifyPhotoReportCreated,
+												notifySubscriptionExpiring: (notificationSettings as any)?.notifySubscriptionExpiring,
+												emailFrequency: (notificationSettings as any)?.emailFrequency,
+												pushFrequency: (notificationSettings as any)?.pushFrequency,
+												quietHoursEnabled: (notificationSettings as any)?.quietHoursEnabled,
+												quietHoursStart: (notificationSettings as any)?.quietHoursStart,
+												quietHoursEnd: (notificationSettings as any)?.quietHoursEnd,
 											}}
 											onUpdate={() => refetchMe()}
 										/>
-									</motion.section>
+									</motion.section> */}
 								</motion.div>
 							</motion.div>
 						)}

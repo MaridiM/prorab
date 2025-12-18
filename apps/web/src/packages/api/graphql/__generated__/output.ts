@@ -21,6 +21,22 @@ export type Scalars = {
   Upload: { input: any; output: any; }
 };
 
+export type ActivityLog = {
+  __typename?: 'ActivityLog';
+  /** Action performed */
+  action: Scalars['String']['output'];
+  /** Admin user email */
+  adminUserEmail: Scalars['String']['output'];
+  /** Action timestamp */
+  createdAt: Scalars['DateTime']['output'];
+  /** Log ID */
+  id: Scalars['String']['output'];
+  /** Resource type */
+  resource: Scalars['String']['output'];
+  /** Resource ID */
+  resourceId: Scalars['String']['output'];
+};
+
 export type AddPhotoInput = {
   caption: InputMaybe<Scalars['String']['input']>;
   fileSize: InputMaybe<Scalars['Int']['input']>;
@@ -35,6 +51,8 @@ export type AddPhotoInput = {
 export type AdminActionLog = {
   __typename?: 'AdminActionLog';
   action: Scalars['String']['output'];
+  /** Admin user email (populated from relation) */
+  adminUserEmail: Maybe<Scalars['String']['output']>;
   adminUserId: Scalars['ID']['output'];
   createdAt: Scalars['DateTime']['output'];
   details: Maybe<Scalars['JSON']['output']>;
@@ -67,6 +85,330 @@ export type AdminActionStatistics = {
   actionsByResource: Scalars['JSON']['output'];
   actionsByType: Scalars['JSON']['output'];
   totalActions: Scalars['Int']['output'];
+};
+
+export type AdminPayment = {
+  __typename?: 'AdminPayment';
+  amount: Scalars['Float']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  currency: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  subscriptionId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  yookassaPaymentId: Maybe<Scalars['String']['output']>;
+};
+
+export type AdminPaymentFilters = {
+  /** Created after date */
+  createdAfter: InputMaybe<Scalars['DateTime']['input']>;
+  /** Created before date */
+  createdBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Maximum amount */
+  maxAmount: InputMaybe<Scalars['Float']['input']>;
+  /** Minimum amount */
+  minAmount: InputMaybe<Scalars['Float']['input']>;
+  /** Search by team name, owner email, or payment ID */
+  search: InputMaybe<Scalars['String']['input']>;
+  /** Filter by status (PENDING, SUCCEEDED, FAILED, CANCELLED) */
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminPaymentsConnection = {
+  __typename?: 'AdminPaymentsConnection';
+  /** List of payments */
+  nodes: Array<AdminPayment>;
+  /** Pagination information */
+  pageInfo: PageInfo;
+  /** Total count of payments */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AdminProject = {
+  __typename?: 'AdminProject';
+  _count: Maybe<ProjectCount>;
+  actualCost: Maybe<Scalars['Float']['output']>;
+  budget: Maybe<Scalars['Float']['output']>;
+  completedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  description: Maybe<Scalars['String']['output']>;
+  endDate: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  owner: Maybe<Scalars['JSON']['output']>;
+  startDate: Maybe<Scalars['DateTime']['output']>;
+  status: Scalars['String']['output'];
+  team: Maybe<Scalars['JSON']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type AdminProjectFilterInput = {
+  ownerId: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+  startDateFrom: InputMaybe<Scalars['DateTime']['input']>;
+  startDateTo: InputMaybe<Scalars['DateTime']['input']>;
+  status: InputMaybe<Scalars['String']['input']>;
+  teamId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminProjectsResult = {
+  __typename?: 'AdminProjectsResult';
+  hasMore: Scalars['Boolean']['output'];
+  projects: Array<AdminProject>;
+  total: Scalars['Int']['output'];
+};
+
+export type AdminRoleDetail = {
+  __typename?: 'AdminRoleDetail';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  ipWhitelist: Array<Scalars['String']['output']>;
+  permissions: Array<Scalars['String']['output']>;
+  role: AdminRoleType;
+  twoFactorEnforced: Scalars['Boolean']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+/** Admin role types with different permission levels */
+export enum AdminRoleType {
+  Admin = 'ADMIN',
+  Moderator = 'MODERATOR',
+  SuperAdmin = 'SUPER_ADMIN',
+  Support = 'SUPPORT'
+}
+
+export type AdminSendMessageInput = {
+  fromUser: Scalars['Boolean']['input'];
+  message: Scalars['String']['input'];
+  ticketId: Scalars['String']['input'];
+};
+
+export type AdminSubscriptionFilters = {
+  /** Created after date */
+  createdAfter: InputMaybe<Scalars['DateTime']['input']>;
+  /** Created before date */
+  createdBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Expiring before date */
+  expiringBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Filter by plan (LITE, FOREMAN, BRIGADE) */
+  plan: InputMaybe<Scalars['String']['input']>;
+  /** Search by team name or owner email */
+  search: InputMaybe<Scalars['String']['input']>;
+  /** Filter by status */
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminSubscriptionsConnection = {
+  __typename?: 'AdminSubscriptionsConnection';
+  /** List of subscriptions */
+  nodes: Array<Subscription>;
+  /** Pagination information */
+  pageInfo: PageInfo;
+  /** Total count of subscriptions */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AdminSupportStatistics = {
+  __typename?: 'AdminSupportStatistics';
+  closedTickets: Scalars['Int']['output'];
+  inProgressTickets: Scalars['Int']['output'];
+  openTickets: Scalars['Int']['output'];
+  resolvedTickets: Scalars['Int']['output'];
+  ticketsByCategory: Scalars['JSON']['output'];
+  ticketsByPriority: Scalars['JSON']['output'];
+  totalTickets: Scalars['Int']['output'];
+};
+
+export type AdminSupportTicket = {
+  __typename?: 'AdminSupportTicket';
+  category: Maybe<Scalars['String']['output']>;
+  closedAt: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  /** Count of messages in ticket */
+  messageCount: Maybe<Scalars['Int']['output']>;
+  messages: Maybe<Array<SupportMessage>>;
+  priority: SupportTicketPriority;
+  status: SupportTicketStatus;
+  subject: Maybe<Scalars['String']['output']>;
+  telegramChatId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  /** User email (populated from relation) */
+  userEmail: Maybe<Scalars['String']['output']>;
+  /** User full name (populated from relation) */
+  userFullName: Maybe<Scalars['String']['output']>;
+  userId: Scalars['ID']['output'];
+};
+
+export type AdminSupportTicketFilterInput = {
+  category: InputMaybe<Scalars['String']['input']>;
+  endDate: InputMaybe<Scalars['DateTime']['input']>;
+  priority: InputMaybe<SupportTicketPriority>;
+  search: InputMaybe<Scalars['String']['input']>;
+  startDate: InputMaybe<Scalars['DateTime']['input']>;
+  status: InputMaybe<SupportTicketStatus>;
+  userId: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminSupportTicketsResult = {
+  __typename?: 'AdminSupportTicketsResult';
+  hasMore: Scalars['Boolean']['output'];
+  tickets: Array<AdminSupportTicket>;
+  total: Scalars['Int']['output'];
+};
+
+export type AdminTeamCounts = {
+  __typename?: 'AdminTeamCounts';
+  /** Number of team members */
+  members: Scalars['Int']['output'];
+  /** Number of projects */
+  projects: Scalars['Int']['output'];
+};
+
+export type AdminTeamDetails = {
+  __typename?: 'AdminTeamDetails';
+  /** Aggregated counts */
+  _count: AdminTeamCounts;
+  /** Team members */
+  members: Array<TeamMemberDetails>;
+  /** Team owner */
+  owner: User;
+  /** Team projects */
+  projects: Array<Project>;
+  /** Team subscription */
+  subscription: Maybe<Subscription>;
+  /** Team data */
+  team: Team;
+};
+
+export type AdminTeamFilters = {
+  /** Created after date */
+  createdAfter: InputMaybe<Scalars['DateTime']['input']>;
+  /** Created before date */
+  createdBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Maximum number of members */
+  maxMembers: InputMaybe<Scalars['Int']['input']>;
+  /** Maximum number of projects */
+  maxProjects: InputMaybe<Scalars['Int']['input']>;
+  /** Minimum number of members */
+  minMembers: InputMaybe<Scalars['Int']['input']>;
+  /** Minimum number of projects */
+  minProjects: InputMaybe<Scalars['Int']['input']>;
+  /** Filter by plan type */
+  planType: InputMaybe<Scalars['String']['input']>;
+  /** Search by team name or owner email */
+  search: InputMaybe<Scalars['String']['input']>;
+  /** Filter by subscription status */
+  subscriptionStatus: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminTeamStats = {
+  __typename?: 'AdminTeamStats';
+  /** Number of active projects */
+  activeProjects: Scalars['Int']['output'];
+  /** Number of completed projects */
+  completedProjects: Scalars['Int']['output'];
+  /** Total expense amount */
+  totalExpenseAmount: Scalars['Float']['output'];
+  /** Total number of expenses */
+  totalExpenses: Scalars['Int']['output'];
+  /** Total number of members */
+  totalMembers: Scalars['Int']['output'];
+  /** Total number of projects */
+  totalProjects: Scalars['Int']['output'];
+};
+
+export type AdminTeamsConnection = {
+  __typename?: 'AdminTeamsConnection';
+  /** List of teams */
+  nodes: Array<Team>;
+  /** Pagination info */
+  pageInfo: PageInfo;
+  /** Total count of teams */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AdminUpdateSupportTicketInput = {
+  category: InputMaybe<Scalars['String']['input']>;
+  priority: InputMaybe<SupportTicketPriority>;
+  status: InputMaybe<SupportTicketStatus>;
+};
+
+export type AdminUpdateTeamInput = {
+  /** Team logo URL */
+  logoUrl: InputMaybe<Scalars['String']['input']>;
+  /** Team name */
+  name: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminUpdateUserInput = {
+  /** User avatar URL */
+  avatarUrl: InputMaybe<Scalars['String']['input']>;
+  /** User email address */
+  email: InputMaybe<Scalars['String']['input']>;
+  /** Email verification status */
+  emailVerified: InputMaybe<Scalars['Boolean']['input']>;
+  /** User full name */
+  fullName: InputMaybe<Scalars['String']['input']>;
+  /** User phone number */
+  phone: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminUserCounts = {
+  __typename?: 'AdminUserCounts';
+  /** Number of teams owned */
+  ownedTeams: Scalars['Int']['output'];
+  /** Number of payments made */
+  payments: Scalars['Int']['output'];
+  /** Number of team memberships */
+  teamMemberships: Scalars['Int']['output'];
+};
+
+export type AdminUserDetails = {
+  __typename?: 'AdminUserDetails';
+  /** Aggregated counts */
+  _count: AdminUserCounts;
+  /** Teams owned by this user */
+  ownedTeams: Array<Team>;
+  /** Teams where user is a member */
+  teamMemberships: Array<TeamMemberInfo>;
+  /** User data */
+  user: User;
+};
+
+export type AdminUserFilters = {
+  /** Created after date */
+  createdAfter: InputMaybe<Scalars['DateTime']['input']>;
+  /** Created before date */
+  createdBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Filter by email verification status */
+  emailVerified: InputMaybe<Scalars['Boolean']['input']>;
+  /** Last login after date */
+  lastLoginAfter: InputMaybe<Scalars['DateTime']['input']>;
+  /** Last login before date */
+  lastLoginBefore: InputMaybe<Scalars['DateTime']['input']>;
+  /** Search by email, name, or phone */
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AdminUsersConnection = {
+  __typename?: 'AdminUsersConnection';
+  /** List of users */
+  nodes: Array<User>;
+  /** Pagination info */
+  pageInfo: PageInfo;
+  /** Total count of users */
+  totalCount: Scalars['Int']['output'];
+};
+
+export type AssignAdminRoleInput = {
+  ipWhitelist: InputMaybe<Array<Scalars['String']['input']>>;
+  permissions: InputMaybe<Array<Scalars['String']['input']>>;
+  role: AdminRoleType;
+  twoFactorEnforced: InputMaybe<Scalars['Boolean']['input']>;
+  userId: Scalars['String']['input'];
 };
 
 export type AuthPayload = {
@@ -106,6 +448,14 @@ export type BulkUpdateSystemSettingsInput = {
   settings: Array<UpdateSystemSettingInput>;
 };
 
+/** Глобальная бизнес-роль пользователя */
+export enum BusinessRole {
+  /** Бригадир - владелец команды, не может присоединяться к другим командам */
+  Foreman = 'FOREMAN',
+  /** Работник - член команды, не может создавать команды */
+  Worker = 'WORKER'
+}
+
 export type ChangePasswordInput = {
   currentPassword: Scalars['String']['input'];
   newPassword: Scalars['String']['input'];
@@ -115,6 +465,14 @@ export type ChangePlanInput = {
   immediate: Scalars['Boolean']['input'];
   newPlan: Scalars['String']['input'];
   subscriptionId: Scalars['String']['input'];
+};
+
+export type ChartData = {
+  __typename?: 'ChartData';
+  /** Chart data points */
+  data: Array<Scalars['Float']['output']>;
+  /** Chart labels */
+  labels: Array<Scalars['String']['output']>;
 };
 
 export type CheckTelegramAuthInput = {
@@ -245,9 +603,117 @@ export type CreateWorkLogInput = {
   projectId: Scalars['ID']['input'];
 };
 
+export type DashboardPaymentStats = {
+  __typename?: 'DashboardPaymentStats';
+  /** Average payment amount */
+  averagePayment: Scalars['Float']['output'];
+  /** Succeeded payments */
+  succeeded: Scalars['Int']['output'];
+  /** Revenue this month */
+  thisMonthRevenue: Scalars['Float']['output'];
+  /** Total payments */
+  total: Scalars['Int']['output'];
+  /** Total revenue */
+  totalRevenue: Scalars['Float']['output'];
+};
+
+export type DashboardProjectStats = {
+  __typename?: 'DashboardProjectStats';
+  /** Active projects */
+  active: Scalars['Int']['output'];
+  /** Archived projects */
+  archived: Scalars['Int']['output'];
+  /** Completed projects */
+  completed: Scalars['Int']['output'];
+  /** Total number of projects */
+  total: Scalars['Int']['output'];
+};
+
+export type DashboardStats = {
+  __typename?: 'DashboardStats';
+  /** Payment statistics */
+  payments: DashboardPaymentStats;
+  /** Project statistics */
+  projects: DashboardProjectStats;
+  /** Storage statistics */
+  storage: DashboardStorageStats;
+  /** Subscription statistics */
+  subscriptions: DashboardSubscriptionStats;
+  /** Team statistics */
+  teams: DashboardTeamStats;
+  /** User statistics */
+  users: DashboardUserStats;
+};
+
+export type DashboardStorageStats = {
+  __typename?: 'DashboardStorageStats';
+  /** Average storage per team in bytes */
+  averagePerTeam: Scalars['Float']['output'];
+  /** Total storage used in bytes */
+  totalUsedBytes: Scalars['Float']['output'];
+  /** Total storage used in GB */
+  totalUsedGB: Scalars['Float']['output'];
+};
+
+export type DashboardSubscriptionStats = {
+  __typename?: 'DashboardSubscriptionStats';
+  /** Active subscriptions */
+  active: Scalars['Int']['output'];
+  /** Subscriptions by plan */
+  byPlan: DashboardSubscriptionsByPlan;
+  /** Cancelled subscriptions */
+  cancelled: Scalars['Int']['output'];
+  /** Total subscriptions */
+  total: Scalars['Int']['output'];
+  /** Trialing subscriptions */
+  trialing: Scalars['Int']['output'];
+};
+
+export type DashboardSubscriptionsByPlan = {
+  __typename?: 'DashboardSubscriptionsByPlan';
+  /** BRIGADE subscriptions */
+  BRIGADE: Scalars['Int']['output'];
+  /** FOREMAN subscriptions */
+  FOREMAN: Scalars['Int']['output'];
+  /** LITE subscriptions */
+  LITE: Scalars['Int']['output'];
+};
+
+export type DashboardTeamStats = {
+  __typename?: 'DashboardTeamStats';
+  /** Average members per team */
+  averageMembers: Scalars['Float']['output'];
+  /** New teams this month */
+  newThisMonth: Scalars['Int']['output'];
+  /** Total number of teams */
+  total: Scalars['Int']['output'];
+  /** Teams with active subscription */
+  withActiveSubscription: Scalars['Int']['output'];
+};
+
+export type DashboardUserStats = {
+  __typename?: 'DashboardUserStats';
+  /** Number of admin users */
+  admins: Scalars['Int']['output'];
+  /** Growth rate percentage */
+  growthRate: Scalars['Float']['output'];
+  /** New users this month */
+  newThisMonth: Scalars['Int']['output'];
+  /** Total number of users */
+  total: Scalars['Int']['output'];
+  /** Number of verified users */
+  verified: Scalars['Int']['output'];
+};
+
 export type DeleteAccountInput = {
   /** Пароль пользователя для подтверждения удаления */
   password: Scalars['String']['input'];
+};
+
+export type DeleteResult = {
+  __typename?: 'DeleteResult';
+  message: Scalars['String']['output'];
+  success: Scalars['Boolean']['output'];
 };
 
 export type Disable2FaInput = {
@@ -380,8 +846,51 @@ export type Mutation = {
   __typename?: 'Mutation';
   /** Добавить фото к фотоотчёту */
   addPhotoToReport: ReportPhoto;
+  /** Archive project (admin only) */
+  adminArchiveProject: AdminProject;
+  /** Cancel subscription (Admin only) */
+  adminCancelSubscription: Subscription;
+  /** Change team subscription plan (Admin only) */
+  adminChangeTeamPlan: Team;
+  /** Delete payment (Admin only) */
+  adminDeletePayment: Scalars['Boolean']['output'];
+  /** Delete project (admin only) */
+  adminDeleteProject: DeleteResult;
+  /** Delete subscription (Admin only) */
+  adminDeleteSubscription: Scalars['Boolean']['output'];
+  /** Delete support ticket (admin only) */
+  adminDeleteSupportTicket: DeleteResult;
+  /** Delete a team (Admin only) */
+  adminDeleteTeam: Scalars['Boolean']['output'];
+  /** Delete a user account (Admin only) */
+  adminDeleteUser: Scalars['Boolean']['output'];
+  /** Reactivate cancelled subscription (Admin only) */
+  adminReactivateSubscription: Subscription;
+  /** Issue refund for payment (Admin only) */
+  adminRefundPayment: AdminPayment;
+  /** Remove a member from a team (Admin only) */
+  adminRemoveTeamMember: Scalars['Boolean']['output'];
+  /** Send password reset link to user (Admin only) */
+  adminResetUserPassword: Scalars['Boolean']['output'];
+  /** Send message in support ticket (admin only) */
+  adminSendSupportMessage: SupportMessage;
+  /** Update payment status (Admin only) */
+  adminUpdatePaymentStatus: AdminPayment;
+  /** Update project status (admin only) */
+  adminUpdateProjectStatus: AdminProject;
+  /** Update subscription (Admin only) */
+  adminUpdateSubscription: Subscription;
+  /** Update support ticket (admin only) */
+  adminUpdateSupportTicket: AdminSupportTicket;
+  /** Update team information (Admin only) */
+  adminUpdateTeam: Team;
+  /** Update user information (Admin only) */
+  adminUpdateUser: User;
+  /** Manually verify user email (Admin only) */
+  adminVerifyUserEmail: User;
   /** Архивировать проект */
   archiveProject: Project;
+  assignAdminRole: AdminRoleDetail;
   /** Bulk create work log entries (owner or self) */
   bulkCreateWorkLogs: BulkUpdateResult;
   /** Bulk update member salaries (owner only) */
@@ -389,6 +898,7 @@ export type Mutation = {
   /** Bulk update system settings (admin only) */
   bulkUpdateSystemSettings: Array<SystemSetting>;
   cancelSubscription: Subscription;
+  changeAdminRole: AdminRoleDetail;
   changePassword: Scalars['Boolean']['output'];
   changePlan: Subscription;
   checkTelegramAuth: TelegramAuthStatusPayload;
@@ -461,6 +971,7 @@ export type Mutation = {
   resetPassword: Scalars['Boolean']['output'];
   /** Восстановить проект */
   restoreProject: Project;
+  revokeAdminRole: Scalars['Boolean']['output'];
   revokeAllSessions: Scalars['Boolean']['output'];
   revokeAllSessionsIncludingCurrent: Scalars['Boolean']['output'];
   revokeSession: Scalars['Boolean']['output'];
@@ -468,8 +979,10 @@ export type Mutation = {
   testServiceConnection: ConnectionTestResult;
   /** Test connection to a specific storage provider */
   testStorageProvider: ProviderTestResult;
+  updateAdminPermissions: AdminRoleDetail;
   /** Обновить расход */
   updateExpense: Expense;
+  updateIpWhitelist: AdminRoleDetail;
   /** Update team member position/specialization (owner only) */
   updateMemberPosition: TeamMember;
   /** Update team member salary settings (owner only) */
@@ -497,6 +1010,7 @@ export type Mutation = {
   updateTask: Task;
   /** Обновление настроек команды (только для владельца) */
   updateTeam: Team;
+  updateTwoFactorEnforcement: AdminRoleDetail;
   /** Update a work log entry (owner or creator) */
   updateWorkLog: WorkLog;
   /** Загрузка аватара пользователя */
@@ -512,8 +1026,128 @@ export type MutationAddPhotoToReportArgs = {
 };
 
 
+export type MutationAdminArchiveProjectArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type MutationAdminCancelSubscriptionArgs = {
+  cancelAtPeriodEnd?: Scalars['Boolean']['input'];
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminChangeTeamPlanArgs = {
+  planType: Scalars['String']['input'];
+  teamId: Scalars['String']['input'];
+};
+
+
+export type MutationAdminDeletePaymentArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminDeleteProjectArgs = {
+  projectId: Scalars['ID']['input'];
+};
+
+
+export type MutationAdminDeleteSubscriptionArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminDeleteSupportTicketArgs = {
+  ticketId: Scalars['ID']['input'];
+};
+
+
+export type MutationAdminDeleteTeamArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminDeleteUserArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminReactivateSubscriptionArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminRefundPaymentArgs = {
+  id: Scalars['String']['input'];
+  input: RefundPaymentInput;
+};
+
+
+export type MutationAdminRemoveTeamMemberArgs = {
+  memberId: Scalars['String']['input'];
+  teamId: Scalars['String']['input'];
+};
+
+
+export type MutationAdminResetUserPasswordArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationAdminSendSupportMessageArgs = {
+  input: AdminSendMessageInput;
+};
+
+
+export type MutationAdminUpdatePaymentStatusArgs = {
+  id: Scalars['String']['input'];
+  status: Scalars['String']['input'];
+};
+
+
+export type MutationAdminUpdateProjectStatusArgs = {
+  projectId: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+};
+
+
+export type MutationAdminUpdateSubscriptionArgs = {
+  id: Scalars['String']['input'];
+  input: UpdateSubscriptionInput;
+};
+
+
+export type MutationAdminUpdateSupportTicketArgs = {
+  input: AdminUpdateSupportTicketInput;
+  ticketId: Scalars['ID']['input'];
+};
+
+
+export type MutationAdminUpdateTeamArgs = {
+  id: Scalars['String']['input'];
+  input: AdminUpdateTeamInput;
+};
+
+
+export type MutationAdminUpdateUserArgs = {
+  id: Scalars['String']['input'];
+  input: AdminUpdateUserInput;
+};
+
+
+export type MutationAdminVerifyUserEmailArgs = {
+  id: Scalars['String']['input'];
+};
+
+
 export type MutationArchiveProjectArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationAssignAdminRoleArgs = {
+  input: AssignAdminRoleInput;
 };
 
 
@@ -534,6 +1168,12 @@ export type MutationBulkUpdateSystemSettingsArgs = {
 
 export type MutationCancelSubscriptionArgs = {
   subscriptionId: Scalars['String']['input'];
+};
+
+
+export type MutationChangeAdminRoleArgs = {
+  newRole: Scalars['String']['input'];
+  roleId: Scalars['String']['input'];
 };
 
 
@@ -727,6 +1367,11 @@ export type MutationRestoreProjectArgs = {
 };
 
 
+export type MutationRevokeAdminRoleArgs = {
+  roleId: Scalars['String']['input'];
+};
+
+
 export type MutationRevokeSessionArgs = {
   sessionId: Scalars['String']['input'];
 };
@@ -742,8 +1387,18 @@ export type MutationTestStorageProviderArgs = {
 };
 
 
+export type MutationUpdateAdminPermissionsArgs = {
+  input: UpdateAdminPermissionsInput;
+};
+
+
 export type MutationUpdateExpenseArgs = {
   input: UpdateExpenseInput;
+};
+
+
+export type MutationUpdateIpWhitelistArgs = {
+  input: UpdateIpWhitelistInput;
 };
 
 
@@ -821,6 +1476,11 @@ export type MutationUpdateTeamArgs = {
 };
 
 
+export type MutationUpdateTwoFactorEnforcementArgs = {
+  input: UpdateTwoFactorInput;
+};
+
+
 export type MutationUpdateWorkLogArgs = {
   input: UpdateWorkLogInput;
 };
@@ -865,6 +1525,25 @@ export type OnboardingResult = {
   team: Team;
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  /** Current page number */
+  currentPage: Scalars['Int']['output'];
+  /** Has next page */
+  hasNextPage: Scalars['Boolean']['output'];
+  /** Has previous page */
+  hasPreviousPage: Scalars['Boolean']['output'];
+  /** Total pages */
+  totalPages: Scalars['Int']['output'];
+};
+
+export type PaginationInput = {
+  /** Items per page */
+  limit: Scalars['Int']['input'];
+  /** Page number (starts at 1) */
+  page: Scalars['Int']['input'];
+};
+
 export type Payment = {
   __typename?: 'Payment';
   amount: Scalars['Float']['output'];
@@ -895,6 +1574,24 @@ export enum PaymentMethod {
   Transfer = 'TRANSFER'
 }
 
+export type PaymentStats = {
+  __typename?: 'PaymentStats';
+  /** Average payment amount */
+  averagePayment: Scalars['Float']['output'];
+  /** Payments count by status */
+  byStatus: PaymentsByStatus;
+  /** Number of failed payments */
+  failedPayments: Scalars['Int']['output'];
+  /** Number of pending payments */
+  pendingPayments: Scalars['Int']['output'];
+  /** Number of succeeded payments */
+  succeededPayments: Scalars['Int']['output'];
+  /** Total number of payments */
+  totalPayments: Scalars['Int']['output'];
+  /** Total revenue from succeeded payments */
+  totalRevenue: Scalars['Float']['output'];
+};
+
 export enum PaymentStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
@@ -907,6 +1604,18 @@ export type PaymentUrl = {
   __typename?: 'PaymentUrl';
   paymentId: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type PaymentsByStatus = {
+  __typename?: 'PaymentsByStatus';
+  /** Number of CANCELLED payments */
+  CANCELLED: Scalars['Int']['output'];
+  /** Number of FAILED payments */
+  FAILED: Scalars['Int']['output'];
+  /** Number of PENDING payments */
+  PENDING: Scalars['Int']['output'];
+  /** Number of SUCCEEDED payments */
+  SUCCEEDED: Scalars['Int']['output'];
 };
 
 export type PayoutSummary = {
@@ -1024,6 +1733,13 @@ export type ProjectAnalytics = {
   totalPayouts: Scalars['Float']['output'];
 };
 
+export type ProjectCount = {
+  __typename?: 'ProjectCount';
+  expenses: Scalars['Int']['output'];
+  photoReports: Scalars['Int']['output'];
+  tasks: Scalars['Int']['output'];
+};
+
 export type ProjectFilterInput = {
   /** Поиск по названию или адресу */
   searchQuery: InputMaybe<Scalars['String']['input']>;
@@ -1137,6 +1853,55 @@ export type Query = {
   adminActionLogs: AdminActionLogsResult;
   /** Get admin action statistics (admin only) */
   adminActionStatistics: AdminActionStatistics;
+  /** Get comprehensive dashboard statistics (Admin only) */
+  adminDashboardStats: DashboardStats;
+  /** Get detailed information about a specific payment (Admin only) */
+  adminPayment: AdminPayment;
+  /** Get payment statistics (Admin only) */
+  adminPaymentStats: PaymentStats;
+  /** Get paginated list of payments with filters (Admin only) */
+  adminPayments: AdminPaymentsConnection;
+  /** Get project by ID with details (admin only) */
+  adminProject: Maybe<AdminProject>;
+  /** Get all projects with filters (admin only) */
+  adminProjects: AdminProjectsResult;
+  /** Get recent admin activity logs (Admin only) */
+  adminRecentActivity: Array<ActivityLog>;
+  /** Get revenue chart data for the last 12 months (Admin only) */
+  adminRevenueChart: ChartData;
+  adminRole: AdminRoleDetail;
+  adminRoleByUserId: Maybe<AdminRoleDetail>;
+  adminRoles: Array<AdminRoleDetail>;
+  /** Get detailed information about a specific subscription (Admin only) */
+  adminSubscription: Subscription;
+  /** Get subscription statistics (Admin only) */
+  adminSubscriptionStats: SubscriptionStats;
+  /** Get paginated list of subscriptions with filters (Admin only) */
+  adminSubscriptions: AdminSubscriptionsConnection;
+  /** Get support tickets statistics (admin only) */
+  adminSupportStatistics: AdminSupportStatistics;
+  /** Get support ticket by ID (admin only) */
+  adminSupportTicket: AdminSupportTicket;
+  /** Get all support tickets with filters (admin only) */
+  adminSupportTickets: AdminSupportTicketsResult;
+  /** Get system health status (Admin only) */
+  adminSystemHealth: SystemHealth;
+  /** Get detailed information about a specific team (Admin only) */
+  adminTeam: AdminTeamDetails;
+  /** Get statistics for a specific team (Admin only) */
+  adminTeamStats: AdminTeamStats;
+  /** Get paginated list of teams with filters (Admin only) */
+  adminTeams: AdminTeamsConnection;
+  /** Get detailed information about a specific user (Admin only) */
+  adminUser: AdminUserDetails;
+  /** Get activity logs for a specific user (Admin only) */
+  adminUserActivity: Array<UserActivity>;
+  /** Get user growth chart data for the last 12 months (Admin only) */
+  adminUserGrowthChart: ChartData;
+  /** Get active sessions for a specific user (Admin only) */
+  adminUserSessions: Array<UserSession>;
+  /** Get paginated list of users with filters (Admin only) */
+  adminUsers: AdminUsersConnection;
   availablePlans: Array<PlanLimits>;
   /** Получить доступные варианты хранилища */
   availableStorageProviders: Array<StorageProviderOption>;
@@ -1242,6 +2007,111 @@ export type QueryAdminActionLogsArgs = {
 export type QueryAdminActionStatisticsArgs = {
   endDate: Scalars['DateTime']['input'];
   startDate: Scalars['DateTime']['input'];
+};
+
+
+export type QueryAdminPaymentArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminPaymentsArgs = {
+  filters: InputMaybe<AdminPaymentFilters>;
+  pagination: PaginationInput;
+};
+
+
+export type QueryAdminProjectArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryAdminProjectsArgs = {
+  filter: InputMaybe<AdminProjectFilterInput>;
+  pagination: InputMaybe<PaginationInput>;
+};
+
+
+export type QueryAdminRecentActivityArgs = {
+  limit?: Scalars['Int']['input'];
+};
+
+
+export type QueryAdminRoleArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminRoleByUserIdArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminRolesArgs = {
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  offset?: InputMaybe<Scalars['Float']['input']>;
+  role: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryAdminSubscriptionArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminSubscriptionsArgs = {
+  filters: InputMaybe<AdminSubscriptionFilters>;
+  pagination: PaginationInput;
+};
+
+
+export type QueryAdminSupportTicketArgs = {
+  ticketId: Scalars['ID']['input'];
+};
+
+
+export type QueryAdminSupportTicketsArgs = {
+  filter: InputMaybe<AdminSupportTicketFilterInput>;
+  pagination: InputMaybe<PaginationInput>;
+};
+
+
+export type QueryAdminTeamArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamStatsArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamsArgs = {
+  filters: InputMaybe<AdminTeamFilters>;
+  pagination: PaginationInput;
+};
+
+
+export type QueryAdminUserArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type QueryAdminUserActivityArgs = {
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminUserSessionsArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminUsersArgs = {
+  filters: InputMaybe<AdminUserFilters>;
+  pagination: PaginationInput;
 };
 
 
@@ -1414,6 +2284,13 @@ export type QueryWorkLogsByDateRangeArgs = {
   startDate: Scalars['DateTime']['input'];
 };
 
+export type RefundPaymentInput = {
+  /** Refund amount */
+  amount: Scalars['Float']['input'];
+  /** Refund reason */
+  reason: Scalars['String']['input'];
+};
+
 export type RegenerateBackupCodesInput = {
   token: Scalars['String']['input'];
 };
@@ -1574,6 +2451,22 @@ export enum SubscriptionPlan {
   Lite = 'LITE'
 }
 
+export type SubscriptionStats = {
+  __typename?: 'SubscriptionStats';
+  /** Number of active subscriptions */
+  activeSubscriptions: Scalars['Int']['output'];
+  /** Subscriptions count by plan */
+  byPlan: SubscriptionsByPlan;
+  /** Number of cancelled subscriptions */
+  cancelledSubscriptions: Scalars['Int']['output'];
+  /** Total revenue from all subscriptions */
+  totalRevenue: Scalars['Float']['output'];
+  /** Total number of subscriptions */
+  totalSubscriptions: Scalars['Int']['output'];
+  /** Number of trialing subscriptions */
+  trialingSubscriptions: Scalars['Int']['output'];
+};
+
 export enum SubscriptionStatus {
   Active = 'ACTIVE',
   Cancelled = 'CANCELLED',
@@ -1581,6 +2474,52 @@ export enum SubscriptionStatus {
   PastDue = 'PAST_DUE',
   Trialing = 'TRIALING'
 }
+
+export type SubscriptionsByPlan = {
+  __typename?: 'SubscriptionsByPlan';
+  /** Number of BRIGADE subscriptions */
+  BRIGADE: Scalars['Int']['output'];
+  /** Number of FOREMAN subscriptions */
+  FOREMAN: Scalars['Int']['output'];
+  /** Number of LITE subscriptions */
+  LITE: Scalars['Int']['output'];
+};
+
+export type SupportMessage = {
+  __typename?: 'SupportMessage';
+  createdAt: Scalars['DateTime']['output'];
+  fromUser: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  message: Scalars['String']['output'];
+  ticketId: Scalars['ID']['output'];
+};
+
+/** Priority level of a support ticket */
+export enum SupportTicketPriority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Urgent = 'URGENT'
+}
+
+/** Status of a support ticket */
+export enum SupportTicketStatus {
+  Closed = 'CLOSED',
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN',
+  Resolved = 'RESOLVED',
+  WaitingUser = 'WAITING_USER'
+}
+
+export type SystemHealth = {
+  __typename?: 'SystemHealth';
+  /** Database health status */
+  database: Scalars['Boolean']['output'];
+  /** Last backup timestamp */
+  lastBackup: Maybe<Scalars['DateTime']['output']>;
+  /** Storage availability */
+  storageAvailable: Scalars['Boolean']['output'];
+};
 
 export type SystemSetting = {
   __typename?: 'SystemSetting';
@@ -1688,8 +2627,8 @@ export type TeamMember = {
   joinedAt: Scalars['DateTime']['output'];
   /** Должность/специализация (например, "Прораб", "Электрик", "Маляр") */
   position: Maybe<Scalars['String']['output']>;
-  /** Роль в команде (owner/member) */
-  role: Scalars['String']['output'];
+  /** Роль в команде (OWNER/MEMBER) */
+  role: TeamRole;
   /** Сумма зарплаты или процент (0-100) */
   salaryAmount: Maybe<Scalars['Float']['output']>;
   /** Тип зарплаты: fixed, percentage, none */
@@ -1702,6 +2641,22 @@ export type TeamMember = {
   /** Пользователь */
   user: Maybe<User>;
   userId: Scalars['ID']['output'];
+};
+
+export type TeamMemberDetails = {
+  __typename?: 'TeamMemberDetails';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  role: Scalars['String']['output'];
+  user: User;
+};
+
+export type TeamMemberInfo = {
+  __typename?: 'TeamMemberInfo';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  role: Scalars['String']['output'];
+  team: Team;
 };
 
 export type TeamMemberSalaryHistory = {
@@ -1738,6 +2693,14 @@ export type TeamMemberStats = {
   /** Общая сумма всех выплат за всё время */
   totalPayouts: Scalars['Float']['output'];
 };
+
+/** Роль участника в конкретной команде */
+export enum TeamRole {
+  /** Участник команды - ограниченные права */
+  Member = 'MEMBER',
+  /** Владелец команды - полные права на управление */
+  Owner = 'OWNER'
+}
 
 export type TelegramAuthPayload = {
   __typename?: 'TelegramAuthPayload';
@@ -1778,6 +2741,11 @@ export type TwoFactorStatus = {
   enabled: Scalars['Boolean']['output'];
 };
 
+export type UpdateAdminPermissionsInput = {
+  permissions: Array<Scalars['String']['input']>;
+  roleId: Scalars['String']['input'];
+};
+
 export type UpdateExpenseInput = {
   /** Сумма расхода */
   amount: InputMaybe<Scalars['Float']['input']>;
@@ -1791,6 +2759,11 @@ export type UpdateExpenseInput = {
   paidByClient: InputMaybe<Scalars['Boolean']['input']>;
   /** Массив URL фотографий */
   photos: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type UpdateIpWhitelistInput = {
+  ipAddresses: Array<Scalars['String']['input']>;
+  roleId: Scalars['String']['input'];
 };
 
 export type UpdateMemberPositionInput = {
@@ -1882,6 +2855,17 @@ export type UpdateStorageSettingsInput = {
   r2SecretAccessKey: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateSubscriptionInput = {
+  /** Cancel at period end */
+  cancelAtPeriodEnd: InputMaybe<Scalars['Boolean']['input']>;
+  /** Current period end date */
+  currentPeriodEnd: InputMaybe<Scalars['DateTime']['input']>;
+  /** Subscription plan */
+  plan: InputMaybe<Scalars['String']['input']>;
+  /** Subscription status */
+  status: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateSystemSettingInput = {
   key: Scalars['String']['input'];
   value: Scalars['String']['input'];
@@ -1908,6 +2892,11 @@ export type UpdateTeamInput = {
   logoFile: InputMaybe<Scalars['Upload']['input']>;
   name: InputMaybe<Scalars['String']['input']>;
   teamId: Scalars['ID']['input'];
+};
+
+export type UpdateTwoFactorInput = {
+  enforced: Scalars['Boolean']['input'];
+  roleId: Scalars['String']['input'];
 };
 
 export type UpdateWorkLogInput = {
@@ -1938,8 +2927,12 @@ export type UsageStats = {
 
 export type User = {
   __typename?: 'User';
+  adminRole: Maybe<AdminRoleDetail>;
   /** URL аватарки пользователя */
   avatarUrl: Maybe<Scalars['String']['output']>;
+  /** Глобальная бизнес-роль: FOREMAN или WORKER */
+  businessRole: Maybe<BusinessRole>;
+  businessRoleAssignedAt: Maybe<Scalars['DateTime']['output']>;
   createdAt: Scalars['DateTime']['output'];
   email: Scalars['String']['output'];
   emailVerified: Scalars['Boolean']['output'];
@@ -1955,6 +2948,37 @@ export type User = {
   /** Telegram Username пользователя */
   telegramUsername: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type UserActivity = {
+  __typename?: 'UserActivity';
+  /** Action type (e.g., UPDATE_USER, DELETE_USER) */
+  action: Scalars['String']['output'];
+  /** When the action occurred */
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  /** IP address of the actor */
+  ipAddress: Maybe<Scalars['String']['output']>;
+  /** Resource type affected */
+  resource: Scalars['String']['output'];
+  /** Resource ID affected */
+  resourceId: Scalars['String']['output'];
+};
+
+export type UserSession = {
+  __typename?: 'UserSession';
+  /** Session creation date */
+  createdAt: Scalars['DateTime']['output'];
+  /** Session expiration date */
+  expiresAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  /** IP address */
+  ipAddress: Maybe<Scalars['String']['output']>;
+  /** Session token (masked) */
+  token: Scalars['String']['output'];
+  /** User agent string */
+  userAgent: Maybe<Scalars['String']['output']>;
+  userId: Scalars['String']['output'];
 };
 
 export type UserStoragePreference = {
@@ -1989,18 +3013,53 @@ export type WorkLog = {
   hours: Scalars['Float']['output'];
   id: Scalars['ID']['output'];
   member: Maybe<TeamMember>;
-  memberId: Scalars['ID']['output'];
+  memberId: Scalars['String']['output'];
   project: Maybe<Project>;
-  projectId: Scalars['ID']['output'];
+  projectId: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
+
+export type DashboardStatsFieldsFragment = { __typename?: 'DashboardStats', users: { __typename?: 'DashboardUserStats', total: number, verified: number, admins: number, newThisMonth: number, growthRate: number }, teams: { __typename?: 'DashboardTeamStats', total: number, withActiveSubscription: number, averageMembers: number, newThisMonth: number }, projects: { __typename?: 'DashboardProjectStats', total: number, active: number, completed: number, archived: number }, subscriptions: { __typename?: 'DashboardSubscriptionStats', total: number, active: number, trialing: number, cancelled: number, byPlan: { __typename?: 'DashboardSubscriptionsByPlan', LITE: number, FOREMAN: number, BRIGADE: number } }, payments: { __typename?: 'DashboardPaymentStats', total: number, succeeded: number, totalRevenue: number, thisMonthRevenue: number, averagePayment: number }, storage: { __typename?: 'DashboardStorageStats', totalUsedBytes: number, totalUsedGB: number, averagePerTeam: number } };
+
+export type ChartDataFieldsFragment = { __typename?: 'ChartData', labels: Array<string>, data: Array<number> };
+
+export type ActivityLogFieldsFragment = { __typename?: 'ActivityLog', id: string, action: string, resource: string, resourceId: string, adminUserEmail: string, createdAt: string };
+
+export type SystemHealthFieldsFragment = { __typename?: 'SystemHealth', database: boolean, storageAvailable: boolean, lastBackup: string | null };
+
+export type AdminDashboardStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminDashboardStatsQuery = { __typename?: 'Query', adminDashboardStats: { __typename?: 'DashboardStats', users: { __typename?: 'DashboardUserStats', total: number, verified: number, admins: number, newThisMonth: number, growthRate: number }, teams: { __typename?: 'DashboardTeamStats', total: number, withActiveSubscription: number, averageMembers: number, newThisMonth: number }, projects: { __typename?: 'DashboardProjectStats', total: number, active: number, completed: number, archived: number }, subscriptions: { __typename?: 'DashboardSubscriptionStats', total: number, active: number, trialing: number, cancelled: number, byPlan: { __typename?: 'DashboardSubscriptionsByPlan', LITE: number, FOREMAN: number, BRIGADE: number } }, payments: { __typename?: 'DashboardPaymentStats', total: number, succeeded: number, totalRevenue: number, thisMonthRevenue: number, averagePayment: number }, storage: { __typename?: 'DashboardStorageStats', totalUsedBytes: number, totalUsedGB: number, averagePerTeam: number } } };
+
+export type AdminRevenueChartQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminRevenueChartQuery = { __typename?: 'Query', adminRevenueChart: { __typename?: 'ChartData', labels: Array<string>, data: Array<number> } };
+
+export type AdminUserGrowthChartQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminUserGrowthChartQuery = { __typename?: 'Query', adminUserGrowthChart: { __typename?: 'ChartData', labels: Array<string>, data: Array<number> } };
+
+export type AdminRecentActivityQueryVariables = Exact<{
+  limit: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AdminRecentActivityQuery = { __typename?: 'Query', adminRecentActivity: Array<{ __typename?: 'ActivityLog', id: string, action: string, resource: string, resourceId: string, adminUserEmail: string, createdAt: string }> };
+
+export type AdminSystemHealthQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminSystemHealthQuery = { __typename?: 'Query', adminSystemHealth: { __typename?: 'SystemHealth', database: boolean, storageAvailable: boolean, lastBackup: string | null } };
 
 export type AdminActionLogsQueryVariables = Exact<{
   filter: InputMaybe<AdminActionLogFilterInput>;
 }>;
 
 
-export type AdminActionLogsQuery = { __typename?: 'Query', adminActionLogs: { __typename?: 'AdminActionLogsResult', total: number, logs: Array<{ __typename?: 'AdminActionLog', id: string, adminUserId: string, action: string, resource: string, resourceId: string | null, details: any | null, ipAddress: string | null, userAgent: string | null, createdAt: string }> } };
+export type AdminActionLogsQuery = { __typename?: 'Query', adminActionLogs: { __typename?: 'AdminActionLogsResult', total: number, logs: Array<{ __typename?: 'AdminActionLog', id: string, adminUserId: string, adminUserEmail: string | null, action: string, resource: string, resourceId: string | null, details: any | null, ipAddress: string | null, userAgent: string | null, createdAt: string }> } };
 
 export type AdminActionLogQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2033,6 +3092,157 @@ export type AdminActionStatisticsQueryVariables = Exact<{
 
 
 export type AdminActionStatisticsQuery = { __typename?: 'Query', adminActionStatistics: { __typename?: 'AdminActionStatistics', totalActions: number, actionsByType: any, actionsByResource: any, actionsByAdmin: any } };
+
+export type PageInfoFieldsFragment = { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, currentPage: number, totalPages: number };
+
+export type AdminPaymentFieldsFragment = { __typename?: 'AdminPayment', id: string, subscriptionId: string, amount: number, currency: string, status: string, yookassaPaymentId: string | null, createdAt: string, updatedAt: string };
+
+export type AdminPaymentsQueryVariables = Exact<{
+  filters: InputMaybe<AdminPaymentFilters>;
+  pagination: PaginationInput;
+}>;
+
+
+export type AdminPaymentsQuery = { __typename?: 'Query', adminPayments: { __typename?: 'AdminPaymentsConnection', totalCount: number, nodes: Array<{ __typename?: 'AdminPayment', id: string, subscriptionId: string, amount: number, currency: string, status: string, yookassaPaymentId: string | null, createdAt: string, updatedAt: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, currentPage: number, totalPages: number } } };
+
+export type AdminPaymentQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminPaymentQuery = { __typename?: 'Query', adminPayment: { __typename?: 'AdminPayment', id: string, subscriptionId: string, amount: number, currency: string, status: string, yookassaPaymentId: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminPaymentStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminPaymentStatsQuery = { __typename?: 'Query', adminPaymentStats: { __typename?: 'PaymentStats', totalPayments: number, succeededPayments: number, pendingPayments: number, failedPayments: number, totalRevenue: number, averagePayment: number, byStatus: { __typename?: 'PaymentsByStatus', PENDING: number, SUCCEEDED: number, FAILED: number, CANCELLED: number } } };
+
+export type AdminUpdatePaymentStatusMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+
+export type AdminUpdatePaymentStatusMutation = { __typename?: 'Mutation', adminUpdatePaymentStatus: { __typename?: 'AdminPayment', id: string, subscriptionId: string, amount: number, currency: string, status: string, yookassaPaymentId: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminRefundPaymentMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  input: RefundPaymentInput;
+}>;
+
+
+export type AdminRefundPaymentMutation = { __typename?: 'Mutation', adminRefundPayment: { __typename?: 'AdminPayment', id: string, subscriptionId: string, amount: number, currency: string, status: string, yookassaPaymentId: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminDeletePaymentMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminDeletePaymentMutation = { __typename?: 'Mutation', adminDeletePayment: boolean };
+
+export type AdminProjectsQueryVariables = Exact<{
+  filter: InputMaybe<AdminProjectFilterInput>;
+  pagination: InputMaybe<PaginationInput>;
+}>;
+
+
+export type AdminProjectsQuery = { __typename?: 'Query', adminProjects: { __typename?: 'AdminProjectsResult', total: number, hasMore: boolean, projects: Array<{ __typename?: 'AdminProject', id: string, name: string, description: string | null, status: string, budget: number | null, actualCost: number | null, startDate: string | null, endDate: string | null, completedAt: string | null, createdAt: string, updatedAt: string, team: any | null, owner: any | null, _count: { __typename?: 'ProjectCount', expenses: number, photoReports: number, tasks: number } | null }> } };
+
+export type AdminProjectQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminProjectQuery = { __typename?: 'Query', adminProject: { __typename?: 'AdminProject', id: string, name: string, description: string | null, status: string, budget: number | null, actualCost: number | null, startDate: string | null, endDate: string | null, completedAt: string | null, createdAt: string, updatedAt: string, team: any | null, owner: any | null, _count: { __typename?: 'ProjectCount', expenses: number, photoReports: number, tasks: number } | null } | null };
+
+export type AdminUpdateProjectStatusMutationVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+
+export type AdminUpdateProjectStatusMutation = { __typename?: 'Mutation', adminUpdateProjectStatus: { __typename?: 'AdminProject', id: string, status: string, updatedAt: string } };
+
+export type AdminDeleteProjectMutationVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminDeleteProjectMutation = { __typename?: 'Mutation', adminDeleteProject: { __typename?: 'DeleteResult', success: boolean, message: string } };
+
+export type AdminArchiveProjectMutationVariables = Exact<{
+  projectId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminArchiveProjectMutation = { __typename?: 'Mutation', adminArchiveProject: { __typename?: 'AdminProject', id: string, status: string, updatedAt: string } };
+
+export type GetAdminRolesQueryVariables = Exact<{
+  role: InputMaybe<Scalars['String']['input']>;
+  search: InputMaybe<Scalars['String']['input']>;
+  limit: InputMaybe<Scalars['Float']['input']>;
+  offset: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetAdminRolesQuery = { __typename?: 'Query', adminRoles: Array<{ __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, twoFactorEnforced: boolean, ipWhitelist: Array<string>, createdAt: string, updatedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string } }> };
+
+export type GetAdminRoleQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetAdminRoleQuery = { __typename?: 'Query', adminRole: { __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, twoFactorEnforced: boolean, ipWhitelist: Array<string>, createdAt: string, updatedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string } } };
+
+export type GetAdminRoleByUserIdQueryVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type GetAdminRoleByUserIdQuery = { __typename?: 'Query', adminRoleByUserId: { __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, twoFactorEnforced: boolean, ipWhitelist: Array<string>, createdAt: string, updatedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string } } | null };
+
+export type AssignAdminRoleMutationVariables = Exact<{
+  input: AssignAdminRoleInput;
+}>;
+
+
+export type AssignAdminRoleMutation = { __typename?: 'Mutation', assignAdminRole: { __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, twoFactorEnforced: boolean, ipWhitelist: Array<string>, createdAt: string, updatedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string } } };
+
+export type UpdateAdminPermissionsMutationVariables = Exact<{
+  input: UpdateAdminPermissionsInput;
+}>;
+
+
+export type UpdateAdminPermissionsMutation = { __typename?: 'Mutation', updateAdminPermissions: { __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, updatedAt: string } };
+
+export type UpdateTwoFactorEnforcementMutationVariables = Exact<{
+  input: UpdateTwoFactorInput;
+}>;
+
+
+export type UpdateTwoFactorEnforcementMutation = { __typename?: 'Mutation', updateTwoFactorEnforcement: { __typename?: 'AdminRoleDetail', id: string, userId: string, twoFactorEnforced: boolean, updatedAt: string } };
+
+export type UpdateIpWhitelistMutationVariables = Exact<{
+  input: UpdateIpWhitelistInput;
+}>;
+
+
+export type UpdateIpWhitelistMutation = { __typename?: 'Mutation', updateIpWhitelist: { __typename?: 'AdminRoleDetail', id: string, userId: string, ipWhitelist: Array<string>, updatedAt: string } };
+
+export type ChangeAdminRoleMutationVariables = Exact<{
+  roleId: Scalars['String']['input'];
+  newRole: Scalars['String']['input'];
+}>;
+
+
+export type ChangeAdminRoleMutation = { __typename?: 'Mutation', changeAdminRole: { __typename?: 'AdminRoleDetail', id: string, userId: string, role: AdminRoleType, permissions: Array<string>, updatedAt: string } };
+
+export type RevokeAdminRoleMutationVariables = Exact<{
+  roleId: Scalars['String']['input'];
+}>;
+
+
+export type RevokeAdminRoleMutation = { __typename?: 'Mutation', revokeAdminRole: boolean };
 
 export type SystemSettingsQueryVariables = Exact<{
   category: InputMaybe<SettingCategory>;
@@ -2126,6 +3336,176 @@ export type MigrateUserStorageMutationVariables = Exact<{
 
 export type MigrateUserStorageMutation = { __typename?: 'Mutation', migrateUserStorage: { __typename?: 'StorageMigrationResult', userId: string, fromProvider: StorageProviderType, toProvider: StorageProviderType, totalFiles: number, successCount: number, failedCount: number, failures: Array<{ __typename?: 'MigrationFailure', url: string, error: string }> } };
 
+export type AdminSubscriptionFieldsFragment = { __typename?: 'Subscription', id: string, teamId: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodStart: string, currentPeriodEnd: string, cancelAtPeriodEnd: boolean, trialEndsAt: string | null, createdAt: string, updatedAt: string };
+
+export type AdminSubscriptionsQueryVariables = Exact<{
+  filters: InputMaybe<AdminSubscriptionFilters>;
+  pagination: PaginationInput;
+}>;
+
+
+export type AdminSubscriptionsQuery = { __typename?: 'Query', adminSubscriptions: { __typename?: 'AdminSubscriptionsConnection', totalCount: number, nodes: Array<{ __typename?: 'Subscription', id: string, teamId: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodStart: string, currentPeriodEnd: string, cancelAtPeriodEnd: boolean, trialEndsAt: string | null, createdAt: string, updatedAt: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, currentPage: number, totalPages: number } } };
+
+export type AdminSubscriptionQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminSubscriptionQuery = { __typename?: 'Query', adminSubscription: { __typename?: 'Subscription', id: string, teamId: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodStart: string, currentPeriodEnd: string, cancelAtPeriodEnd: boolean, trialEndsAt: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminSubscriptionStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminSubscriptionStatsQuery = { __typename?: 'Query', adminSubscriptionStats: { __typename?: 'SubscriptionStats', totalSubscriptions: number, activeSubscriptions: number, trialingSubscriptions: number, cancelledSubscriptions: number, byPlan: { __typename?: 'SubscriptionsByPlan', LITE: number, FOREMAN: number, BRIGADE: number } } };
+
+export type AdminCancelSubscriptionMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminCancelSubscriptionMutation = { __typename?: 'Mutation', adminCancelSubscription: { __typename?: 'Subscription', id: string, teamId: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodStart: string, currentPeriodEnd: string, cancelAtPeriodEnd: boolean, trialEndsAt: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminChangeTeamPlanMutationVariables = Exact<{
+  teamId: Scalars['String']['input'];
+  planType: Scalars['String']['input'];
+}>;
+
+
+export type AdminChangeTeamPlanMutation = { __typename?: 'Mutation', adminChangeTeamPlan: { __typename?: 'Team', id: string, name: string, ownerId: string } };
+
+export type AdminDeleteSubscriptionMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminDeleteSubscriptionMutation = { __typename?: 'Mutation', adminDeleteSubscription: boolean };
+
+export type AdminSupportTicketsQueryVariables = Exact<{
+  filter: InputMaybe<AdminSupportTicketFilterInput>;
+  pagination: InputMaybe<PaginationInput>;
+}>;
+
+
+export type AdminSupportTicketsQuery = { __typename?: 'Query', adminSupportTickets: { __typename?: 'AdminSupportTicketsResult', total: number, hasMore: boolean, tickets: Array<{ __typename?: 'AdminSupportTicket', id: string, userId: string, userEmail: string | null, userFullName: string | null, telegramChatId: string, subject: string | null, status: SupportTicketStatus, priority: SupportTicketPriority, category: string | null, createdAt: string, updatedAt: string, closedAt: string | null, messageCount: number | null }> } };
+
+export type AdminSupportTicketQueryVariables = Exact<{
+  ticketId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminSupportTicketQuery = { __typename?: 'Query', adminSupportTicket: { __typename?: 'AdminSupportTicket', id: string, userId: string, userEmail: string | null, userFullName: string | null, telegramChatId: string, subject: string | null, status: SupportTicketStatus, priority: SupportTicketPriority, category: string | null, createdAt: string, updatedAt: string, closedAt: string | null, messages: Array<{ __typename?: 'SupportMessage', id: string, ticketId: string, fromUser: boolean, message: string, createdAt: string }> | null } };
+
+export type AdminSupportStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminSupportStatisticsQuery = { __typename?: 'Query', adminSupportStatistics: { __typename?: 'AdminSupportStatistics', totalTickets: number, openTickets: number, inProgressTickets: number, resolvedTickets: number, closedTickets: number, ticketsByPriority: any, ticketsByCategory: any } };
+
+export type AdminUpdateSupportTicketMutationVariables = Exact<{
+  ticketId: Scalars['ID']['input'];
+  input: AdminUpdateSupportTicketInput;
+}>;
+
+
+export type AdminUpdateSupportTicketMutation = { __typename?: 'Mutation', adminUpdateSupportTicket: { __typename?: 'AdminSupportTicket', id: string, status: SupportTicketStatus, priority: SupportTicketPriority, category: string | null, updatedAt: string, closedAt: string | null } };
+
+export type AdminSendSupportMessageMutationVariables = Exact<{
+  input: AdminSendMessageInput;
+}>;
+
+
+export type AdminSendSupportMessageMutation = { __typename?: 'Mutation', adminSendSupportMessage: { __typename?: 'SupportMessage', id: string, ticketId: string, fromUser: boolean, message: string, createdAt: string } };
+
+export type AdminDeleteSupportTicketMutationVariables = Exact<{
+  ticketId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminDeleteSupportTicketMutation = { __typename?: 'Mutation', adminDeleteSupportTicket: { __typename?: 'DeleteResult', success: boolean, message: string } };
+
+export type AdminTeamFieldsFragment = { __typename?: 'Team', id: string, name: string, ownerId: string, createdAt: string, updatedAt: string };
+
+export type AdminTeamDetailsFieldsFragment = { __typename?: 'AdminTeamDetails', team: { __typename?: 'Team', id: string, name: string, ownerId: string, createdAt: string, updatedAt: string }, owner: { __typename?: 'User', id: string, email: string, fullName: string, avatarUrl: string | null }, subscription: { __typename?: 'Subscription', id: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodEnd: string } | null, projects: Array<{ __typename?: 'Project', id: string, name: string, status: ProjectStatus, budget: number | null, createdAt: string }>, _count: { __typename?: 'AdminTeamCounts', members: number, projects: number } };
+
+export type AdminTeamStatsFieldsFragment = { __typename?: 'AdminTeamStats', totalMembers: number, totalProjects: number, totalExpenses: number, totalExpenseAmount: number, activeProjects: number, completedProjects: number };
+
+export type AdminTeamsQueryVariables = Exact<{
+  filters: InputMaybe<AdminTeamFilters>;
+  pagination: PaginationInput;
+}>;
+
+
+export type AdminTeamsQuery = { __typename?: 'Query', adminTeams: { __typename?: 'AdminTeamsConnection', totalCount: number, nodes: Array<{ __typename?: 'Team', id: string, name: string, ownerId: string, createdAt: string, updatedAt: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, currentPage: number, totalPages: number } } };
+
+export type AdminTeamQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamQuery = { __typename?: 'Query', adminTeam: { __typename?: 'AdminTeamDetails', team: { __typename?: 'Team', id: string, name: string, ownerId: string, createdAt: string, updatedAt: string }, owner: { __typename?: 'User', id: string, email: string, fullName: string, avatarUrl: string | null }, subscription: { __typename?: 'Subscription', id: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodEnd: string } | null, projects: Array<{ __typename?: 'Project', id: string, name: string, status: ProjectStatus, budget: number | null, createdAt: string }>, _count: { __typename?: 'AdminTeamCounts', members: number, projects: number } } };
+
+export type AdminTeamStatsQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamStatsQuery = { __typename?: 'Query', adminTeamStats: { __typename?: 'AdminTeamStats', totalMembers: number, totalProjects: number, totalExpenses: number, totalExpenseAmount: number, activeProjects: number, completedProjects: number } };
+
+export type AdminUpdateTeamMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  input: AdminUpdateTeamInput;
+}>;
+
+
+export type AdminUpdateTeamMutation = { __typename?: 'Mutation', adminUpdateTeam: { __typename?: 'Team', id: string, name: string, ownerId: string, createdAt: string, updatedAt: string } };
+
+export type AdminDeleteTeamMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminDeleteTeamMutation = { __typename?: 'Mutation', adminDeleteTeam: boolean };
+
+export type AdminUserFieldsFragment = { __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string };
+
+export type AdminUserDetailsFieldsFragment = { __typename?: 'AdminUserDetails', user: { __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string }, _count: { __typename?: 'AdminUserCounts', ownedTeams: number, payments: number } };
+
+export type AdminUsersQueryVariables = Exact<{
+  filters: InputMaybe<AdminUserFilters>;
+  pagination: PaginationInput;
+}>;
+
+
+export type AdminUsersQuery = { __typename?: 'Query', adminUsers: { __typename?: 'AdminUsersConnection', totalCount: number, nodes: Array<{ __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, currentPage: number, totalPages: number } } };
+
+export type AdminUserQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminUserQuery = { __typename?: 'Query', adminUser: { __typename?: 'AdminUserDetails', user: { __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string }, _count: { __typename?: 'AdminUserCounts', ownedTeams: number, payments: number } } };
+
+export type AdminUpdateUserMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  input: AdminUpdateUserInput;
+}>;
+
+
+export type AdminUpdateUserMutation = { __typename?: 'Mutation', adminUpdateUser: { __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminVerifyUserEmailMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminVerifyUserEmailMutation = { __typename?: 'Mutation', adminVerifyUserEmail: { __typename?: 'User', id: string, email: string, fullName: string, telegramChatId: string | null, emailVerified: boolean, avatarUrl: string | null, createdAt: string, updatedAt: string } };
+
+export type AdminDeleteUserMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type AdminDeleteUserMutation = { __typename?: 'Mutation', adminDeleteUser: boolean };
+
 export type MemberAnalyticsFieldsFragment = { __typename?: 'MemberAnalytics', memberId: string, memberName: string, memberEmail: string, avatarUrl: string | null, role: string, position: string | null, salaryType: string, salaryAmount: number | null, projectsCount: number, totalHoursWorked: number, totalPayouts: number, averagePayoutPerProject: number, completedPayoutsCount: number, pendingPayoutsCount: number, joinedAt: string };
 
 export type ProjectAnalyticsFieldsFragment = { __typename?: 'ProjectAnalytics', projectId: string, projectName: string, budget: number | null, totalHoursWorked: number, totalPayouts: number, membersCount: number, status: string, startDate: string | null, endDate: string | null };
@@ -2151,14 +3531,14 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'AuthPayload', message: string | null, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean } } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'AuthPayload', message: string | null, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, businessRole: BusinessRole | null, businessRoleAssignedAt: string | null } } };
 
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthPayload', user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean } } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthPayload', user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, businessRole: BusinessRole | null, businessRoleAssignedAt: string | null } } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -2168,7 +3548,7 @@ export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 export type RefreshSessionMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RefreshSessionMutation = { __typename?: 'Mutation', refreshSession: { __typename?: 'AuthPayload', user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean } } | null };
+export type RefreshSessionMutation = { __typename?: 'Mutation', refreshSession: { __typename?: 'AuthPayload', user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, businessRole: BusinessRole | null, businessRoleAssignedAt: string | null } } | null };
 
 export type VerifyEmailMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -2210,6 +3590,13 @@ export type UpdateProfileMutationVariables = Exact<{
 
 export type UpdateProfileMutation = { __typename?: 'Mutation', updateProfile: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null } };
 
+export type UpdateNotificationSettingsMutationVariables = Exact<{
+  input: UpdateNotificationSettingsInput;
+}>;
+
+
+export type UpdateNotificationSettingsMutation = { __typename?: 'Mutation', updateNotificationSettings: { __typename?: 'NotificationSettings', appPush: boolean, appEmail: boolean, appSms: boolean, marketingPush: boolean, marketingEmail: boolean } };
+
 export type RevokeSessionMutationVariables = Exact<{
   sessionId: Scalars['String']['input'];
 }>;
@@ -2237,12 +3624,12 @@ export type CheckTelegramAuthMutationVariables = Exact<{
 }>;
 
 
-export type CheckTelegramAuthMutation = { __typename?: 'Mutation', checkTelegramAuth: { __typename?: 'TelegramAuthStatusPayload', completed: boolean, sessionToken: string | null, refreshToken: string | null, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean } | null } };
+export type CheckTelegramAuthMutation = { __typename?: 'Mutation', checkTelegramAuth: { __typename?: 'TelegramAuthStatusPayload', completed: boolean, sessionToken: string | null, refreshToken: string | null, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, businessRole: BusinessRole | null, businessRoleAssignedAt: string | null } | null } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, avatarUrl: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, createdAt: string } | null };
+export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, avatarUrl: string | null, emailVerified: boolean, hasCompletedOnboarding: boolean, businessRole: BusinessRole | null, businessRoleAssignedAt: string | null, createdAt: string, notificationSettings: { __typename?: 'NotificationSettings', appPush: boolean, appEmail: boolean, appSms: boolean, marketingPush: boolean, marketingEmail: boolean } | null, adminRole: { __typename?: 'AdminRoleDetail', id: string, role: AdminRoleType, permissions: Array<string> } | null } | null };
 
 export type SessionsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2304,7 +3691,7 @@ export type DeleteExpenseMutationVariables = Exact<{
 
 export type DeleteExpenseMutation = { __typename?: 'Mutation', deleteExpense: { __typename?: 'Expense', id: string } };
 
-export type ProjectPayoutFieldsFragment = { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } };
+export type ProjectPayoutFieldsFragment = { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } };
 
 export type MemberPayoutDetailFieldsFragment = { __typename?: 'MemberPayoutDetail', memberId: string, memberName: string, salaryType: string, salaryAmount: number | null, calculatedPayout: number, status: string };
 
@@ -2322,14 +3709,14 @@ export type ProjectPayoutsQueryVariables = Exact<{
 }>;
 
 
-export type ProjectPayoutsQuery = { __typename?: 'Query', projectPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
+export type ProjectPayoutsQuery = { __typename?: 'Query', projectPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
 
 export type MemberPayoutsQueryVariables = Exact<{
   memberId: Scalars['ID']['input'];
 }>;
 
 
-export type MemberPayoutsQuery = { __typename?: 'Query', memberPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
+export type MemberPayoutsQuery = { __typename?: 'Query', memberPayouts: Array<{ __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } }> };
 
 export type UpdateMemberSalaryMutationVariables = Exact<{
   input: UpdateMemberSalaryInput;
@@ -2343,7 +3730,7 @@ export type CreatePayoutMutationVariables = Exact<{
 }>;
 
 
-export type CreatePayoutMutation = { __typename?: 'Mutation', createPayout: { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } } };
+export type CreatePayoutMutation = { __typename?: 'Mutation', createPayout: { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } } };
 
 export type CloseProjectMutationVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -2357,7 +3744,7 @@ export type UpdatePayoutPaymentMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePayoutPaymentMutation = { __typename?: 'Mutation', updatePayoutPayment: { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } } };
+export type UpdatePayoutPaymentMutation = { __typename?: 'Mutation', updatePayoutPayment: { __typename?: 'ProjectPayout', id: string, projectId: string, memberId: string, calculatedAmount: number, actualAmount: number | null, status: string, paidAt: string | null, notes: string | null, paymentMethod: PaymentMethod | null, receiptUrl: string | null, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string }, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string } | null } } };
 
 export type PhotoReportFieldsFragment = { __typename?: 'PhotoReport', id: string, slug: string, projectId: string, title: string, description: string | null, coverPhotoUrl: string | null, isPublic: boolean, viewCount: number, createdById: string, createdAt: string, updatedAt: string, publishedAt: string | null };
 
@@ -2663,7 +4050,7 @@ export type TeamMembersQueryVariables = Exact<{
 }>;
 
 
-export type TeamMembersQuery = { __typename?: 'Query', teamMembers: Array<{ __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: string, position: string | null, salaryType: string, salaryAmount: number | null, joinedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, avatarUrl: string | null } | null, stats: { __typename?: 'TeamMemberStats', projectCount: number, totalPayouts: number, averagePayoutPerProject: number, completedPayoutsCount: number, pendingPayoutsCount: number } | null }> };
+export type TeamMembersQuery = { __typename?: 'Query', teamMembers: Array<{ __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: TeamRole, position: string | null, salaryType: string, salaryAmount: number | null, joinedAt: string, user: { __typename?: 'User', id: string, email: string, fullName: string, phone: string | null, avatarUrl: string | null } | null, stats: { __typename?: 'TeamMemberStats', projectCount: number, totalPayouts: number, averagePayoutPerProject: number, completedPayoutsCount: number, pendingPayoutsCount: number } | null }> };
 
 export type CompleteOnboardingMutationVariables = Exact<{
   input: CompleteOnboardingInput;
@@ -2700,7 +4087,7 @@ export type JoinTeamByInviteMutationVariables = Exact<{
 }>;
 
 
-export type JoinTeamByInviteMutation = { __typename?: 'Mutation', joinTeamByInvite: { __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: string, joinedAt: string, team: { __typename?: 'Team', id: string, name: string, logoType: LogoType, logoUrl: string | null, iconId: string | null, colorId: string | null } | null } };
+export type JoinTeamByInviteMutation = { __typename?: 'Mutation', joinTeamByInvite: { __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: TeamRole, joinedAt: string, team: { __typename?: 'Team', id: string, name: string, logoType: LogoType, logoUrl: string | null, iconId: string | null, colorId: string | null } | null } };
 
 export type TeamInvitesQueryVariables = Exact<{
   teamId: Scalars['ID']['input'];
@@ -2721,7 +4108,14 @@ export type UpdateMemberPositionMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMemberPositionMutation = { __typename?: 'Mutation', updateMemberPosition: { __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: string, position: string | null, joinedAt: string } };
+export type UpdateMemberPositionMutation = { __typename?: 'Mutation', updateMemberPosition: { __typename?: 'TeamMember', id: string, teamId: string, userId: string, role: TeamRole, position: string | null, joinedAt: string } };
+
+export type MemberSalaryHistoryQueryVariables = Exact<{
+  memberId: Scalars['ID']['input'];
+}>;
+
+
+export type MemberSalaryHistoryQuery = { __typename?: 'Query', memberSalaryHistory: Array<{ __typename?: 'TeamMemberSalaryHistory', id: string, memberId: string, previousType: string | null, previousAmount: number | null, newType: string, newAmount: number | null, reason: string | null, changedByUserId: string, createdAt: string, changedBy: { __typename?: 'User', id: string, fullName: string, email: string } | null }> };
 
 export type DisconnectTelegramMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -2759,21 +4153,21 @@ export type Regenerate2FaBackupCodesMutationVariables = Exact<{
 
 export type Regenerate2FaBackupCodesMutation = { __typename?: 'Mutation', regenerate2FABackupCodes: { __typename?: 'BackupCodesResponse', backupCodes: Array<string> } };
 
-export type WorkLogFieldsFragment = { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null };
+export type WorkLogFieldsFragment = { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null };
 
 export type ProjectWorkLogsQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
 }>;
 
 
-export type ProjectWorkLogsQuery = { __typename?: 'Query', projectWorkLogs: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
+export type ProjectWorkLogsQuery = { __typename?: 'Query', projectWorkLogs: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
 
 export type MemberWorkLogsQueryVariables = Exact<{
   memberId: Scalars['ID']['input'];
 }>;
 
 
-export type MemberWorkLogsQuery = { __typename?: 'Query', memberWorkLogs: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
+export type MemberWorkLogsQuery = { __typename?: 'Query', memberWorkLogs: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
 
 export type WorkLogsByDateRangeQueryVariables = Exact<{
   projectId: Scalars['ID']['input'];
@@ -2782,21 +4176,21 @@ export type WorkLogsByDateRangeQueryVariables = Exact<{
 }>;
 
 
-export type WorkLogsByDateRangeQuery = { __typename?: 'Query', workLogsByDateRange: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
+export type WorkLogsByDateRangeQuery = { __typename?: 'Query', workLogsByDateRange: Array<{ __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null }> };
 
 export type CreateWorkLogMutationVariables = Exact<{
   input: CreateWorkLogInput;
 }>;
 
 
-export type CreateWorkLogMutation = { __typename?: 'Mutation', createWorkLog: { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null } };
+export type CreateWorkLogMutation = { __typename?: 'Mutation', createWorkLog: { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null } };
 
 export type UpdateWorkLogMutationVariables = Exact<{
   input: UpdateWorkLogInput;
 }>;
 
 
-export type UpdateWorkLogMutation = { __typename?: 'Mutation', updateWorkLog: { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: string, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null } };
+export type UpdateWorkLogMutation = { __typename?: 'Mutation', updateWorkLog: { __typename?: 'WorkLog', id: string, projectId: string, memberId: string, date: string, hours: number, description: string | null, createdById: string, createdAt: string, updatedAt: string, project: { __typename?: 'Project', id: string, name: string } | null, member: { __typename?: 'TeamMember', id: string, userId: string, role: TeamRole, salaryType: string, salaryAmount: number | null, user: { __typename?: 'User', id: string, fullName: string, email: string, avatarUrl: string | null } | null } | null } };
 
 export type DeleteWorkLogMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2812,6 +4206,18 @@ export type ExportProjectWorkLogsQueryVariables = Exact<{
 
 export type ExportProjectWorkLogsQuery = { __typename?: 'Query', exportProjectWorkLogs: string };
 
+export const DashboardStatsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DashboardStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DashboardStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"admins"}},{"kind":"Field","name":{"kind":"Name","value":"newThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"growthRate"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teams"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"withActiveSubscription"}},{"kind":"Field","name":{"kind":"Name","value":"averageMembers"}},{"kind":"Field","name":{"kind":"Name","value":"newThisMonth"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"archived"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscriptions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"trialing"}},{"kind":"Field","name":{"kind":"Name","value":"cancelled"}},{"kind":"Field","name":{"kind":"Name","value":"byPlan"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"LITE"}},{"kind":"Field","name":{"kind":"Name","value":"FOREMAN"}},{"kind":"Field","name":{"kind":"Name","value":"BRIGADE"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"payments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"succeeded"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"thisMonthRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayment"}}]}},{"kind":"Field","name":{"kind":"Name","value":"storage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalUsedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"totalUsedGB"}},{"kind":"Field","name":{"kind":"Name","value":"averagePerTeam"}}]}}]}}]} as unknown as DocumentNode<DashboardStatsFieldsFragment, unknown>;
+export const ChartDataFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ChartDataFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ChartData"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]} as unknown as DocumentNode<ChartDataFieldsFragment, unknown>;
+export const ActivityLogFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ActivityLogFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ActivityLog"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserEmail"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<ActivityLogFieldsFragment, unknown>;
+export const SystemHealthFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SystemHealthFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SystemHealth"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"database"}},{"kind":"Field","name":{"kind":"Name","value":"storageAvailable"}},{"kind":"Field","name":{"kind":"Name","value":"lastBackup"}}]}}]} as unknown as DocumentNode<SystemHealthFieldsFragment, unknown>;
+export const PageInfoFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<PageInfoFieldsFragment, unknown>;
+export const AdminPaymentFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminPaymentFieldsFragment, unknown>;
+export const AdminSubscriptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminSubscriptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Subscription"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodStart"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"cancelAtPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"trialEndsAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminSubscriptionFieldsFragment, unknown>;
+export const AdminTeamFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminTeamFieldsFragment, unknown>;
+export const AdminTeamDetailsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"members"}},{"kind":"Field","name":{"kind":"Name","value":"projects"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminTeamDetailsFieldsFragment, unknown>;
+export const AdminTeamStatsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProjects"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenseAmount"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjects"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjects"}}]}}]} as unknown as DocumentNode<AdminTeamStatsFieldsFragment, unknown>;
+export const AdminUserFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminUserFieldsFragment, unknown>;
+export const AdminUserDetailsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUserDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ownedTeams"}},{"kind":"Field","name":{"kind":"Name","value":"payments"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminUserDetailsFieldsFragment, unknown>;
 export const MemberAnalyticsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"memberEmail"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerProject"}},{"kind":"Field","name":{"kind":"Name","value":"completedPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"pendingPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}}]} as unknown as DocumentNode<MemberAnalyticsFieldsFragment, unknown>;
 export const ProjectAnalyticsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"membersCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}}]}}]} as unknown as DocumentNode<ProjectAnalyticsFieldsFragment, unknown>;
 export const PersonnelAnalyticsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PersonnelAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PersonnelAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"teamName"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averageHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"generatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberAnalyticsFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectAnalyticsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"memberEmail"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerProject"}},{"kind":"Field","name":{"kind":"Name","value":"completedPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"pendingPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"membersCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}}]}}]} as unknown as DocumentNode<PersonnelAnalyticsFieldsFragment, unknown>;
@@ -2826,11 +4232,36 @@ export const PlanLimitsFieldsFragmentDoc = {"kind":"Document","definitions":[{"k
 export const PaymentFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Payment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"paymentMethod"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"failureReason"}},{"kind":"Field","name":{"kind":"Name","value":"paidAt"}},{"kind":"Field","name":{"kind":"Name","value":"refundedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<PaymentFieldsFragment, unknown>;
 export const TaskFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TaskFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Task"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeId"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"dueDate"}},{"kind":"Field","name":{"kind":"Name","value":"orderIndex"}},{"kind":"Field","name":{"kind":"Name","value":"checklist"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}},{"kind":"Field","name":{"kind":"Name","value":"assignee"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}}]} as unknown as DocumentNode<TaskFieldsFragment, unknown>;
 export const WorkLogFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"WorkLogFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"WorkLog"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"hours"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"project"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"member"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}}]}}]} as unknown as DocumentNode<WorkLogFieldsFragment, unknown>;
-export const AdminActionLogsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActionLogs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminActionLogFilterInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminActionLogs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserId"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]} as unknown as DocumentNode<AdminActionLogsQuery, AdminActionLogsQueryVariables>;
+export const AdminDashboardStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDashboardStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DashboardStatsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DashboardStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DashboardStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"verified"}},{"kind":"Field","name":{"kind":"Name","value":"admins"}},{"kind":"Field","name":{"kind":"Name","value":"newThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"growthRate"}}]}},{"kind":"Field","name":{"kind":"Name","value":"teams"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"withActiveSubscription"}},{"kind":"Field","name":{"kind":"Name","value":"averageMembers"}},{"kind":"Field","name":{"kind":"Name","value":"newThisMonth"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"archived"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscriptions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"trialing"}},{"kind":"Field","name":{"kind":"Name","value":"cancelled"}},{"kind":"Field","name":{"kind":"Name","value":"byPlan"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"LITE"}},{"kind":"Field","name":{"kind":"Name","value":"FOREMAN"}},{"kind":"Field","name":{"kind":"Name","value":"BRIGADE"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"payments"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"succeeded"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"thisMonthRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayment"}}]}},{"kind":"Field","name":{"kind":"Name","value":"storage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalUsedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"totalUsedGB"}},{"kind":"Field","name":{"kind":"Name","value":"averagePerTeam"}}]}}]}}]} as unknown as DocumentNode<AdminDashboardStatsQuery, AdminDashboardStatsQueryVariables>;
+export const AdminRevenueChartDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminRevenueChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRevenueChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ChartDataFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ChartDataFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ChartData"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]} as unknown as DocumentNode<AdminRevenueChartQuery, AdminRevenueChartQueryVariables>;
+export const AdminUserGrowthChartDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminUserGrowthChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUserGrowthChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ChartDataFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ChartDataFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ChartData"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]} as unknown as DocumentNode<AdminUserGrowthChartQuery, AdminUserGrowthChartQueryVariables>;
+export const AdminRecentActivityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminRecentActivity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRecentActivity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ActivityLogFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ActivityLogFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ActivityLog"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserEmail"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<AdminRecentActivityQuery, AdminRecentActivityQueryVariables>;
+export const AdminSystemHealthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSystemHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSystemHealth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SystemHealthFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SystemHealthFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SystemHealth"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"database"}},{"kind":"Field","name":{"kind":"Name","value":"storageAvailable"}},{"kind":"Field","name":{"kind":"Name","value":"lastBackup"}}]}}]} as unknown as DocumentNode<AdminSystemHealthQuery, AdminSystemHealthQueryVariables>;
+export const AdminActionLogsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActionLogs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminActionLogFilterInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminActionLogs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserId"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserEmail"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"total"}}]}}]}}]} as unknown as DocumentNode<AdminActionLogsQuery, AdminActionLogsQueryVariables>;
 export const AdminActionLogDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActionLog"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminActionLog"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserId"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<AdminActionLogQuery, AdminActionLogQueryVariables>;
 export const RecentAdminActionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"RecentAdminActions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"adminUserId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}},"defaultValue":{"kind":"IntValue","value":"20"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recentAdminActions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"adminUserId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"adminUserId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserId"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<RecentAdminActionsQuery, RecentAdminActionsQueryVariables>;
 export const ActionsByResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ActionsByResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"resource"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"resourceId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}},"defaultValue":{"kind":"IntValue","value":"50"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionsByResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"resource"},"value":{"kind":"Variable","name":{"kind":"Name","value":"resource"}}},{"kind":"Argument","name":{"kind":"Name","value":"resourceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"resourceId"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"adminUserId"}},{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"resource"}},{"kind":"Field","name":{"kind":"Name","value":"resourceId"}},{"kind":"Field","name":{"kind":"Name","value":"details"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<ActionsByResourceQuery, ActionsByResourceQueryVariables>;
 export const AdminActionStatisticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminActionStatistics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"startDate"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DateTime"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"endDate"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DateTime"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminActionStatistics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"startDate"},"value":{"kind":"Variable","name":{"kind":"Name","value":"startDate"}}},{"kind":"Argument","name":{"kind":"Name","value":"endDate"},"value":{"kind":"Variable","name":{"kind":"Name","value":"endDate"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalActions"}},{"kind":"Field","name":{"kind":"Name","value":"actionsByType"}},{"kind":"Field","name":{"kind":"Name","value":"actionsByResource"}},{"kind":"Field","name":{"kind":"Name","value":"actionsByAdmin"}}]}}]}}]} as unknown as DocumentNode<AdminActionStatisticsQuery, AdminActionStatisticsQueryVariables>;
+export const AdminPaymentsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminPayments"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPaymentFilters"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminPayments"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminPaymentFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PageInfoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<AdminPaymentsQuery, AdminPaymentsQueryVariables>;
+export const AdminPaymentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminPayment"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminPayment"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminPaymentFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminPaymentQuery, AdminPaymentQueryVariables>;
+export const AdminPaymentStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminPaymentStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminPaymentStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalPayments"}},{"kind":"Field","name":{"kind":"Name","value":"succeededPayments"}},{"kind":"Field","name":{"kind":"Name","value":"pendingPayments"}},{"kind":"Field","name":{"kind":"Name","value":"failedPayments"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayment"}},{"kind":"Field","name":{"kind":"Name","value":"byStatus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"PENDING"}},{"kind":"Field","name":{"kind":"Name","value":"SUCCEEDED"}},{"kind":"Field","name":{"kind":"Name","value":"FAILED"}},{"kind":"Field","name":{"kind":"Name","value":"CANCELLED"}}]}}]}}]}}]} as unknown as DocumentNode<AdminPaymentStatsQuery, AdminPaymentStatsQueryVariables>;
+export const AdminUpdatePaymentStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdatePaymentStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"status"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdatePaymentStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"Variable","name":{"kind":"Name","value":"status"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminPaymentFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminUpdatePaymentStatusMutation, AdminUpdatePaymentStatusMutationVariables>;
+export const AdminRefundPaymentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminRefundPayment"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RefundPaymentInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRefundPayment"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminPaymentFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminRefundPaymentMutation, AdminRefundPaymentMutationVariables>;
+export const AdminDeletePaymentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeletePayment"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeletePayment"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<AdminDeletePaymentMutation, AdminDeletePaymentMutationVariables>;
+export const AdminProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminProjects"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminProjectFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminProjects"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"actualCost"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"team"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expenses"}},{"kind":"Field","name":{"kind":"Name","value":"photoReports"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"hasMore"}}]}}]}}]} as unknown as DocumentNode<AdminProjectsQuery, AdminProjectsQueryVariables>;
+export const AdminProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"actualCost"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"team"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expenses"}},{"kind":"Field","name":{"kind":"Name","value":"photoReports"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"}}]}}]}}]}}]} as unknown as DocumentNode<AdminProjectQuery, AdminProjectQueryVariables>;
+export const AdminUpdateProjectStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdateProjectStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"status"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdateProjectStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}},{"kind":"Argument","name":{"kind":"Name","value":"status"},"value":{"kind":"Variable","name":{"kind":"Name","value":"status"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<AdminUpdateProjectStatusMutation, AdminUpdateProjectStatusMutationVariables>;
+export const AdminDeleteProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<AdminDeleteProjectMutation, AdminDeleteProjectMutationVariables>;
+export const AdminArchiveProjectDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminArchiveProject"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminArchiveProject"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"projectId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"projectId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<AdminArchiveProjectMutation, AdminArchiveProjectMutationVariables>;
+export const GetAdminRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAdminRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"role"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"role"},"value":{"kind":"Variable","name":{"kind":"Name","value":"role"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"twoFactorEnforced"}},{"kind":"Field","name":{"kind":"Name","value":"ipWhitelist"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetAdminRolesQuery, GetAdminRolesQueryVariables>;
+export const GetAdminRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAdminRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"twoFactorEnforced"}},{"kind":"Field","name":{"kind":"Name","value":"ipWhitelist"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetAdminRoleQuery, GetAdminRoleQueryVariables>;
+export const GetAdminRoleByUserIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAdminRoleByUserId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminRoleByUserId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"twoFactorEnforced"}},{"kind":"Field","name":{"kind":"Name","value":"ipWhitelist"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<GetAdminRoleByUserIdQuery, GetAdminRoleByUserIdQueryVariables>;
+export const AssignAdminRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AssignAdminRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AssignAdminRoleInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"assignAdminRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}}]}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"twoFactorEnforced"}},{"kind":"Field","name":{"kind":"Name","value":"ipWhitelist"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<AssignAdminRoleMutation, AssignAdminRoleMutationVariables>;
+export const UpdateAdminPermissionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateAdminPermissions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateAdminPermissionsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateAdminPermissions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateAdminPermissionsMutation, UpdateAdminPermissionsMutationVariables>;
+export const UpdateTwoFactorEnforcementDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateTwoFactorEnforcement"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateTwoFactorInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateTwoFactorEnforcement"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"twoFactorEnforced"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateTwoFactorEnforcementMutation, UpdateTwoFactorEnforcementMutationVariables>;
+export const UpdateIpWhitelistDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateIpWhitelist"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateIpWhitelistInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateIpWhitelist"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"ipWhitelist"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateIpWhitelistMutation, UpdateIpWhitelistMutationVariables>;
+export const ChangeAdminRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangeAdminRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newRole"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changeAdminRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleId"}}},{"kind":"Argument","name":{"kind":"Name","value":"newRole"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newRole"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<ChangeAdminRoleMutation, ChangeAdminRoleMutationVariables>;
+export const RevokeAdminRoleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeAdminRole"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"roleId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeAdminRole"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"roleId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"roleId"}}}]}]}}]} as unknown as DocumentNode<RevokeAdminRoleMutation, RevokeAdminRoleMutationVariables>;
 export const SystemSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SystemSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"category"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SettingCategory"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"systemSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"category"},"value":{"kind":"Variable","name":{"kind":"Name","value":"category"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"valueType"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"defaultValue"}},{"kind":"Field","name":{"kind":"Name","value":"isEncrypted"}},{"kind":"Field","name":{"kind":"Name","value":"isRequired"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<SystemSettingsQuery, SystemSettingsQueryVariables>;
 export const SystemSettingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"SystemSetting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"systemSetting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"valueType"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"defaultValue"}},{"kind":"Field","name":{"kind":"Name","value":"isEncrypted"}},{"kind":"Field","name":{"kind":"Name","value":"isRequired"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<SystemSettingQuery, SystemSettingQueryVariables>;
 export const CreateSystemSettingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSystemSetting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateSystemSettingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createSystemSetting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"valueType"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"defaultValue"}},{"kind":"Field","name":{"kind":"Name","value":"isEncrypted"}},{"kind":"Field","name":{"kind":"Name","value":"isRequired"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<CreateSystemSettingMutation, CreateSystemSettingMutationVariables>;
@@ -2845,24 +4276,47 @@ export const TestStorageProvidersDocument = {"kind":"Document","definitions":[{"
 export const UpdateStorageSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateStorageSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateStorageSettingsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateStorageSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminMode"}},{"kind":"Field","name":{"kind":"Name","value":"defaultProvider"}},{"kind":"Field","name":{"kind":"Name","value":"autoMigrate"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryCloudName"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiKey"}},{"kind":"Field","name":{"kind":"Name","value":"cloudinaryApiSecretSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccountId"}},{"kind":"Field","name":{"kind":"Name","value":"r2AccessKeyIdSet"}},{"kind":"Field","name":{"kind":"Name","value":"r2SecretAccessKeySet"}},{"kind":"Field","name":{"kind":"Name","value":"r2BucketName"}},{"kind":"Field","name":{"kind":"Name","value":"r2PublicUrl"}}]}}]}}]} as unknown as DocumentNode<UpdateStorageSettingsMutation, UpdateStorageSettingsMutationVariables>;
 export const TestStorageProviderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TestStorageProvider"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"provider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"testStorageProvider"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"provider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"provider"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"provider"}},{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"latency"}}]}}]}}]} as unknown as DocumentNode<TestStorageProviderMutation, TestStorageProviderMutationVariables>;
 export const MigrateUserStorageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MigrateUserStorage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"fromProvider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"toProvider"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"StorageProviderType"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"migrateUserStorage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userId"}}},{"kind":"Argument","name":{"kind":"Name","value":"fromProvider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"fromProvider"}}},{"kind":"Argument","name":{"kind":"Name","value":"toProvider"},"value":{"kind":"Variable","name":{"kind":"Name","value":"toProvider"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"fromProvider"}},{"kind":"Field","name":{"kind":"Name","value":"toProvider"}},{"kind":"Field","name":{"kind":"Name","value":"totalFiles"}},{"kind":"Field","name":{"kind":"Name","value":"successCount"}},{"kind":"Field","name":{"kind":"Name","value":"failedCount"}},{"kind":"Field","name":{"kind":"Name","value":"failures"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"error"}}]}}]}}]}}]} as unknown as DocumentNode<MigrateUserStorageMutation, MigrateUserStorageMutationVariables>;
+export const AdminSubscriptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSubscriptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminSubscriptionFilters"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSubscriptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminSubscriptionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PageInfoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminSubscriptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Subscription"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodStart"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"cancelAtPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"trialEndsAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<AdminSubscriptionsQuery, AdminSubscriptionsQueryVariables>;
+export const AdminSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSubscription"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSubscription"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminSubscriptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminSubscriptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Subscription"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodStart"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"cancelAtPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"trialEndsAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminSubscriptionQuery, AdminSubscriptionQueryVariables>;
+export const AdminSubscriptionStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSubscriptionStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSubscriptionStats"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalSubscriptions"}},{"kind":"Field","name":{"kind":"Name","value":"activeSubscriptions"}},{"kind":"Field","name":{"kind":"Name","value":"trialingSubscriptions"}},{"kind":"Field","name":{"kind":"Name","value":"cancelledSubscriptions"}},{"kind":"Field","name":{"kind":"Name","value":"byPlan"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"LITE"}},{"kind":"Field","name":{"kind":"Name","value":"FOREMAN"}},{"kind":"Field","name":{"kind":"Name","value":"BRIGADE"}}]}}]}}]}}]} as unknown as DocumentNode<AdminSubscriptionStatsQuery, AdminSubscriptionStatsQueryVariables>;
+export const AdminCancelSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminCancelSubscription"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminCancelSubscription"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminSubscriptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminSubscriptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Subscription"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodStart"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"cancelAtPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"trialEndsAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminCancelSubscriptionMutation, AdminCancelSubscriptionMutationVariables>;
+export const AdminChangeTeamPlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminChangeTeamPlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"planType"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminChangeTeamPlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}},{"kind":"Argument","name":{"kind":"Name","value":"planType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"planType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}}]}}]}}]} as unknown as DocumentNode<AdminChangeTeamPlanMutation, AdminChangeTeamPlanMutationVariables>;
+export const AdminDeleteSubscriptionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteSubscription"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteSubscription"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<AdminDeleteSubscriptionMutation, AdminDeleteSubscriptionMutationVariables>;
+export const AdminSupportTicketsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSupportTickets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filter"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminSupportTicketFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSupportTickets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filter"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tickets"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userEmail"}},{"kind":"Field","name":{"kind":"Name","value":"userFullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"subject"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}},{"kind":"Field","name":{"kind":"Name","value":"messageCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"hasMore"}}]}}]}}]} as unknown as DocumentNode<AdminSupportTicketsQuery, AdminSupportTicketsQueryVariables>;
+export const AdminSupportTicketDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSupportTicket"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSupportTicket"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ticketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userEmail"}},{"kind":"Field","name":{"kind":"Name","value":"userFullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"subject"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}},{"kind":"Field","name":{"kind":"Name","value":"messages"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ticketId"}},{"kind":"Field","name":{"kind":"Name","value":"fromUser"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]}}]} as unknown as DocumentNode<AdminSupportTicketQuery, AdminSupportTicketQueryVariables>;
+export const AdminSupportStatisticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminSupportStatistics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSupportStatistics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalTickets"}},{"kind":"Field","name":{"kind":"Name","value":"openTickets"}},{"kind":"Field","name":{"kind":"Name","value":"inProgressTickets"}},{"kind":"Field","name":{"kind":"Name","value":"resolvedTickets"}},{"kind":"Field","name":{"kind":"Name","value":"closedTickets"}},{"kind":"Field","name":{"kind":"Name","value":"ticketsByPriority"}},{"kind":"Field","name":{"kind":"Name","value":"ticketsByCategory"}}]}}]}}]} as unknown as DocumentNode<AdminSupportStatisticsQuery, AdminSupportStatisticsQueryVariables>;
+export const AdminUpdateSupportTicketDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdateSupportTicket"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUpdateSupportTicketInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdateSupportTicket"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ticketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}}]}}]}}]} as unknown as DocumentNode<AdminUpdateSupportTicketMutation, AdminUpdateSupportTicketMutationVariables>;
+export const AdminSendSupportMessageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminSendSupportMessage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminSendMessageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSendSupportMessage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ticketId"}},{"kind":"Field","name":{"kind":"Name","value":"fromUser"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<AdminSendSupportMessageMutation, AdminSendSupportMessageMutationVariables>;
+export const AdminDeleteSupportTicketDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteSupportTicket"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteSupportTicket"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ticketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<AdminDeleteSupportTicketMutation, AdminDeleteSupportTicketMutationVariables>;
+export const AdminTeamsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeams"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamFilters"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeams"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PageInfoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<AdminTeamsQuery, AdminTeamsQueryVariables>;
+export const AdminTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamDetailsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"members"}},{"kind":"Field","name":{"kind":"Name","value":"projects"}}]}}]}}]} as unknown as DocumentNode<AdminTeamQuery, AdminTeamQueryVariables>;
+export const AdminTeamStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamStats"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamStats"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamStatsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProjects"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenseAmount"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjects"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjects"}}]}}]} as unknown as DocumentNode<AdminTeamStatsQuery, AdminTeamStatsQueryVariables>;
+export const AdminUpdateTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdateTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUpdateTeamInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdateTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminUpdateTeamMutation, AdminUpdateTeamMutationVariables>;
+export const AdminDeleteTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<AdminDeleteTeamMutation, AdminDeleteTeamMutationVariables>;
+export const AdminUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminUsers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUserFilters"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUsers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PageInfoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<AdminUsersQuery, AdminUsersQueryVariables>;
+export const AdminUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserDetailsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUserDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ownedTeams"}},{"kind":"Field","name":{"kind":"Name","value":"payments"}}]}}]}}]} as unknown as DocumentNode<AdminUserQuery, AdminUserQueryVariables>;
+export const AdminUpdateUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdateUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUpdateUserInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdateUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminUpdateUserMutation, AdminUpdateUserMutationVariables>;
+export const AdminVerifyUserEmailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminVerifyUserEmail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminVerifyUserEmail"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminUserFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminUserFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"User"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminVerifyUserEmailMutation, AdminVerifyUserEmailMutationVariables>;
+export const AdminDeleteUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<AdminDeleteUserMutation, AdminDeleteUserMutationVariables>;
 export const PersonnelAnalyticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PersonnelAnalytics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"personnelAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PersonnelAnalyticsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"memberName"}},{"kind":"Field","name":{"kind":"Name","value":"memberEmail"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"salaryType"}},{"kind":"Field","name":{"kind":"Name","value":"salaryAmount"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerProject"}},{"kind":"Field","name":{"kind":"Name","value":"completedPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"pendingPayoutsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"membersCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PersonnelAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PersonnelAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"teamName"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"totalPayouts"}},{"kind":"Field","name":{"kind":"Name","value":"averageHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"averagePayoutPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"generatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberAnalyticsFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectAnalyticsFields"}}]}}]}}]} as unknown as DocumentNode<PersonnelAnalyticsQuery, PersonnelAnalyticsQueryVariables>;
 export const ExportPersonnelAnalyticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ExportPersonnelAnalytics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"exportPersonnelAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}]}]}}]} as unknown as DocumentNode<ExportPersonnelAnalyticsQuery, ExportPersonnelAnalyticsQueryVariables>;
-export const RegisterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Register"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"register"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>;
-export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const RegisterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Register"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"register"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"businessRole"}},{"kind":"Field","name":{"kind":"Name","value":"businessRoleAssignedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>;
+export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"LoginInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"businessRole"}},{"kind":"Field","name":{"kind":"Name","value":"businessRoleAssignedAt"}}]}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
 export const LogoutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Logout"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logout"}}]}}]} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
-export const RefreshSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RefreshSession"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshSession"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}}]}}]}}]} as unknown as DocumentNode<RefreshSessionMutation, RefreshSessionMutationVariables>;
+export const RefreshSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RefreshSession"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshSession"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"businessRole"}},{"kind":"Field","name":{"kind":"Name","value":"businessRoleAssignedAt"}}]}}]}}]}}]} as unknown as DocumentNode<RefreshSessionMutation, RefreshSessionMutationVariables>;
 export const VerifyEmailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"VerifyEmail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"token"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"verifyEmail"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"token"},"value":{"kind":"Variable","name":{"kind":"Name","value":"token"}}}]}]}}]} as unknown as DocumentNode<VerifyEmailMutation, VerifyEmailMutationVariables>;
 export const ResendVerificationEmailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResendVerificationEmail"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resendVerificationEmail"}}]}}]} as unknown as DocumentNode<ResendVerificationEmailMutation, ResendVerificationEmailMutationVariables>;
 export const ForgotPasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ForgotPassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"forgotPassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}]}}]} as unknown as DocumentNode<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
 export const ResetPasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResetPassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ResetPasswordInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resetPassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ResetPasswordMutation, ResetPasswordMutationVariables>;
 export const ChangePasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangePassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangePasswordInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changePassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const UpdateProfileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProfile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProfileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProfile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}}]}}]}}]} as unknown as DocumentNode<UpdateProfileMutation, UpdateProfileMutationVariables>;
+export const UpdateNotificationSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotificationSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotificationSettingsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotificationSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"appPush"}},{"kind":"Field","name":{"kind":"Name","value":"appEmail"}},{"kind":"Field","name":{"kind":"Name","value":"appSms"}},{"kind":"Field","name":{"kind":"Name","value":"marketingPush"}},{"kind":"Field","name":{"kind":"Name","value":"marketingEmail"}}]}}]}}]} as unknown as DocumentNode<UpdateNotificationSettingsMutation, UpdateNotificationSettingsMutationVariables>;
 export const RevokeSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}]}]}}]} as unknown as DocumentNode<RevokeSessionMutation, RevokeSessionMutationVariables>;
 export const RevokeAllSessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeAllSessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeAllSessions"}}]}}]} as unknown as DocumentNode<RevokeAllSessionsMutation, RevokeAllSessionsMutationVariables>;
 export const RevokeAllSessionsIncludingCurrentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeAllSessionsIncludingCurrent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeAllSessionsIncludingCurrent"}}]}}]} as unknown as DocumentNode<RevokeAllSessionsIncludingCurrentMutation, RevokeAllSessionsIncludingCurrentMutationVariables>;
 export const InitTelegramAuthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"InitTelegramAuth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"initTelegramAuth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"deepLink"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}}]}}]}}]} as unknown as DocumentNode<InitTelegramAuthMutation, InitTelegramAuthMutationVariables>;
-export const CheckTelegramAuthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CheckTelegramAuth"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CheckTelegramAuthInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkTelegramAuth"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sessionToken"}},{"kind":"Field","name":{"kind":"Name","value":"refreshToken"}}]}}]}}]} as unknown as DocumentNode<CheckTelegramAuthMutation, CheckTelegramAuthMutationVariables>;
-export const MeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
+export const CheckTelegramAuthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CheckTelegramAuth"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CheckTelegramAuthInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"checkTelegramAuth"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"businessRole"}},{"kind":"Field","name":{"kind":"Name","value":"businessRoleAssignedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sessionToken"}},{"kind":"Field","name":{"kind":"Name","value":"refreshToken"}}]}}]}}]} as unknown as DocumentNode<CheckTelegramAuthMutation, CheckTelegramAuthMutationVariables>;
+export const MeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"emailVerified"}},{"kind":"Field","name":{"kind":"Name","value":"hasCompletedOnboarding"}},{"kind":"Field","name":{"kind":"Name","value":"businessRole"}},{"kind":"Field","name":{"kind":"Name","value":"businessRoleAssignedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"notificationSettings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"appPush"}},{"kind":"Field","name":{"kind":"Name","value":"appEmail"}},{"kind":"Field","name":{"kind":"Name","value":"appSms"}},{"kind":"Field","name":{"kind":"Name","value":"marketingPush"}},{"kind":"Field","name":{"kind":"Name","value":"marketingEmail"}}]}},{"kind":"Field","name":{"kind":"Name","value":"adminRole"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"}}]}}]}}]}}]} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
 export const SessionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sessions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}},{"kind":"Field","name":{"kind":"Name","value":"ip"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"current"}}]}}]}}]} as unknown as DocumentNode<SessionsQuery, SessionsQueryVariables>;
 export const UploadAvatarDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UploadAvatar"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"file"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Upload"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uploadAvatar"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"file"},"value":{"kind":"Variable","name":{"kind":"Name","value":"file"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<UploadAvatarMutation, UploadAvatarMutationVariables>;
 export const DeleteAvatarDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteAvatar"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteAvatar"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]} as unknown as DocumentNode<DeleteAvatarMutation, DeleteAvatarMutationVariables>;
@@ -2929,6 +4383,7 @@ export const JoinTeamByInviteDocument = {"kind":"Document","definitions":[{"kind
 export const TeamInvitesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TeamInvites"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamInvites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"usedBy"}},{"kind":"Field","name":{"kind":"Name","value":"usedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"inviteUrl"}}]}}]}}]} as unknown as DocumentNode<TeamInvitesQuery, TeamInvitesQueryVariables>;
 export const DeleteInviteCodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteInviteCode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"codeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteInviteCode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"codeId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"codeId"}}}]}]}}]} as unknown as DocumentNode<DeleteInviteCodeMutation, DeleteInviteCodeMutationVariables>;
 export const UpdateMemberPositionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMemberPosition"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateMemberPositionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateMemberPosition"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateMemberPositionMutation, UpdateMemberPositionMutationVariables>;
+export const MemberSalaryHistoryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"MemberSalaryHistory"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberSalaryHistory"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"memberId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"memberId"}},{"kind":"Field","name":{"kind":"Name","value":"previousType"}},{"kind":"Field","name":{"kind":"Name","value":"previousAmount"}},{"kind":"Field","name":{"kind":"Name","value":"newType"}},{"kind":"Field","name":{"kind":"Name","value":"newAmount"}},{"kind":"Field","name":{"kind":"Name","value":"reason"}},{"kind":"Field","name":{"kind":"Name","value":"changedByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"changedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"email"}}]}}]}}]}}]} as unknown as DocumentNode<MemberSalaryHistoryQuery, MemberSalaryHistoryQueryVariables>;
 export const DisconnectTelegramDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DisconnectTelegram"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"disconnectTelegram"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"telegramChatId"}},{"kind":"Field","name":{"kind":"Name","value":"telegramUsername"}},{"kind":"Field","name":{"kind":"Name","value":"telegramPhotoUrl"}}]}}]}}]} as unknown as DocumentNode<DisconnectTelegramMutation, DisconnectTelegramMutationVariables>;
 export const TwoFactorStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TwoFactorStatus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"twoFactorStatus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"backupCodesRemaining"}}]}}]}}]} as unknown as DocumentNode<TwoFactorStatusQuery, TwoFactorStatusQueryVariables>;
 export const Generate2FaSecretDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Generate2FASecret"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generate2FASecret"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"secret"}},{"kind":"Field","name":{"kind":"Name","value":"qrCodeUrl"}},{"kind":"Field","name":{"kind":"Name","value":"manualEntryCode"}}]}}]}}]} as unknown as DocumentNode<Generate2FaSecretMutation, Generate2FaSecretMutationVariables>;

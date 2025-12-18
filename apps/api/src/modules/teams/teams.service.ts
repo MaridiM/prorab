@@ -9,6 +9,8 @@ import { UpdateTeamInput } from './dto/update-team.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { StorageService } from '../../core/storage/storage.service';
 import { LogoType } from './models/logo-type.enum';
+import { BusinessRole } from '../users/models/user.model';
+import { TeamRole } from './models/team-member.model';
 
 /**
  * Сервис для работы с командами/бригадами
@@ -50,6 +52,32 @@ export class TeamsService extends CoreService {
       throw new BadRequestException('Онбординг уже завершён');
     }
 
+    // Валидация: проверяем businessRole (WORKER не может создавать команды)
+    if (user.businessRole === BusinessRole.WORKER) {
+      throw new ForbiddenException(
+        'Вы уже являетесь работником в команде. ' +
+        'Работники не могут создавать собственные команды. ' +
+        'Если вы хотите стать бригадиром, сначала покиньте все команды через настройки.'
+      );
+    }
+
+    // Дополнительная проверка: есть ли активные членства в других командах
+    const existingMembership = await this.prisma.teamMember.findFirst({
+      where: {
+        userId,
+        role: TeamRole.MEMBER,
+      },
+      include: { team: true },
+    });
+
+    if (existingMembership) {
+      throw new ForbiddenException(
+        `Вы уже являетесь работником в команде "${existingMembership.team.name}". ` +
+        'Работники не могут создавать команды. ' +
+        'Сначала покиньте команду через настройки.'
+      );
+    }
+
     // Валидация: проверяем что у пользователя нет команды как владелец
     const existingTeam = await this.prisma.team.findFirst({
       where: { ownerId: userId },
@@ -85,7 +113,7 @@ export class TeamsService extends CoreService {
         data: {
           teamId: team.id,
           userId: userId,
-          role: 'owner',
+          role: TeamRole.OWNER, // Use enum instead of string
         },
       });
 
@@ -106,13 +134,15 @@ export class TeamsService extends CoreService {
 
       this.logger.log(`Created project ${project.id} for team ${team.id}`);
 
-      // 5. Обновляем пользователя: отмечаем онбординг завершённым
+      // 5. Обновляем пользователя: отмечаем онбординг завершённым + assign FOREMAN role
       await tx.user.update({
         where: { id: userId },
         data: {
           hasCompletedOnboarding: true,
           onboardingCompletedAt: new Date(),
           currentTeamId: team.id,
+          businessRole: BusinessRole.FOREMAN,
+          businessRoleAssignedAt: new Date(),
         },
       });
 
@@ -245,15 +275,23 @@ export class TeamsService extends CoreService {
 
   /**
    * Получение команд пользователя
+   * Возвращает все команды где пользователь является владельцем ИЛИ участником
    */
   async getMyTeams(userId: string): Promise<any[]> {
     return this.prisma.team.findMany({
       where: {
-        members: {
-          some: {
-            userId,
+        OR: [
+          // Команды где пользователь является владельцем
+          { ownerId: userId },
+          // Команды где пользователь является участником
+          {
+            members: {
+              some: {
+                userId,
+              },
+            },
           },
-        },
+        ],
       },
       orderBy: {
         createdAt: 'desc',
@@ -542,7 +580,34 @@ export class TeamsService extends CoreService {
       throw new BadRequestException('Срок действия кода приглашения истёк');
     }
 
-    // 4. Проверяем что пользователь ещё не состоит в команде
+    // 4. Проверяем businessRole (FOREMAN не может присоединяться к другим командам)
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (user?.businessRole === BusinessRole.FOREMAN) {
+      throw new ForbiddenException(
+        'Вы являетесь владельцем команды и не можете присоединиться к другим командам. ' +
+        'Бригадиры управляют СВОИМИ командами. ' +
+        'Если вы хотите стать работником, сначала передайте владение вашей командой.'
+      );
+    }
+
+    // Дополнительная проверка: владеет ли пользователь какой-либо командой
+    const ownedTeam = await this.prisma.team.findFirst({
+      where: { ownerId: userId },
+      select: { id: true, name: true },
+    });
+
+    if (ownedTeam) {
+      throw new ForbiddenException(
+        `Вы являетесь владельцем команды "${ownedTeam.name}". ` +
+        'Владельцы команд не могут присоединяться к другим командам как работники. ' +
+        'Передайте владение вашей командой, если хотите стать работником.'
+      );
+    }
+
+    // 5. Проверяем что пользователь ещё не состоит в команде
     const existingMembership = await this.prisma.teamMember.findUnique({
       where: {
         teamId_userId: {
@@ -556,14 +621,14 @@ export class TeamsService extends CoreService {
       throw new BadRequestException('Вы уже состоите в этой команде');
     }
 
-    // 5. Добавляем пользователя в команду и отмечаем код как использованный
+    // 6. Добавляем пользователя в команду и отмечаем код как использованный
     const result = await this.prisma.$transaction(async (tx) => {
       // Создаём участника команды
       const teamMember = await tx.teamMember.create({
         data: {
           teamId: inviteCode.teamId,
           userId,
-          role: 'member',
+          role: TeamRole.MEMBER, // Use enum instead of string
         },
         include: {
           team: true,
@@ -579,6 +644,18 @@ export class TeamsService extends CoreService {
           usedAt: new Date(),
         },
       });
+
+      // Assign WORKER role if user doesn't have businessRole yet
+      if (!user?.businessRole) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            businessRole: BusinessRole.WORKER,
+            businessRoleAssignedAt: new Date(),
+          },
+        });
+        this.logger.log(`✅ Assigned WORKER role to user ${userId}`);
+      }
 
       return teamMember;
     });
@@ -904,7 +981,7 @@ export class TeamsService extends CoreService {
     const csvData = analytics.members.map((member: any) => ({
       memberName: member.memberName,
       memberEmail: member.memberEmail,
-      role: member.role === 'owner' ? 'Владелец' : 'Участник',
+      role: member.role === TeamRole.OWNER ? 'Владелец' : 'Участник',
       position: member.position || '—',
       salaryType:
         member.salaryType === 'FIXED'

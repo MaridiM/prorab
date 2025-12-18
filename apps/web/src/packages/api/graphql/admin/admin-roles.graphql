@@ -1,0 +1,129 @@
+# Admin Roles Management GraphQL Operations
+
+# Query all admin roles with optional filters
+query GetAdminRoles(
+  $role: String
+  $search: String
+  $limit: Float
+  $offset: Float
+) {
+  adminRoles(role: $role, search: $search, limit: $limit, offset: $offset) {
+    id
+    userId
+    user {
+      id
+      email
+      fullName
+    }
+    role
+    permissions
+    twoFactorEnforced
+    ipWhitelist
+    createdAt
+    updatedAt
+  }
+}
+
+# Query single admin role by ID
+query GetAdminRole($id: String!) {
+  adminRole(id: $id) {
+    id
+    userId
+    user {
+      id
+      email
+      fullName
+    }
+    role
+    permissions
+    twoFactorEnforced
+    ipWhitelist
+    createdAt
+    updatedAt
+  }
+}
+
+# Query admin role by user ID
+query GetAdminRoleByUserId($userId: String!) {
+  adminRoleByUserId(userId: $userId) {
+    id
+    userId
+    user {
+      id
+      email
+      fullName
+    }
+    role
+    permissions
+    twoFactorEnforced
+    ipWhitelist
+    createdAt
+    updatedAt
+  }
+}
+
+# Assign admin role to a user
+mutation AssignAdminRole($input: AssignAdminRoleInput!) {
+  assignAdminRole(input: $input) {
+    id
+    userId
+    user {
+      id
+      email
+      fullName
+    }
+    role
+    permissions
+    twoFactorEnforced
+    ipWhitelist
+    createdAt
+    updatedAt
+  }
+}
+
+# Update admin permissions
+mutation UpdateAdminPermissions($input: UpdateAdminPermissionsInput!) {
+  updateAdminPermissions(input: $input) {
+    id
+    userId
+    role
+    permissions
+    updatedAt
+  }
+}
+
+# Update two-factor enforcement
+mutation UpdateTwoFactorEnforcement($input: UpdateTwoFactorInput!) {
+  updateTwoFactorEnforcement(input: $input) {
+    id
+    userId
+    twoFactorEnforced
+    updatedAt
+  }
+}
+
+# Update IP whitelist
+mutation UpdateIpWhitelist($input: UpdateIpWhitelistInput!) {
+  updateIpWhitelist(input: $input) {
+    id
+    userId
+    ipWhitelist
+    updatedAt
+  }
+}
+
+# Change admin role type
+mutation ChangeAdminRole($roleId: String!, $newRole: String!) {
+  changeAdminRole(roleId: $roleId, newRole: $newRole) {
+    id
+    userId
+    role
+    permissions
+    updatedAt
+  }
+}
+
+# Revoke admin role
+mutation RevokeAdminRole($roleId: String!) {
+  revokeAdminRole(roleId: $roleId)
+}

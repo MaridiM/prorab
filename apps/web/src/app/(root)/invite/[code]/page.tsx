@@ -20,7 +20,7 @@ interface PageProps {
 export default function InviteCodePage({ params }: PageProps) {
   const router = useRouter();
   const { code } = use(params);
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isForeman } = useAuth();
 
   const [joinTeamByInvite, { data, loading, error }] = useMutation(JoinTeamByInviteDocument, {
     onCompleted: (data) => {
@@ -53,14 +53,23 @@ export default function InviteCodePage({ params }: PageProps) {
     });
   };
 
+  const handleRegister = () => {
+    // Store the invite code and redirect to register
+    sessionStorage.setItem('pendingInviteCode', code);
+    router.push('/auth/register?redirect=/invite/' + code);
+  };
+
   // Auto-join if user is logged in and they just got redirected back
   useEffect(() => {
     const pendingCode = sessionStorage.getItem('pendingInviteCode');
     if (user && pendingCode === code && !data && !loading && !error) {
       sessionStorage.removeItem('pendingInviteCode');
-      handleJoinTeam();
+      // Call joinTeamByInvite directly to avoid dependency issues
+      joinTeamByInvite({
+        variables: { code },
+      });
     }
-  }, [user, code]);
+  }, [user, code, data, loading, error, joinTeamByInvite]);
 
   if (authLoading) {
     return (
@@ -161,31 +170,57 @@ export default function InviteCodePage({ params }: PageProps) {
           {!user && (
             <Alert>
               <AlertDescription>
-                Чтобы присоединиться к команде, необходимо войти в систему
+                Чтобы присоединиться к команде, войдите в систему или создайте новый аккаунт
               </AlertDescription>
             </Alert>
           )}
 
-          <Button
-            className="w-full"
-            onClick={handleJoinTeam}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Присоединение...
-              </>
-            ) : user ? (
-              'Присоединиться к команде'
-            ) : (
-              'Войти и присоединиться'
-            )}
-          </Button>
+          {isForeman && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Владельцы команд не могут присоединяться к другим командам. Вы являетесь бригадиром и управляете собственной командой.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {user && !isForeman ? (
+            <Button
+              className="w-full"
+              onClick={handleJoinTeam}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Присоединение...
+                </>
+              ) : (
+                'Присоединиться к команде'
+              )}
+            </Button>
+          ) : !user ? (
+            <>
+              <Button
+                className="w-full"
+                onClick={handleJoinTeam}
+                disabled={loading}
+              >
+                Войти и присоединиться
+              </Button>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleRegister}
+              >
+                Создать аккаунт и присоединиться
+              </Button>
+            </>
+          ) : null}
 
           <Button
             className="w-full"
-            variant="outline"
+            variant="ghost"
             onClick={() => router.push('/')}
           >
             Отмена

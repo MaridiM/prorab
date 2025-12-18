@@ -1,0 +1,47 @@
+## [Unreleased]
+
+### Added
+
+- **👮 RBAC System (Role-Based Access Control) - Stage 13:**
+  - ✅ **Backend API (90% Complete):**
+    - `AdminRolesResolver` - 8 GraphQL operations with PermissionsGuard protection
+    - `AdminRolesService` - Full CRUD operations (~450 LOC)
+      - Queries: `adminRoles(role?, search?, limit, offset)`, `adminRole(id)`, `adminRoleByUserId(userId)`
+      - Mutations: `assignAdminRole`, `updateAdminPermissions`, `updateTwoFactorEnforcement`, `updateIpWhitelist`, `changeAdminRole`, `revokeAdminRole`
+      - Safety checks: Cannot revoke last SUPER_ADMIN
+      - IP validation: IPv4, IPv6, CIDR notation support
+    - **4 Role Types** with pre-defined permission sets:
+      - `SUPER_ADMIN` - All permissions (40+)
+      - `ADMIN` - Most permissions (26)
+      - `MODERATOR` - Limited permissions (12)
+      - `SUPPORT` - Minimal permissions (6)
+    - **40+ Granular Permissions:** Resource:Action format (e.g., `users:view`, `teams:delete`, `settings:update`)
+    - **Audit Logging:** All role changes logged to AdminActionLog with full context
+  - ✅ **GraphQL Schema:**
+    - `AdminRoleDetail` type with user relation, permissions array, 2FA enforcement, IP whitelist
+    - Input types: `AssignAdminRoleInput`, `UpdateAdminPermissionsInput`, `UpdateTwoFactorInput`, `UpdateIpWhitelistInput`
+  - ✅ **User Model Extension:**
+    - Added `adminRole` field to User GraphQL type (nullable)
+    - Updated `usersService.findById()` to include adminRole relation
+  - ✅ **Frontend Integration (40% Complete):**
+    - **Auth Context Enhancement:**
+      - User interface includes `adminRole?: { id, role, permissions }`
+      - New `hasPermission(permission: string): boolean` helper function
+      - Me query automatically loads admin role on app load
+    - **Permission-Based Navigation:**
+      - AdminSidebar dynamically filters menu items based on permissions
+      - Replaced TODO comment with actual permission filtering logic
+    - **GraphQL Operations:**
+      - Created `admin-roles.graphql` with all queries/mutations
+      - Generated TypeScript types via codegen (successful)
+  - ✅ **Documentation:**
+    - `docs/stages/STAGE_13_RBAC_SYSTEM.md` - Complete stage specification (885 lines, Russian)
+    - `docs/SESSION_SUMMARY_2025-12-18_RBAC.md` - Implementation session summary
+    - **Remaining work:** Frontend UI (Roles page + dialogs), System Settings migration, Testing
+
+### Changed
+
+- **🔐 Security Enhancements:**
+  - All admin role operations protected by PermissionsGuard
+  - Permission checks enforced at both backend (security) and frontend (UX)
+  - Audit trail for all administrative actions

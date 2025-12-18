@@ -34,8 +34,7 @@ import {
 	Users,
 	TrendingUp,
 } from 'lucide-react'
-import { useToast } from '@/packages/hooks'
-import { PageHeader } from '@/packages/components/ui/page-header'
+import { toast } from 'sonner'
 import {
 	Select,
 	SelectContent,
@@ -53,7 +52,6 @@ const providerIcons = {
 export default function StorageSettingsPage() {
 	const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
 	const [testResults, setTestResults] = useState<Record<string, { success: boolean; message: string; latency?: number }>>({})
-	const { toast } = useToast()
 
 	// Queries
 	const { data: settingsData, loading: settingsLoading, refetch: refetchSettings } = useQuery(GetStorageSettingsDocument)
@@ -62,18 +60,11 @@ export default function StorageSettingsPage() {
 	// Mutations
 	const [updateSettings, { loading: updating }] = useMutation(UpdateStorageSettingsDocument, {
 		onCompleted: () => {
-			toast({
-				title: 'Настройки обновлены',
-				description: 'Storage provider settings успешно сохранены',
-			})
+			toast.success('Storage provider settings успешно сохранены')
 			refetchSettings()
 		},
 		onError: (error) => {
-			toast({
-				variant: 'destructive',
-				title: 'Ошибка',
-				description: error.message,
-			})
+			toast.error('Ошибка: ' + error.message)
 		},
 	})
 
@@ -152,11 +143,11 @@ export default function StorageSettingsPage() {
 				},
 			}))
 
-			toast({
-				title: r.success ? 'Успешно' : 'Ошибка',
-				description: r.message,
-				variant: r.success ? 'default' : 'destructive',
-			})
+			if (r.success) {
+				toast.success(r.message)
+			} else {
+				toast.error(r.message)
+			}
 		}
 	}
 
@@ -186,11 +177,10 @@ export default function StorageSettingsPage() {
 
 	return (
 		<div className="container mx-auto py-6 space-y-6">
-			<PageHeader
-				title="Storage Management"
-				description="Manage storage provider settings and monitor usage"
-				icon={<HardDrive className="h-8 w-8" />}
-			/>
+			<div>
+				<h1 className="text-3xl font-bold">Storage Management</h1>
+				<p className="text-muted-foreground mt-1">Manage storage provider settings and monitor usage</p>
+			</div>
 
 			{/* Statistics Cards */}
 			{stats && (

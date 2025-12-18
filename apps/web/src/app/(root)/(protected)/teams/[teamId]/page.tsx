@@ -9,6 +9,8 @@ import {
 	ProjectsByTeamDocument,
 	MyTeamsDocument,
 	ProjectStatsDocument,
+	TeamMembersDocument,
+	TeamRole,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
 import { ProjectCardDashboard } from '@/packages/components/dashboard'
@@ -99,6 +101,13 @@ export default function TeamDashboardPage() {
 	const [, startTransition] = useTransition()
     const { showToast } = useToast()
 
+	// Сбрасываем состояние архива при изменении фильтра
+	useEffect(() => {
+		if (statusFilter !== 'ALL' && statusFilter !== 'ARCHIVED') {
+			setShowArchived(false)
+		}
+	}, [statusFilter])
+
 	const setStatusFilter = (filter: StatusFilter) => {
 		startTransition(() => {
 			const newParams = new URLSearchParams(searchParams.toString())
@@ -127,7 +136,7 @@ export default function TeamDashboardPage() {
 	)
 
     const { data: membersData, loading: membersLoading, refetch: refetchMembers } = useQuery(
-        TEAM_MEMBERS_QUERY,
+        TeamMembersDocument,
         {
             variables: { teamId },
             skip: activeTab !== 'salaries'
@@ -152,22 +161,41 @@ export default function TeamDashboardPage() {
     }
 
 	const allProjects = useMemo(() => {
-		// Создаем новый массив при каждом изменении данных, чтобы избежать мутаций
 		return projectsData?.projectsByTeam || []
 	}, [projectsData])
 
-	// Фильтрация проектов
-	const filteredProjects = useMemo(() => {
+	// Единый список проектов для отображения - упрощенная логика
+	const displayedProjects = useMemo(() => {
+		console.log('🔍 Фильтрация проектов:', {
+			total: allProjects.length,
+			statusFilter,
+			searchQuery,
+		})
+
 		let projects = [...allProjects]
 
 		// Фильтрация по статусу
-		if (statusFilter !== 'ALL') {
-			projects = projects.filter(p => p?.status === statusFilter)
+		if (statusFilter === 'ALL') {
+			// Для "Все проекты" показываем активные и завершенные (без архива)
+			projects = projects.filter(
+				p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
+			)
+		} else if (statusFilter === 'ACTIVE') {
+			// Только активные
+			projects = projects.filter(p => p?.status === ProjectStatus.ACTIVE)
+		} else if (statusFilter === 'COMPLETED') {
+			// Только завершенные
+			projects = projects.filter(p => p?.status === ProjectStatus.COMPLETED)
+		} else if (statusFilter === 'ARCHIVED') {
+			// Только архивные
+			projects = projects.filter(p => p?.status === ProjectStatus.ARCHIVED)
 		}
 
+		console.log('📊 После фильтра статуса:', projects.length)
+
 		// Фильтрация по поиску
-		if (searchQuery) {
-			const query = searchQuery.toLowerCase()
+		if (searchQuery.trim()) {
+			const query = searchQuery.toLowerCase().trim()
 			projects = projects.filter(
 				p =>
 					p?.name?.toLowerCase().includes(query) ||
@@ -175,36 +203,28 @@ export default function TeamDashboardPage() {
 			)
 		}
 
+		console.log('✅ Итого проектов для отображения:', projects.length)
 		return projects
 	}, [allProjects, statusFilter, searchQuery])
 
-	// Разделение на активные и архивные на основе текущего фильтра
-	const activeProjects = useMemo(() => {
-		if (statusFilter === 'COMPLETED') {
-			// Для завершенных показываем только завершенные (filteredProjects уже отфильтрован)
-			return filteredProjects
-		} else if (statusFilter === 'ACTIVE') {
-			// Для активных показываем только активные (filteredProjects уже отфильтрован)
-			return filteredProjects
-		} else {
-			// Для "Все проекты" показываем активные и завершенные
-			return filteredProjects.filter(
+	// Отдельный список архивных проектов для фильтра "Все проекты"
+	const archivedProjectsForAll = useMemo(() => {
+		if (statusFilter !== 'ALL') return []
+		
+		let projects = [...allProjects]
+		
+		// Фильтрация по поиску
+		if (searchQuery.trim()) {
+			const query = searchQuery.toLowerCase().trim()
+			projects = projects.filter(
 				p =>
-					p?.status === ProjectStatus.ACTIVE ||
-					p?.status === ProjectStatus.COMPLETED
+					p?.name?.toLowerCase().includes(query) ||
+					p?.address?.toLowerCase().includes(query)
 			)
 		}
-	}, [filteredProjects, statusFilter])
-
-	const archivedProjects = useMemo(() => {
-		if (statusFilter === 'ARCHIVED') {
-			// Для архива показываем все отфильтрованные проекты (они уже архивные)
-			return filteredProjects
-		} else {
-			// Для других фильтров показываем архивные из отфильтрованных
-			return filteredProjects.filter(p => p?.status === ProjectStatus.ARCHIVED)
-		}
-	}, [filteredProjects, statusFilter])
+		
+		return projects.filter(p => p?.status === ProjectStatus.ARCHIVED)
+	}, [allProjects, statusFilter, searchQuery])
 
 	// Финансовые метрики
 	const financialMetrics = useMemo(() => {
@@ -323,13 +343,10 @@ export default function TeamDashboardPage() {
 										)}
 									</div>
 									<p className="text-sm text-muted-foreground">
-										{activeProjects.length}{' '}
-										{activeProjects.length === 1
-											? 'активный проект'
-											: activeProjects.length >= 2 &&
-											  activeProjects.length <= 4
-											? 'активных проекта'
-											: 'активных проектов'}
+										{allProjects.filter(
+											p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
+										).length}{' '}
+										активных проектов
 									</p>
 								</div>
 							</div>
@@ -389,10 +406,10 @@ export default function TeamDashboardPage() {
 			{/* Main Content */}
 			<main className="container mx-auto px-4 py-6">
                 {activeTab === 'projects' ? (
-				<motion.div initial="hidden" animate="visible" variants={stagger}>
+				<div>
 					{/* Financial Summary (только для владельца) */}
 					{isOwner && financialMetrics.totalBudget > 0 && (
-						<motion.div variants={fadeIn} className="mb-8">
+						<div className="mb-8">
 							<FinancialSummary
 								totalBudget={financialMetrics.totalBudget}
 								totalExpenses={financialMetrics.totalExpenses}
@@ -400,11 +417,11 @@ export default function TeamDashboardPage() {
 								membersCount={financialMetrics.membersCount}
 								showFinancials={isOwner}
 							/>
-						</motion.div>
+						</div>
 					)}
 
 					{/* Filters */}
-					<motion.div variants={fadeIn} className="mb-6 space-y-4">
+					<div className="mb-6 space-y-4">
 						{/* Status Tabs */}
 						<div className="flex flex-wrap gap-2">
 							{[
@@ -436,33 +453,122 @@ export default function TeamDashboardPage() {
 								className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border/50 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
 							/>
 						</div>
-					</motion.div>
+					</div>
 
-					{/* Active Projects */}
-					{statusFilter !== 'ARCHIVED' && (
-						<motion.section variants={fadeIn} className="mb-8">
-							<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-								<span className="w-2 h-2 rounded-full bg-emerald-500" />
-								{statusFilter === 'COMPLETED'
-									? 'Завершённые проекты'
-									: statusFilter === 'ACTIVE'
-									? 'Активные проекты'
-									: 'Проекты'}
-								{activeProjects.length > 0 && (
-									<span className="text-sm font-normal text-muted-foreground">
-										({activeProjects.length})
-									</span>
+					{/* Projects List - единая секция для всех фильтров */}
+					<div className="mb-8">
+						{/* Заголовок секции */}
+						<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+							<span className={`w-2 h-2 rounded-full ${
+								statusFilter === 'ARCHIVED' 
+									? 'bg-muted-foreground' 
+									: 'bg-emerald-500'
+							}`} />
+							{statusFilter === 'COMPLETED'
+								? 'Завершённые проекты'
+								: statusFilter === 'ACTIVE'
+								? 'Активные проекты'
+								: statusFilter === 'ARCHIVED'
+								? 'Архивные проекты'
+								: 'Проекты'}
+							{displayedProjects.length > 0 && (
+								<span className="text-sm font-normal text-muted-foreground">
+									({displayedProjects.length})
+								</span>
+							)}
+						</h2>
+
+						{/* Список проектов */}
+						{projectsLoading ? (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								{[1, 2, 3].map(i => (
+									<Skeleton key={i} className="h-48 rounded-2xl" />
+								))}
+							</div>
+						) : displayedProjects.length > 0 ? (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								{displayedProjects.map(project => {
+									if (!project?.id) return null
+									return (
+										<div key={project.id}>
+											<ProjectCardDashboard
+												id={project.id}
+												teamId={teamId}
+												name={project.name || ''}
+												address={project.address}
+												photoUrl={project.photoUrl}
+												budget={project.budget}
+												progress={project.progress || 0}
+												status={project.status as any}
+												startDate={project.startDate}
+												endDate={project.endDate}
+												profit={
+													project.budget
+														? project.budget * 0.35
+														: null
+												}
+												showFinancials={isOwner}
+											/>
+										</div>
+									)
+								})}
+							</div>
+						) : (
+							<div className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-secondary/20">
+								<FolderKanban className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+								<h3 className="text-lg font-medium mb-2">
+									{searchQuery.trim()
+										? 'Проекты не найдены'
+										: statusFilter === 'COMPLETED'
+										? 'Нет завершённых проектов'
+										: statusFilter === 'ACTIVE'
+										? 'Нет активных проектов'
+										: statusFilter === 'ARCHIVED'
+										? 'Нет архивных проектов'
+										: 'Пока нет проектов'}
+								</h3>
+								<p className="text-muted-foreground mb-4">
+									{searchQuery.trim()
+										? 'Попробуйте изменить поисковый запрос'
+										: 'Создайте свой первый строительный проект'}
+								</p>
+								{!searchQuery.trim() && statusFilter === 'ALL' && (
+									<Button onClick={handleCreateProject}>
+										<Plus className="w-4 h-4 mr-2" />
+										Создать проект
+									</Button>
 								)}
-							</h2>
+							</div>
+						)}
+					</div>
 
-							{activeProjects.length > 0 ? (
-								<motion.div
-									variants={stagger}
-									className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-								>
-									{activeProjects.map(project =>
-										project?.id ? (
-											<motion.div key={project.id} variants={fadeIn}>
+					{/* Архивные проекты для фильтра "Все проекты" */}
+					{statusFilter === 'ALL' && archivedProjectsForAll.length > 0 && (
+						<div className="mt-8">
+							<button
+								onClick={() => setShowArchived(!showArchived)}
+								className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 transition-colors mb-4"
+							>
+								<div className="flex items-center gap-2">
+									<span className="w-2 h-2 rounded-full bg-muted-foreground" />
+									<span className="font-medium">Архив</span>
+									<span className="text-sm text-muted-foreground">
+										({archivedProjectsForAll.length})
+									</span>
+								</div>
+								{showArchived ? (
+									<ChevronUp className="w-5 h-5 text-muted-foreground" />
+								) : (
+									<ChevronDown className="w-5 h-5 text-muted-foreground" />
+								)}
+							</button>
+
+							{showArchived && (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+									{archivedProjectsForAll.map(project => {
+										if (!project?.id) return null
+										return (
+											<div key={project.id}>
 												<ProjectCardDashboard
 													id={project.id}
 													teamId={teamId}
@@ -474,140 +580,18 @@ export default function TeamDashboardPage() {
 													status={project.status as any}
 													startDate={project.startDate}
 													endDate={project.endDate}
-													profit={
-														project.budget
-															? project.budget * 0.35
-															: null
-													}
 													showFinancials={isOwner}
 												/>
-											</motion.div>
-										) : null
-									)}
-								</motion.div>
-							) : (
-								<motion.div
-									variants={fadeIn}
-									className="text-center py-12 rounded-2xl border-2 border-dashed border-border/50 bg-secondary/20"
-								>
-									<FolderKanban className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-									<h3 className="text-lg font-medium mb-2">
-										{searchQuery
-											? 'Проекты не найдены'
-											: 'Пока нет проектов'}
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										{searchQuery
-											? 'Попробуйте изменить поисковый запрос'
-											: 'Создайте свой первый строительный проект'}
-									</p>
-									{!searchQuery && (
-										<Button onClick={handleCreateProject}>
-											<Plus className="w-4 h-4 mr-2" />
-											Создать проект
-										</Button>
-									)}
-								</motion.div>
-							)}
-						</motion.section>
-					)}
-
-					{/* Archived Projects */}
-					{(statusFilter === 'ALL' || statusFilter === 'ARCHIVED') &&
-						archivedProjects.length > 0 && (
-							<motion.section variants={fadeIn}>
-								{statusFilter === 'ALL' ? (
-									<>
-										<button
-											onClick={() => setShowArchived(!showArchived)}
-											className="w-full flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/30 hover:bg-secondary/50 transition-colors mb-4"
-										>
-											<div className="flex items-center gap-2">
-												<span className="w-2 h-2 rounded-full bg-muted-foreground" />
-												<span className="font-medium">Архив</span>
-												<span className="text-sm text-muted-foreground">
-													({archivedProjects.length})
-												</span>
 											</div>
-											{showArchived ? (
-												<ChevronUp className="w-5 h-5 text-muted-foreground" />
-											) : (
-												<ChevronDown className="w-5 h-5 text-muted-foreground" />
-											)}
-										</button>
-
-										<AnimatePresence>
-											{showArchived && (
-												<motion.div
-													initial={{ opacity: 0, height: 0 }}
-													animate={{ opacity: 1, height: 'auto' }}
-													exit={{ opacity: 0, height: 0 }}
-													transition={{ duration: 0.3 }}
-													className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-												>
-													{archivedProjects.map(project =>
-														project?.id ? (
-															<ProjectCardDashboard
-																key={project.id}
-																id={project.id}
-																teamId={teamId}
-																name={project.name || ''}
-																address={project.address}
-																photoUrl={project.photoUrl}
-																budget={project.budget}
-																progress={project.progress || 0}
-																status={project.status as any}
-																startDate={project.startDate}
-																endDate={project.endDate}
-																showFinancials={isOwner}
-															/>
-														) : null
-													)}
-												</motion.div>
-											)}
-										</AnimatePresence>
-									</>
-								) : (
-									<>
-										<h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-											<span className="w-2 h-2 rounded-full bg-muted-foreground" />
-											Архивные проекты
-											<span className="text-sm font-normal text-muted-foreground">
-												({archivedProjects.length})
-											</span>
-										</h2>
-										<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-											{archivedProjects.map(project =>
-												project?.id ? (
-													<ProjectCardDashboard
-														key={project.id}
-														id={project.id}
-														teamId={teamId}
-														name={project.name || ''}
-														address={project.address}
-														photoUrl={project.photoUrl}
-														budget={project.budget}
-														progress={project.progress || 0}
-														status={project.status as any}
-														startDate={project.startDate}
-														endDate={project.endDate}
-														showFinancials={isOwner}
-													/>
-												) : null
-											)}
-										</div>
-									</>
-								)}
-							</motion.section>
-						)}
-				</motion.div>
+										)
+									})}
+								</div>
+							)}
+						</div>
+					)}
+				</div>
                 ) : (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="max-w-4xl mx-auto"
-                    >
+                    <div className="max-w-4xl mx-auto">
                         <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl p-6 mb-8 border border-white/10">
                             <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
                                 <Banknote className="w-5 h-5 text-indigo-400" />
@@ -626,7 +610,7 @@ export default function TeamDashboardPage() {
                             </div>
                         ) : (
                             <div className="grid gap-4">
-                                {membersData?.teamMembers?.map((member) => (
+                                {(membersData as any)?.teamMembers?.map((member: any) => (
                                     <div 
                                         key={member.id}
                                         className="bg-card border border-border/50 rounded-2xl p-4 flex items-center justify-between hover:border-primary/30 transition-all group"
@@ -638,7 +622,7 @@ export default function TeamDashboardPage() {
                                             <div>
                                                 <div className="flex items-center gap-2">
                                                     <h3 className="font-semibold">{member.user?.fullName}</h3>
-                                                    {member.role === 'owner' && (
+                                                    {member.role === TeamRole.Owner && (
                                                         <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/20">
                                                             Владелец
                                                         </Badge>
@@ -666,7 +650,7 @@ export default function TeamDashboardPage() {
                                 ))}
                             </div>
                         )}
-                    </motion.div>
+                    </div>
                 )}
 			</main>
             

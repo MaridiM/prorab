@@ -46,6 +46,8 @@ export type UserMinAggregateOutputType = {
   storagePreference: $Enums.StorageProviderType | null
   storageMigratedFrom: $Enums.StorageProviderType | null
   storageMigratedAt: Date | null
+  businessRole: $Enums.BusinessRole | null
+  businessRoleAssignedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +74,8 @@ export type UserMaxAggregateOutputType = {
   storagePreference: $Enums.StorageProviderType | null
   storageMigratedFrom: $Enums.StorageProviderType | null
   storageMigratedAt: Date | null
+  businessRole: $Enums.BusinessRole | null
+  businessRoleAssignedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -99,6 +103,8 @@ export type UserCountAggregateOutputType = {
   storagePreference: number
   storageMigratedFrom: number
   storageMigratedAt: number
+  businessRole: number
+  businessRoleAssignedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -127,6 +133,8 @@ export type UserMinAggregateInputType = {
   storagePreference?: true
   storageMigratedFrom?: true
   storageMigratedAt?: true
+  businessRole?: true
+  businessRoleAssignedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -153,6 +161,8 @@ export type UserMaxAggregateInputType = {
   storagePreference?: true
   storageMigratedFrom?: true
   storageMigratedAt?: true
+  businessRole?: true
+  businessRoleAssignedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -180,6 +190,8 @@ export type UserCountAggregateInputType = {
   storagePreference?: true
   storageMigratedFrom?: true
   storageMigratedAt?: true
+  businessRole?: true
+  businessRoleAssignedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -280,6 +292,8 @@ export type UserGroupByOutputType = {
   storagePreference: $Enums.StorageProviderType | null
   storageMigratedFrom: $Enums.StorageProviderType | null
   storageMigratedAt: Date | null
+  businessRole: $Enums.BusinessRole | null
+  businessRoleAssignedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -328,6 +342,8 @@ export type UserWhereInput = {
   storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -340,6 +356,7 @@ export type UserWhereInput = {
   supportTickets?: Prisma.SupportTicketListRelationFilter
   salaryChanges?: Prisma.TeamMemberSalaryHistoryListRelationFilter
   adminRole?: Prisma.XOR<Prisma.AdminRoleNullableScalarRelationFilter, Prisma.AdminRoleWhereInput> | null
+  adminActionLogs?: Prisma.AdminActionLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -365,6 +382,8 @@ export type UserOrderByWithRelationInput = {
   storagePreference?: Prisma.SortOrderInput | Prisma.SortOrder
   storageMigratedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   storageMigratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessRoleAssignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   verificationTokens?: Prisma.VerificationTokenOrderByRelationAggregateInput
@@ -377,6 +396,7 @@ export type UserOrderByWithRelationInput = {
   supportTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryOrderByRelationAggregateInput
   adminRole?: Prisma.AdminRoleOrderByWithRelationInput
+  adminActionLogs?: Prisma.AdminActionLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -405,6 +425,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -417,6 +439,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   supportTickets?: Prisma.SupportTicketListRelationFilter
   salaryChanges?: Prisma.TeamMemberSalaryHistoryListRelationFilter
   adminRole?: Prisma.XOR<Prisma.AdminRoleNullableScalarRelationFilter, Prisma.AdminRoleWhereInput> | null
+  adminActionLogs?: Prisma.AdminActionLogListRelationFilter
 }, "id" | "email" | "emailNormalized" | "telegramChatId">
 
 export type UserOrderByWithAggregationInput = {
@@ -442,6 +465,8 @@ export type UserOrderByWithAggregationInput = {
   storagePreference?: Prisma.SortOrderInput | Prisma.SortOrder
   storageMigratedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   storageMigratedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessRoleAssignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -475,6 +500,8 @@ export type UserScalarWhereWithAggregatesInput = {
   storagePreference?: Prisma.EnumStorageProviderTypeNullableWithAggregatesFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableWithAggregatesFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  businessRole?: Prisma.EnumBusinessRoleNullableWithAggregatesFilter<"User"> | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -501,6 +528,8 @@ export type UserCreateInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -513,6 +542,7 @@ export type UserCreateInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -538,6 +568,8 @@ export type UserUncheckedCreateInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -549,6 +581,7 @@ export type UserUncheckedCreateInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUpdateInput = {
@@ -573,6 +606,8 @@ export type UserUpdateInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -585,6 +620,7 @@ export type UserUpdateInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -610,6 +646,8 @@ export type UserUncheckedUpdateInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -621,6 +659,7 @@ export type UserUncheckedUpdateInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -646,6 +685,8 @@ export type UserCreateManyInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -672,6 +713,8 @@ export type UserUpdateManyMutationInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -699,6 +742,8 @@ export type UserUncheckedUpdateManyInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -734,6 +779,8 @@ export type UserCountOrderByAggregateInput = {
   storagePreference?: Prisma.SortOrder
   storageMigratedFrom?: Prisma.SortOrder
   storageMigratedAt?: Prisma.SortOrder
+  businessRole?: Prisma.SortOrder
+  businessRoleAssignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -760,6 +807,8 @@ export type UserMaxOrderByAggregateInput = {
   storagePreference?: Prisma.SortOrder
   storageMigratedFrom?: Prisma.SortOrder
   storageMigratedAt?: Prisma.SortOrder
+  businessRole?: Prisma.SortOrder
+  businessRoleAssignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -786,6 +835,8 @@ export type UserMinOrderByAggregateInput = {
   storagePreference?: Prisma.SortOrder
   storageMigratedFrom?: Prisma.SortOrder
   storageMigratedAt?: Prisma.SortOrder
+  businessRole?: Prisma.SortOrder
+  businessRoleAssignedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -832,6 +883,10 @@ export type UserUpdatetwoFactorBackupCodesInput = {
 
 export type NullableEnumStorageProviderTypeFieldUpdateOperationsInput = {
   set?: $Enums.StorageProviderType | null
+}
+
+export type NullableEnumBusinessRoleFieldUpdateOperationsInput = {
+  set?: $Enums.BusinessRole | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -1006,6 +1061,20 @@ export type UserUpdateOneRequiredWithoutAdminRoleNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminRoleInput, Prisma.UserUpdateWithoutAdminRoleInput>, Prisma.UserUncheckedUpdateWithoutAdminRoleInput>
 }
 
+export type UserCreateNestedOneWithoutAdminActionLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAdminActionLogsInput, Prisma.UserUncheckedCreateWithoutAdminActionLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminActionLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAdminActionLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAdminActionLogsInput, Prisma.UserUncheckedCreateWithoutAdminActionLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAdminActionLogsInput
+  upsert?: Prisma.UserUpsertWithoutAdminActionLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminActionLogsInput, Prisma.UserUpdateWithoutAdminActionLogsInput>, Prisma.UserUncheckedUpdateWithoutAdminActionLogsInput>
+}
+
 export type UserCreateWithoutNotificationSettingsInput = {
   id?: string
   email: string
@@ -1028,6 +1097,8 @@ export type UserCreateWithoutNotificationSettingsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1039,6 +1110,7 @@ export type UserCreateWithoutNotificationSettingsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationSettingsInput = {
@@ -1064,6 +1136,8 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1074,6 +1148,7 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationSettingsInput = {
@@ -1114,6 +1189,8 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1125,6 +1202,7 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
@@ -1150,6 +1228,8 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1160,6 +1240,7 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutVerificationTokensInput = {
@@ -1184,6 +1265,8 @@ export type UserCreateWithoutVerificationTokensInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1195,6 +1278,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -1220,6 +1304,8 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1230,6 +1316,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -1270,6 +1357,8 @@ export type UserUpdateWithoutVerificationTokensInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1281,6 +1370,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -1306,6 +1396,8 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1316,6 +1408,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1340,6 +1433,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1351,6 +1446,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1376,6 +1472,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1386,6 +1484,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1426,6 +1525,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1437,6 +1538,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1462,6 +1564,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1472,6 +1576,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutOwnedTeamsInput = {
@@ -1496,6 +1601,8 @@ export type UserCreateWithoutOwnedTeamsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1507,6 +1614,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedTeamsInput = {
@@ -1532,6 +1640,8 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1542,6 +1652,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedTeamsInput = {
@@ -1571,6 +1682,8 @@ export type UserCreateWithoutCurrentTeamInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1582,6 +1695,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutCurrentTeamInput = {
@@ -1606,6 +1720,8 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1617,6 +1733,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutCurrentTeamInput = {
@@ -1662,6 +1779,8 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1673,6 +1792,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
@@ -1698,6 +1818,8 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1708,6 +1830,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutCurrentTeamInput = {
@@ -1752,6 +1875,8 @@ export type UserScalarWhereInput = {
   storagePreference?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.EnumStorageProviderTypeNullableFilter<"User"> | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
@@ -1778,6 +1903,8 @@ export type UserCreateWithoutTeamMembershipsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1789,6 +1916,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -1814,6 +1942,8 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1824,6 +1954,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -1864,6 +1995,8 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1875,6 +2008,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -1900,6 +2034,8 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1910,6 +2046,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutSalaryChangesInput = {
@@ -1934,6 +2071,8 @@ export type UserCreateWithoutSalaryChangesInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1945,6 +2084,7 @@ export type UserCreateWithoutSalaryChangesInput = {
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutSalaryChangesInput = {
@@ -1970,6 +2110,8 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1980,6 +2122,7 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutSalaryChangesInput = {
@@ -2020,6 +2163,8 @@ export type UserUpdateWithoutSalaryChangesInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2031,6 +2176,7 @@ export type UserUpdateWithoutSalaryChangesInput = {
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryChangesInput = {
@@ -2056,6 +2202,8 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2066,6 +2214,7 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTasksInput = {
@@ -2090,6 +2239,8 @@ export type UserCreateWithoutCreatedTasksInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2101,6 +2252,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTasksInput = {
@@ -2126,6 +2278,8 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2136,6 +2290,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTasksInput = {
@@ -2176,6 +2331,8 @@ export type UserUpdateWithoutCreatedTasksInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2187,6 +2344,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTasksInput = {
@@ -2212,6 +2370,8 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2222,6 +2382,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -2246,6 +2407,8 @@ export type UserCreateWithoutSupportTicketsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2257,6 +2420,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -2282,6 +2446,8 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2292,6 +2458,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -2332,6 +2499,8 @@ export type UserUpdateWithoutSupportTicketsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2343,6 +2512,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -2368,6 +2538,8 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2378,6 +2550,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserCreateWithoutAdminRoleInput = {
@@ -2402,6 +2575,8 @@ export type UserCreateWithoutAdminRoleInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2413,6 +2588,7 @@ export type UserCreateWithoutAdminRoleInput = {
   createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminRoleInput = {
@@ -2438,6 +2614,8 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2448,6 +2626,7 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminRoleInput = {
@@ -2488,6 +2667,8 @@ export type UserUpdateWithoutAdminRoleInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2499,6 +2680,7 @@ export type UserUpdateWithoutAdminRoleInput = {
   createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminRoleInput = {
@@ -2524,6 +2706,8 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2534,6 +2718,175 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
+}
+
+export type UserCreateWithoutAdminActionLogsInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
+  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAdminActionLogsInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  currentTeamId?: string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAdminActionLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAdminActionLogsInput, Prisma.UserUncheckedCreateWithoutAdminActionLogsInput>
+}
+
+export type UserUpsertWithoutAdminActionLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAdminActionLogsInput, Prisma.UserUncheckedUpdateWithoutAdminActionLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAdminActionLogsInput, Prisma.UserUncheckedCreateWithoutAdminActionLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAdminActionLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAdminActionLogsInput, Prisma.UserUncheckedUpdateWithoutAdminActionLogsInput>
+}
+
+export type UserUpdateWithoutAdminActionLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
+  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyCurrentTeamInput = {
@@ -2558,6 +2911,8 @@ export type UserCreateManyCurrentTeamInput = {
   storagePreference?: $Enums.StorageProviderType | null
   storageMigratedFrom?: $Enums.StorageProviderType | null
   storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2584,6 +2939,8 @@ export type UserUpdateWithoutCurrentTeamInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2595,6 +2952,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCurrentTeamInput = {
@@ -2619,6 +2977,8 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2630,6 +2990,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
@@ -2654,6 +3015,8 @@ export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
   storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
   storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2671,6 +3034,7 @@ export type UserCountOutputType = {
   createdTasks: number
   supportTickets: number
   salaryChanges: number
+  adminActionLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2681,6 +3045,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   createdTasks?: boolean | UserCountOutputTypeCountCreatedTasksArgs
   supportTickets?: boolean | UserCountOutputTypeCountSupportTicketsArgs
   salaryChanges?: boolean | UserCountOutputTypeCountSalaryChangesArgs
+  adminActionLogs?: boolean | UserCountOutputTypeCountAdminActionLogsArgs
 }
 
 /**
@@ -2742,6 +3107,13 @@ export type UserCountOutputTypeCountSalaryChangesArgs<ExtArgs extends runtime.Ty
   where?: Prisma.TeamMemberSalaryHistoryWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAdminActionLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AdminActionLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2766,6 +3138,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   storagePreference?: boolean
   storageMigratedFrom?: boolean
   storageMigratedAt?: boolean
+  businessRole?: boolean
+  businessRoleAssignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
@@ -2778,6 +3152,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   supportTickets?: boolean | Prisma.User$supportTicketsArgs<ExtArgs>
   salaryChanges?: boolean | Prisma.User$salaryChangesArgs<ExtArgs>
   adminRole?: boolean | Prisma.User$adminRoleArgs<ExtArgs>
+  adminActionLogs?: boolean | Prisma.User$adminActionLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2804,6 +3179,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   storagePreference?: boolean
   storageMigratedFrom?: boolean
   storageMigratedAt?: boolean
+  businessRole?: boolean
+  businessRoleAssignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -2832,6 +3209,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   storagePreference?: boolean
   storageMigratedFrom?: boolean
   storageMigratedAt?: boolean
+  businessRole?: boolean
+  businessRoleAssignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -2860,11 +3239,13 @@ export type UserSelectScalar = {
   storagePreference?: boolean
   storageMigratedFrom?: boolean
   storageMigratedAt?: boolean
+  businessRole?: boolean
+  businessRoleAssignedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "businessRole" | "businessRoleAssignedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -2876,6 +3257,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   supportTickets?: boolean | Prisma.User$supportTicketsArgs<ExtArgs>
   salaryChanges?: boolean | Prisma.User$salaryChangesArgs<ExtArgs>
   adminRole?: boolean | Prisma.User$adminRoleArgs<ExtArgs>
+  adminActionLogs?: boolean | Prisma.User$adminActionLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2898,6 +3280,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     supportTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
     salaryChanges: Prisma.$TeamMemberSalaryHistoryPayload<ExtArgs>[]
     adminRole: Prisma.$AdminRolePayload<ExtArgs> | null
+    adminActionLogs: Prisma.$AdminActionLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2922,6 +3305,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     storagePreference: $Enums.StorageProviderType | null
     storageMigratedFrom: $Enums.StorageProviderType | null
     storageMigratedAt: Date | null
+    businessRole: $Enums.BusinessRole | null
+    businessRoleAssignedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -3328,6 +3713,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   supportTickets<T extends Prisma.User$supportTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$supportTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   salaryChanges<T extends Prisma.User$salaryChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$salaryChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamMemberSalaryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   adminRole<T extends Prisma.User$adminRoleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminRoleArgs<ExtArgs>>): Prisma.Prisma__AdminRoleClient<runtime.Types.Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  adminActionLogs<T extends Prisma.User$adminActionLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminActionLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminActionLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3379,6 +3765,8 @@ export interface UserFieldRefs {
   readonly storagePreference: Prisma.FieldRef<"User", 'StorageProviderType'>
   readonly storageMigratedFrom: Prisma.FieldRef<"User", 'StorageProviderType'>
   readonly storageMigratedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly businessRole: Prisma.FieldRef<"User", 'BusinessRole'>
+  readonly businessRoleAssignedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -3999,6 +4387,30 @@ export type User$adminRoleArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.AdminRoleInclude<ExtArgs> | null
   where?: Prisma.AdminRoleWhereInput
+}
+
+/**
+ * User.adminActionLogs
+ */
+export type User$adminActionLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AdminActionLog
+   */
+  select?: Prisma.AdminActionLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AdminActionLog
+   */
+  omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  where?: Prisma.AdminActionLogWhereInput
+  orderBy?: Prisma.AdminActionLogOrderByWithRelationInput | Prisma.AdminActionLogOrderByWithRelationInput[]
+  cursor?: Prisma.AdminActionLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AdminActionLogScalarFieldEnum | Prisma.AdminActionLogScalarFieldEnum[]
 }
 
 /**

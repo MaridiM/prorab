@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
-import { gql } from '@apollo/client'
 import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -27,64 +26,12 @@ import {
 	Progress,
 } from '@/packages/ui'
 import { useToast } from '@/packages/hooks'
-
-// GraphQL Queries & Mutations
-const MY_SUBSCRIPTION = gql`
-	query MySubscription {
-		mySubscription {
-			id
-			plan
-			status
-			currentPeriodStart
-			currentPeriodEnd
-			trialEndsAt
-			cancelAtPeriodEnd
-			cancelledAt
-			isEarlyBird
-			limits {
-				name
-				price
-				maxActiveProjects
-				maxMembers
-				storageGB
-				features
-			}
-		}
-	}
-`
-
-const CANCEL_SUBSCRIPTION = gql`
-	mutation CancelSubscription($subscriptionId: String!) {
-		cancelSubscription(subscriptionId: $subscriptionId) {
-			id
-			cancelAtPeriodEnd
-			cancelledAt
-		}
-	}
-`
-
-const REACTIVATE_SUBSCRIPTION = gql`
-	mutation ReactivateSubscription($subscriptionId: String!) {
-		reactivateSubscription(subscriptionId: $subscriptionId) {
-			id
-			cancelAtPeriodEnd
-			cancelledAt
-		}
-	}
-`
-
-const AVAILABLE_PLANS = gql`
-	query AvailablePlans {
-		availablePlans {
-			name
-			price
-			maxActiveProjects
-			maxMembers
-			storageGB
-			features
-		}
-	}
-`
+import {
+	MySubscriptionDocument,
+	CancelSubscriptionDocument,
+	ReactivateSubscriptionDocument,
+	AvailablePlansDocument,
+} from '@/packages/api/graphql/__generated__/output'
 
 interface SubscriptionManagementProps {
 	teamId?: string
@@ -96,42 +43,28 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const [showReactivateDialog, setShowReactivateDialog] = useState(false)
 	const { toast } = useToast()
 
-	const { data: subData, loading: subLoading, refetch } = useQuery(MY_SUBSCRIPTION)
-	const { data: plansData } = useQuery(AVAILABLE_PLANS)
+	const { data: subData, loading: subLoading, refetch } = useQuery(MySubscriptionDocument)
+	const { data: plansData } = useQuery(AvailablePlansDocument)
 
-	const [cancelSubscription, { loading: cancelling }] = useMutation(CANCEL_SUBSCRIPTION, {
+	const [cancelSubscription, { loading: cancelling }] = useMutation(CancelSubscriptionDocument, {
 		onCompleted: () => {
-			toast({
-				title: 'Подписка отменена',
-				description: 'Подписка будет активна до конца оплаченного периода',
-			})
+			toast('Подписка будет активна до конца оплаченного периода', 'success')
 			setShowCancelDialog(false)
 			refetch()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось отменить подписку',
-				variant: 'destructive',
-			})
+			toast(error.message || 'Не удалось отменить подписку', 'error')
 		},
 	})
 
-	const [reactivateSubscription, { loading: reactivating }] = useMutation(REACTIVATE_SUBSCRIPTION, {
+	const [reactivateSubscription, { loading: reactivating }] = useMutation(ReactivateSubscriptionDocument, {
 		onCompleted: () => {
-			toast({
-				title: 'Подписка возобновлена',
-				description: 'Подписка снова активна',
-			})
+			toast('Подписка снова активна', 'success')
 			setShowReactivateDialog(false)
 			refetch()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось возобновить подписку',
-				variant: 'destructive',
-			})
+			toast(error.message || 'Не удалось возобновить подписку', 'error')
 		},
 	})
 
@@ -155,7 +88,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const getStatusBadge = (status: string, cancelAtPeriodEnd: boolean) => {
 		if (cancelAtPeriodEnd) {
 			return (
-				<Badge variant="destructive" className="flex items-center gap-1">
+				<Badge variant="danger" className="flex items-center gap-1">
 					<AlertCircle className="w-3 h-3" />
 					Отменена
 				</Badge>
@@ -179,11 +112,11 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 				)
 			case 'PAST_DUE':
 				return (
-					<Badge variant="destructive">Просрочена</Badge>
+					<Badge variant="danger">Просрочена</Badge>
 				)
 			case 'CANCELLED':
 				return (
-					<Badge variant="outline">Отменена</Badge>
+					<Badge variant="secondary">Отменена</Badge>
 				)
 			default:
 				return <Badge>{status}</Badge>

@@ -9,6 +9,9 @@ export class AdminActionLog {
   @Field(() => ID)
   adminUserId: string;
 
+  @Field({ nullable: true, description: 'Admin user email (populated from relation)' })
+  adminUserEmail?: string;
+
   @Field()
   action: string;
 

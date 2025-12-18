@@ -60,22 +60,25 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
     variables: { teamId },
   });
 
-  const [exportAnalytics, { loading: exporting }] = useLazyQuery(ExportPersonnelAnalyticsDocument, {
-    variables: { teamId },
-    onCompleted: (data) => {
-      const blob = new Blob([data.exportPersonnelAnalytics], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `personnel-analytics-${teamId}-${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-      toast.success('CSV экспортирован');
-    },
-    onError: (error) => {
+  const [exportAnalytics, { loading: exporting }] = useLazyQuery(ExportPersonnelAnalyticsDocument);
+
+  const handleExport = async () => {
+    try {
+      const { data: exportData } = await exportAnalytics({ variables: { teamId } });
+      if (exportData) {
+        const blob = new Blob([exportData.exportPersonnelAnalytics], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `personnel-analytics-${teamId}-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('CSV экспортирован');
+      }
+    } catch (error: any) {
       toast.error('Ошибка экспорта', { description: error.message });
-    },
-  });
+    }
+  };
 
   const analytics = data?.personnelAnalytics;
 
@@ -232,7 +235,7 @@ export default function PersonnelAnalyticsPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => exportAnalytics()} disabled={exporting}>
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
             <Download className="w-4 h-4 mr-2" />
             {exporting ? 'Экспорт...' : 'Экспорт CSV'}
           </Button>

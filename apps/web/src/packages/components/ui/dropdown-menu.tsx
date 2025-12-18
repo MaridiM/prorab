@@ -78,7 +78,11 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
 )
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
-interface DropdownMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DropdownMenuContentProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  | 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onDragEnter' | 'onDragLeave' | 'onDragExit' | 'onDragOver'
+  | 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration'
+> {
   align?: "start" | "center" | "end"
   sideOffset?: number
 }

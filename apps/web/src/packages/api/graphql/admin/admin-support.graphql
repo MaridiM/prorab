@@ -1,0 +1,125 @@
+# Admin Support Tickets Queries and Mutations
+
+query AdminSupportTickets($filter: AdminSupportTicketFilterInput, $pagination: PaginationInput) {
+	adminSupportTickets(filter: $filter, pagination: $pagination) {
+		tickets {
+			id
+			userId
+			userEmail
+			userFullName
+			telegramChatId
+			subject
+			status
+			priority
+			category
+			createdAt
+			updatedAt
+			closedAt
+			messageCount
+		}
+		total
+		hasMore
+	}
+}
+
+query AdminSupportTicket($ticketId: ID!) {
+	adminSupportTicket(ticketId: $ticketId) {
+		id
+		userId
+		userEmail
+		userFullName
+		telegramChatId
+		subject
+		status
+		priority
+		category
+		createdAt
+		updatedAt
+		closedAt
+		messages {
+			id
+			ticketId
+			fromUser
+			message
+			createdAt
+		}
+	}
+}
+
+query AdminSupportStatistics {
+	adminSupportStatistics {
+		totalTickets
+		openTickets
+		inProgressTickets
+		resolvedTickets
+		closedTickets
+		ticketsByPriority
+		ticketsByCategory
+	}
+}
+
+mutation AdminUpdateSupportTicket($ticketId: ID!, $input: AdminUpdateSupportTicketInput!) {
+	adminUpdateSupportTicket(ticketId: $ticketId, input: $input) {
+		id
+		status
+		priority
+		category
+		updatedAt
+		closedAt
+	}
+}
+
+mutation AdminSendSupportMessage($input: AdminSendMessageInput!) {
+	adminSendSupportMessage(input: $input) {
+		id
+		ticketId
+		fromUser
+		message
+		createdAt
+	}
+}
+
+mutation AdminDeleteSupportTicket($ticketId: ID!) {
+	adminDeleteSupportTicket(ticketId: $ticketId) {
+		success
+		message
+	}
+}
+
+# Input Types (defined in backend schema)
+input AdminSupportTicketFilterInput {
+	search: String
+	status: SupportTicketStatus
+	priority: SupportTicketPriority
+	category: String
+	userId: ID
+	startDate: DateTime
+	endDate: DateTime
+}
+
+input AdminUpdateSupportTicketInput {
+	status: SupportTicketStatus
+	priority: SupportTicketPriority
+	category: String
+}
+
+input AdminSendMessageInput {
+	ticketId: ID!
+	message: String!
+	fromUser: Boolean
+}
+
+enum SupportTicketStatus {
+	OPEN
+	IN_PROGRESS
+	WAITING_USER
+	RESOLVED
+	CLOSED
+}
+
+enum SupportTicketPriority {
+	LOW
+	MEDIUM
+	HIGH
+	URGENT
+}

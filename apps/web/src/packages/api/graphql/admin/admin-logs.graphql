@@ -4,6 +4,7 @@ query AdminActionLogs($filter: AdminActionLogFilterInput) {
 		logs {
 			id
 			adminUserId
+			adminUserEmail
 			action
 			resource
 			resourceId

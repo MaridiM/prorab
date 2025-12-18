@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/packages/components';
-import { MemberSalaryBadge } from '@/app/components/payouts';
+import { MemberSalaryBadge } from '@/packages/components/payouts/MemberSalaryBadge';
 import { toast } from 'sonner';
 
 type Payout = MemberPayoutsQuery['memberPayouts'][0];
@@ -380,7 +380,7 @@ export default function MemberPayoutsPage() {
                   </TableCell>
                   <TableCell>
                     <MemberSalaryBadge
-                      salaryType={payout.member.salaryType}
+                      salaryType={payout.member.salaryType as "FIXED" | "PERCENTAGE" | "NONE"}
                       salaryAmount={payout.member.salaryAmount}
                     />
                   </TableCell>

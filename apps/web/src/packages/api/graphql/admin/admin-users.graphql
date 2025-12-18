@@ -1,0 +1,66 @@
+# Admin Users Management Queries and Mutations
+
+# Fragments
+fragment AdminUserFields on User {
+  id
+  email
+  fullName
+  telegramChatId
+  emailVerified
+  avatarUrl
+  createdAt
+  updatedAt
+}
+
+fragment AdminUserDetailsFields on AdminUserDetails {
+  user {
+    ...AdminUserFields
+  }
+  _count {
+    ownedTeams
+    payments
+  }
+}
+
+fragment PageInfoFields on PageInfo {
+  hasNextPage
+  hasPreviousPage
+  currentPage
+  totalPages
+}
+
+# Queries
+query AdminUsers($filters: AdminUserFilters, $pagination: PaginationInput!) {
+  adminUsers(filters: $filters, pagination: $pagination) {
+    nodes {
+      ...AdminUserFields
+    }
+    totalCount
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}
+
+query AdminUser($id: String!) {
+  adminUser(id: $id) {
+    ...AdminUserDetailsFields
+  }
+}
+
+# Mutations
+mutation AdminUpdateUser($id: String!, $input: AdminUpdateUserInput!) {
+  adminUpdateUser(id: $id, input: $input) {
+    ...AdminUserFields
+  }
+}
+
+mutation AdminVerifyUserEmail($id: String!) {
+  adminVerifyUserEmail(id: $id) {
+    ...AdminUserFields
+  }
+}
+
+mutation AdminDeleteUser($id: String!) {
+  adminDeleteUser(id: $id)
+}

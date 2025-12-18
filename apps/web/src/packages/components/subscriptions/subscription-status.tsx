@@ -43,22 +43,22 @@ const STATUS_CONFIG = {
 	},
 	ACTIVE: {
 		label: 'Активна',
-		variant: 'default' as const,
+		variant: 'success' as const,
 		color: 'text-green-500',
 	},
 	PAST_DUE: {
 		label: 'Просрочена',
-		variant: 'destructive' as const,
+		variant: 'danger' as const,
 		color: 'text-red-500',
 	},
 	CANCELLED: {
 		label: 'Отменена',
-		variant: 'outline' as const,
+		variant: 'secondary' as const,
 		color: 'text-muted-foreground',
 	},
 	EXPIRED: {
 		label: 'Истекла',
-		variant: 'destructive' as const,
+		variant: 'danger' as const,
 		color: 'text-red-500',
 	},
 }
@@ -104,7 +104,7 @@ export function SubscriptionStatus({
 							<h3 className="text-2xl font-bold">{limits.name}</h3>
 							<Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
 							{subscription.isEarlyBird && (
-								<Badge variant="outline" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+								<Badge variant="warning" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
 									Early Bird
 								</Badge>
 							)}

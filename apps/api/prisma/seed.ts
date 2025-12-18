@@ -19,13 +19,90 @@ const pool = new Pool({ connectionString: databaseUrl })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
-// Демо пользователь
-const DEMO_USER = {
-	email: 'demo@prorab.app',
-	password: 'demo123456',
-	fullName: 'Демо Пользователь',
-	phone: '+7 (999) 123-45-67',
+// ==================== SEED USERS ====================
+// Все тестовые пользователи для базового формирования
+
+interface SeedUser {
+	email: string
+	password: string
+	fullName: string
+	phone: string
+	role: AdminRoleType | null
+	roleDescription: string
 }
+
+const SEED_USERS: SeedUser[] = [
+	// 1. Super Admin - полный доступ ко всему
+	{
+		email: 'superadmin@prorab.app',
+		password: 'super123456',
+		fullName: 'Александр Супер',
+		phone: '+7 (999) 000-00-01',
+		role: AdminRoleType.SUPER_ADMIN,
+		roleDescription: 'Полный доступ ко всей системе',
+	},
+	// 2. Admin - большинство админских функций
+	{
+		email: 'admin@prorab.app',
+		password: 'admin123456',
+		fullName: 'Мария Админова',
+		phone: '+7 (999) 000-00-02',
+		role: AdminRoleType.ADMIN,
+		roleDescription: 'Управление пользователями, командами, подписками',
+	},
+	// 3. Moderator - модерация контента
+	{
+		email: 'moderator@prorab.app',
+		password: 'mod123456',
+		fullName: 'Иван Модератор',
+		phone: '+7 (999) 000-00-03',
+		role: AdminRoleType.MODERATOR,
+		roleDescription: 'Модерация контента, поддержка пользователей',
+	},
+	// 4. Support - только поддержка
+	{
+		email: 'support@prorab.app',
+		password: 'support123456',
+		fullName: 'Елена Саппорт',
+		phone: '+7 (999) 000-00-04',
+		role: AdminRoleType.SUPPORT,
+		roleDescription: 'Просмотр тикетов и базовая поддержка',
+	},
+	// 5. Demo User - обычный пользователь с демо данными
+	{
+		email: 'demo@prorab.app',
+		password: 'demo123456',
+		fullName: 'Демо Пользователь',
+		phone: '+7 (999) 123-45-67',
+		role: null, // Обычный пользователь без админ роли
+		roleDescription: 'Обычный пользователь с демо проектами',
+	},
+	// 6-8. Обычные пользователи для тестирования команд
+	{
+		email: 'user1@prorab.app',
+		password: 'user123456',
+		fullName: 'Петр Петров',
+		phone: '+7 (999) 111-11-11',
+		role: null,
+		roleDescription: 'Тестовый пользователь 1',
+	},
+	{
+		email: 'user2@prorab.app',
+		password: 'user123456',
+		fullName: 'Ольга Сидорова',
+		phone: '+7 (999) 222-22-22',
+		role: null,
+		roleDescription: 'Тестовый пользователь 2',
+	},
+	{
+		email: 'user3@prorab.app',
+		password: 'user123456',
+		fullName: 'Сергей Иванов',
+		phone: '+7 (999) 333-33-33',
+		role: null,
+		roleDescription: 'Тестовый пользователь 3',
+	},
+]
 
 // Генерация случайного slug для отчётов
 function generateSlug(): string {
@@ -53,70 +130,99 @@ function daysLater(days: number): Date {
 
 async function main() {
 	console.log('🌱 Starting seed...')
+	console.log('')
 
-	// Проверяем, существует ли уже демо пользователь
-	const existingUser = await prisma.user.findUnique({
-		where: { email: DEMO_USER.email },
-		include: { adminRole: true },
-	})
+	// ==================== 1. CREATE ALL USERS ====================
+	console.log('👥 Creating seed users...')
+	const createdUsers: any[] = []
 
-	let demoUser: any = existingUser
+	for (const seedUser of SEED_USERS) {
+		// Проверяем, существует ли пользователь
+		const existingUser = await prisma.user.findUnique({
+			where: { email: seedUser.email },
+			include: { adminRole: true },
+		})
 
-	if (existingUser) {
-		console.log('⚠️ Demo user already exists')
-		
-		// Проверяем, есть ли у пользователя админ роль
-		if (!existingUser.adminRole) {
-			console.log('👑 Creating admin role for existing demo user...')
+		if (existingUser) {
+			console.log(`   ⚠️  User already exists: ${seedUser.email}`)
+
+			// Проверяем и создаем админ роль если нужна
+			if (seedUser.role && !existingUser.adminRole) {
+				console.log(`      👑 Creating ${seedUser.role} role...`)
+				await prisma.adminRole.create({
+					data: {
+						userId: existingUser.id,
+						role: seedUser.role as any,
+						permissions: seedUser.role === AdminRoleType.SUPER_ADMIN
+							? [...RolePermissions.SUPER_ADMIN]
+							: seedUser.role === AdminRoleType.ADMIN
+							? [...RolePermissions.ADMIN]
+							: seedUser.role === AdminRoleType.MODERATOR
+							? [...RolePermissions.MODERATOR]
+							: [...RolePermissions.SUPPORT],
+						twoFactorEnforced: false,
+						ipWhitelist: [],
+					},
+				})
+				console.log(`      ✅ Role assigned`)
+			}
+
+			createdUsers.push(existingUser)
+			continue
+		}
+
+		// Создаём нового пользователя
+		const passwordHash = await argon2.hash(seedUser.password)
+
+		const user = await prisma.user.create({
+			data: {
+				email: seedUser.email,
+				emailNormalized: seedUser.email.toLowerCase(),
+				emailVerified: true,
+				passwordHash,
+				fullName: seedUser.fullName,
+				phone: seedUser.phone,
+				hasCompletedOnboarding: true,
+				onboardingCompletedAt: daysAgo(30),
+			},
+		})
+
+		console.log(`   ✅ Created: ${user.email} - ${seedUser.fullName}`)
+
+		// Создаём админ роль если указана
+		if (seedUser.role) {
 			await prisma.adminRole.create({
 				data: {
-					userId: existingUser.id,
-					role: AdminRoleType.ADMIN as any,
-					permissions: [...RolePermissions.ADMIN],
-					twoFactorEnforced: false, // Отключаем 2FA для демо аккаунта
+					userId: user.id,
+					role: seedUser.role as any,
+					permissions: seedUser.role === AdminRoleType.SUPER_ADMIN
+						? [...RolePermissions.SUPER_ADMIN]
+						: seedUser.role === AdminRoleType.ADMIN
+						? [...RolePermissions.ADMIN]
+						: seedUser.role === AdminRoleType.MODERATOR
+						? [...RolePermissions.MODERATOR]
+						: [...RolePermissions.SUPPORT],
+					twoFactorEnforced: false,
 					ipWhitelist: [],
 				},
 			})
-			console.log(`   ✅ Admin role created: ${AdminRoleType.ADMIN}`)
-		} else {
-			console.log(`   ℹ️  User already has admin role: ${existingUser.adminRole.role}`)
+			console.log(`      👑 Role assigned: ${seedUser.role}`)
 		}
-		
-		console.log('⚠️ Skipping seed (user already exists)')
-		return
+
+		createdUsers.push(user)
 	}
 
-	// 1. Создаём демо пользователя
-	console.log('👤 Creating demo user...')
-	const passwordHash = await argon2.hash(DEMO_USER.password)
+	console.log('')
+	console.log(`   ✅ Total users: ${createdUsers.length}`)
+	console.log('')
 
-	demoUser = await prisma.user.create({
-		data: {
-			email: DEMO_USER.email,
-			emailNormalized: DEMO_USER.email.toLowerCase(),
-			emailVerified: true,
-			passwordHash,
-			fullName: DEMO_USER.fullName,
-			phone: DEMO_USER.phone,
-			hasCompletedOnboarding: true,
-			onboardingCompletedAt: daysAgo(30),
-		},
-	})
+	// Находим демо пользователя для создания проектов
+	const demoUser = createdUsers.find(u => u.email === 'demo@prorab.app')
 
-	console.log(`   ✅ User created: ${demoUser.email}`)
-
-	// 1.1. Создаём админ роль для демо пользователя
-	console.log('👑 Creating admin role for demo user...')
-	await prisma.adminRole.create({
-		data: {
-			userId: demoUser.id,
-			role: AdminRoleType.ADMIN as any,
-			permissions: [...RolePermissions.ADMIN],
-			twoFactorEnforced: false, // Отключаем 2FA для демо аккаунта
-			ipWhitelist: [],
-		},
-	})
-	console.log(`   ✅ Admin role created: ${AdminRoleType.ADMIN}`)
+	if (!demoUser) {
+		console.log('⚠️ Demo user not found, skipping project creation')
+		return
+	}
 
 	// 2. Создаём команду
 	console.log('👥 Creating team...')
@@ -135,7 +241,7 @@ async function main() {
 		data: {
 			teamId: team.id,
 			userId: demoUser.id,
-			role: 'owner',
+			role: 'OWNER',
 			salaryType: 'percentage',
 			salaryAmount: 15,
 		},
@@ -561,20 +667,199 @@ async function main() {
 
 	console.log('   ✅ Created payouts')
 
+	// ============================================
+	// CREATE ADMIN ACTION LOGS
+	// ============================================
+	console.log('\n🔐 Creating admin action logs...')
+
+	const superAdmin = createdUsers.find((u) => u.email === 'superadmin@prorab.app')
+	const admin = createdUsers.find((u) => u.email === 'admin@prorab.app')
+	const moderator = createdUsers.find((u) => u.email === 'moderator@prorab.app')
+	const support = createdUsers.find((u) => u.email === 'support@prorab.app')
+
+	if (superAdmin && admin && moderator && support) {
+		// Super Admin actions (last 7 days)
+		await prisma.adminActionLog.createMany({
+			data: [
+				{
+					adminUserId: superAdmin.id,
+					action: 'CREATE',
+					resource: 'User',
+					resourceId: demoUser.id,
+					details: { email: 'demo@prorab.app', role: 'user' },
+					ipAddress: '192.168.1.100',
+					userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+					createdAt: daysAgo(7),
+				},
+				{
+					adminUserId: superAdmin.id,
+					action: 'UPDATE',
+					resource: 'AdminRole',
+					resourceId: admin.id,
+					details: { permissions: ['users:view', 'users:manage'] },
+					ipAddress: '192.168.1.100',
+					createdAt: daysAgo(6),
+				},
+				{
+					adminUserId: superAdmin.id,
+					action: 'CREATE',
+					resource: 'SystemSettings',
+					resourceId: 'email-config',
+					details: { category: 'email', key: 'smtp_host', value: 'smtp.example.com' },
+					ipAddress: '192.168.1.100',
+					createdAt: daysAgo(5),
+				},
+				{
+					adminUserId: superAdmin.id,
+					action: 'DELETE',
+					resource: 'Team',
+					resourceId: 'deleted-team-id',
+					details: { teamName: 'Старая команда', reason: 'inactive' },
+					ipAddress: '192.168.1.100',
+					createdAt: daysAgo(4),
+				},
+			],
+		})
+
+		// Admin actions (last 5 days)
+		await prisma.adminActionLog.createMany({
+			data: [
+				{
+					adminUserId: admin.id,
+					action: 'VERIFY',
+					resource: 'User',
+					resourceId: demoUser.id,
+					details: { verified: true },
+					ipAddress: '192.168.1.101',
+					userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+					createdAt: daysAgo(5),
+				},
+				{
+					adminUserId: admin.id,
+					action: 'UPDATE',
+					resource: 'Team',
+					resourceId: team.id,
+					details: { name: 'СтройМастер', subscription: 'BRIGADE' },
+					ipAddress: '192.168.1.101',
+					createdAt: daysAgo(3),
+				},
+				{
+					adminUserId: admin.id,
+					action: 'CREATE',
+					resource: 'Subscription',
+					resourceId: 'sub-123',
+					details: { teamId: team.id, plan: 'BRIGADE', price: 2490 },
+					ipAddress: '192.168.1.101',
+					createdAt: daysAgo(2),
+				},
+			],
+		})
+
+		// Moderator actions (last 3 days)
+		await prisma.adminActionLog.createMany({
+			data: [
+				{
+					adminUserId: moderator.id,
+					action: 'UPDATE',
+					resource: 'Project',
+					resourceId: project1.id,
+					details: { status: 'active', moderated: true },
+					ipAddress: '192.168.1.102',
+					userAgent: 'Mozilla/5.0 (X11; Linux x86_64)',
+					createdAt: daysAgo(3),
+				},
+				{
+					adminUserId: moderator.id,
+					action: 'UPDATE',
+					resource: 'PhotoReport',
+					resourceId: 'report-id',
+					details: { approved: true },
+					ipAddress: '192.168.1.102',
+					createdAt: daysAgo(1),
+				},
+			],
+		})
+
+		// Support actions (today)
+		await prisma.adminActionLog.createMany({
+			data: [
+				{
+					adminUserId: support.id,
+					action: 'VIEW',
+					resource: 'User',
+					resourceId: demoUser.id,
+					details: { ticket: 'SUPPORT-123' },
+					ipAddress: '192.168.1.103',
+					userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
+					createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+				},
+				{
+					adminUserId: support.id,
+					action: 'VIEW',
+					resource: 'Team',
+					resourceId: team.id,
+					details: { ticket: 'SUPPORT-124' },
+					ipAddress: '192.168.1.103',
+					createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+				},
+			],
+		})
+
+		console.log('   ✅ Created 13 admin action logs')
+	}
+
 	console.log('')
 	console.log('✅ Seed completed successfully!')
 	console.log('')
-	console.log('📋 Demo account credentials:')
-	console.log(`   Email: ${DEMO_USER.email}`)
-	console.log(`   Password: ${DEMO_USER.password}`)
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+	console.log('📋 SEED ACCOUNTS - LOGIN CREDENTIALS')
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 	console.log('')
-	console.log('📊 Created data:')
-	console.log('   - 1 demo user (with ADMIN role)')
-	console.log('   - 1 team')
-	console.log('   - 7 projects (3 active, 2 completed, 2 archived)')
-	console.log('   - 27 expenses')
-	console.log('   - 6 photo reports')
-	console.log('   - 2 payouts')
+	console.log('👑 ADMIN ACCOUNTS:')
+	console.log('   1. Super Admin:')
+	console.log(`      Email:    superadmin@prorab.app`)
+	console.log(`      Password: super123456`)
+	console.log(`      Role:     SUPER_ADMIN (полный доступ)`)
+	console.log('')
+	console.log('   2. Admin:')
+	console.log(`      Email:    admin@prorab.app`)
+	console.log(`      Password: admin123456`)
+	console.log(`      Role:     ADMIN (управление системой)`)
+	console.log('')
+	console.log('   3. Moderator:')
+	console.log(`      Email:    moderator@prorab.app`)
+	console.log(`      Password: mod123456`)
+	console.log(`      Role:     MODERATOR (модерация контента)`)
+	console.log('')
+	console.log('   4. Support:')
+	console.log(`      Email:    support@prorab.app`)
+	console.log(`      Password: support123456`)
+	console.log(`      Role:     SUPPORT (просмотр тикетов)`)
+	console.log('')
+	console.log('👤 REGULAR USERS:')
+	console.log('   5. Demo User (с проектами):')
+	console.log(`      Email:    demo@prorab.app`)
+	console.log(`      Password: demo123456`)
+	console.log('')
+	console.log('   6-8. Test Users:')
+	console.log(`      Email:    user1@prorab.app, user2@prorab.app, user3@prorab.app`)
+	console.log(`      Password: user123456 (для всех)`)
+	console.log('')
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+	console.log('📊 CREATED DATA:')
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+	console.log(`   ✅ ${createdUsers.length} users`)
+	console.log(`   ✅ 4 admin roles (SUPER_ADMIN, ADMIN, MODERATOR, SUPPORT)`)
+	console.log('   ✅ 1 team (СтройМастер)')
+	console.log('   ✅ 7 projects (3 active, 2 completed, 2 archived)')
+	console.log('   ✅ 27 expenses')
+	console.log('   ✅ 6 photo reports')
+	console.log('   ✅ 2 payouts')
+	console.log('   ✅ 13 admin action logs')
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+	console.log('')
+	console.log('💡 TIP: Use superadmin@prorab.app to test RBAC system')
+	console.log('')
 }
 
 main()

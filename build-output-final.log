@@ -1,0 +1,57 @@
+
+> prorab-monorepo@0.4.1 build
+> turbo run build
+
+turbo 2.6.3
+
+• Packages in scope: api, web
+• Running build in 2 packages
+• Remote caching disabled
+api:build: cache hit, replaying logs d7cde58f381bc0c9
+api:build: 
+api:build: > api@0.3.0 build G:\Projects\prorab\v-1\apps\api
+api:build: > nest build
+api:build: 
+web:build: cache miss, executing 93861283982eef32
+web:build: 
+web:build: > web@0.2.8 build G:\Projects\prorab\v-1\apps\web
+web:build: > next build
+web:build: 
+web:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+web:build:  ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+web:build:  We detected multiple lockfiles and selected the directory of G:\Projects\prorab\v-1\pnpm-lock.yaml as the root directory.
+web:build:  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+web:build:    See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+web:build:  Detected additional lockfiles: 
+web:build:    * G:\Projects\prorab\v-1\apps\web\package-lock.json
+web:build: 
+web:build:    ▲ Next.js 16.0.3 (Turbopack)
+web:build:    - Environments: .env
+web:build: 
+web:build:    Creating an optimized production build ...
+web:build: [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+web:build:  ✓ Compiled successfully in 32.3s
+web:build:    Running TypeScript ...
+web:build: Failed to compile.
+web:build: 
+web:build: ./src/app/(root)/(protected)/teams/[teamId]/subscription/page.tsx:387:8
+web:build: Type error: Type '"destructive"' is not assignable to type '"link" | "outline" | "default" | "secondary" | "ghost" | null | undefined'.
+web:build: 
+web:build: [0m [90m 385 |[39m 						[33m<[39m[33m/[39m[33mButton[39m[33m>[39m
+web:build:  [90m 386 |[39m 						[33m<[39m[33mButton[39m
+web:build: [31m[1m>[22m[39m[90m 387 |[39m 							variant[33m=[39m[32m"destructive"[39m
+web:build:  [90m     |[39m 							[31m[1m^[22m[39m
+web:build:  [90m 388 |[39m 							onClick[33m=[39m{handleCancelSubscription}
+web:build:  [90m 389 |[39m 							disabled[33m=[39m{cancelling}
+web:build:  [90m 390 |[39m 						[33m>[39m[0m
+web:build: Next.js build worker exited with code: 1 and signal: null
+web:build:  ELIFECYCLE  Command failed with exit code 1.
+web:build: ERROR: command finished with error: command (G:\Projects\prorab\v-1\apps\web) C:\Users\User\AppData\Local\pnpm\pnpm.CMD run build exited (1)
+web#build: command (G:\Projects\prorab\v-1\apps\web) C:\Users\User\AppData\Local\pnpm\pnpm.CMD run build exited (1)
+
+ Tasks:    1 successful, 2 total
+Cached:    1 cached, 2 total
+  Time:    1m19.976s 
+Failed:    web#build
+
+ ERROR  run failed: command  exited (1)

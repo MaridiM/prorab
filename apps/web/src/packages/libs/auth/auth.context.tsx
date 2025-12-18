@@ -4,12 +4,13 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { useRouter } from 'next/navigation'
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 
-import { 
-  LoginDocument, 
-  RegisterDocument, 
-  LogoutDocument, 
+import {
+  LoginDocument,
+  RegisterDocument,
+  LogoutDocument,
   MeDocument,
-  type User as GqlUser 
+  type User as GqlUser,
+  BusinessRole
 } from '@/packages/api/graphql'
 
 interface User {
@@ -19,6 +20,13 @@ interface User {
   phone?: string | null
   emailVerified: boolean
   hasCompletedOnboarding: boolean
+  businessRole?: BusinessRole | null
+  businessRoleAssignedAt?: string | null
+  adminRole?: {
+    id: string
+    role: string
+    permissions: string[]
+  } | null
 }
 
 interface AuthContextType {
@@ -29,6 +37,11 @@ interface AuthContextType {
   register: (data: RegisterData) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  hasPermission: (permission: string) => boolean
+  isForeman: boolean
+  isWorker: boolean
+  canCreateTeam: boolean
+  canJoinTeam: boolean
 }
 
 interface RegisterData {
@@ -84,7 +97,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           fullName: data.me.fullName,
           phone: data.me.phone,
           emailVerified: data.me.emailVerified,
-          hasCompletedOnboarding: data.me.hasCompletedOnboarding
+          hasCompletedOnboarding: data.me.hasCompletedOnboarding,
+          businessRole: data.me.businessRole,
+          businessRoleAssignedAt: data.me.businessRoleAssignedAt,
+          adminRole: data.me.adminRole ? {
+            id: data.me.adminRole.id,
+            role: data.me.adminRole.role,
+            permissions: data.me.adminRole.permissions
+          } : null
         })
       }
     } catch {
@@ -177,7 +197,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         fullName: userData.fullName,
         phone: userData.phone,
         emailVerified: userData.emailVerified,
-        hasCompletedOnboarding: userData.hasCompletedOnboarding
+        hasCompletedOnboarding: userData.hasCompletedOnboarding,
+        businessRole: userData.businessRole,
+        businessRoleAssignedAt: userData.businessRoleAssignedAt
       })
 
       // Redirect based on onboarding status (with small delay for state update)
@@ -222,7 +244,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         fullName: userData.fullName,
         phone: userData.phone,
         emailVerified: userData.emailVerified,
-        hasCompletedOnboarding: userData.hasCompletedOnboarding
+        hasCompletedOnboarding: userData.hasCompletedOnboarding,
+        businessRole: userData.businessRole,
+        businessRoleAssignedAt: userData.businessRoleAssignedAt
       })
 
       // Redirect based on onboarding status (with small delay for state update)
@@ -247,6 +271,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [logoutMutation, router])
 
+  const hasPermission = useCallback((permission: string): boolean => {
+    if (!user?.adminRole) return false
+    return user.adminRole.permissions.includes(permission)
+  }, [user])
+
+  // Business role helpers
+  const isForeman = user?.businessRole === BusinessRole.Foreman
+  const isWorker = user?.businessRole === BusinessRole.Worker
+  const canCreateTeam = !user?.businessRole || isForeman
+  const canJoinTeam = !user?.businessRole || isWorker
+
   return (
     <AuthContext.Provider
       value={{
@@ -257,6 +292,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         register,
         logout,
         refreshUser,
+        hasPermission,
+        isForeman,
+        isWorker,
+        canCreateTeam,
+        canJoinTeam,
       }}
     >
       {children}

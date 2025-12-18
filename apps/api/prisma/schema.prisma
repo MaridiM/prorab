@@ -40,6 +40,10 @@ model User {
   storageMigratedFrom StorageProviderType? @map("storage_migrated_from")
   storageMigratedAt   DateTime?            @map("storage_migrated_at")
 
+  // Business Role - Global role constraint (FOREMAN or WORKER)
+  businessRole           BusinessRole? @map("business_role")
+  businessRoleAssignedAt DateTime?     @map("business_role_assigned_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -53,6 +57,7 @@ model User {
   supportTickets       SupportTicket[]
   salaryChanges        TeamMemberSalaryHistory[] @relation("SalaryChangedBy")
   adminRole            AdminRole?
+  adminActionLogs      AdminActionLog[]          @relation("AdminActionLogs")
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -248,7 +253,7 @@ model TeamMember {
   id       String   @id @default(uuid())
   teamId   String   @map("team_id")
   userId   String   @map("user_id")
-  role     String   @default("member")
+  role     TeamRole @default(MEMBER) // Changed from String to TeamRole enum
   position String?  @db.VarChar(100) // Job position/specialization (e.g., "Прораб", "Электрик", "Маляр")
   joinedAt DateTime @default(now()) @map("joined_at")
 
@@ -646,6 +651,18 @@ enum AdminRoleType {
   SUPPORT // User support only
 }
 
+// Business Role - Global user role constraint
+enum BusinessRole {
+  FOREMAN // Бригадир - владелец команды, не может присоединяться к другим командам
+  WORKER // Работник - член команды, не может создавать команды
+}
+
+// Team Role - Contextual role within a specific team
+enum TeamRole {
+  OWNER // Владелец команды (was 'owner')
+  MEMBER // Участник команды (was 'member')
+}
+
 model SystemSettings {
   id           String           @id @default(uuid())
   key          String           @unique
@@ -699,6 +716,9 @@ model AdminActionLog {
   ipAddress   String?  @map("ip_address")
   userAgent   String?  @map("user_agent") @db.Text
   createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  adminUser User @relation("AdminActionLogs", fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@index([adminUserId])
   @@index([action])

@@ -26,6 +26,7 @@ export const AdminPermissions = {
   PROJECTS_VIEW: 'projects:view',
   PROJECTS_CREATE: 'projects:create',
   PROJECTS_UPDATE: 'projects:update',
+  PROJECTS_MANAGE: 'projects:manage',
   PROJECTS_DELETE: 'projects:delete',
   PROJECTS_EXPORT: 'projects:export',
 
@@ -64,8 +65,10 @@ export const AdminPermissions = {
   // ==================== SUPPORT MANAGEMENT ====================
   SUPPORT_TICKETS_VIEW: 'support_tickets:view',
   SUPPORT_TICKETS_REPLY: 'support_tickets:reply',
+  SUPPORT_TICKETS_MANAGE: 'support_tickets:manage',
   SUPPORT_TICKETS_CLOSE: 'support_tickets:close',
   SUPPORT_TICKETS_ASSIGN: 'support_tickets:assign',
+  SUPPORT_TICKETS_DELETE: 'support_tickets:delete',
   SUPPORT_FAQ_MANAGE: 'support_faq:manage',
 
   // ==================== CONTENT MODERATION ====================
@@ -110,6 +113,7 @@ export const RolePermissions = {
     // Project Management
     AdminPermissions.PROJECTS_VIEW,
     AdminPermissions.PROJECTS_UPDATE,
+    AdminPermissions.PROJECTS_MANAGE,
     AdminPermissions.PROJECTS_EXPORT,
 
     // Subscription Management
@@ -132,8 +136,10 @@ export const RolePermissions = {
     // Support Management
     AdminPermissions.SUPPORT_TICKETS_VIEW,
     AdminPermissions.SUPPORT_TICKETS_REPLY,
+    AdminPermissions.SUPPORT_TICKETS_MANAGE,
     AdminPermissions.SUPPORT_TICKETS_CLOSE,
     AdminPermissions.SUPPORT_TICKETS_ASSIGN,
+    AdminPermissions.SUPPORT_TICKETS_DELETE,
     AdminPermissions.SUPPORT_FAQ_MANAGE,
 
     // Analytics
@@ -156,6 +162,7 @@ export const RolePermissions = {
     // Support Management
     AdminPermissions.SUPPORT_TICKETS_VIEW,
     AdminPermissions.SUPPORT_TICKETS_REPLY,
+    AdminPermissions.SUPPORT_TICKETS_MANAGE,
     AdminPermissions.SUPPORT_TICKETS_CLOSE,
     AdminPermissions.SUPPORT_FAQ_MANAGE,
 
@@ -173,6 +180,7 @@ export const RolePermissions = {
     // Support Management
     AdminPermissions.SUPPORT_TICKETS_VIEW,
     AdminPermissions.SUPPORT_TICKETS_REPLY,
+    AdminPermissions.SUPPORT_TICKETS_MANAGE,
     AdminPermissions.SUPPORT_TICKETS_CLOSE,
     AdminPermissions.SUPPORT_FAQ_MANAGE,
 

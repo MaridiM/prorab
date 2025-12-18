@@ -7,13 +7,13 @@ export class WorkLog {
   @Field(() => ID)
   id: string;
 
-  @Field(() => ID)
+  @Field(() => String)
   projectId: string;
 
-  @Field(() => ID)
+  @Field(() => String)
   memberId: string;
 
-  @Field()
+  @Field(() => Date)
   date: Date;
 
   @Field(() => Float, { description: 'Hours worked (max 999.99)' })

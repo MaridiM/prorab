@@ -5,7 +5,10 @@ export function useToast() {
 
   return {
     toast: show,
-    showToast: ({ message, type }: { message: string; type: ToastType }) => show(message, type),
+    showToast: ({ message, title, description, type }: { message?: string; title?: string; description?: string; type: ToastType }) => {
+      const displayMessage = message || title || description || 'Notification';
+      return show(displayMessage, type);
+    },
     success: (message: string) => show(message, 'success'),
     error: (message: string) => show(message, 'error'),
   }

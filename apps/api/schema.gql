@@ -35,6 +35,9 @@ input AddPhotoInput {
 
 type AdminActionLog {
   action: String!
+
+  """Admin user email (populated from relation)"""
+  adminUserEmail: String
   adminUserId: ID!
   createdAt: DateTime!
   details: JSON
@@ -109,6 +112,64 @@ type AdminPaymentsConnection {
   totalCount: Int!
 }
 
+type AdminProject {
+  _count: ProjectCount
+  actualCost: Float
+  budget: Float
+  completedAt: DateTime
+  createdAt: DateTime!
+  description: String
+  endDate: DateTime
+  id: ID!
+  name: String!
+  owner: JSON
+  startDate: DateTime
+  status: String!
+  team: JSON
+  updatedAt: DateTime!
+}
+
+input AdminProjectFilterInput {
+  ownerId: String
+  search: String
+  startDateFrom: DateTime
+  startDateTo: DateTime
+  status: String
+  teamId: String
+}
+
+type AdminProjectsResult {
+  hasMore: Boolean!
+  projects: [AdminProject!]!
+  total: Int!
+}
+
+type AdminRoleDetail {
+  createdAt: DateTime!
+  id: ID!
+  ipWhitelist: [String!]!
+  permissions: [String!]!
+  role: AdminRoleType!
+  twoFactorEnforced: Boolean!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+"""Admin role types with different permission levels"""
+enum AdminRoleType {
+  ADMIN
+  MODERATOR
+  SUPER_ADMIN
+  SUPPORT
+}
+
+input AdminSendMessageInput {
+  fromUser: Boolean! = false
+  message: String!
+  ticketId: String!
+}
+
 input AdminSubscriptionFilters {
   """Created after date"""
   createdAfter: DateTime
@@ -138,6 +199,55 @@ type AdminSubscriptionsConnection {
 
   """Total count of subscriptions"""
   totalCount: Int!
+}
+
+type AdminSupportStatistics {
+  closedTickets: Int!
+  inProgressTickets: Int!
+  openTickets: Int!
+  resolvedTickets: Int!
+  ticketsByCategory: JSON!
+  ticketsByPriority: JSON!
+  totalTickets: Int!
+}
+
+type AdminSupportTicket {
+  category: String
+  closedAt: DateTime
+  createdAt: DateTime!
+  id: ID!
+
+  """Count of messages in ticket"""
+  messageCount: Int
+  messages: [SupportMessage!]
+  priority: SupportTicketPriority!
+  status: SupportTicketStatus!
+  subject: String
+  telegramChatId: String!
+  updatedAt: DateTime!
+
+  """User email (populated from relation)"""
+  userEmail: String
+
+  """User full name (populated from relation)"""
+  userFullName: String
+  userId: ID!
+}
+
+input AdminSupportTicketFilterInput {
+  category: String
+  endDate: DateTime
+  priority: SupportTicketPriority
+  search: String
+  startDate: DateTime
+  status: SupportTicketStatus
+  userId: String
+}
+
+type AdminSupportTicketsResult {
+  hasMore: Boolean!
+  tickets: [AdminSupportTicket!]!
+  total: Int!
 }
 
 type AdminTeamCounts {
@@ -228,6 +338,12 @@ type AdminTeamsConnection {
   totalCount: Int!
 }
 
+input AdminUpdateSupportTicketInput {
+  category: String
+  priority: SupportTicketPriority
+  status: SupportTicketStatus
+}
+
 input AdminUpdateTeamInput {
   """Team logo URL"""
   logoUrl: String
@@ -309,6 +425,14 @@ type AdminUsersConnection {
   totalCount: Int!
 }
 
+input AssignAdminRoleInput {
+  ipWhitelist: [String!]
+  permissions: [String!]
+  role: AdminRoleType!
+  twoFactorEnforced: Boolean
+  userId: String!
+}
+
 type AuthPayload {
   message: String
   user: User!
@@ -344,6 +468,15 @@ input BulkUpdateSalaryInput {
 
 input BulkUpdateSystemSettingsInput {
   settings: [UpdateSystemSettingInput!]!
+}
+
+"""Глобальная бизнес-роль пользователя"""
+enum BusinessRole {
+  """Бригадир - владелец команды, не может присоединяться к другим командам"""
+  FOREMAN
+
+  """Работник - член команды, не может создавать команды"""
+  WORKER
 }
 
 input ChangePasswordInput {
@@ -654,6 +787,11 @@ input DeleteAccountInput {
   password: String!
 }
 
+type DeleteResult {
+  message: String!
+  success: Boolean!
+}
+
 input Disable2FAInput {
   token: String!
 }
@@ -806,6 +944,9 @@ type Mutation {
   """Добавить фото к фотоотчёту"""
   addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
 
+  """Archive project (admin only)"""
+  adminArchiveProject(projectId: ID!): AdminProject!
+
   """Cancel subscription (Admin only)"""
   adminCancelSubscription(cancelAtPeriodEnd: Boolean! = true, id: String!): Subscription!
 
@@ -815,8 +956,14 @@ type Mutation {
   """Delete payment (Admin only)"""
   adminDeletePayment(id: String!): Boolean!
 
+  """Delete project (admin only)"""
+  adminDeleteProject(projectId: ID!): DeleteResult!
+
   """Delete subscription (Admin only)"""
   adminDeleteSubscription(id: String!): Boolean!
+
+  """Delete support ticket (admin only)"""
+  adminDeleteSupportTicket(ticketId: ID!): DeleteResult!
 
   """Delete a team (Admin only)"""
   adminDeleteTeam(id: String!): Boolean!
@@ -836,11 +983,20 @@ type Mutation {
   """Send password reset link to user (Admin only)"""
   adminResetUserPassword(id: String!): Boolean!
 
+  """Send message in support ticket (admin only)"""
+  adminSendSupportMessage(input: AdminSendMessageInput!): SupportMessage!
+
   """Update payment status (Admin only)"""
   adminUpdatePaymentStatus(id: String!, status: String!): AdminPayment!
 
+  """Update project status (admin only)"""
+  adminUpdateProjectStatus(projectId: ID!, status: String!): AdminProject!
+
   """Update subscription (Admin only)"""
   adminUpdateSubscription(id: String!, input: UpdateSubscriptionInput!): Subscription!
+
+  """Update support ticket (admin only)"""
+  adminUpdateSupportTicket(input: AdminUpdateSupportTicketInput!, ticketId: ID!): AdminSupportTicket!
 
   """Update team information (Admin only)"""
   adminUpdateTeam(id: String!, input: AdminUpdateTeamInput!): Team!
@@ -853,6 +1009,7 @@ type Mutation {
 
   """Архивировать проект"""
   archiveProject(id: ID!): Project!
+  assignAdminRole(input: AssignAdminRoleInput!): AdminRoleDetail!
 
   """Bulk create work log entries (owner or self)"""
   bulkCreateWorkLogs(input: BulkCreateWorkLogInput!): BulkUpdateResult!
@@ -863,6 +1020,7 @@ type Mutation {
   """Bulk update system settings (admin only)"""
   bulkUpdateSystemSettings(input: BulkUpdateSystemSettingsInput!): [SystemSetting!]!
   cancelSubscription(subscriptionId: String!): Subscription!
+  changeAdminRole(newRole: String!, roleId: String!): AdminRoleDetail!
   changePassword(input: ChangePasswordInput!): Boolean!
   changePlan(input: ChangePlanInput!): Subscription!
   checkTelegramAuth(input: CheckTelegramAuthInput!): TelegramAuthStatusPayload!
@@ -962,6 +1120,7 @@ type Mutation {
 
   """Восстановить проект"""
   restoreProject(id: ID!): Project!
+  revokeAdminRole(roleId: String!): Boolean!
   revokeAllSessions: Boolean!
   revokeAllSessionsIncludingCurrent: Boolean!
   revokeSession(sessionId: String!): Boolean!
@@ -971,9 +1130,11 @@ type Mutation {
 
   """Test connection to a specific storage provider"""
   testStorageProvider(provider: StorageProviderType!): ProviderTestResult!
+  updateAdminPermissions(input: UpdateAdminPermissionsInput!): AdminRoleDetail!
 
   """Обновить расход"""
   updateExpense(input: UpdateExpenseInput!): Expense!
+  updateIpWhitelist(input: UpdateIpWhitelistInput!): AdminRoleDetail!
 
   """Update team member position/specialization (owner only)"""
   updateMemberPosition(input: UpdateMemberPositionInput!): TeamMember!
@@ -1014,6 +1175,7 @@ type Mutation {
 
   """Обновление настроек команды (только для владельца)"""
   updateTeam(input: UpdateTeamInput!): Team!
+  updateTwoFactorEnforcement(input: UpdateTwoFactorInput!): AdminRoleDetail!
 
   """Update a work log entry (owner or creator)"""
   updateWorkLog(input: UpdateWorkLogInput!): WorkLog!
@@ -1288,6 +1450,12 @@ type ProjectAnalytics {
   totalPayouts: Float!
 }
 
+type ProjectCount {
+  expenses: Int!
+  photoReports: Int!
+  tasks: Int!
+}
+
 input ProjectFilterInput {
   """Поиск по названию или адресу"""
   searchQuery: String
@@ -1432,11 +1600,20 @@ type Query {
   """Get paginated list of payments with filters (Admin only)"""
   adminPayments(filters: AdminPaymentFilters, pagination: PaginationInput!): AdminPaymentsConnection!
 
+  """Get project by ID with details (admin only)"""
+  adminProject(id: ID!): AdminProject
+
+  """Get all projects with filters (admin only)"""
+  adminProjects(filter: AdminProjectFilterInput, pagination: PaginationInput): AdminProjectsResult!
+
   """Get recent admin activity logs (Admin only)"""
   adminRecentActivity(limit: Int! = 50): [ActivityLog!]!
 
   """Get revenue chart data for the last 12 months (Admin only)"""
   adminRevenueChart: ChartData!
+  adminRole(id: String!): AdminRoleDetail!
+  adminRoleByUserId(userId: String!): AdminRoleDetail
+  adminRoles(limit: Float = 50, offset: Float = 0, role: String, search: String): [AdminRoleDetail!]!
 
   """Get detailed information about a specific subscription (Admin only)"""
   adminSubscription(id: String!): Subscription!
@@ -1446,6 +1623,15 @@ type Query {
 
   """Get paginated list of subscriptions with filters (Admin only)"""
   adminSubscriptions(filters: AdminSubscriptionFilters, pagination: PaginationInput!): AdminSubscriptionsConnection!
+
+  """Get support tickets statistics (admin only)"""
+  adminSupportStatistics: AdminSupportStatistics!
+
+  """Get support ticket by ID (admin only)"""
+  adminSupportTicket(ticketId: ID!): AdminSupportTicket!
+
+  """Get all support tickets with filters (admin only)"""
+  adminSupportTickets(filter: AdminSupportTicketFilterInput, pagination: PaginationInput): AdminSupportTicketsResult!
 
   """Get system health status (Admin only)"""
   adminSystemHealth: SystemHealth!
@@ -1816,6 +2002,31 @@ type SubscriptionsByPlan {
   LITE: Int!
 }
 
+type SupportMessage {
+  createdAt: DateTime!
+  fromUser: Boolean!
+  id: ID!
+  message: String!
+  ticketId: ID!
+}
+
+"""Priority level of a support ticket"""
+enum SupportTicketPriority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
+}
+
+"""Status of a support ticket"""
+enum SupportTicketStatus {
+  CLOSED
+  IN_PROGRESS
+  OPEN
+  RESOLVED
+  WAITING_USER
+}
+
 type SystemHealth {
   """Database health status"""
   database: Boolean!
@@ -1954,8 +2165,8 @@ type TeamMember {
   """Должность/специализация (например, "Прораб", "Электрик", "Маляр")"""
   position: String
 
-  """Роль в команде (owner/member)"""
-  role: String!
+  """Роль в команде (OWNER/MEMBER)"""
+  role: TeamRole!
 
   """Сумма зарплаты или процент (0-100)"""
   salaryAmount: Float
@@ -2032,6 +2243,15 @@ type TeamMemberStats {
   totalPayouts: Float!
 }
 
+"""Роль участника в конкретной команде"""
+enum TeamRole {
+  """Участник команды - ограниченные права"""
+  MEMBER
+
+  """Владелец команды - полные права на управление"""
+  OWNER
+}
+
 type TelegramAuthPayload {
   deepLink: String!
   expiresAt: DateTime!
@@ -2065,6 +2285,11 @@ type TwoFactorStatus {
   enabled: Boolean!
 }
 
+input UpdateAdminPermissionsInput {
+  permissions: [String!]!
+  roleId: String!
+}
+
 input UpdateExpenseInput {
   """Сумма расхода"""
   amount: Float
@@ -2083,6 +2308,11 @@ input UpdateExpenseInput {
 
   """Массив URL фотографий"""
   photos: [String!]
+}
+
+input UpdateIpWhitelistInput {
+  ipAddresses: [String!]!
+  roleId: String!
 }
 
 input UpdateMemberPositionInput {
@@ -2236,6 +2466,11 @@ input UpdateTeamInput {
   teamId: ID!
 }
 
+input UpdateTwoFactorInput {
+  enforced: Boolean!
+  roleId: String!
+}
+
 input UpdateWorkLogInput {
   """Date of work (ISO string)"""
   date: String
@@ -2268,8 +2503,14 @@ type UsageStats {
 }
 
 type User {
+  adminRole: AdminRoleDetail
+
   """URL аватарки пользователя"""
   avatarUrl: String
+
+  """Глобальная бизнес-роль: FOREMAN или WORKER"""
+  businessRole: BusinessRole
+  businessRoleAssignedAt: DateTime
   createdAt: DateTime!
   email: String!
   emailVerified: Boolean!
@@ -2363,8 +2604,8 @@ type WorkLog {
   hours: Float!
   id: ID!
   member: TeamMember
-  memberId: ID!
+  memberId: String!
   project: Project
-  projectId: ID!
+  projectId: String!
   updatedAt: DateTime!
 }

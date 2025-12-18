@@ -210,6 +210,7 @@ export type AdminActionLogWhereInput = {
   ipAddress?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
   userAgent?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminActionLog"> | Date | string
+  adminUser?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type AdminActionLogOrderByWithRelationInput = {
@@ -222,6 +223,7 @@ export type AdminActionLogOrderByWithRelationInput = {
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  adminUser?: Prisma.UserOrderByWithRelationInput
 }
 
 export type AdminActionLogWhereUniqueInput = Prisma.AtLeast<{
@@ -237,6 +239,7 @@ export type AdminActionLogWhereUniqueInput = Prisma.AtLeast<{
   ipAddress?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
   userAgent?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminActionLog"> | Date | string
+  adminUser?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
 export type AdminActionLogOrderByWithAggregationInput = {
@@ -271,7 +274,6 @@ export type AdminActionLogScalarWhereWithAggregatesInput = {
 
 export type AdminActionLogCreateInput = {
   id?: string
-  adminUserId: string
   action: string
   resource: string
   resourceId?: string | null
@@ -279,6 +281,7 @@ export type AdminActionLogCreateInput = {
   ipAddress?: string | null
   userAgent?: string | null
   createdAt?: Date | string
+  adminUser: Prisma.UserCreateNestedOneWithoutAdminActionLogsInput
 }
 
 export type AdminActionLogUncheckedCreateInput = {
@@ -295,7 +298,6 @@ export type AdminActionLogUncheckedCreateInput = {
 
 export type AdminActionLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   resource?: Prisma.StringFieldUpdateOperationsInput | string
   resourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -303,6 +305,7 @@ export type AdminActionLogUpdateInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adminUser?: Prisma.UserUpdateOneRequiredWithoutAdminActionLogsNestedInput
 }
 
 export type AdminActionLogUncheckedUpdateInput = {
@@ -331,7 +334,6 @@ export type AdminActionLogCreateManyInput = {
 
 export type AdminActionLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   resource?: Prisma.StringFieldUpdateOperationsInput | string
   resourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -351,6 +353,16 @@ export type AdminActionLogUncheckedUpdateManyInput = {
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AdminActionLogListRelationFilter = {
+  every?: Prisma.AdminActionLogWhereInput
+  some?: Prisma.AdminActionLogWhereInput
+  none?: Prisma.AdminActionLogWhereInput
+}
+
+export type AdminActionLogOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type AdminActionLogCountOrderByAggregateInput = {
@@ -387,6 +399,155 @@ export type AdminActionLogMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
 }
 
+export type AdminActionLogCreateNestedManyWithoutAdminUserInput = {
+  create?: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput> | Prisma.AdminActionLogCreateWithoutAdminUserInput[] | Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput[]
+  connectOrCreate?: Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput | Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput[]
+  createMany?: Prisma.AdminActionLogCreateManyAdminUserInputEnvelope
+  connect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+}
+
+export type AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput = {
+  create?: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput> | Prisma.AdminActionLogCreateWithoutAdminUserInput[] | Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput[]
+  connectOrCreate?: Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput | Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput[]
+  createMany?: Prisma.AdminActionLogCreateManyAdminUserInputEnvelope
+  connect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+}
+
+export type AdminActionLogUpdateManyWithoutAdminUserNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput> | Prisma.AdminActionLogCreateWithoutAdminUserInput[] | Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput[]
+  connectOrCreate?: Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput | Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput[]
+  upsert?: Prisma.AdminActionLogUpsertWithWhereUniqueWithoutAdminUserInput | Prisma.AdminActionLogUpsertWithWhereUniqueWithoutAdminUserInput[]
+  createMany?: Prisma.AdminActionLogCreateManyAdminUserInputEnvelope
+  set?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  disconnect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  delete?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  connect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  update?: Prisma.AdminActionLogUpdateWithWhereUniqueWithoutAdminUserInput | Prisma.AdminActionLogUpdateWithWhereUniqueWithoutAdminUserInput[]
+  updateMany?: Prisma.AdminActionLogUpdateManyWithWhereWithoutAdminUserInput | Prisma.AdminActionLogUpdateManyWithWhereWithoutAdminUserInput[]
+  deleteMany?: Prisma.AdminActionLogScalarWhereInput | Prisma.AdminActionLogScalarWhereInput[]
+}
+
+export type AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput> | Prisma.AdminActionLogCreateWithoutAdminUserInput[] | Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput[]
+  connectOrCreate?: Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput | Prisma.AdminActionLogCreateOrConnectWithoutAdminUserInput[]
+  upsert?: Prisma.AdminActionLogUpsertWithWhereUniqueWithoutAdminUserInput | Prisma.AdminActionLogUpsertWithWhereUniqueWithoutAdminUserInput[]
+  createMany?: Prisma.AdminActionLogCreateManyAdminUserInputEnvelope
+  set?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  disconnect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  delete?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  connect?: Prisma.AdminActionLogWhereUniqueInput | Prisma.AdminActionLogWhereUniqueInput[]
+  update?: Prisma.AdminActionLogUpdateWithWhereUniqueWithoutAdminUserInput | Prisma.AdminActionLogUpdateWithWhereUniqueWithoutAdminUserInput[]
+  updateMany?: Prisma.AdminActionLogUpdateManyWithWhereWithoutAdminUserInput | Prisma.AdminActionLogUpdateManyWithWhereWithoutAdminUserInput[]
+  deleteMany?: Prisma.AdminActionLogScalarWhereInput | Prisma.AdminActionLogScalarWhereInput[]
+}
+
+export type AdminActionLogCreateWithoutAdminUserInput = {
+  id?: string
+  action: string
+  resource: string
+  resourceId?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt?: Date | string
+}
+
+export type AdminActionLogUncheckedCreateWithoutAdminUserInput = {
+  id?: string
+  action: string
+  resource: string
+  resourceId?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt?: Date | string
+}
+
+export type AdminActionLogCreateOrConnectWithoutAdminUserInput = {
+  where: Prisma.AdminActionLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput>
+}
+
+export type AdminActionLogCreateManyAdminUserInputEnvelope = {
+  data: Prisma.AdminActionLogCreateManyAdminUserInput | Prisma.AdminActionLogCreateManyAdminUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type AdminActionLogUpsertWithWhereUniqueWithoutAdminUserInput = {
+  where: Prisma.AdminActionLogWhereUniqueInput
+  update: Prisma.XOR<Prisma.AdminActionLogUpdateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedUpdateWithoutAdminUserInput>
+  create: Prisma.XOR<Prisma.AdminActionLogCreateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedCreateWithoutAdminUserInput>
+}
+
+export type AdminActionLogUpdateWithWhereUniqueWithoutAdminUserInput = {
+  where: Prisma.AdminActionLogWhereUniqueInput
+  data: Prisma.XOR<Prisma.AdminActionLogUpdateWithoutAdminUserInput, Prisma.AdminActionLogUncheckedUpdateWithoutAdminUserInput>
+}
+
+export type AdminActionLogUpdateManyWithWhereWithoutAdminUserInput = {
+  where: Prisma.AdminActionLogScalarWhereInput
+  data: Prisma.XOR<Prisma.AdminActionLogUpdateManyMutationInput, Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserInput>
+}
+
+export type AdminActionLogScalarWhereInput = {
+  AND?: Prisma.AdminActionLogScalarWhereInput | Prisma.AdminActionLogScalarWhereInput[]
+  OR?: Prisma.AdminActionLogScalarWhereInput[]
+  NOT?: Prisma.AdminActionLogScalarWhereInput | Prisma.AdminActionLogScalarWhereInput[]
+  id?: Prisma.StringFilter<"AdminActionLog"> | string
+  adminUserId?: Prisma.StringFilter<"AdminActionLog"> | string
+  action?: Prisma.StringFilter<"AdminActionLog"> | string
+  resource?: Prisma.StringFilter<"AdminActionLog"> | string
+  resourceId?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
+  details?: Prisma.JsonNullableFilter<"AdminActionLog">
+  ipAddress?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
+  userAgent?: Prisma.StringNullableFilter<"AdminActionLog"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"AdminActionLog"> | Date | string
+}
+
+export type AdminActionLogCreateManyAdminUserInput = {
+  id?: string
+  action: string
+  resource: string
+  resourceId?: string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt?: Date | string
+}
+
+export type AdminActionLogUpdateWithoutAdminUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  resource?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AdminActionLogUncheckedUpdateWithoutAdminUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  resource?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AdminActionLogUncheckedUpdateManyWithoutAdminUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  resource?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  details?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type AdminActionLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -399,6 +560,7 @@ export type AdminActionLogSelect<ExtArgs extends runtime.Types.Extensions.Intern
   ipAddress?: boolean
   userAgent?: boolean
   createdAt?: boolean
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminActionLog"]>
 
 export type AdminActionLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -411,6 +573,7 @@ export type AdminActionLogSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   ipAddress?: boolean
   userAgent?: boolean
   createdAt?: boolean
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminActionLog"]>
 
 export type AdminActionLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -423,6 +586,7 @@ export type AdminActionLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   ipAddress?: boolean
   userAgent?: boolean
   createdAt?: boolean
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminActionLog"]>
 
 export type AdminActionLogSelectScalar = {
@@ -438,10 +602,21 @@ export type AdminActionLogSelectScalar = {
 }
 
 export type AdminActionLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "action" | "resource" | "resourceId" | "details" | "ipAddress" | "userAgent" | "createdAt", ExtArgs["result"]["adminActionLog"]>
+export type AdminActionLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AdminActionLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type AdminActionLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  adminUser?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
 
 export type $AdminActionLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AdminActionLog"
-  objects: {}
+  objects: {
+    adminUser: Prisma.$UserPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     adminUserId: string
@@ -846,6 +1021,7 @@ readonly fields: AdminActionLogFieldRefs;
  */
 export interface Prisma__AdminActionLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  adminUser<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -901,6 +1077,10 @@ export type AdminActionLogFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  /**
    * Filter, which AdminActionLog to fetch.
    */
   where: Prisma.AdminActionLogWhereUniqueInput
@@ -919,6 +1099,10 @@ export type AdminActionLogFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  /**
    * Filter, which AdminActionLog to fetch.
    */
   where: Prisma.AdminActionLogWhereUniqueInput
@@ -936,6 +1120,10 @@ export type AdminActionLogFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the AdminActionLog
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
   /**
    * Filter, which AdminActionLog to fetch.
    */
@@ -985,6 +1173,10 @@ export type AdminActionLogFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  /**
    * Filter, which AdminActionLog to fetch.
    */
   where?: Prisma.AdminActionLogWhereInput
@@ -1033,6 +1225,10 @@ export type AdminActionLogFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  /**
    * Filter, which AdminActionLogs to fetch.
    */
   where?: Prisma.AdminActionLogWhereInput
@@ -1076,6 +1272,10 @@ export type AdminActionLogCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
+  /**
    * The data needed to create a AdminActionLog.
    */
   data: Prisma.XOR<Prisma.AdminActionLogCreateInput, Prisma.AdminActionLogUncheckedCreateInput>
@@ -1109,6 +1309,10 @@ export type AdminActionLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.AdminActionLogCreateManyInput | Prisma.AdminActionLogCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1123,6 +1327,10 @@ export type AdminActionLogUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the AdminActionLog
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
   /**
    * The data needed to update a AdminActionLog.
    */
@@ -1175,6 +1383,10 @@ export type AdminActionLogUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many AdminActionLogs to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1189,6 +1401,10 @@ export type AdminActionLogUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the AdminActionLog
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
   /**
    * The filter to search for the AdminActionLog to update in case it exists.
    */
@@ -1215,6 +1431,10 @@ export type AdminActionLogDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the AdminActionLog
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
   /**
    * Filter which AdminActionLog to delete.
    */
@@ -1247,4 +1467,8 @@ export type AdminActionLogDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the AdminActionLog
    */
   omit?: Prisma.AdminActionLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdminActionLogInclude<ExtArgs> | null
 }

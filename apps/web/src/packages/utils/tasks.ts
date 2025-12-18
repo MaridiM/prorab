@@ -9,16 +9,16 @@ import { type TaskPriority, type TaskStatus } from '../api/graphql/__generated__
  */
 export function getPriorityVariant(
 	priority: TaskPriority
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+): 'default' | 'secondary' | 'success' | 'warning' | 'danger' {
 	switch (priority) {
 		case 'URGENT':
-			return 'destructive'
+			return 'danger'
 		case 'HIGH':
-			return 'default'
+			return 'warning'
 		case 'MEDIUM':
-			return 'secondary'
+			return 'default'
 		case 'LOW':
-			return 'outline'
+			return 'secondary'
 		default:
 			return 'secondary'
 	}

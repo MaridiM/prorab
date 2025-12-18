@@ -164,3 +164,22 @@ mutation UpdateMemberPosition($input: UpdateMemberPositionInput!) {
     joinedAt
   }
 }
+
+query MemberSalaryHistory($memberId: ID!) {
+  memberSalaryHistory(memberId: $memberId) {
+    id
+    memberId
+    previousType
+    previousAmount
+    newType
+    newAmount
+    reason
+    changedByUserId
+    createdAt
+    changedBy {
+      id
+      fullName
+      email
+    }
+  }
+}

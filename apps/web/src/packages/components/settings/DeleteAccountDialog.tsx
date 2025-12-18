@@ -38,28 +38,21 @@ interface DeleteAccountDialogProps {
 
 export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 	const router = useRouter()
-	const { toast } = useToast()
+	const { toast, success, error: showError } = useToast()
 	const [password, setPassword] = useState('')
 	const [confirmationOpen, setConfirmationOpen] = useState(false)
 	const [finalConfirmOpen, setFinalConfirmOpen] = useState(false)
 
 	const [deleteAccount, { loading }] = useMutation(DELETE_ACCOUNT, {
 		onCompleted: () => {
-			toast({
-				title: 'Аккаунт удалён',
-				description: 'Ваш аккаунт был успешно удалён. Перенаправляем на главную страницу...',
-			})
+			success('Аккаунт удалён и будет перенаправлен на главную страницу')
 			// Redirect to home page after 2 seconds
 			setTimeout(() => {
 				router.push('/')
 			}, 2000)
 		},
-		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Не удалось удалить аккаунт',
-				variant: 'destructive',
-			})
+		onError: (err) => {
+			showError(err.message || 'Не удалось удалить аккаунт')
 			setPassword('')
 			setFinalConfirmOpen(false)
 		},
@@ -72,11 +65,7 @@ export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 
 	const handleFinalDelete = async () => {
 		if (!password.trim()) {
-			toast({
-				title: 'Ошибка',
-				description: 'Введите пароль для подтверждения удаления',
-				variant: 'destructive',
-			})
+			showError('Введите пароль для подтверждения удаления')
 			return
 		}
 
@@ -135,9 +124,9 @@ export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 
 						<div className="flex justify-end">
 							<Button
-								variant="destructive"
+								variant="default"
 								onClick={() => setConfirmationOpen(true)}
-								className="gap-2"
+								className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
 								<Trash2 className="h-4 w-4" />
 								Удалить аккаунт

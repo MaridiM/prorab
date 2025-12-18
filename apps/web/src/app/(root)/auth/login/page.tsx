@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, Variants } from "framer-motion"
 import { ArrowRight, Loader2, Mail, Lock } from "lucide-react"
@@ -27,8 +27,15 @@ const fadeIn: Variants = {
 
 export default function LoginPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { success, error } = useToast()
     const { login: authLogin, isLoading } = useAuth()
+    
+    // Get redirect URL from query params (if coming from invite link)
+    const redirectUrl = searchParams.get('redirect')
+    const registerUrl = useMemo(() => {
+        return redirectUrl ? `/auth/register?redirect=${encodeURIComponent(redirectUrl)}` : '/auth/register'
+    }, [redirectUrl])
 
     // React Hook Form with Zod validation
     const form = useForm<TLoginSchema>({
@@ -45,7 +52,14 @@ export default function LoginPage() {
         try {
             await authLogin(data.email, data.password)
             success("Вход выполнен успешно")
-            // AuthContext handles redirect automatically based on hasCompletedOnboarding
+            
+            // Check if there's a redirect URL (e.g., from invite link)
+            if (redirectUrl) {
+                setTimeout(() => {
+                    router.push(redirectUrl)
+                }, 500)
+            }
+            // Otherwise AuthContext handles redirect automatically based on hasCompletedOnboarding
         } catch (err: any) {
             const errorMessage = err?.message || 'Ошибка входа'
             error(errorMessage)
@@ -211,10 +225,10 @@ export default function LoginPage() {
             >
                 Нет аккаунта?{" "}
                 <Link
-                    href="/auth/register"
+                    href={registerUrl}
                     className="text-primary font-medium hover:text-primary/80 transition-colors"
                 >
-                    Создать бригаду
+                    Создать аккаунт
                 </Link>
             </motion.div>
 

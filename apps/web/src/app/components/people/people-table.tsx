@@ -55,7 +55,7 @@ import { Label } from '@/packages/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/packages/components/ui/avatar';
 import { Badge } from '@/packages/components/ui/badge';
 import { toast } from 'sonner';
-import { RemoveTeamMemberDocument, UpdateMemberPositionDocument, type TeamMembersQuery } from '@/packages/api/graphql/__generated__/output';
+import { RemoveTeamMemberDocument, UpdateMemberPositionDocument, type TeamMembersQuery, TeamRole } from '@/packages/api/graphql/__generated__/output';
 import { MemberSalaryBadge } from '@/packages/components/payouts/MemberSalaryBadge';
 
 type TeamMember = TeamMembersQuery['teamMembers'][0];
@@ -176,7 +176,7 @@ export function PeopleTable({ members, teamId, onRefetch }: PeopleTableProps) {
               </TableRow>
             ) : (
               members.map((member) => {
-                const isOwner = member.role === 'owner';
+                const isOwner = member.role === TeamRole.Owner;
                 const stats = member.stats;
 
                 return (

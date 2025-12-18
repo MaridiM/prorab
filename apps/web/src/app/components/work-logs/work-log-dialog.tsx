@@ -123,7 +123,7 @@ export function WorkLogDialog({
             id: workLog.id,
             date,
             hours: hoursNum,
-            description: description || undefined,
+            description: description || null,
           },
         },
       });
@@ -136,7 +136,7 @@ export function WorkLogDialog({
             memberId,
             date,
             hours: hoursNum,
-            description: description || undefined,
+            description: description || null,
           },
         },
       });
@@ -171,7 +171,7 @@ export function WorkLogDialog({
                     {teamData?.teamMembers && teamData.teamMembers.length > 0 ? (
                       teamData.teamMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
-                          {member.user.fullName} ({member.user.email})
+                          {member.user?.fullName || 'Unknown'} ({member.user?.email || ''})
                         </SelectItem>
                       ))
                     ) : (

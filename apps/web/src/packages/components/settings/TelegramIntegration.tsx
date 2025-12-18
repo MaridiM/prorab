@@ -48,7 +48,6 @@ interface TelegramIntegrationProps {
 
 export function TelegramIntegration({ user, onDisconnect }: TelegramIntegrationProps) {
 	const [showDisconnectDialog, setShowDisconnectDialog] = useState(false)
-	const { toast } = useToast()
 
 	const [disconnectTelegram, { loading: disconnecting }] = useMutation(DISCONNECT_TELEGRAM, {
 		onCompleted: () => {

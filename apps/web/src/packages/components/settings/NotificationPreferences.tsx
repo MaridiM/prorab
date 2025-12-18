@@ -96,19 +96,12 @@ export function NotificationPreferences({ settings, onUpdate }: NotificationPref
 
 	const [updateSettings, { loading: updating }] = useMutation(UPDATE_NOTIFICATION_SETTINGS, {
 		onCompleted: () => {
-			toast({
-				title: 'Настройки сохранены',
-				description: 'Настройки уведомлений обновлены',
-			})
+			toast('Настройки уведомлений обновлены', 'success')
 			setHasChanges(false)
 			onUpdate()
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message,
-				variant: 'destructive',
-			})
+			toast(error.message, 'error')
 		},
 	})
 

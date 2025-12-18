@@ -11,6 +11,9 @@ import { AdminTeamsService } from './services/admin-teams.service';
 import { AdminSubscriptionsService } from './services/admin-subscriptions.service';
 import { AdminPaymentsService } from './services/admin-payments.service';
 import { AdminAnalyticsService } from './services/admin-analytics.service';
+import { AdminRolesService } from './services/admin-roles.service';
+import { AdminProjectsService } from './services/admin-projects.service';
+import { AdminSupportService } from './services/admin-support.service';
 import { AdminSettingsResolver } from './resolvers/admin-settings.resolver';
 import { AdminLogsResolver } from './resolvers/admin-logs.resolver';
 import { AdminStorageResolver } from './resolvers/admin-storage.resolver';
@@ -19,6 +22,9 @@ import { AdminTeamsResolver } from './resolvers/admin-teams.resolver';
 import { AdminSubscriptionsResolver } from './resolvers/admin-subscriptions.resolver';
 import { AdminPaymentsResolver } from './resolvers/admin-payments.resolver';
 import { AdminAnalyticsResolver } from './resolvers/admin-analytics.resolver';
+import { AdminRolesResolver } from './resolvers/admin-roles.resolver';
+import { AdminProjectsResolver } from './resolvers/admin-projects.resolver';
+import { AdminSupportResolver } from './resolvers/admin-support.resolver';
 
 @Module({
   imports: [AuthModule, StorageModule],
@@ -34,6 +40,9 @@ import { AdminAnalyticsResolver } from './resolvers/admin-analytics.resolver';
     AdminSubscriptionsService,
     AdminPaymentsService,
     AdminAnalyticsService,
+    AdminRolesService,
+    AdminProjectsService,
+    AdminSupportService,
 
     // Resolvers
     AdminSettingsResolver,
@@ -44,6 +53,9 @@ import { AdminAnalyticsResolver } from './resolvers/admin-analytics.resolver';
     AdminSubscriptionsResolver,
     AdminPaymentsResolver,
     AdminAnalyticsResolver,
+    AdminRolesResolver,
+    AdminProjectsResolver,
+    AdminSupportResolver,
   ],
   exports: [
     SystemSettingsService,
@@ -54,6 +66,9 @@ import { AdminAnalyticsResolver } from './resolvers/admin-analytics.resolver';
     AdminSubscriptionsService,
     AdminPaymentsService,
     AdminAnalyticsService,
+    AdminRolesService,
+    AdminProjectsService,
+    AdminSupportService,
     EncryptionService,
   ],
 })

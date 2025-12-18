@@ -53,7 +53,7 @@ export function PlanCard({
 			{/* Current Plan Badge */}
 			{isCurrentPlan && (
 				<div className="absolute top-4 left-4">
-					<Badge variant="outline" className="border-primary text-primary">
+					<Badge variant="default" className="border-primary text-primary">
 						Текущий план
 					</Badge>
 				</div>

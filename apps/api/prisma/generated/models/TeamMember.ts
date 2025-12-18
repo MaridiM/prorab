@@ -38,7 +38,7 @@ export type TeamMemberMinAggregateOutputType = {
   id: string | null
   teamId: string | null
   userId: string | null
-  role: string | null
+  role: $Enums.TeamRole | null
   position: string | null
   joinedAt: Date | null
   salaryType: string | null
@@ -49,7 +49,7 @@ export type TeamMemberMaxAggregateOutputType = {
   id: string | null
   teamId: string | null
   userId: string | null
-  role: string | null
+  role: $Enums.TeamRole | null
   position: string | null
   joinedAt: Date | null
   salaryType: string | null
@@ -201,7 +201,7 @@ export type TeamMemberGroupByOutputType = {
   id: string
   teamId: string
   userId: string
-  role: string
+  role: $Enums.TeamRole
   position: string | null
   joinedAt: Date
   salaryType: string
@@ -235,7 +235,7 @@ export type TeamMemberWhereInput = {
   id?: Prisma.StringFilter<"TeamMember"> | string
   teamId?: Prisma.StringFilter<"TeamMember"> | string
   userId?: Prisma.StringFilter<"TeamMember"> | string
-  role?: Prisma.StringFilter<"TeamMember"> | string
+  role?: Prisma.EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
   position?: Prisma.StringNullableFilter<"TeamMember"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
   salaryType?: Prisma.StringFilter<"TeamMember"> | string
@@ -273,7 +273,7 @@ export type TeamMemberWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TeamMemberWhereInput | Prisma.TeamMemberWhereInput[]
   teamId?: Prisma.StringFilter<"TeamMember"> | string
   userId?: Prisma.StringFilter<"TeamMember"> | string
-  role?: Prisma.StringFilter<"TeamMember"> | string
+  role?: Prisma.EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
   position?: Prisma.StringNullableFilter<"TeamMember"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
   salaryType?: Prisma.StringFilter<"TeamMember"> | string
@@ -309,7 +309,7 @@ export type TeamMemberScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
   teamId?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
   userId?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
-  role?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
+  role?: Prisma.EnumTeamRoleWithAggregatesFilter<"TeamMember"> | $Enums.TeamRole
   position?: Prisma.StringNullableWithAggregatesFilter<"TeamMember"> | string | null
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"TeamMember"> | Date | string
   salaryType?: Prisma.StringWithAggregatesFilter<"TeamMember"> | string
@@ -318,7 +318,7 @@ export type TeamMemberScalarWhereWithAggregatesInput = {
 
 export type TeamMemberCreateInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -335,7 +335,7 @@ export type TeamMemberUncheckedCreateInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -348,7 +348,7 @@ export type TeamMemberUncheckedCreateInput = {
 
 export type TeamMemberUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -365,7 +365,7 @@ export type TeamMemberUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -380,7 +380,7 @@ export type TeamMemberCreateManyInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -389,7 +389,7 @@ export type TeamMemberCreateManyInput = {
 
 export type TeamMemberUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -400,7 +400,7 @@ export type TeamMemberUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -585,6 +585,10 @@ export type TeamMemberUpdateOneRequiredWithoutWorkLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TeamMemberUpdateToOneWithWhereWithoutWorkLogsInput, Prisma.TeamMemberUpdateWithoutWorkLogsInput>, Prisma.TeamMemberUncheckedUpdateWithoutWorkLogsInput>
 }
 
+export type EnumTeamRoleFieldUpdateOperationsInput = {
+  set?: $Enums.TeamRole
+}
+
 export type TeamMemberCreateNestedOneWithoutSalaryHistoryInput = {
   create?: Prisma.XOR<Prisma.TeamMemberCreateWithoutSalaryHistoryInput, Prisma.TeamMemberUncheckedCreateWithoutSalaryHistoryInput>
   connectOrCreate?: Prisma.TeamMemberCreateOrConnectWithoutSalaryHistoryInput
@@ -617,7 +621,7 @@ export type TeamMemberUpdateOneWithoutAssignedTasksNestedInput = {
 
 export type TeamMemberCreateWithoutUserInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -632,7 +636,7 @@ export type TeamMemberCreateWithoutUserInput = {
 export type TeamMemberUncheckedCreateWithoutUserInput = {
   id?: string
   teamId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -676,7 +680,7 @@ export type TeamMemberScalarWhereInput = {
   id?: Prisma.StringFilter<"TeamMember"> | string
   teamId?: Prisma.StringFilter<"TeamMember"> | string
   userId?: Prisma.StringFilter<"TeamMember"> | string
-  role?: Prisma.StringFilter<"TeamMember"> | string
+  role?: Prisma.EnumTeamRoleFilter<"TeamMember"> | $Enums.TeamRole
   position?: Prisma.StringNullableFilter<"TeamMember"> | string | null
   joinedAt?: Prisma.DateTimeFilter<"TeamMember"> | Date | string
   salaryType?: Prisma.StringFilter<"TeamMember"> | string
@@ -685,7 +689,7 @@ export type TeamMemberScalarWhereInput = {
 
 export type TeamMemberCreateWithoutTeamInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -700,7 +704,7 @@ export type TeamMemberCreateWithoutTeamInput = {
 export type TeamMemberUncheckedCreateWithoutTeamInput = {
   id?: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -739,7 +743,7 @@ export type TeamMemberUpdateManyWithWhereWithoutTeamInput = {
 
 export type TeamMemberCreateWithoutPayoutsInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -755,7 +759,7 @@ export type TeamMemberUncheckedCreateWithoutPayoutsInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -783,7 +787,7 @@ export type TeamMemberUpdateToOneWithWhereWithoutPayoutsInput = {
 
 export type TeamMemberUpdateWithoutPayoutsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -799,7 +803,7 @@ export type TeamMemberUncheckedUpdateWithoutPayoutsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -811,7 +815,7 @@ export type TeamMemberUncheckedUpdateWithoutPayoutsInput = {
 
 export type TeamMemberCreateWithoutWorkLogsInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -827,7 +831,7 @@ export type TeamMemberUncheckedCreateWithoutWorkLogsInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -855,7 +859,7 @@ export type TeamMemberUpdateToOneWithWhereWithoutWorkLogsInput = {
 
 export type TeamMemberUpdateWithoutWorkLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -871,7 +875,7 @@ export type TeamMemberUncheckedUpdateWithoutWorkLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -883,7 +887,7 @@ export type TeamMemberUncheckedUpdateWithoutWorkLogsInput = {
 
 export type TeamMemberCreateWithoutSalaryHistoryInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -899,7 +903,7 @@ export type TeamMemberUncheckedCreateWithoutSalaryHistoryInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -927,7 +931,7 @@ export type TeamMemberUpdateToOneWithWhereWithoutSalaryHistoryInput = {
 
 export type TeamMemberUpdateWithoutSalaryHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -943,7 +947,7 @@ export type TeamMemberUncheckedUpdateWithoutSalaryHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -955,7 +959,7 @@ export type TeamMemberUncheckedUpdateWithoutSalaryHistoryInput = {
 
 export type TeamMemberCreateWithoutAssignedTasksInput = {
   id?: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -971,7 +975,7 @@ export type TeamMemberUncheckedCreateWithoutAssignedTasksInput = {
   id?: string
   teamId: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -999,7 +1003,7 @@ export type TeamMemberUpdateToOneWithWhereWithoutAssignedTasksInput = {
 
 export type TeamMemberUpdateWithoutAssignedTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1015,7 +1019,7 @@ export type TeamMemberUncheckedUpdateWithoutAssignedTasksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1028,7 +1032,7 @@ export type TeamMemberUncheckedUpdateWithoutAssignedTasksInput = {
 export type TeamMemberCreateManyUserInput = {
   id?: string
   teamId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -1037,7 +1041,7 @@ export type TeamMemberCreateManyUserInput = {
 
 export type TeamMemberUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1052,7 +1056,7 @@ export type TeamMemberUpdateWithoutUserInput = {
 export type TeamMemberUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1066,7 +1070,7 @@ export type TeamMemberUncheckedUpdateWithoutUserInput = {
 export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1076,7 +1080,7 @@ export type TeamMemberUncheckedUpdateManyWithoutUserInput = {
 export type TeamMemberCreateManyTeamInput = {
   id?: string
   userId: string
-  role?: string
+  role?: $Enums.TeamRole
   position?: string | null
   joinedAt?: Date | string
   salaryType?: string
@@ -1085,7 +1089,7 @@ export type TeamMemberCreateManyTeamInput = {
 
 export type TeamMemberUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1100,7 +1104,7 @@ export type TeamMemberUpdateWithoutTeamInput = {
 export type TeamMemberUncheckedUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1114,7 +1118,7 @@ export type TeamMemberUncheckedUpdateWithoutTeamInput = {
 export type TeamMemberUncheckedUpdateManyWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumTeamRoleFieldUpdateOperationsInput | $Enums.TeamRole
   position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   salaryType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1267,7 +1271,7 @@ export type $TeamMemberPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     teamId: string
     userId: string
-    role: string
+    role: $Enums.TeamRole
     position: string | null
     joinedAt: Date
     salaryType: string
@@ -1704,7 +1708,7 @@ export interface TeamMemberFieldRefs {
   readonly id: Prisma.FieldRef<"TeamMember", 'String'>
   readonly teamId: Prisma.FieldRef<"TeamMember", 'String'>
   readonly userId: Prisma.FieldRef<"TeamMember", 'String'>
-  readonly role: Prisma.FieldRef<"TeamMember", 'String'>
+  readonly role: Prisma.FieldRef<"TeamMember", 'TeamRole'>
   readonly position: Prisma.FieldRef<"TeamMember", 'String'>
   readonly joinedAt: Prisma.FieldRef<"TeamMember", 'DateTime'>
   readonly salaryType: Prisma.FieldRef<"TeamMember", 'String'>

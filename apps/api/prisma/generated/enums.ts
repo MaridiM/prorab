@@ -126,6 +126,22 @@ export const AdminRoleType = {
 export type AdminRoleType = (typeof AdminRoleType)[keyof typeof AdminRoleType]
 
 
+export const BusinessRole = {
+  FOREMAN: 'FOREMAN',
+  WORKER: 'WORKER'
+} as const
+
+export type BusinessRole = (typeof BusinessRole)[keyof typeof BusinessRole]
+
+
+export const TeamRole = {
+  OWNER: 'OWNER',
+  MEMBER: 'MEMBER'
+} as const
+
+export type TeamRole = (typeof TeamRole)[keyof typeof TeamRole]
+
+
 export const SettingCategory = {
   PAYMENT: 'PAYMENT',
   EMAIL: 'EMAIL',

@@ -1,0 +1,84 @@
+# Admin Teams Management Queries and Mutations
+
+# Fragments
+fragment AdminTeamFields on Team {
+  id
+  name
+  ownerId
+  createdAt
+  updatedAt
+}
+
+fragment AdminTeamDetailsFields on AdminTeamDetails {
+  team {
+    ...AdminTeamFields
+  }
+  owner {
+    id
+    email
+    fullName
+    avatarUrl
+  }
+  subscription {
+    id
+    plan
+    status
+    currentPeriodEnd
+  }
+  projects {
+    id
+    name
+    status
+    budget
+    createdAt
+  }
+  _count {
+    members
+    projects
+  }
+}
+
+fragment AdminTeamStatsFields on AdminTeamStats {
+  totalMembers
+  totalProjects
+  totalExpenses
+  totalExpenseAmount
+  activeProjects
+  completedProjects
+}
+
+# Queries
+query AdminTeams($filters: AdminTeamFilters, $pagination: PaginationInput!) {
+  adminTeams(filters: $filters, pagination: $pagination) {
+    nodes {
+      ...AdminTeamFields
+    }
+    totalCount
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}
+
+query AdminTeam($id: String!) {
+  adminTeam(id: $id) {
+    ...AdminTeamDetailsFields
+  }
+}
+
+query AdminTeamStats($teamId: String!) {
+  adminTeamStats(teamId: $teamId) {
+    ...AdminTeamStatsFields
+  }
+}
+
+# Mutations
+mutation AdminUpdateTeam($id: String!, $input: AdminUpdateTeamInput!) {
+  adminUpdateTeam(id: $id, input: $input) {
+    ...AdminTeamFields
+  }
+}
+
+mutation AdminDeleteTeam($id: String!) {
+  adminDeleteTeam(id: $id)
+}

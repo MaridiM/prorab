@@ -285,7 +285,7 @@ export class AuthResolver {
 
 		return {
 			completed: true,
-			user,
+			user: user as any,
 			sessionToken,
 			refreshToken,
 		}

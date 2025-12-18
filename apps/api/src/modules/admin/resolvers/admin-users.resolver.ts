@@ -34,7 +34,7 @@ export class AdminUsersResolver {
 		@Args('pagination', { type: () => PaginationInput })
 		pagination: PaginationInput,
 	): Promise<AdminUsersConnection> {
-		return this.adminUsersService.findAll(filters, pagination)
+		return this.adminUsersService.findAll(filters, pagination) as any
 	}
 
 	@Query(() => AdminUserDetails, {
@@ -42,7 +42,7 @@ export class AdminUsersResolver {
 	})
 	@RequirePermissions(AdminPermissions.USERS_VIEW)
 	async adminUser(@Args('id', { type: () => String }) id: string): Promise<AdminUserDetails> {
-		return this.adminUsersService.findById(id)
+		return this.adminUsersService.findById(id) as any
 	}
 
 	@Query(() => [UserActivity], {
@@ -75,7 +75,7 @@ export class AdminUsersResolver {
 		@Args('input', { type: () => AdminUpdateUserInput }) input: AdminUpdateUserInput,
 		@CurrentUser() currentUser: CurrentUserData,
 	): Promise<User> {
-		return this.adminUsersService.updateUser(id, input, currentUser.id)
+		return this.adminUsersService.updateUser(id, input, currentUser.id) as any
 	}
 
 	@Mutation(() => Boolean, {
@@ -97,7 +97,7 @@ export class AdminUsersResolver {
 		@Args('id', { type: () => String }) id: string,
 		@CurrentUser() currentUser: CurrentUserData,
 	): Promise<User> {
-		return this.adminUsersService.verifyUserEmail(id, currentUser.id)
+		return this.adminUsersService.verifyUserEmail(id, currentUser.id) as any
 	}
 
 	@Mutation(() => Boolean, {

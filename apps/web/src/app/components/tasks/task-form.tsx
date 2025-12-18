@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CalendarIcon, Loader2Icon } from 'lucide-react'
@@ -88,6 +88,32 @@ export function TaskForm({
 	const selectedPriority = watch('priority')
 	const selectedStatus = watch('status')
 	const selectedAssignee = watch('assigneeId')
+
+	// Reset form when task changes or dialog opens
+	useEffect(() => {
+		if (open) {
+			if (isEditing && task) {
+				// Editing existing task - load task data
+				reset({
+					title: task.title,
+					description: task.description || '',
+					status: task.status as TaskStatus,
+					priority: task.priority as TaskPriority,
+					assigneeId: task.assigneeId || '',
+					dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+				})
+			} else {
+				// Creating new task - reset to defaults
+				reset({
+					projectId,
+					title: '',
+					description: '',
+					priority: TaskPriority.Medium,
+					assigneeId: '',
+				})
+			}
+		}
+	}, [open, task, isEditing, projectId, reset])
 
 	const handleFormSubmit = async (data: CreateTaskInput | UpdateTaskInput) => {
 		setIsSubmitting(true)
@@ -228,10 +254,8 @@ export function TaskForm({
 									<PopoverContent className="w-auto p-0" align="start">
 										<Calendar
 											mode="single"
-											selected={selectedDate}
+											selected={selectedDate || undefined}
 											onSelect={(date) => setValue('dueDate', date)}
-											initialFocus
-											locale={ru}
 										/>
 									</PopoverContent>
 								</Popover>

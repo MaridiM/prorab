@@ -1,0 +1,88 @@
+
+> web@0.2.8 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of G:\Projects\prorab\v-1\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * G:\Projects\prorab\v-1\apps\web\package-lock.json
+
+   ▲ Next.js 16.0.3 (Turbopack)
+   - Environments: .env
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 33.3s
+   Running TypeScript ...
+   Collecting page data using 11 workers ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 11 workers (0/28) ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 11 workers (7/28) 
+   Generating static pages using 11 workers (14/28) 
+   Generating static pages using 11 workers (21/28) 
+ ✓ Generating static pages using 11 workers (28/28) in 2.4s
+   Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /admin
+├ ƒ /admin/payments
+├ ƒ /admin/settings
+├ ƒ /admin/storage
+├ ƒ /admin/subscriptions
+├ ƒ /admin/teams
+├ ƒ /admin/users
+├ ƒ /auth
+├ ƒ /auth/forgot-password
+├ ƒ /auth/login
+├ ƒ /auth/register
+├ ƒ /auth/reset-password
+├ ƒ /dashboard
+├ ƒ /invite/[code]
+├ ƒ /login
+├ ƒ /onboarding
+├ ƒ /onboarding/invite
+├ ƒ /onboarding/step-1
+├ ƒ /onboarding/step-2
+├ ƒ /onboarding/step-3
+├ ƒ /payment/failure
+├ ƒ /payment/success
+├ ƒ /pricing
+├ ƒ /r/[slug]
+├ ƒ /settings
+├ ƒ /teams
+├ ƒ /teams/[teamId]
+├ ƒ /teams/[teamId]/analytics/personnel
+├ ƒ /teams/[teamId]/members/[memberId]/payouts
+├ ƒ /teams/[teamId]/members/[memberId]/salary
+├ ƒ /teams/[teamId]/people
+├ ƒ /teams/[teamId]/projects/[projectId]
+├ ƒ /teams/[teamId]/projects/[projectId]/edit
+├ ƒ /teams/[teamId]/projects/[projectId]/payouts
+├ ƒ /teams/[teamId]/projects/[projectId]/tasks
+├ ƒ /teams/[teamId]/projects/[projectId]/time-tracking
+├ ƒ /teams/[teamId]/projects/new
+├ ƒ /teams/[teamId]/settings
+└ ƒ /teams/[teamId]/subscription
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+

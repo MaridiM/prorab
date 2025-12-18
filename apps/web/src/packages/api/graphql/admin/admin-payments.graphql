@@ -1,0 +1,73 @@
+# Admin Payments Management Queries and Mutations
+
+# Fragments
+fragment PageInfoFields on PageInfo {
+  hasNextPage
+  hasPreviousPage
+  currentPage
+  totalPages
+}
+
+fragment AdminPaymentFields on AdminPayment {
+  id
+  subscriptionId
+  amount
+  currency
+  status
+  yookassaPaymentId
+  createdAt
+  updatedAt
+}
+
+# Queries
+query AdminPayments($filters: AdminPaymentFilters, $pagination: PaginationInput!) {
+  adminPayments(filters: $filters, pagination: $pagination) {
+    nodes {
+      ...AdminPaymentFields
+    }
+    totalCount
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}
+
+query AdminPayment($id: String!) {
+  adminPayment(id: $id) {
+    ...AdminPaymentFields
+  }
+}
+
+query AdminPaymentStats {
+  adminPaymentStats {
+    totalPayments
+    succeededPayments
+    pendingPayments
+    failedPayments
+    totalRevenue
+    averagePayment
+    byStatus {
+      PENDING
+      SUCCEEDED
+      FAILED
+      CANCELLED
+    }
+  }
+}
+
+# Mutations
+mutation AdminUpdatePaymentStatus($id: String!, $status: String!) {
+  adminUpdatePaymentStatus(id: $id, status: $status) {
+    ...AdminPaymentFields
+  }
+}
+
+mutation AdminRefundPayment($id: String!, $input: RefundPaymentInput!) {
+  adminRefundPayment(id: $id, input: $input) {
+    ...AdminPaymentFields
+  }
+}
+
+mutation AdminDeletePayment($id: String!) {
+  adminDeletePayment(id: $id)
+}

@@ -1,0 +1,98 @@
+# Admin Analytics and Dashboard Queries
+
+# Fragments
+fragment DashboardStatsFields on DashboardStats {
+  users {
+    total
+    verified
+    admins
+    newThisMonth
+    growthRate
+  }
+  teams {
+    total
+    withActiveSubscription
+    averageMembers
+    newThisMonth
+  }
+  projects {
+    total
+    active
+    completed
+    archived
+  }
+  subscriptions {
+    total
+    active
+    trialing
+    cancelled
+    byPlan {
+      LITE
+      FOREMAN
+      BRIGADE
+    }
+  }
+  payments {
+    total
+    succeeded
+    totalRevenue
+    thisMonthRevenue
+    averagePayment
+  }
+  storage {
+    totalUsedBytes
+    totalUsedGB
+    averagePerTeam
+  }
+}
+
+fragment ChartDataFields on ChartData {
+  labels
+  data
+}
+
+fragment ActivityLogFields on ActivityLog {
+  id
+  action
+  resource
+  resourceId
+  adminUserEmail
+  createdAt
+}
+
+fragment SystemHealthFields on SystemHealth {
+  database
+  storageAvailable
+  lastBackup
+}
+
+# Queries
+query AdminDashboardStats {
+  adminDashboardStats {
+    ...DashboardStatsFields
+  }
+}
+
+query AdminRevenueChart {
+  adminRevenueChart {
+    ...ChartDataFields
+  }
+}
+
+query AdminUserGrowthChart {
+  adminUserGrowthChart {
+    ...ChartDataFields
+  }
+}
+
+query AdminRecentActivity($limit: Int) {
+  adminRecentActivity(limit: $limit) {
+    ...ActivityLogFields
+  }
+}
+
+query AdminSystemHealth {
+  adminSystemHealth {
+    ...SystemHealthFields
+  }
+}

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { gql } from '@apollo/client'
 import { motion } from 'framer-motion'
 import {
 	Shield,
@@ -38,57 +37,20 @@ import {
 	AlertDialogTitle,
 } from '@/packages/ui'
 import { useToast } from '@/packages/hooks/use-toast'
-
-const TWO_FACTOR_STATUS = gql`
-	query TwoFactorStatus {
-		twoFactorStatus {
-			enabled
-			backupCodesRemaining
-		}
-	}
-`
-
-const GENERATE_2FA_SECRET = gql`
-	mutation Generate2FASecret {
-		generate2FASecret {
-			secret
-			qrCodeUrl
-			manualEntryCode
-		}
-	}
-`
-
-const ENABLE_2FA = gql`
-	mutation Enable2FA($input: Enable2FAInput!) {
-		enable2FA(input: $input) {
-			success
-			backupCodes
-		}
-	}
-`
-
-const DISABLE_2FA = gql`
-	mutation Disable2FA($input: Disable2FAInput!) {
-		disable2FA(input: $input) {
-			success
-		}
-	}
-`
-
-const REGENERATE_BACKUP_CODES = gql`
-	mutation Regenerate2FABackupCodes($input: RegenerateBackupCodesInput!) {
-		regenerate2FABackupCodes(input: $input) {
-			backupCodes
-		}
-	}
-`
+import {
+	TwoFactorStatusDocument,
+	Generate2FaSecretDocument,
+	Enable2FaDocument,
+	Disable2FaDocument,
+	Regenerate2FaBackupCodesDocument,
+} from '@/packages/api/graphql/__generated__/output'
 
 interface TwoFactorAuthProps {
 	className?: string
 }
 
 export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
-	const { toast } = useToast()
+	const { success: toastSuccess, error: toastError } = useToast()
 	const [setupStep, setSetupStep] = useState<'idle' | 'qr' | 'verify' | 'backup'>('idle')
 	const [verificationCode, setVerificationCode] = useState('')
 	const [disableCode, setDisableCode] = useState('')
@@ -103,79 +65,54 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 	const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
 	const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
-	const { data, loading, refetch } = useQuery(TWO_FACTOR_STATUS)
+	const { data, loading, refetch } = useQuery(TwoFactorStatusDocument)
 
-	const [generateSecret, { loading: generating }] = useMutation(GENERATE_2FA_SECRET, {
+	const [generateSecret, { loading: generating }] = useMutation(Generate2FaSecretDocument, {
 		onCompleted: (data) => {
 			setQrData(data.generate2FASecret)
 			setSetupStep('qr')
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message,
-				variant: 'destructive',
-			})
+			toastError(error.message || 'Ошибка генерации секрета')
 		},
 	})
 
-	const [enable2FA, { loading: enabling }] = useMutation(ENABLE_2FA, {
+	const [enable2FA, { loading: enabling }] = useMutation(Enable2FaDocument, {
 		onCompleted: (data) => {
 			setBackupCodes(data.enable2FA.backupCodes)
 			setSetupStep('backup')
 			refetch()
-			toast({
-				title: 'Двухфакторная аутентификация включена',
-				description: 'Сохраните резервные коды в безопасном месте',
-			})
+			toastSuccess('Двухфакторная аутентификация включена. Сохраните резервные коды в безопасном месте')
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Неверный код подтверждения',
-				variant: 'destructive',
-			})
+			toastError(error.message || 'Неверный код подтверждения')
 		},
 	})
 
-	const [disable2FA, { loading: disabling }] = useMutation(DISABLE_2FA, {
+	const [disable2FA, { loading: disabling }] = useMutation(Disable2FaDocument, {
 		onCompleted: () => {
 			setShowDisableDialog(false)
 			setDisableCode('')
 			refetch()
-			toast({
-				title: 'Двухфакторная аутентификация отключена',
-				description: 'Вы можете включить её снова в любое время',
-			})
+			toastSuccess('Двухфакторная аутентификация отключена. Вы можете включить её снова в любое время')
 		},
 		onError: (error) => {
-			toast({
-				title: 'Ошибка',
-				description: error.message || 'Неверный код подтверждения',
-				variant: 'destructive',
-			})
+			toastError(error.message || 'Неверный код подтверждения')
 		},
 	})
 
 	const [regenerateBackupCodes, { loading: regenerating }] = useMutation(
-		REGENERATE_BACKUP_CODES,
+		Regenerate2FaBackupCodesDocument,
 		{
 			onCompleted: (data) => {
 				setBackupCodes(data.regenerate2FABackupCodes.backupCodes)
 				setShowRegenerateDialog(false)
 				setRegenerateCode('')
 				refetch()
-				toast({
-					title: 'Резервные коды обновлены',
-					description: 'Сохраните новые коды в безопасном месте',
-				})
+				toastSuccess('Резервные коды обновлены. Сохраните новые коды в безопасном месте')
 			},
 			onError: (error) => {
-				toast({
-					title: 'Ошибка',
-					description: error.message,
-					variant: 'destructive',
-				})
+				toastError(error.message || 'Ошибка обновления кодов')
 			},
 		},
 	)
@@ -186,11 +123,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 
 	const handleVerify = async () => {
 		if (!qrData || verificationCode.length !== 6) {
-			toast({
-				title: 'Ошибка',
-				description: 'Введите 6-значный код',
-				variant: 'destructive',
-			})
+			toastError('Введите 6-значный код')
 			return
 		}
 
@@ -206,11 +139,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 
 	const handleDisable = async () => {
 		if (disableCode.length !== 6) {
-			toast({
-				title: 'Ошибка',
-				description: 'Введите 6-значный код',
-				variant: 'destructive',
-			})
+			toastError('Введите 6-значный код')
 			return
 		}
 
@@ -223,11 +152,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 
 	const handleRegenerate = async () => {
 		if (regenerateCode.length !== 6) {
-			toast({
-				title: 'Ошибка',
-				description: 'Введите 6-значный код',
-				variant: 'destructive',
-			})
+			toastError('Введите 6-значный код')
 			return
 		}
 
@@ -242,10 +167,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 		navigator.clipboard.writeText(code)
 		setCopiedCode(code)
 		setTimeout(() => setCopiedCode(null), 2000)
-		toast({
-			title: 'Скопировано',
-			description: 'Код скопирован в буфер обмена',
-		})
+		toastSuccess('Код скопирован в буфер обмена')
 	}
 
 	const handleDownloadCodes = () => {
@@ -546,9 +468,9 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 							</div>
 
 							<Button
-								variant="destructive"
+								variant="default"
 								onClick={() => setShowDisableDialog(true)}
-								className="w-full rounded-xl"
+								className="w-full rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
 							>
 								<ShieldAlert className="w-4 h-4 mr-2" />
 								Отключить двухфакторную аутентификацию

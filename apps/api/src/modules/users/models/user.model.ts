@@ -1,4 +1,25 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { AdminRoleDetail } from '../../admin/models/admin-role-detail.model'
+
+// Define enum values for GraphQL (must match Prisma enum exactly)
+export enum BusinessRole {
+	FOREMAN = 'FOREMAN',
+	WORKER = 'WORKER',
+}
+
+// Register enum with GraphQL
+registerEnumType(BusinessRole, {
+	name: 'BusinessRole',
+	description: 'Глобальная бизнес-роль пользователя',
+	valuesMap: {
+		FOREMAN: {
+			description: 'Бригадир - владелец команды, не может присоединяться к другим командам',
+		},
+		WORKER: {
+			description: 'Работник - член команды, не может создавать команды',
+		},
+	},
+})
 
 @ObjectType()
 export class User {
@@ -32,10 +53,22 @@ export class User {
 	@Field()
 	hasCompletedOnboarding: boolean
 
+	@Field(() => BusinessRole, {
+		nullable: true,
+		description: 'Глобальная бизнес-роль: FOREMAN или WORKER',
+	})
+	businessRole?: BusinessRole | null
+
+	@Field(() => Date, { nullable: true })
+	businessRoleAssignedAt?: Date | null
+
 	@Field()
 	createdAt: Date
 
 	@Field()
 	updatedAt: Date
+
+	@Field(() => AdminRoleDetail, { nullable: true })
+	adminRole?: AdminRoleDetail
 }
 

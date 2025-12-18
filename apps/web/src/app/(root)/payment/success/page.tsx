@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useQuery } from '@apollo/client'
-import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Alert, AlertDescription } from '@/packages/components/ui/alert'
@@ -11,48 +10,14 @@ import { CheckCircle2, Download, ArrowRight, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 import Link from 'next/link'
-
-const PAYMENT_QUERY = gql`
-	query Payment($paymentId: String!) {
-		payment(id: $paymentId) {
-			id
-			amount
-			currency
-			status
-			paymentMethod
-			description
-			paidAt
-			createdAt
-		}
-	}
-`
-
-const MY_SUBSCRIPTION_QUERY = gql`
-	query MySubscription {
-		mySubscription {
-			id
-			plan
-			status
-			currentPeriodEnd
-		}
-	}
-`
+import { MySubscriptionDocument } from '@/packages/api/graphql'
 
 export default function PaymentSuccessPage() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const paymentId = searchParams.get('paymentId')
 	const [countdown, setCountdown] = useState(10)
 
-	const { data: paymentData, loading: paymentLoading } = useQuery(
-		PAYMENT_QUERY,
-		{
-			variables: { paymentId },
-			skip: !paymentId,
-		}
-	)
-
-	const { data: subscriptionData } = useQuery(MY_SUBSCRIPTION_QUERY)
+	const { data: subscriptionData, loading: subscriptionLoading } = useQuery(MySubscriptionDocument)
 
 	useEffect(() => {
 		// Countdown timer for auto-redirect
@@ -75,7 +40,7 @@ export default function PaymentSuccessPage() {
 		alert('Загрузка чека скоро будет доступна')
 	}
 
-	if (paymentLoading) {
+	if (subscriptionLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -83,7 +48,6 @@ export default function PaymentSuccessPage() {
 		)
 	}
 
-	const payment = paymentData?.payment
 	const subscription = subscriptionData?.mySubscription
 
 	return (
@@ -106,7 +70,7 @@ export default function PaymentSuccessPage() {
 					</p>
 				</div>
 
-				{/* Payment Details */}
+				{/* Payment Details - Removed: No user payment query available
 				{payment && (
 					<div className="space-y-4 pt-4 border-t">
 						<h2 className="font-semibold text-lg">Детали платежа</h2>
@@ -145,7 +109,7 @@ export default function PaymentSuccessPage() {
 							</div>
 						)}
 					</div>
-				)}
+				)} */}
 
 				{/* Subscription Info */}
 				{subscription && (

@@ -2,7 +2,9 @@
 
 import { motion, Variants } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Users, Key } from 'lucide-react'
+import { Users, Key, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/packages/libs/auth'
+import { Alert, AlertDescription } from '@/packages/components/ui/alert'
 
 const fadeIn: Variants = {
 	hidden: { opacity: 0, y: 20 },
@@ -18,6 +20,7 @@ const fadeIn: Variants = {
 
 export default function OnboardingStartPage() {
 	const router = useRouter()
+	const { isWorker } = useAuth()
 
 	return (
 		<motion.div
@@ -38,10 +41,20 @@ export default function OnboardingStartPage() {
 
 			{/* Options */}
 			<motion.div variants={fadeIn} className="space-y-4">
+				{isWorker && (
+					<Alert variant="destructive">
+						<AlertCircle className="h-4 w-4" />
+						<AlertDescription>
+							Вы уже являетесь работником в команде. Работники не могут создавать собственные команды.
+						</AlertDescription>
+					</Alert>
+				)}
+
 				{/* Create New Team */}
 				<button
 					onClick={() => router.push('/onboarding/step-1')}
-					className="group relative w-full overflow-hidden rounded-2xl border-2 border-border bg-card p-6 text-left transition-all hover:border-primary hover:shadow-lg active:scale-[0.98]"
+					disabled={isWorker}
+					className="group relative w-full overflow-hidden rounded-2xl border-2 border-border bg-card p-6 text-left transition-all hover:border-primary hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:shadow-none"
 				>
 					<div className="flex items-start gap-4">
 						<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-110">

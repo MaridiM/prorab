@@ -1,6 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, Variants } from "framer-motion"
 import { ArrowRight, Loader2, Mail, Lock, User, Phone } from "lucide-react"
@@ -27,7 +28,14 @@ const fadeIn: Variants = {
 
 export default function RegisterPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { success, error } = useToast()
+    
+    // Get redirect URL from query params (if coming from invite link)
+    const redirectUrl = searchParams.get('redirect')
+    const loginUrl = useMemo(() => {
+        return redirectUrl ? `/auth/login?redirect=${encodeURIComponent(redirectUrl)}` : '/auth/login'
+    }, [redirectUrl])
 
     // React Hook Form with Zod validation
     const form = useForm<TRegisterSchema>({
@@ -80,8 +88,15 @@ export default function RegisterPage() {
             const responseData = response.data?.register
             if (responseData?.user) {
                 success(responseData.message || "Аккаунт создан!")
+                
                 setTimeout(() => {
-                    router.push("/onboarding")
+                    if (redirectUrl) {
+                        // Redirect to the specified URL (e.g., invite page)
+                        router.push(redirectUrl)
+                    } else {
+                        // Normal onboarding flow
+                        router.push("/onboarding")
+                    }
                 }, 1000)
             } else if (response.data === null || response.data === undefined) {
                 // No data at all - this shouldn't happen with errorPolicy: 'all', but handle it
@@ -281,7 +296,7 @@ export default function RegisterPage() {
             >
                 Уже есть аккаунт?{" "}
                 <Link
-                    href="/auth/login"
+                    href={loginUrl}
                     className="text-primary font-medium hover:text-primary/80 transition-colors"
                 >
                     Войти

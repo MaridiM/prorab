@@ -1,4 +1,6 @@
 import { ObjectType, Field, Int, ID, Float, InputType } from '@nestjs/graphql'
+import { IsOptional, IsString, IsDate, IsInt } from 'class-validator'
+import { Type } from 'class-transformer'
 import { Team } from '../../teams/models/team.model'
 import { User } from '../../users/models/user.model'
 import { SubscriptionModel } from '../../subscriptions/models/subscription.model'
@@ -8,30 +10,50 @@ import { PageInfo } from './shared/page-info.model'
 @InputType()
 export class AdminTeamFilters {
 	@Field(() => String, { nullable: true, description: 'Search by team name or owner email' })
+	@IsOptional()
+	@IsString()
 	search?: string
 
 	@Field(() => String, { nullable: true, description: 'Filter by plan type' })
+	@IsOptional()
+	@IsString()
 	planType?: string
 
 	@Field(() => String, { nullable: true, description: 'Filter by subscription status' })
+	@IsOptional()
+	@IsString()
 	subscriptionStatus?: string
 
 	@Field(() => Date, { nullable: true, description: 'Created after date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	createdAfter?: Date
 
 	@Field(() => Date, { nullable: true, description: 'Created before date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	createdBefore?: Date
 
 	@Field(() => Int, { nullable: true, description: 'Minimum number of members' })
+	@IsOptional()
+	@IsInt()
 	minMembers?: number
 
 	@Field(() => Int, { nullable: true, description: 'Maximum number of members' })
+	@IsOptional()
+	@IsInt()
 	maxMembers?: number
 
 	@Field(() => Int, { nullable: true, description: 'Minimum number of projects' })
+	@IsOptional()
+	@IsInt()
 	minProjects?: number
 
 	@Field(() => Int, { nullable: true, description: 'Maximum number of projects' })
+	@IsOptional()
+	@IsInt()
 	maxProjects?: number
 }
 

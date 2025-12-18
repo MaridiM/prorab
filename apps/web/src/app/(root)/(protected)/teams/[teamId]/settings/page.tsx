@@ -58,7 +58,7 @@ const fadeIn = {
 	visible: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] },
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as const },
 	},
 }
 
@@ -275,11 +275,9 @@ export default function TeamSettingsPage() {
 											<div className="w-20 h-20 rounded-2xl border-2 border-dashed border-border/50 flex items-center justify-center overflow-hidden bg-secondary/30">
 												{team && (
 													<TeamLogo
-														team={{
-															...team,
-															iconId: form.watch('iconId') || team.iconId,
-															colorId: form.watch('colorId') || team.colorId,
-														}}
+														name={team.name}
+														logo={team.logoUrl}
+														iconId={form.watch('iconId') || team.iconId}
 														size="lg"
 													/>
 												)}
@@ -289,12 +287,10 @@ export default function TeamSettingsPage() {
 										{/* Icon Picker */}
 										<div className="flex-1 opacity-50 pointer-events-none">
 											<IconPicker
-												selectedIcon={form.watch('iconId') || team?.iconId}
-												selectedColor={form.watch('colorId') || team?.colorId}
-												onSelect={(iconId, colorId) => {
-													form.setValue('iconId', iconId)
-													form.setValue('colorId', colorId)
-												}}
+												selectedIcon={form.watch('iconId') || team?.iconId || undefined}
+												selectedColor={form.watch('colorId') || team?.colorId || undefined}
+												onIconSelect={(iconId) => form.setValue('iconId', iconId)}
+												onColorSelect={(colorId) => form.setValue('colorId', colorId)}
 											/>
 										</div>
 									</div>
@@ -378,7 +374,7 @@ export default function TeamSettingsPage() {
 								Удаление команды приведёт к безвозвратной потере всех проектов, расходов и
 								отчётов. Это действие нельзя отменить.
 							</p>
-							<Button variant="destructive" className="rounded-xl" disabled>
+							<Button variant="outline" className="rounded-xl text-destructive hover:bg-destructive/10" disabled>
 								<Trash2 className="w-4 h-4 mr-2" />
 								Удалить команду (скоро)
 							</Button>

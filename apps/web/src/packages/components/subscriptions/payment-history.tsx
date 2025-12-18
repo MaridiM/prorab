@@ -29,27 +29,27 @@ export interface PaymentHistoryProps {
 const STATUS_CONFIG = {
 	PENDING: {
 		label: 'Ожидание',
-		variant: 'outline' as const,
+		variant: 'secondary' as const,
 		color: 'text-muted-foreground',
 	},
 	SUCCEEDED: {
 		label: 'Успешно',
-		variant: 'default' as const,
+		variant: 'success' as const,
 		color: 'text-green-500',
 	},
 	FAILED: {
 		label: 'Ошибка',
-		variant: 'destructive' as const,
+		variant: 'danger' as const,
 		color: 'text-red-500',
 	},
 	CANCELLED: {
 		label: 'Отменён',
-		variant: 'outline' as const,
+		variant: 'secondary' as const,
 		color: 'text-muted-foreground',
 	},
 	REFUNDED: {
 		label: 'Возврат',
-		variant: 'outline' as const,
+		variant: 'warning' as const,
 		color: 'text-blue-500',
 	},
 }

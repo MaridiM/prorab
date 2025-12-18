@@ -1,7 +1,27 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Team } from './team.model';
 import { User } from '../../users/models/user.model';
 import { TeamMemberStats } from './team-member-stats.model';
+
+// Define enum values for GraphQL (must match Prisma enum exactly)
+export enum TeamRole {
+  OWNER = 'OWNER',
+  MEMBER = 'MEMBER',
+}
+
+// Register enum with GraphQL
+registerEnumType(TeamRole, {
+  name: 'TeamRole',
+  description: 'Роль участника в конкретной команде',
+  valuesMap: {
+    OWNER: {
+      description: 'Владелец команды - полные права на управление',
+    },
+    MEMBER: {
+      description: 'Участник команды - ограниченные права',
+    },
+  },
+});
 
 /**
  * GraphQL модель участника команды
@@ -17,8 +37,8 @@ export class TeamMember {
   @Field(() => ID)
   userId: string;
 
-  @Field({ description: 'Роль в команде (owner/member)' })
-  role: string;
+  @Field(() => TeamRole, { description: 'Роль в команде (OWNER/MEMBER)' })
+  role: TeamRole;
 
   @Field({ nullable: true, description: 'Должность/специализация (например, "Прораб", "Электрик", "Маляр")' })
   position?: string;

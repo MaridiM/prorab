@@ -2,36 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client/react'
-import { gql } from '@apollo/client'
 import { Button } from '../ui/button'
 import { Spinner } from '../ui/spinner'
 import { toast } from 'sonner'
-
-const INIT_TELEGRAM_AUTH = gql`
-	mutation InitTelegramAuth {
-		initTelegramAuth {
-			token
-			deepLink
-			expiresAt
-		}
-	}
-`
-
-const CHECK_TELEGRAM_AUTH = gql`
-	mutation CheckTelegramAuth($input: CheckTelegramAuthInput!) {
-		checkTelegramAuth(input: $input) {
-			completed
-			user {
-				id
-				email
-				fullName
-				hasCompletedOnboarding
-			}
-			sessionToken
-			refreshToken
-		}
-	}
-`
+import { InitTelegramAuthDocument, CheckTelegramAuthDocument } from '@/packages/api/graphql'
 
 interface TelegramLoginButtonProps {
 	onSuccess: (user: any) => void
@@ -47,8 +21,8 @@ export function TelegramLoginButton({
 	const [authToken, setAuthToken] = useState<string | null>(null)
 	const [pollingActive, setPollingActive] = useState(false)
 
-	const [initAuth, { loading: initLoading }] = useMutation(INIT_TELEGRAM_AUTH)
-	const [checkAuth, { loading: checkLoading }] = useMutation(CHECK_TELEGRAM_AUTH)
+	const [initAuth, { loading: initLoading }] = useMutation(InitTelegramAuthDocument)
+	const [checkAuth, { loading: checkLoading }] = useMutation(CheckTelegramAuthDocument)
 
 	// Polling logic
 	useEffect(() => {

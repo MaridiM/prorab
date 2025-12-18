@@ -1234,8 +1234,7 @@ export default function DashboardPage() {
 
 	// Error state
 	if (teamsError) {
-		const isNetworkError = teamsError.message === 'Failed to fetch' || 
-			teamsError.networkError || 
+		const isNetworkError = teamsError.message === 'Failed to fetch' ||
 			teamsError.message?.includes('Failed to fetch');
 		
 		const errorMessage = isNetworkError 
@@ -1818,7 +1817,7 @@ export default function DashboardPage() {
 														return (
 															<div
 																key={report.id}
-																onClick={() => currentTeamId && router.push(`/teams/${currentTeamId}/projects/${report.projectId}?tab=reports&report=${report.slug}`)}
+																onClick={() => currentTeamId && router.push(`/teams/${currentTeamId}/projects/${report.projectId}?tab=reports&report=${report.id}`)}
 																className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group cursor-pointer"
 															>
 																<div className={cn(

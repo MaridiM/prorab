@@ -1,8 +1,7 @@
 import { z } from 'zod'
 
 export const subscriptionPlanSchema = z.enum(['LITE', 'FOREMAN', 'BRIGADE'], {
-  required_error: 'Выберите тарифный план',
-  invalid_type_error: 'Некорректный тарифный план',
+  message: 'Выберите тарифный план',
 })
 
 export const createSubscriptionSchema = z.object({

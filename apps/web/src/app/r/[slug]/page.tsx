@@ -59,16 +59,10 @@ export default async function PublicPhotoReportPage({ params }: PageProps) {
 	const client = getServerClient()
 
 	try {
-		const { data, errors } = await client.query({
+		const { data } = await client.query({
 			query: PublicPhotoReportDocument,
 			variables: { slug },
 		})
-
-		// Check for GraphQL errors
-		if (errors && errors.length > 0) {
-			console.error('[PublicPhotoReportPage] GraphQL errors:', errors);
-			notFound()
-		}
 
 		if (!data || !data.publicPhotoReport) {
 			console.warn(`[PublicPhotoReportPage] Report not found for slug: ${slug}`);

@@ -1,0 +1,67 @@
+# Admin Subscriptions Management Queries and Mutations
+
+# Fragments
+fragment AdminSubscriptionFields on Subscription {
+  id
+  teamId
+  plan
+  status
+  currentPeriodStart
+  currentPeriodEnd
+  cancelAtPeriodEnd
+  trialEndsAt
+  createdAt
+  updatedAt
+}
+
+# Queries
+query AdminSubscriptions($filters: AdminSubscriptionFilters, $pagination: PaginationInput!) {
+  adminSubscriptions(filters: $filters, pagination: $pagination) {
+    nodes {
+      ...AdminSubscriptionFields
+    }
+    totalCount
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}
+
+query AdminSubscription($id: String!) {
+  adminSubscription(id: $id) {
+    ...AdminSubscriptionFields
+  }
+}
+
+query AdminSubscriptionStats {
+  adminSubscriptionStats {
+    totalSubscriptions
+    activeSubscriptions
+    trialingSubscriptions
+    cancelledSubscriptions
+    byPlan {
+      LITE
+      FOREMAN
+      BRIGADE
+    }
+  }
+}
+
+# Mutations
+mutation AdminCancelSubscription($id: String!) {
+  adminCancelSubscription(id: $id) {
+    ...AdminSubscriptionFields
+  }
+}
+
+mutation AdminChangeTeamPlan($teamId: String!, $planType: String!) {
+  adminChangeTeamPlan(teamId: $teamId, planType: $planType) {
+    id
+    name
+    ownerId
+  }
+}
+
+mutation AdminDeleteSubscription($id: String!) {
+  adminDeleteSubscription(id: $id)
+}

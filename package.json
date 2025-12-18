@@ -1,6 +1,6 @@
 {
   "name": "prorab-monorepo",
-  "version": "0.3.2",
+  "version": "0.7.0",
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "scripts": {

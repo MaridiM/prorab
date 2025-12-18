@@ -7,7 +7,7 @@ import { ru } from 'date-fns/locale/ru'
 import { cn } from '@/packages/utils/tw-merge'
 import { buttonVariants } from './button'
 
-export type CalendarProps = DayPickerSingleProps
+export type CalendarProps = React.ComponentPropsWithoutRef<typeof DayPicker>
 
 function Calendar({
 	className,
@@ -17,6 +17,7 @@ function Calendar({
 }: CalendarProps) {
 	return (
 		<DayPicker
+			mode="single"
 			showOutsideDays={showOutsideDays}
 			className={cn('p-3', className)}
 			classNames={{
@@ -51,10 +52,6 @@ function Calendar({
 					'aria-selected:bg-accent aria-selected:text-accent-foreground',
 				day_hidden: 'invisible',
 				...classNames,
-			}}
-			components={{
-				IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-				IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
 			}}
 			locale={ru}
 			{...props}
