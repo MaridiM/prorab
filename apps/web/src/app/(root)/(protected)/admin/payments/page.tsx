@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Input } from '@/packages/components/ui/input'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Select,
 	SelectContent,
@@ -62,20 +63,38 @@ const statusIcon: Record<string, any> = {
 export default function AdminPaymentsPage() {
 	const [page, setPage] = useState(1)
 	const [search, setSearch] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [statusFilter, setStatusFilter] = useState<string>('')
 	const [selectedPayment, setSelectedPayment] = useState<any>(null)
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search)
+			setPage(1) // Reset to first page when search changes
+		}, 500)
+
+		return () => clearTimeout(timer)
+	}, [search])
+
+	// Reset page when filters change
+	useEffect(() => {
+		setPage(1)
+	}, [statusFilter])
+
+	// Build filters with useMemo - only include non-null values
+	const filters = useMemo(() => {
+		const filterObj: any = {}
+		if (debouncedSearch) filterObj.search = debouncedSearch
+		if (statusFilter && statusFilter !== 'all') filterObj.status = statusFilter
+		// Only return filter object if it has values
+		return Object.keys(filterObj).length > 0 ? filterObj : null
+	}, [debouncedSearch, statusFilter])
+
 	const { data, loading, refetch } = useQuery(AdminPaymentsDocument, {
 		variables: {
-			filters: (search || statusFilter) ? {
-				search: search || null,
-				status: statusFilter || null,
-				createdAfter: null,
-				createdBefore: null,
-				minAmount: null,
-				maxAmount: null,
-			} : null,
+			filters,
 			pagination: {
 				page,
 				limit: 20,
@@ -106,6 +125,10 @@ export default function AdminPaymentsPage() {
 	const payments = data?.adminPayments?.nodes || []
 	const pageInfo = data?.adminPayments?.pageInfo
 	const totalCount = data?.adminPayments?.totalCount || 0
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	const handleDeletePayment = (paymentId: string) => {
 		if (confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { motion } from 'framer-motion'
+import { QRCodeSVG } from 'react-qr-code'
 import {
 	Shield,
 	ShieldCheck,
@@ -244,51 +245,104 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 							animate={{ opacity: 1, y: 0 }}
 							className="space-y-6"
 						>
-							<div className="p-6 rounded-2xl border bg-card/50 text-center space-y-4">
-								<div className="flex justify-center">
-									<div className="p-4 bg-white rounded-xl">
-										<QrCode className="w-48 h-48 text-gray-800" />
-										<p className="text-xs text-muted-foreground mt-2">{qrData.qrCodeUrl}</p>
+							{/* QR Code Section */}
+							<div className="p-8 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 text-center space-y-6">
+								<div className="flex flex-col items-center space-y-4">
+									<div className="relative">
+										{/* QR Code Container */}
+										<div className="p-6 bg-white rounded-2xl shadow-lg border-2 border-primary/20">
+											<QRCodeSVG
+												value={qrData.qrCodeUrl}
+												size={256}
+												level="M"
+												includeMargin={true}
+												className="w-full h-full"
+											/>
+										</div>
+										{/* Decorative corner elements */}
+										<div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
+										<div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
+										<div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
+										<div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
+									</div>
+									<div className="space-y-2">
+										<p className="text-sm font-semibold text-foreground">
+											Сканируйте QR-код в приложении
+										</p>
+										<p className="text-xs text-muted-foreground">
+											Откройте приложение аутентификации и отсканируйте этот код
+										</p>
 									</div>
 								</div>
 
-								<div className="space-y-2">
-									<p className="text-sm font-medium">Или введите код вручную:</p>
+								{/* Manual Entry Section */}
+								<div className="pt-4 border-t border-primary/20 space-y-3">
+									<p className="text-sm font-medium text-foreground">
+										Или введите код вручную:
+									</p>
 									<div className="flex items-center gap-2 justify-center">
-										<code className="px-3 py-2 rounded-lg bg-muted font-mono text-sm">
-											{qrData.manualEntryCode}
-										</code>
+										<div className="relative flex-1 max-w-md">
+											<code className="block px-4 py-3 rounded-xl bg-background border-2 border-primary/20 font-mono text-sm font-semibold tracking-wider text-center">
+												{qrData.manualEntryCode}
+											</code>
+										</div>
 										<Button
-											variant="ghost"
+											variant="outline"
 											size="icon"
+											className="h-11 w-11 rounded-xl"
 											onClick={() => handleCopyCode(qrData.manualEntryCode)}
 										>
 											{copiedCode === qrData.manualEntryCode ? (
-												<Check className="w-4 h-4 text-green-600" />
+												<Check className="w-5 h-5 text-green-600" />
 											) : (
-												<Copy className="w-4 h-4" />
+												<Copy className="w-5 h-5" />
 											)}
 										</Button>
 									</div>
+									{copiedCode === qrData.manualEntryCode && (
+										<motion.p
+											initial={{ opacity: 0 }}
+											animate={{ opacity: 1 }}
+											className="text-xs text-green-600 font-medium"
+										>
+											Код скопирован!
+										</motion.p>
+									)}
 								</div>
 							</div>
 
+							{/* Recommended Apps */}
 							<div className="space-y-3">
-								<div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-									<Smartphone className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-									<div className="space-y-1 text-sm">
-										<p className="font-medium text-blue-900 dark:text-blue-100">
+								<div className="flex items-start gap-4 p-5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+									<div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+										<Smartphone className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+									</div>
+									<div className="flex-1 space-y-2">
+										<p className="font-semibold text-sm text-blue-900 dark:text-blue-100">
 											Рекомендуемые приложения:
 										</p>
-										<ul className="text-blue-800 dark:text-blue-200 space-y-1">
-											<li>• Google Authenticator</li>
-											<li>• Microsoft Authenticator</li>
-											<li>• Authy</li>
+										<ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1.5">
+											<li className="flex items-center gap-2">
+												<span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+												Google Authenticator
+											</li>
+											<li className="flex items-center gap-2">
+												<span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+												Microsoft Authenticator
+											</li>
+											<li className="flex items-center gap-2">
+												<span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+												Authy
+											</li>
 										</ul>
 									</div>
 								</div>
 
-								<Button onClick={() => setSetupStep('verify')} className="w-full rounded-xl">
+								<Button
+									onClick={() => setSetupStep('verify')}
+									className="w-full rounded-xl h-12 text-base font-semibold shadow-lg"
+									size="lg"
+								>
 									Продолжить
 								</Button>
 							</div>
@@ -341,7 +395,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 						>
 							<div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
 								<div className="flex items-start gap-3">
-									<AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+									<AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
 									<div className="space-y-1 text-sm">
 										<p className="font-medium text-amber-900 dark:text-amber-100">
 											Важно! Сохраните эти коды
@@ -434,7 +488,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 						<>
 							<div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
 								<div className="flex items-start gap-3">
-									<ShieldCheck className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+									<ShieldCheck className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
 									<div className="space-y-1 text-sm">
 										<p className="font-medium text-green-900 dark:text-green-100">
 											Аккаунт защищён двухфакторной аутентификацией
@@ -491,7 +545,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 										'Резервные коды для восстановления доступа',
 									].map((item) => (
 										<li key={item} className="flex items-start gap-2">
-											<Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+											<Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
 											<span>{item}</span>
 										</li>
 									))}

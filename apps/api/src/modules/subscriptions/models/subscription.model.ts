@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-scalars';
 import {
   SubscriptionPlan,
   SubscriptionStatus,
@@ -57,4 +58,7 @@ export class SubscriptionModel implements Partial<PrismaSubscription> {
 
   @Field()
   updatedAt: Date;
+
+  @Field(() => GraphQLJSON, { nullable: true, description: 'Team with owner and members details' })
+  team?: any;
 }

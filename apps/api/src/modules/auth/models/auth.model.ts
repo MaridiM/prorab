@@ -4,11 +4,17 @@ import { User } from '../../users/models/user.model'
 
 @ObjectType()
 export class AuthPayload {
-	@Field(() => User)
-	user: User
+	@Field(() => User, { nullable: true })
+	user?: User
 
 	@Field({ nullable: true })
 	message?: string
+
+	@Field({ nullable: true })
+	requiresTwoFactor?: boolean
+
+	@Field({ nullable: true })
+	twoFactorToken?: string
 }
 
 @ObjectType()

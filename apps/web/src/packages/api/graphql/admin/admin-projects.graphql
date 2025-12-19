@@ -24,6 +24,35 @@ query AdminProjects($filter: AdminProjectFilterInput, $pagination: PaginationInp
 		}
 		total
 		hasMore
+		stats {
+			active
+			completed
+			archived
+		}
+	}
+}
+
+# Extended query for detailed view with team members
+query AdminProjectDetailed($id: ID!) {
+	adminProject(id: $id) {
+		id
+		name
+		description
+		status
+		budget
+		actualCost
+		startDate
+		endDate
+		completedAt
+		createdAt
+		updatedAt
+		team
+		owner
+		_count {
+			expenses
+			photoReports
+			tasks
+		}
 	}
 }
 

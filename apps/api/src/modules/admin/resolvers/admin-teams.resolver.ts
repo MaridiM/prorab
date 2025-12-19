@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 import { AuthGuard } from '../../../shared/guards/auth.guard'
 import { AdminGuard } from '../../../shared/guards/admin.guard'
@@ -8,20 +8,27 @@ import { CurrentUser } from '../../../shared/decorators/current-user.decorator'
 import type { CurrentUserData } from '../../auth/decorators/current-user.decorator'
 import { AdminTeamsService } from '../services/admin-teams.service'
 import { Team } from '../../teams/models/team.model'
+import { User } from '../../users/models/user.model'
 import {
 	AdminTeamsConnection,
 	AdminTeamDetails,
 	AdminTeamStats,
 	AdminTeamFilters,
+	AdminTeamCounts,
 } from '../models/admin-team.model'
+import { TeamCounts } from '../../teams/models/team.model'
 import { AdminUpdateTeamInput } from '../dto/admin-update-team.input'
 import { PaginationInput } from '../dto/pagination.input'
 import { AdminPermissions } from '../../../shared/constants/admin-permissions'
+import { PrismaService } from '../../../core/prisma/prisma.service'
 
 @Resolver(() => Team)
 @UseGuards(AuthGuard, AdminGuard, PermissionsGuard)
 export class AdminTeamsResolver {
-	constructor(private adminTeamsService: AdminTeamsService) {}
+	constructor(
+		private adminTeamsService: AdminTeamsService,
+		private prisma: PrismaService,
+	) {}
 
 	@Query(() => AdminTeamsConnection, {
 		description: 'Get paginated list of teams with filters (Admin only)',
@@ -99,5 +106,31 @@ export class AdminTeamsResolver {
 		@CurrentUser() currentUser: CurrentUserData,
 	): Promise<boolean> {
 		return this.adminTeamsService.deleteTeam(id, currentUser.id)
+	}
+
+	@ResolveField(() => User, { nullable: true })
+	async owner(@Parent() team: Team): Promise<User | null> {
+		const user = await this.prisma.user.findUnique({
+			where: { id: team.ownerId },
+			select: {
+				id: true,
+				email: true,
+				fullName: true,
+				avatarUrl: true,
+			},
+		})
+		return user as User | null
+	}
+
+	@ResolveField(() => TeamCounts, { nullable: true })
+	async _count(@Parent() team: Team): Promise<TeamCounts | null> {
+		const [membersCount, projectsCount] = await Promise.all([
+			this.prisma.teamMember.count({ where: { teamId: team.id } }),
+			this.prisma.project.count({ where: { teamId: team.id } }),
+		])
+		return {
+			members: membersCount,
+			projects: projectsCount,
+		}
 	}
 }

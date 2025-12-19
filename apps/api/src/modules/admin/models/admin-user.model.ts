@@ -1,27 +1,51 @@
 import { ObjectType, Field, Int, ID, InputType } from '@nestjs/graphql'
+import { IsOptional, IsString, IsBoolean, IsDate, IsEnum } from 'class-validator'
+import { Type } from 'class-transformer'
 import { User } from '../../users/models/user.model'
 import { AdminRole } from './admin-role.model'
 import { Team } from '../../teams/models/team.model'
 import { PageInfo } from './shared/page-info.model'
+import { AdminRoleType } from './admin-role-type.enum'
 
 @InputType()
 export class AdminUserFilters {
 	@Field(() => String, { nullable: true, description: 'Search by email, name, or phone' })
+	@IsOptional()
+	@IsString()
 	search?: string
 
 	@Field(() => Boolean, { nullable: true, description: 'Filter by email verification status' })
+	@IsOptional()
+	@IsBoolean()
 	emailVerified?: boolean
 
+	@Field(() => AdminRoleType, { nullable: true, description: 'Filter by admin role type' })
+	@IsOptional()
+	@IsEnum(AdminRoleType)
+	role?: AdminRoleType
+
 	@Field(() => Date, { nullable: true, description: 'Created after date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	createdAfter?: Date
 
 	@Field(() => Date, { nullable: true, description: 'Created before date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	createdBefore?: Date
 
 	@Field(() => Date, { nullable: true, description: 'Last login after date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	lastLoginAfter?: Date
 
 	@Field(() => Date, { nullable: true, description: 'Last login before date' })
+	@IsOptional()
+	@IsDate()
+	@Type(() => Date)
 	lastLoginBefore?: Date
 }
 

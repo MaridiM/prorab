@@ -10,6 +10,7 @@ import { nanoid } from 'nanoid'
 import { RedisService } from '../../core/redis/redis.service'
 import { MailService } from '../../core/mail/mail.service'
 import { UsersService } from '../users/users.service'
+import { TwoFactorService } from './two-factor.service'
 
 import { LoginInput } from './dto/login.input'
 import { RegisterInput } from './dto/register.input'
@@ -19,6 +20,14 @@ export interface SessionData {
 	userAgent?: string
 	ip?: string
 	createdAt: number
+}
+
+export interface LoginResult {
+	user: any
+	sessionToken?: string
+	refreshToken?: string
+	requiresTwoFactor?: boolean
+	twoFactorToken?: string
 }
 
 @Injectable()
@@ -35,6 +44,7 @@ export class AuthService {
 		private readonly redisService: RedisService,
 		private readonly mailService: MailService,
 		private readonly configService: ConfigService,
+		private readonly twoFactorService: TwoFactorService,
 	) {
 		this.sessionTtl = this.configService.get('auth.sessionTtl')!
 		this.refreshTokenTtl = this.configService.get('auth.refreshTokenTtl')!
@@ -133,7 +143,7 @@ export class AuthService {
 		input: LoginInput,
 		userAgent?: string,
 		ip?: string,
-	): Promise<{ user: any; sessionToken: string; refreshToken: string }> {
+	): Promise<LoginResult> {
 		await this.checkRateLimit('login', ip ?? 'unknown')
 
 		const emailNormalized = this.normalizeEmail(input.email)
@@ -150,9 +160,64 @@ export class AuthService {
 			throw new UnauthorizedException('Неверный email или пароль')
 		}
 
-		// Create session
+		// Check if 2FA is enabled
+		const twoFactorStatus = await this.twoFactorService.getStatus(user.id)
+		if (twoFactorStatus.enabled) {
+			// Generate temporary token for 2FA verification
+			const twoFactorToken = this.generateToken()
+			await this.redisService.set(
+				`2fa_pending:${twoFactorToken}`,
+				JSON.stringify({ userId: user.id, userAgent, ip }),
+				300, // 5 minutes TTL
+			)
+
+			return {
+				user,
+				requiresTwoFactor: true,
+				twoFactorToken,
+			}
+		}
+
+		// Create session (no 2FA required)
 		const { sessionToken, refreshToken } = await this.createSession(
 			user.id,
+			userAgent,
+			ip,
+		)
+
+		return { user, sessionToken, refreshToken }
+	}
+
+	async verifyTwoFactorLogin(
+		twoFactorToken: string,
+		code: string,
+	): Promise<{ user: any; sessionToken: string; refreshToken: string }> {
+		// Get pending 2FA data from Redis
+		const pendingData = await this.redisService.get(`2fa_pending:${twoFactorToken}`)
+		if (!pendingData) {
+			throw new UnauthorizedException('Недействительный или истёкший токен 2FA')
+		}
+
+		const { userId, userAgent, ip } = JSON.parse(pendingData)
+
+		// Verify 2FA code
+		const isValid = await this.twoFactorService.verify2FAToken(userId, code)
+		if (!isValid) {
+			throw new UnauthorizedException('Неверный код двухфакторной аутентификации')
+		}
+
+		// Delete the pending token
+		await this.redisService.del(`2fa_pending:${twoFactorToken}`)
+
+		// Get user data
+		const user = await this.usersService.findById(userId)
+		if (!user) {
+			throw new UnauthorizedException('Пользователь не найден')
+		}
+
+		// Create session
+		const { sessionToken, refreshToken } = await this.createSession(
+			userId,
 			userAgent,
 			ip,
 		)

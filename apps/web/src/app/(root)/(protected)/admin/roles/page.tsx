@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Input } from '@/packages/components/ui/input'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Select,
 	SelectContent,
@@ -51,6 +52,7 @@ import { EditPermissionsDialog } from './edit-permissions-dialog'
 
 export default function AdminRolesPage() {
 	const [search, setSearch] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [roleFilter, setRoleFilter] = useState<string>('all')
 	const [showAssignDialog, setShowAssignDialog] = useState(false)
 	const [selectedRole, setSelectedRole] = useState<any>(null)
@@ -58,10 +60,19 @@ export default function AdminRolesPage() {
 	const [showRevokeConfirm, setShowRevokeConfirm] = useState(false)
 	const [roleToRevoke, setRoleToRevoke] = useState<string | null>(null)
 
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search)
+		}, 500)
+
+		return () => clearTimeout(timer)
+	}, [search])
+
 	const { data, loading, refetch } = useQuery(GetAdminRolesDocument, {
 		variables: {
 			role: roleFilter === 'all' ? null : roleFilter,
-			search: search || null,
+			search: debouncedSearch || null,
 			limit: 100,
 			offset: 0,
 		},
@@ -80,6 +91,10 @@ export default function AdminRolesPage() {
 	})
 
 	const roles = data?.adminRoles || []
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	const handleEditPermissions = (role: any) => {
 		setSelectedRole(role)

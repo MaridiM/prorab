@@ -400,6 +400,10 @@ export const ModelName = {
   PhotoReport: 'PhotoReport',
   ReportPhoto: 'ReportPhoto',
   Task: 'Task',
+  Plan: 'Plan',
+  PlanPrice: 'PlanPrice',
+  PlanFeature: 'PlanFeature',
+  PaymentProvider: 'PaymentProvider',
   Subscription: 'Subscription',
   Payment: 'Payment',
   SupportTicket: 'SupportTicket',
@@ -424,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "team" | "projectPayout" | "workLog" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1612,6 +1616,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Plan: {
+      payload: Prisma.$PlanPayload<ExtArgs>
+      fields: Prisma.PlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        findFirst: {
+          args: Prisma.PlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        findMany: {
+          args: Prisma.PlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>[]
+        }
+        create: {
+          args: Prisma.PlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        createMany: {
+          args: Prisma.PlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>[]
+        }
+        delete: {
+          args: Prisma.PlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        update: {
+          args: Prisma.PlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPayload>
+        }
+        aggregate: {
+          args: Prisma.PlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlan>
+        }
+        groupBy: {
+          args: Prisma.PlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlanPrice: {
+      payload: Prisma.$PlanPricePayload<ExtArgs>
+      fields: Prisma.PlanPriceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlanPriceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlanPriceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        findFirst: {
+          args: Prisma.PlanPriceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlanPriceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        findMany: {
+          args: Prisma.PlanPriceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>[]
+        }
+        create: {
+          args: Prisma.PlanPriceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        createMany: {
+          args: Prisma.PlanPriceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlanPriceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>[]
+        }
+        delete: {
+          args: Prisma.PlanPriceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        update: {
+          args: Prisma.PlanPriceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlanPriceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlanPriceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlanPriceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlanPriceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanPricePayload>
+        }
+        aggregate: {
+          args: Prisma.PlanPriceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlanPrice>
+        }
+        groupBy: {
+          args: Prisma.PlanPriceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanPriceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlanPriceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanPriceCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlanFeature: {
+      payload: Prisma.$PlanFeaturePayload<ExtArgs>
+      fields: Prisma.PlanFeatureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlanFeatureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlanFeatureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        findFirst: {
+          args: Prisma.PlanFeatureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlanFeatureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        findMany: {
+          args: Prisma.PlanFeatureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>[]
+        }
+        create: {
+          args: Prisma.PlanFeatureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        createMany: {
+          args: Prisma.PlanFeatureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlanFeatureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>[]
+        }
+        delete: {
+          args: Prisma.PlanFeatureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        update: {
+          args: Prisma.PlanFeatureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlanFeatureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlanFeatureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlanFeatureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlanFeatureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanFeaturePayload>
+        }
+        aggregate: {
+          args: Prisma.PlanFeatureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlanFeature>
+        }
+        groupBy: {
+          args: Prisma.PlanFeatureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanFeatureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlanFeatureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlanFeatureCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaymentProvider: {
+      payload: Prisma.$PaymentProviderPayload<ExtArgs>
+      fields: Prisma.PaymentProviderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaymentProviderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaymentProviderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        findFirst: {
+          args: Prisma.PaymentProviderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaymentProviderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        findMany: {
+          args: Prisma.PaymentProviderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>[]
+        }
+        create: {
+          args: Prisma.PaymentProviderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        createMany: {
+          args: Prisma.PaymentProviderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaymentProviderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>[]
+        }
+        delete: {
+          args: Prisma.PaymentProviderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        update: {
+          args: Prisma.PaymentProviderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaymentProviderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaymentProviderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaymentProviderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaymentProviderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentProviderPayload>
+        }
+        aggregate: {
+          args: Prisma.PaymentProviderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaymentProvider>
+        }
+        groupBy: {
+          args: Prisma.PaymentProviderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentProviderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaymentProviderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentProviderCountAggregateOutputType> | number
+        }
+      }
+    }
     Subscription: {
       payload: Prisma.$SubscriptionPayload<ExtArgs>
       fields: Prisma.SubscriptionFieldRefs
@@ -2606,10 +2906,71 @@ export const TaskScalarFieldEnum = {
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const PlanScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  description: 'description',
+  maxActiveProjects: 'maxActiveProjects',
+  maxMembers: 'maxMembers',
+  storageGB: 'storageGB',
+  isActive: 'isActive',
+  isPopular: 'isPopular',
+  sortOrder: 'sortOrder',
+  isEarlyBird: 'isEarlyBird',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
+export const PlanPriceScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  currency: 'currency',
+  price: 'price',
+  earlyBirdPrice: 'earlyBirdPrice',
+  billingCycleDays: 'billingCycleDays',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanPriceScalarFieldEnum = (typeof PlanPriceScalarFieldEnum)[keyof typeof PlanPriceScalarFieldEnum]
+
+
+export const PlanFeatureScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  name: 'name',
+  description: 'description',
+  isIncluded: 'isIncluded',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanFeatureScalarFieldEnum = (typeof PlanFeatureScalarFieldEnum)[keyof typeof PlanFeatureScalarFieldEnum]
+
+
+export const PaymentProviderScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  name: 'name',
+  isActive: 'isActive',
+  isPrimary: 'isPrimary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentProviderScalarFieldEnum = (typeof PaymentProviderScalarFieldEnum)[keyof typeof PaymentProviderScalarFieldEnum]
+
+
 export const SubscriptionScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
   plan: 'plan',
+  planId: 'planId',
   status: 'status',
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
@@ -2619,6 +2980,7 @@ export const SubscriptionScalarFieldEnum = {
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
   cancelledAt: 'cancelledAt',
   isEarlyBird: 'isEarlyBird',
+  currency: 'currency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2633,6 +2995,8 @@ export const PaymentScalarFieldEnum = {
   amount: 'amount',
   currency: 'currency',
   status: 'status',
+  providerType: 'providerType',
+  providerPaymentId: 'providerPaymentId',
   yookassaPaymentId: 'yookassaPaymentId',
   paymentMethod: 'paymentMethod',
   description: 'description',
@@ -3018,6 +3382,34 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentProviderType'
+ */
+export type EnumPaymentProviderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProviderType'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentProviderType[]'
+ */
+export type ListEnumPaymentProviderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProviderType[]'>
+    
+
+
+/**
  * Reference to a field of type 'SubscriptionPlan'
  */
 export type EnumSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionPlan'>
@@ -3128,20 +3520,6 @@ export type EnumSettingValueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListEnumSettingValueTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SettingValueType[]'>
     
 
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -3237,6 +3615,10 @@ export type GlobalOmitConfig = {
   photoReport?: Prisma.PhotoReportOmit
   reportPhoto?: Prisma.ReportPhotoOmit
   task?: Prisma.TaskOmit
+  plan?: Prisma.PlanOmit
+  planPrice?: Prisma.PlanPriceOmit
+  planFeature?: Prisma.PlanFeatureOmit
+  paymentProvider?: Prisma.PaymentProviderOmit
   subscription?: Prisma.SubscriptionOmit
   payment?: Prisma.PaymentOmit
   supportTicket?: Prisma.SupportTicketOmit

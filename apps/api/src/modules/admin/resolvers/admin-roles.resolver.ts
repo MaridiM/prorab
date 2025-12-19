@@ -8,12 +8,12 @@ import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { AdminRolesService } from '../services/admin-roles.service';
 import {
   AdminRoleDetail,
-  AdminRoleType,
   AssignAdminRoleInput,
   UpdateAdminPermissionsInput,
   UpdateTwoFactorInput,
   UpdateIpWhitelistInput,
 } from '../models/admin-role-detail.model';
+import { AdminRoleType } from '../models/admin-role-type.enum';
 import { AdminPermissions } from '../../../shared/constants/admin-permissions';
 
 @Resolver(() => AdminRoleDetail)

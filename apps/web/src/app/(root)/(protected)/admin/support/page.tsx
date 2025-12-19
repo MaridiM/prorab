@@ -5,6 +5,7 @@ import { Card } from '@/packages/components/ui/card'
 import { Input } from '@/packages/components/ui/input'
 import { Button } from '@/packages/components/ui/button'
 import { Badge } from '@/packages/components/ui/badge'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Loader2,
 	Search,
@@ -150,6 +151,10 @@ export default function AdminSupportPage() {
 				input: { priority, category: null, status: null },
 			},
 		})
+	}
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
 	}
 
 	return (

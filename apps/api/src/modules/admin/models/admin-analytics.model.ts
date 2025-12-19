@@ -1,6 +1,18 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 
 @ObjectType()
+export class UsersByBusinessRole {
+  @Field(() => Int, { description: 'FOREMAN users' })
+  FOREMAN: number;
+
+  @Field(() => Int, { description: 'WORKER users' })
+  WORKER: number;
+
+  @Field(() => Int, { description: 'Unassigned users' })
+  unassigned: number;
+}
+
+@ObjectType()
 export class DashboardUserStats {
   @Field(() => Int, { description: 'Total number of users' })
   total: number;
@@ -16,6 +28,30 @@ export class DashboardUserStats {
 
   @Field(() => Float, { description: 'Growth rate percentage' })
   growthRate: number;
+
+  @Field(() => UsersByBusinessRole, { description: 'Users by business role' })
+  byBusinessRole: UsersByBusinessRole;
+
+  @Field(() => Int, { description: 'Active users in last week' })
+  activeLastWeek: number;
+
+  @Field(() => Int, { description: 'Active users in last month' })
+  activeLastMonth: number;
+}
+
+@ObjectType()
+export class TopTeamItem {
+  @Field(() => String, { description: 'Team ID' })
+  id: string;
+
+  @Field(() => String, { description: 'Team name' })
+  name: string;
+
+  @Field(() => Int, { description: 'Members count' })
+  membersCount: number;
+
+  @Field(() => String, { description: 'Owner name' })
+  ownerName: string;
 }
 
 @ObjectType()
@@ -31,6 +67,21 @@ export class DashboardTeamStats {
 
   @Field(() => Int, { description: 'New teams this month' })
   newThisMonth: number;
+
+  @Field(() => [TopTeamItem], { description: 'Top teams by member count' })
+  topTeamsByMembers: TopTeamItem[];
+}
+
+@ObjectType()
+export class ProjectsByTeamItem {
+  @Field(() => String, { description: 'Team ID' })
+  teamId: string;
+
+  @Field(() => String, { description: 'Team name' })
+  teamName: string;
+
+  @Field(() => Int, { description: 'Projects count' })
+  projectsCount: number;
 }
 
 @ObjectType()
@@ -46,6 +97,9 @@ export class DashboardProjectStats {
 
   @Field(() => Int, { description: 'Archived projects' })
   archived: number;
+
+  @Field(() => [ProjectsByTeamItem], { description: 'Projects by team' })
+  byTeam: ProjectsByTeamItem[];
 }
 
 @ObjectType()
@@ -79,6 +133,18 @@ export class DashboardSubscriptionStats {
 }
 
 @ObjectType()
+export class TopPayingTeamItem {
+  @Field(() => String, { description: 'Team ID' })
+  teamId: string;
+
+  @Field(() => String, { description: 'Team name' })
+  teamName: string;
+
+  @Field(() => Float, { description: 'Total paid amount' })
+  totalPaid: number;
+}
+
+@ObjectType()
 export class DashboardPaymentStats {
   @Field(() => Int, { description: 'Total payments' })
   total: number;
@@ -94,6 +160,9 @@ export class DashboardPaymentStats {
 
   @Field(() => Float, { description: 'Average payment amount' })
   averagePayment: number;
+
+  @Field(() => [TopPayingTeamItem], { description: 'Top paying teams' })
+  topPayingTeams: TopPayingTeamItem[];
 }
 
 @ObjectType()

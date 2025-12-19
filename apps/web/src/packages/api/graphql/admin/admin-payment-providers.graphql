@@ -1,0 +1,84 @@
+# Admin Payment Providers Management GraphQL Operations
+
+# Query all payment providers
+query GetAdminPaymentProviders($baseUrl: String) {
+  adminPaymentProviders(baseUrl: $baseUrl) {
+    id
+    type
+    name
+    isActive
+    isPrimary
+    webhookUrl
+    configStatus {
+      hasShopId
+      hasSecretKey
+      hasWebhookSecret
+      hasPublishableKey
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Query single payment provider by type
+query GetAdminPaymentProvider($type: PaymentProviderType!, $baseUrl: String) {
+  adminPaymentProvider(type: $type, baseUrl: $baseUrl) {
+    id
+    type
+    name
+    isActive
+    isPrimary
+    webhookUrl
+    configStatus {
+      hasShopId
+      hasSecretKey
+      hasWebhookSecret
+      hasPublishableKey
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Query provider configuration (safe viewing)
+query GetProviderConfig($type: PaymentProviderType!) {
+  adminPaymentProviderConfig(type: $type) {
+    shopId
+    hasSecretKey
+    hasWebhookSecret
+    hasPublishableKey
+  }
+}
+
+# Update payment provider
+mutation UpdateAdminPaymentProvider($type: PaymentProviderType!, $input: UpdatePaymentProviderInput!) {
+  adminUpdatePaymentProvider(type: $type, input: $input) {
+    id
+    type
+    name
+    isActive
+    isPrimary
+    webhookUrl
+    configStatus {
+      hasShopId
+      hasSecretKey
+      hasWebhookSecret
+      hasPublishableKey
+    }
+    updatedAt
+  }
+}
+
+# Test payment provider connection
+mutation TestPaymentProvider($type: PaymentProviderType!) {
+  adminTestPaymentProvider(type: $type) {
+    success
+    message
+    error
+  }
+}
+
+# Clear provider cache
+mutation ClearProviderCache($type: PaymentProviderType) {
+  adminClearPaymentProviderCache(type: $type)
+}

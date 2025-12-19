@@ -48,12 +48,15 @@ export class PaymentsService {
     // Create payment record
     const payment = await this.prisma.payment.create({
       data: {
-        subscriptionId: subscription.id,
+        subscription: {
+          connect: { id: subscription.id },
+        },
         teamId: subscription.teamId,
         amount,
         currency: 'RUB',
         status: PaymentStatus.PENDING,
-        yookassaPaymentId: 'pending', // Will be updated after YooKassa creates payment
+        providerPaymentId: 'pending', // Will be updated after provider creates payment
+        yookassaPaymentId: 'pending', // DEPRECATED: Will be updated after YooKassa creates payment
         description: `Оплата подписки "${limits.name}" за месяц`,
       },
     });

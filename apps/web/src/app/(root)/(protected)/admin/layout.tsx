@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@apollo/client/react'
 import { SystemSettingsDocument } from '@/packages/api/graphql'
@@ -11,23 +11,34 @@ import { Button } from '@/packages/components/ui/button'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
+	const [mounted, setMounted] = useState(false)
 
 	// Check if user has admin access by trying to fetch admin data
+	// Only run query after component is mounted (client-side only)
 	const { data, loading, error } = useQuery(SystemSettingsDocument, {
 		variables: { category: null },
 		fetchPolicy: 'network-only',
 		errorPolicy: 'all',
+		skip: !mounted, // Skip query until component is mounted on client
 	})
 
 	useEffect(() => {
-		if (!loading && error) {
+		// Ensure this only runs on client
+		if (typeof window !== 'undefined') {
+			setMounted(true)
+		}
+	}, [])
+
+	useEffect(() => {
+		// Only handle redirect after mount and query completion
+		if (mounted && !loading && error) {
 			// If query fails, user doesn't have admin access
 			router.push('/dashboard')
 		}
-	}, [loading, error, router])
+	}, [mounted, loading, error, router])
 
-	// Show loading state while checking permissions
-	if (loading) {
+	// Show loading state during initial mount or while checking permissions
+	if (!mounted || loading) {
 		return (
 			<div className="flex h-screen bg-background w-full">
 				<div className="w-64 border-r border-border/30 bg-card/50 flex-shrink-0">

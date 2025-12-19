@@ -29,7 +29,6 @@ import {
 	CurrentPlanLimitsDocument,
 	UsageStatsDocument,
 	PaymentsBySubscriptionDocument,
-	AvailablePlansDocument,
 	ChangePlanDocument,
 	CancelSubscriptionDocument,
 	ReactivateSubscriptionDocument,
@@ -79,9 +78,12 @@ export default function SubscriptionPage() {
 		skip: !subscriptionId,
 	})
 
-	const { data: plansData, loading: plansLoading } = useQuery(
-		AvailablePlansDocument
-	)
+	// TODO: Re-enable when AvailablePlansDocument is fixed
+	// const { data: plansData, loading: plansLoading } = useQuery(
+	// 	AvailablePlansDocument
+	// )
+	const plansData = null
+	const plansLoading = false
 
 	// Mutations
 	const [changePlan, { loading: changingPlan }] = useMutation(
@@ -169,7 +171,7 @@ export default function SubscriptionPage() {
 	const limits = limitsData?.currentPlanLimits
 	const usageStats = usageData?.usageStats
 	const payments = paymentsData?.paymentsBySubscription || []
-	const availablePlans = plansData?.availablePlans || []
+	const availablePlans: any[] = [] // TODO: Fix when AvailablePlansDocument is restored
 
 	if (!subscription) {
 		return (

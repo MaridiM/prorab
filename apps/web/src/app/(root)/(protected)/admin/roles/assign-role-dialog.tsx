@@ -120,6 +120,7 @@ export function AssignRoleDialog({ open, onOpenChange, onSuccess }: AssignRoleDi
 			filters: searchQuery
 				? {
 						search: searchQuery,
+						role: null,
 						emailVerified: null,
 						createdAfter: null,
 						createdBefore: null,

@@ -8,18 +8,36 @@ fragment DashboardStatsFields on DashboardStats {
     admins
     newThisMonth
     growthRate
+    byBusinessRole {
+      FOREMAN
+      WORKER
+      unassigned
+    }
+    activeLastWeek
+    activeLastMonth
   }
   teams {
     total
     withActiveSubscription
     averageMembers
     newThisMonth
+    topTeamsByMembers {
+      id
+      name
+      membersCount
+      ownerName
+    }
   }
   projects {
     total
     active
     completed
     archived
+    byTeam {
+      teamId
+      teamName
+      projectsCount
+    }
   }
   subscriptions {
     total
@@ -38,6 +56,11 @@ fragment DashboardStatsFields on DashboardStats {
     totalRevenue
     thisMonthRevenue
     averagePayment
+    topPayingTeams {
+      teamId
+      teamName
+      totalPaid
+    }
   }
   storage {
     totalUsedBytes

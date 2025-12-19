@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	GetStorageSettingsDocument,
 	GetStorageStatsDocument,
@@ -99,7 +100,7 @@ export default function StorageSettingsPage() {
 		r2PublicUrl: '',
 	})
 
-	// Initialize form data
+	// Initialize form data - MUST be before any conditional returns
 	useEffect(() => {
 		if (settingsData?.storageSettings) {
 			const s = settingsData.storageSettings
@@ -118,6 +119,11 @@ export default function StorageSettingsPage() {
 			})
 		}
 	}, [settingsData])
+
+	// Early returns AFTER all hooks
+	if (settingsLoading && !settingsData) {
+		return <AdminPageSkeleton />
+	}
 
 	const handleSave = async () => {
 		await updateSettings({
@@ -163,6 +169,10 @@ export default function StorageSettingsPage() {
 		setShowSecrets((prev) => ({ ...prev, [key]: !prev[key] }))
 	}
 
+	const settings = settingsData?.storageSettings
+	const stats = statsData?.storageStats
+
+	// Early return for loading state (after all hooks)
 	if (settingsLoading) {
 		return (
 			<div className="container mx-auto py-6 space-y-6">
@@ -171,9 +181,6 @@ export default function StorageSettingsPage() {
 			</div>
 		)
 	}
-
-	const settings = settingsData?.storageSettings
-	const stats = statsData?.storageStats
 
 	return (
 		<div className="container mx-auto py-6 space-y-6">

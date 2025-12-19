@@ -11,6 +11,8 @@ import { StorageService } from '../../core/storage/storage.service';
 import { LogoType } from './models/logo-type.enum';
 import { BusinessRole } from '../users/models/user.model';
 import { TeamRole } from './models/team-member.model';
+import { TeamStats } from './models/team-stats.model';
+import { ProjectStatus } from '@prisma/generated/client';
 
 /**
  * Сервис для работы с командами/бригадами
@@ -965,6 +967,78 @@ export class TeamsService extends CoreService {
     });
 
     return updated;
+  }
+
+  // ==================== TEAM STATISTICS ====================
+
+  /**
+   * Get aggregated team statistics
+   * Includes expenses, budget, profit, members count, and work hours
+   */
+  async getTeamStats(teamId: string, userId: string): Promise<TeamStats> {
+    // 1. Verify team access
+    const membership = await this.prisma.teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId,
+          userId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('Вы не являетесь участником этой команды');
+    }
+
+    // 2. Get active and completed projects
+    const projects = await this.prisma.project.findMany({
+      where: {
+        teamId,
+        status: {
+          in: [ProjectStatus.ACTIVE, ProjectStatus.COMPLETED],
+        },
+      },
+      select: {
+        id: true,
+        budget: true,
+      },
+    });
+
+    const projectIds = projects.map((p) => p.id);
+
+    // 3. Calculate total budget
+    const totalBudget = projects.reduce(
+      (sum, p) => sum + Number(p.budget || 0),
+      0
+    );
+
+    // 4. Aggregate expenses using Prisma (performant)
+    const expensesAgg = await this.prisma.expense.aggregate({
+      where: { projectId: { in: projectIds } },
+      _sum: { amount: true },
+    });
+
+    // 5. Count team members
+    const membersCount = await this.prisma.teamMember.count({
+      where: { teamId },
+    });
+
+    // 6. Aggregate work hours
+    const hoursAgg = await this.prisma.workLog.aggregate({
+      where: { projectId: { in: projectIds } },
+      _sum: { hours: true },
+    });
+
+    const totalExpenses = Number(expensesAgg._sum.amount || 0);
+
+    return {
+      totalExpenses,
+      totalBudget,
+      profit: totalBudget - totalExpenses,
+      activeProjectsCount: projects.length,
+      membersCount,
+      totalHours: Number(hoursAgg._sum.hours || 0),
+    };
   }
 
   // ==================== EXPORT ====================

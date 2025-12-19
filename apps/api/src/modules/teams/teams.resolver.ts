@@ -12,6 +12,7 @@ import { TeamMember } from './models/team-member.model';
 import { InviteCode } from './models/invite-code.model';
 import { PersonnelAnalytics } from './models/personnel-analytics.model';
 import { TeamMemberSalaryHistory } from './models/salary-history.model';
+import { TeamStats } from './models/team-stats.model';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 
@@ -77,6 +78,20 @@ export class TeamsResolver {
     @CurrentUser() user: { id: string },
   ): Promise<TeamMember[]> {
     return this.teamsService.getTeamMembers(teamId, user.id);
+  }
+
+  /**
+   * Query: получение агрегированной статистики команды
+   */
+  @Query(() => TeamStats, {
+    description: 'Получение агрегированной статистики команды (расходы, бюджет, участники)',
+  })
+  @UseGuards(AuthGuard)
+  async teamStats(
+    @Args('teamId', { type: () => ID }) teamId: string,
+    @CurrentUser() user: { id: string },
+  ): Promise<TeamStats> {
+    return this.teamsService.getTeamStats(teamId, user.id);
   }
 
   /**

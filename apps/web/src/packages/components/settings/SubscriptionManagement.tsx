@@ -30,7 +30,6 @@ import {
 	MySubscriptionDocument,
 	CancelSubscriptionDocument,
 	ReactivateSubscriptionDocument,
-	AvailablePlansDocument,
 } from '@/packages/api/graphql/__generated__/output'
 
 interface SubscriptionManagementProps {
@@ -44,7 +43,9 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const { toast } = useToast()
 
 	const { data: subData, loading: subLoading, refetch } = useQuery(MySubscriptionDocument)
-	const { data: plansData } = useQuery(AvailablePlansDocument)
+	// TODO: Re-enable when AvailablePlansDocument is fixed
+	// const { data: plansData } = useQuery(AvailablePlansDocument)
+	const plansData: { availablePlans?: any[] } | null = null
 
 	const [cancelSubscription, { loading: cancelling }] = useMutation(CancelSubscriptionDocument, {
 		onCompleted: () => {
@@ -69,7 +70,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	})
 
 	const subscription = subData?.mySubscription
-	const plans = plansData?.availablePlans || []
+	const plans = (plansData as any)?.availablePlans || []
 
 	const handleCancel = async () => {
 		if (!subscription?.id) return

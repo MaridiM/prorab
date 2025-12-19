@@ -8,12 +8,12 @@ import { PrismaService } from '../../../core/prisma/prisma.service';
 import { AdminActionLogService } from './admin-action-log.service';
 import {
   AdminRoleDetail,
-  AdminRoleType,
   AssignAdminRoleInput,
   UpdateAdminPermissionsInput,
   UpdateTwoFactorInput,
   UpdateIpWhitelistInput,
 } from '../models/admin-role-detail.model';
+import { AdminRoleType } from '../models/admin-role-type.enum';
 import { AdminPermissions, RolePermissions } from '../../../shared/constants/admin-permissions';
 
 @Injectable()

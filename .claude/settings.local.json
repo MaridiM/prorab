@@ -167,7 +167,17 @@
       "Bash(npm run codegen)",
       "Bash(timeout 45 npm run start:dev:*)",
       "Bash(where:*)",
-      "Bash(timeout 50 npm run start:dev:*)"
+      "Bash(timeout 50 npm run start:dev:*)",
+      "Bash(npx prisma db push)",
+      "Bash(pnpm run build:*)",
+      "Bash(node check-users.js:*)",
+      "Bash(pnpm ts-node:*)",
+      "Bash(npx prisma db seed:*)",
+      "Bash(pnpm tsx:*)",
+      "Bash(pnpm exec tsx:*)",
+      "Bash(type \"G:\\\\Projects\\\\prorab\\\\v-1\\\\apps\\\\web\\\\src\\\\app\\\\\\(root\\)\\\\\\(protected\\)\\\\admin\\\\payment-providers\\\\page.tsx\")",
+      "Bash(head:*)",
+      "Bash(pnpm run codegen:*)"
     ],
     "deny": [],
     "ask": []

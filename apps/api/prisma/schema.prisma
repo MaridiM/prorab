@@ -478,10 +478,108 @@ enum TaskPriority {
 
 // ==================== SUBSCRIPTIONS & PAYMENTS ====================
 
+// Subscription Plan - Database-stored tariff plans (replaces hardcoded plans)
+// Note: Model is named "Plan" to avoid conflict with "SubscriptionPlan" enum
+model Plan {
+  id          String  @id @default(uuid())
+  slug        String  @unique @db.VarChar(50) // "lite", "foreman", "brigade"
+  name        String  @db.VarChar(100) // "Лайт", "Прораб", "Бригада"
+  description String? @db.Text
+
+  // Plan Limits
+  maxActiveProjects Int?  // null = unlimited (for BRIGADE plan)
+  maxMembers        Int   @map("max_members")
+  storageGB         Float @map("storage_gb") // Storage limit in GB
+
+  // Metadata
+  isActive    Boolean @default(true) @map("is_active") // Can be purchased
+  isPopular   Boolean @default(false) @map("is_popular") // Display "Most Popular" badge
+  sortOrder   Int     @default(0) @map("sort_order") // Display order
+  isEarlyBird Boolean @default(false) @map("is_early_bird") // Early bird pricing active
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  prices        PlanPrice[]
+  features      PlanFeature[]
+  subscriptions Subscription[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("subscription_plans")
+}
+
+// Plan Price - Multi-currency pricing for each plan
+model PlanPrice {
+  id       String @id @default(uuid())
+  planId   String @map("plan_id")
+  currency String @db.VarChar(3) // "RUB", "USD", "EUR"
+
+  price          Decimal @db.Decimal(10, 2) // Regular price
+  earlyBirdPrice Decimal @db.Decimal(10, 2) @map("early_bird_price") // Discounted price for early adopters
+
+  billingCycleDays Int @default(30) @map("billing_cycle_days") // 30 for monthly, 365 for yearly
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, currency, billingCycleDays])
+  @@index([planId])
+  @@index([currency])
+  @@map("plan_prices")
+}
+
+// Plan Feature - Features included in each plan
+model PlanFeature {
+  id          String  @id @default(uuid())
+  planId      String  @map("plan_id")
+  name        String  @db.VarChar(200) // "Базовый функционал", "Расчёты зарплаты"
+  description String? @db.Text // Detailed description (optional)
+  isIncluded  Boolean @default(true) @map("is_included") // true = included, false = not included
+  sortOrder   Int     @default(0) @map("sort_order") // Display order
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([planId, sortOrder])
+  @@map("plan_features")
+}
+
+// Payment Provider - Configuration for payment gateways (Yookassa, Stripe)
+model PaymentProvider {
+  id   String              @id @default(uuid())
+  type PaymentProviderType @unique
+  name String              @db.VarChar(100) // "Yookassa", "Stripe"
+
+  isActive  Boolean @default(false) @map("is_active") // Can be used for payments
+  isPrimary Boolean @default(false) @map("is_primary") // Default provider for new payments
+
+  // Configuration stored in SystemSettings (encrypted)
+  // Keys: payment.yookassa.shop_id, payment.yookassa.secret_key, etc.
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_providers")
+}
+
+enum PaymentProviderType {
+  YOOKASSA
+  STRIPE
+}
+
 model Subscription {
   id                     String             @id @default(uuid())
   teamId                 String             @unique @map("team_id")
-  plan                   SubscriptionPlan
+  plan                   SubscriptionPlan   // DEPRECATED: Will be replaced by planId
+  planId                 String?            @map("plan_id") // NEW: Foreign key to SubscriptionPlan
   status                 SubscriptionStatus @default(TRIALING)
   currentPeriodStart     DateTime           @map("current_period_start")
   currentPeriodEnd       DateTime           @map("current_period_end")
@@ -491,15 +589,18 @@ model Subscription {
   cancelAtPeriodEnd      Boolean            @default(false) @map("cancel_at_period_end")
   cancelledAt            DateTime?          @map("cancelled_at")
   isEarlyBird            Boolean            @default(false) @map("is_early_bird")
+  currency               String             @default("RUB") @db.VarChar(3) // NEW: Subscription currency
   createdAt              DateTime           @default(now()) @map("created_at")
   updatedAt              DateTime           @updatedAt @map("updated_at")
 
-  team     Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  payments Payment[]
+  team          Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  planRef       Plan?                @relation(fields: [planId], references: [id]) // NEW: Relation to Plan model
+  payments      Payment[]
 
   @@index([teamId])
   @@index([status])
   @@index([plan])
+  @@index([planId]) // NEW: Index for planId
   @@index([currentPeriodEnd])
   @@map("subscriptions")
 }
@@ -519,26 +620,34 @@ enum SubscriptionStatus {
 }
 
 model Payment {
-  id                String        @id @default(uuid())
-  subscriptionId    String        @map("subscription_id")
-  teamId            String        @map("team_id")
-  amount            Decimal       @db.Decimal(12, 2)
-  currency          String        @default("RUB") @db.VarChar(3)
-  status            PaymentStatus @default(PENDING)
-  yookassaPaymentId String        @unique @map("yookassa_payment_id")
-  paymentMethod     String?       @map("payment_method")
-  description       String?       @db.Text
-  failureReason     String?       @map("failure_reason") @db.Text
-  paidAt            DateTime?     @map("paid_at")
-  refundedAt        DateTime?     @map("refunded_at")
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
+  id             String        @id @default(uuid())
+  subscriptionId String        @map("subscription_id")
+  teamId         String        @map("team_id")
+  amount         Decimal       @db.Decimal(12, 2)
+  currency       String        @default("RUB") @db.VarChar(3)
+  status         PaymentStatus @default(PENDING)
+
+  // Multi-provider support
+  providerType      PaymentProviderType @default(YOOKASSA) @map("provider_type") // NEW: Which provider was used
+  providerPaymentId String              @unique @map("provider_payment_id") // NEW: Provider's payment ID (Yookassa or Stripe)
+
+  // DEPRECATED fields (kept for backward compatibility)
+  yookassaPaymentId String? @unique @map("yookassa_payment_id") // DEPRECATED: Use providerPaymentId instead
+
+  paymentMethod String?  @map("payment_method")
+  description   String?  @db.Text
+  failureReason String?  @map("failure_reason") @db.Text
+  paidAt        DateTime? @map("paid_at")
+  refundedAt    DateTime? @map("refunded_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
   @@index([teamId])
   @@index([status])
+  @@index([providerType]) // NEW: Index for provider type
   @@index([createdAt])
   @@map("payments")
 }

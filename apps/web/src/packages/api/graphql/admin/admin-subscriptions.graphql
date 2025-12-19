@@ -12,6 +12,8 @@ fragment AdminSubscriptionFields on Subscription {
   trialEndsAt
   createdAt
   updatedAt
+  # Team data with owner and members info (JSON field populated by backend)
+  team
 }
 
 # Queries

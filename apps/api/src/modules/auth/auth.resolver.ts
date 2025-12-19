@@ -88,10 +88,36 @@ export class AuthResolver {
 		@UserAgent() userAgent?: string,
 		@ClientIp() ip?: string,
 	): Promise<AuthPayload> {
-		const { user, sessionToken, refreshToken } = await this.authService.login(
+		const result = await this.authService.login(
 			input,
 			userAgent,
 			ip,
+		)
+
+		// If 2FA is required, return the token without setting cookies
+		if (result.requiresTwoFactor) {
+			return {
+				requiresTwoFactor: true,
+				twoFactorToken: result.twoFactorToken,
+			}
+		}
+
+		// No 2FA - set cookies and return user
+		this.setAuthCookies(ctx.res, result.sessionToken!, result.refreshToken!)
+
+		return { user: result.user }
+	}
+
+	@Public()
+	@Mutation(() => AuthPayload)
+	async verifyTwoFactorLogin(
+		@Args('twoFactorToken') twoFactorToken: string,
+		@Args('code') code: string,
+		@Context() ctx: { res: Response },
+	): Promise<AuthPayload> {
+		const { user, sessionToken, refreshToken } = await this.authService.verifyTwoFactorLogin(
+			twoFactorToken,
+			code,
 		)
 
 		this.setAuthCookies(ctx.res, sessionToken, refreshToken)

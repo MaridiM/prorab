@@ -59,6 +59,17 @@ query TeamMembers($teamId: ID!) {
   }
 }
 
+query TeamStats($teamId: ID!) {
+  teamStats(teamId: $teamId) {
+    totalExpenses
+    totalBudget
+    profit
+    activeProjectsCount
+    membersCount
+    totalHours
+  }
+}
+
 # ==================== MUTATIONS ====================
 
 mutation CompleteOnboarding(

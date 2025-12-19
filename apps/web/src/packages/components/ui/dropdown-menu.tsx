@@ -1,12 +1,14 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/packages/utils"
 
 interface DropdownMenuContextValue {
   open: boolean
   setOpen: (open: boolean) => void
+  triggerRef: React.MutableRefObject<HTMLElement | null>
 }
 
 const DropdownMenuContext = React.createContext<DropdownMenuContextValue | null>(null)
@@ -27,6 +29,7 @@ interface DropdownMenuProps {
 
 function DropdownMenu({ children, open: controlledOpen, onOpenChange }: DropdownMenuProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+  const triggerRef = React.useRef<HTMLElement | null>(null)
   
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen
   const setOpen = React.useCallback((value: boolean) => {
@@ -37,7 +40,7 @@ function DropdownMenu({ children, open: controlledOpen, onOpenChange }: Dropdown
   }, [controlledOpen, onOpenChange])
 
   return (
-    <DropdownMenuContext.Provider value={{ open, setOpen }}>
+    <DropdownMenuContext.Provider value={{ open, setOpen, triggerRef }}>
       <div className="relative inline-block">{children}</div>
     </DropdownMenuContext.Provider>
   )
@@ -49,7 +52,7 @@ interface DropdownMenuTriggerProps extends React.ButtonHTMLAttributes<HTMLButton
 
 const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTriggerProps>(
   ({ className, onClick, children, asChild, ...props }, ref) => {
-    const { open, setOpen } = useDropdownMenu()
+    const { open, setOpen, triggerRef } = useDropdownMenu()
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       setOpen(!open)
@@ -59,13 +62,27 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
     if (asChild && React.isValidElement(children)) {
       return React.cloneElement(children as React.ReactElement<any>, {
         onClick: handleClick,
-        ref,
+        ref: (node: HTMLElement) => {
+          triggerRef.current = node
+          if (typeof ref === 'function') {
+            ref(node as HTMLButtonElement)
+          } else if (ref) {
+            (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node as HTMLButtonElement
+          }
+        },
       })
     }
 
     return (
       <button
-        ref={ref}
+        ref={(node) => {
+          triggerRef.current = node
+          if (typeof ref === 'function') {
+            ref(node)
+          } else if (ref) {
+            (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node
+          }
+        }}
         type="button"
         className={className}
         onClick={handleClick}
@@ -89,8 +106,65 @@ interface DropdownMenuContentProps extends Omit<
 
 const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContentProps>(
   ({ className, align = "end", sideOffset = 4, children, ...props }, ref) => {
-    const { open, setOpen } = useDropdownMenu()
+    const { open, setOpen, triggerRef } = useDropdownMenu()
     const contentRef = React.useRef<HTMLDivElement>(null)
+    const [position, setPosition] = React.useState({ top: 0, left: 0 })
+
+    // Calculate position based on trigger
+    React.useEffect(() => {
+      if (!open || !triggerRef.current) return
+
+      const updatePosition = () => {
+        if (triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect()
+
+          let left = rect.left
+          const top = rect.bottom + sideOffset
+
+          // Adjust for alignment
+          if (align === "end") {
+            left = rect.right
+          } else if (align === "center") {
+            left = rect.left + rect.width / 2
+          }
+
+          setPosition({ top, left })
+        }
+      }
+
+      // Small delay to ensure DOM is ready
+      const timeoutId = setTimeout(updatePosition, 0)
+      return () => clearTimeout(timeoutId)
+    }, [open, align, sideOffset, triggerRef])
+
+    // Update position on scroll/resize
+    React.useEffect(() => {
+      if (!open || !triggerRef.current) return
+
+      const updatePosition = () => {
+        if (triggerRef.current) {
+          const rect = triggerRef.current.getBoundingClientRect()
+
+          let left = rect.left
+          const top = rect.bottom + sideOffset
+
+          if (align === "end") {
+            left = rect.right
+          } else if (align === "center") {
+            left = rect.left + rect.width / 2
+          }
+
+          setPosition({ top, left })
+        }
+      }
+
+      window.addEventListener("scroll", updatePosition, true)
+      window.addEventListener("resize", updatePosition)
+      return () => {
+        window.removeEventListener("scroll", updatePosition, true)
+        window.removeEventListener("resize", updatePosition)
+      }
+    }, [open, align, sideOffset, triggerRef])
 
     // Close on click outside
     React.useEffect(() => {
@@ -98,9 +172,7 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
 
       const handleClickOutside = (event: MouseEvent) => {
         if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
-          // Check if click is on trigger
-          const trigger = contentRef.current.parentElement?.querySelector('[data-dropdown-trigger]')
-          if (trigger && trigger.contains(event.target as Node)) return
+          if (triggerRef.current && triggerRef.current.contains(event.target as Node)) return
           setOpen(false)
         }
       }
@@ -120,12 +192,12 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
     }, [open, setOpen])
 
     const alignClasses = {
-      start: "left-0",
-      center: "left-1/2 -translate-x-1/2",
-      end: "right-0",
+      start: "",
+      center: "-translate-x-1/2",
+      end: "-translate-x-full",
     }
 
-    return (
+    const content = (
       <AnimatePresence>
         {open && (
           <motion.div
@@ -135,11 +207,14 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              "absolute z-50 min-w-[180px] overflow-hidden rounded-xl border border-border/50 bg-card p-1.5 shadow-lg",
+              "fixed z-[9999] min-w-[180px] overflow-hidden rounded-xl border border-border/50 bg-card p-1.5 shadow-lg",
               alignClasses[align],
               className
             )}
-            style={{ top: `calc(100% + ${sideOffset}px)` }}
+            style={{ 
+              top: `${position.top}px`, 
+              left: `${position.left}px` 
+            }}
             {...props}
           >
             {children}
@@ -147,6 +222,13 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
         )}
       </AnimatePresence>
     )
+
+    // Use portal to render outside the DOM hierarchy
+    if (typeof window !== "undefined") {
+      return createPortal(content, document.body)
+    }
+
+    return content
   }
 )
 DropdownMenuContent.displayName = "DropdownMenuContent"
@@ -225,6 +307,7 @@ export {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 }
+
 
 
 

@@ -8,18 +8,36 @@ export interface DashboardStats {
     admins: number;
     newThisMonth: number;
     growthRate: number;
+    byBusinessRole: {
+      FOREMAN: number;
+      WORKER: number;
+      unassigned: number;
+    };
+    activeLastWeek: number;
+    activeLastMonth: number;
   };
   teams: {
     total: number;
     withActiveSubscription: number;
     averageMembers: number;
     newThisMonth: number;
+    topTeamsByMembers: Array<{
+      id: string;
+      name: string;
+      membersCount: number;
+      ownerName: string;
+    }>;
   };
   projects: {
     total: number;
     active: number;
     completed: number;
     archived: number;
+    byTeam: Array<{
+      teamId: string;
+      teamName: string;
+      projectsCount: number;
+    }>;
   };
   subscriptions: {
     total: number;
@@ -38,6 +56,11 @@ export interface DashboardStats {
     totalRevenue: number;
     thisMonthRevenue: number;
     averagePayment: number;
+    topPayingTeams: Array<{
+      teamId: string;
+      teamName: string;
+      totalPaid: number;
+    }>;
   };
   storage: {
     totalUsedBytes: number;
@@ -81,6 +104,8 @@ export class AdminAnalyticsService {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Get all data in parallel
     const [
@@ -89,14 +114,20 @@ export class AdminAnalyticsService {
       usersLastMonth,
       verifiedUsers,
       adminUsers,
+      usersByRole,
+      activeUsersLastWeek,
+      activeUsersLastMonth,
       teams,
       teamsThisMonth,
       teamsWithMembers,
+      topTeamsByMembers,
       projects,
+      projectsByTeam,
       subscriptions,
       payments,
       succeededPayments,
       paymentsThisMonth,
+      paymentsByTeam,
       storageStats,
     ] = await Promise.all([
       // Users
@@ -109,6 +140,15 @@ export class AdminAnalyticsService {
       }),
       this.prisma.user.count({ where: { emailVerified: true } }),
       this.prisma.user.count({ where: { adminRole: { isNot: null } } }),
+      // Users by business role
+      this.prisma.user.groupBy({
+        by: ['businessRole'],
+        _count: true,
+      }),
+      // Active users (updated profile/activity last week)
+      this.prisma.user.count({ where: { updatedAt: { gte: oneWeekAgo } } }),
+      // Active users (updated profile/activity last month)
+      this.prisma.user.count({ where: { updatedAt: { gte: oneMonthAgo } } }),
 
       // Teams
       this.prisma.team.count(),
@@ -122,11 +162,45 @@ export class AdminAnalyticsService {
           },
         },
       }),
+      // Top teams by members
+      this.prisma.team.findMany({
+        select: {
+          id: true,
+          name: true,
+          owner: {
+            select: {
+              fullName: true,
+            },
+          },
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+        },
+        orderBy: {
+          members: {
+            _count: 'desc',
+          },
+        },
+        take: 10,
+      }),
 
       // Projects
       this.prisma.project.groupBy({
         by: ['status'],
         _count: true,
+      }),
+      // Projects by team
+      this.prisma.project.groupBy({
+        by: ['teamId'],
+        _count: true,
+        orderBy: {
+          _count: {
+            teamId: 'desc',
+          },
+        },
+        take: 10,
       }),
 
       // Subscriptions
@@ -148,6 +222,20 @@ export class AdminAnalyticsService {
         },
         select: { amount: true },
       }),
+      // Top paying teams
+      this.prisma.payment.groupBy({
+        by: ['subscriptionId'],
+        where: { status: 'SUCCEEDED' },
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          _sum: {
+            amount: 'desc',
+          },
+        },
+        take: 10,
+      }),
 
       // Storage
       this.prisma.team.aggregate({
@@ -161,9 +249,29 @@ export class AdminAnalyticsService {
     const growthRate =
       usersLastMonth > 0 ? ((usersThisMonth - usersLastMonth) / usersLastMonth) * 100 : 0;
 
+    // Process users by business role
+    const userRoleStats = {
+      FOREMAN: 0,
+      WORKER: 0,
+      unassigned: 0,
+    };
+    usersByRole.forEach((r) => {
+      if (r.businessRole === 'FOREMAN') userRoleStats.FOREMAN = r._count;
+      else if (r.businessRole === 'WORKER') userRoleStats.WORKER = r._count;
+      else userRoleStats.unassigned += r._count;
+    });
+
     // Calculate average members per team
     const totalMembers = teamsWithMembers.reduce((sum, team) => sum + team._count.members, 0);
     const averageMembers = teams > 0 ? totalMembers / teams : 0;
+
+    // Process top teams
+    const topTeams = topTeamsByMembers.map(team => ({
+      id: team.id,
+      name: team.name,
+      membersCount: team._count.members,
+      ownerName: team.owner?.fullName || 'Unknown',
+    }));
 
     // Process projects
     const projectStats = {
@@ -178,6 +286,21 @@ export class AdminAnalyticsService {
       if (p.status === 'COMPLETED') projectStats.completed = p._count;
       if (p.status === 'ARCHIVED') projectStats.archived = p._count;
     });
+
+    // Process projects by team
+    const projectsByTeamData = await Promise.all(
+      projectsByTeam.slice(0, 10).map(async (pt) => {
+        const team = await this.prisma.team.findUnique({
+          where: { id: pt.teamId },
+          select: { id: true, name: true },
+        });
+        return {
+          teamId: pt.teamId,
+          teamName: team?.name || 'Unknown',
+          projectsCount: pt._count,
+        };
+      })
+    );
 
     // Process subscriptions
     const subscriptionStats = {
@@ -207,6 +330,25 @@ export class AdminAnalyticsService {
     const averagePayment =
       succeededPayments.length > 0 ? totalRevenue / succeededPayments.length : 0;
 
+    // Process top paying teams
+    const topPayingTeamsData = await Promise.all(
+      paymentsByTeam.slice(0, 10).map(async (pt) => {
+        const subscription = await this.prisma.subscription.findUnique({
+          where: { id: pt.subscriptionId },
+          select: {
+            team: {
+              select: { id: true, name: true },
+            },
+          },
+        });
+        return {
+          teamId: subscription?.team?.id || 'unknown',
+          teamName: subscription?.team?.name || 'Unknown',
+          totalPaid: Math.round(Number(pt._sum.amount || 0) * 100) / 100,
+        };
+      })
+    );
+
     // Calculate storage
     const totalUsedBytes = Number(storageStats._sum.storageUsedBytes || 0);
     const totalUsedGB = totalUsedBytes / (1024 * 1024 * 1024);
@@ -219,14 +361,21 @@ export class AdminAnalyticsService {
         admins: adminUsers,
         newThisMonth: usersThisMonth,
         growthRate: Math.round(growthRate * 100) / 100,
+        byBusinessRole: userRoleStats,
+        activeLastWeek: activeUsersLastWeek,
+        activeLastMonth: activeUsersLastMonth,
       },
       teams: {
         total: teams,
         withActiveSubscription: subscriptionStats.active,
         averageMembers: Math.round(averageMembers * 100) / 100,
         newThisMonth: teamsThisMonth,
+        topTeamsByMembers: topTeams,
       },
-      projects: projectStats,
+      projects: {
+        ...projectStats,
+        byTeam: projectsByTeamData,
+      },
       subscriptions: subscriptionStats,
       payments: {
         total: payments,
@@ -234,6 +383,7 @@ export class AdminAnalyticsService {
         totalRevenue: Math.round(totalRevenue * 100) / 100,
         thisMonthRevenue: Math.round(thisMonthRevenue * 100) / 100,
         averagePayment: Math.round(averagePayment * 100) / 100,
+        topPayingTeams: topPayingTeamsData,
       },
       storage: {
         totalUsedBytes,

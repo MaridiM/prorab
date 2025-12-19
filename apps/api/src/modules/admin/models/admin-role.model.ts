@@ -1,10 +1,5 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { AdminRoleType } from '@prisma/generated/client';
-
-registerEnumType(AdminRoleType, {
-  name: 'AdminRoleType',
-  description: 'Admin role types',
-});
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { AdminRoleType } from './admin-role-type.enum';
 
 @ObjectType()
 export class AdminRole {

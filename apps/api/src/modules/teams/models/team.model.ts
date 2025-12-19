@@ -1,5 +1,15 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, Int } from '@nestjs/graphql';
 import { LogoType } from './logo-type.enum';
+import { User } from '../../users/models/user.model';
+
+@ObjectType()
+export class TeamCounts {
+  @Field(() => Int, { description: 'Number of team members' })
+  members: number;
+
+  @Field(() => Int, { description: 'Number of projects' })
+  projects: number;
+}
 
 /**
  * GraphQL модель команды/бригады
@@ -32,4 +42,11 @@ export class Team {
 
   @Field(() => Date, { description: 'Дата последнего обновления' })
   updatedAt: Date;
+
+  // Optional fields resolved by field resolvers (for admin queries)
+  @Field(() => User, { nullable: true, description: 'Team owner (resolved field)' })
+  owner?: User;
+
+  @Field(() => TeamCounts, { nullable: true, description: 'Team counts (resolved field)' })
+  _count?: TeamCounts;
 }

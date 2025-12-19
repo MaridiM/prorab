@@ -36,10 +36,16 @@ export const AdminPermissions = {
   SUBSCRIPTIONS_CANCEL: 'subscriptions:cancel',
   SUBSCRIPTIONS_REFUND: 'subscriptions:refund',
 
+  // ==================== PLAN MANAGEMENT ====================
+  PLANS_VIEW: 'plans:view',
+  PLANS_MANAGE: 'plans:manage', // Create, update, archive, delete plans
+
   // ==================== PAYMENT MANAGEMENT ====================
   PAYMENTS_VIEW: 'payments:view',
   PAYMENTS_REFUND: 'payments:refund',
   PAYMENTS_EXPORT: 'payments:export',
+  PAYMENT_PROVIDERS_VIEW: 'payment_providers:view',
+  PAYMENT_PROVIDERS_MANAGE: 'payment_providers:manage', // Configure payment providers
 
   // ==================== SYSTEM SETTINGS ====================
   SETTINGS_VIEW: 'settings:view',
@@ -121,9 +127,15 @@ export const RolePermissions = {
     AdminPermissions.SUBSCRIPTIONS_UPDATE,
     AdminPermissions.SUBSCRIPTIONS_CANCEL,
 
+    // Plan Management
+    AdminPermissions.PLANS_VIEW,
+    AdminPermissions.PLANS_MANAGE,
+
     // Payment Management
     AdminPermissions.PAYMENTS_VIEW,
     AdminPermissions.PAYMENTS_EXPORT,
+    AdminPermissions.PAYMENT_PROVIDERS_VIEW,
+    AdminPermissions.PAYMENT_PROVIDERS_MANAGE,
 
     // System Settings (view only)
     AdminPermissions.SETTINGS_VIEW,

@@ -63,12 +63,6 @@ query GetSubscription($id: String!) {
   }
 }
 
-query AvailablePlans {
-  availablePlans {
-    ...PlanLimitsFields
-  }
-}
-
 query CurrentPlanLimits($teamId: String!) {
   currentPlanLimits(teamId: $teamId) {
     ...PlanLimitsFields

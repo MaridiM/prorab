@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Input } from '@/packages/components/ui/input'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Select,
 	SelectContent,
@@ -55,21 +56,48 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'success' | 'warni
 export default function AdminSubscriptionsPage() {
 	const [page, setPage] = useState(1)
 	const [search, setSearch] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [planFilter, setPlanFilter] = useState<string>('')
 	const [statusFilter, setStatusFilter] = useState<string>('')
 	const [selectedSubscription, setSelectedSubscription] = useState<any>(null)
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
-	const { data, loading, refetch } = useQuery(AdminSubscriptionsDocument, {
-		variables: {
-			filters: (search || planFilter || statusFilter) ? {
-				search: search || null,
-				plan: planFilter || null,
-				status: statusFilter || null,
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search)
+			setPage(1) // Reset to first page when search changes
+		}, 500)
+
+		return () => clearTimeout(timer)
+	}, [search])
+
+	// Reset page when filters change
+	useEffect(() => {
+		setPage(1)
+	}, [planFilter, statusFilter])
+
+	// Build filters with useMemo
+	const filters = useMemo(() => {
+		const plan = planFilter && planFilter !== 'all' ? planFilter : null
+		const status = statusFilter && statusFilter !== 'all' ? statusFilter : null
+
+		if (debouncedSearch || plan || status) {
+			return {
+				search: debouncedSearch || null,
+				plan,
+				status,
 				expiringBefore: null,
 				createdAfter: null,
 				createdBefore: null,
-			} : null,
+			}
+		}
+		return null
+	}, [debouncedSearch, planFilter, statusFilter])
+
+	const { data, loading, refetch } = useQuery(AdminSubscriptionsDocument, {
+		variables: {
+			filters,
 			pagination: {
 				page,
 				limit: 20,
@@ -100,6 +128,10 @@ export default function AdminSubscriptionsPage() {
 	const subscriptions = data?.adminSubscriptions?.nodes || []
 	const pageInfo = data?.adminSubscriptions?.pageInfo
 	const totalCount = data?.adminSubscriptions?.totalCount || 0
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	const handleCancelSubscription = (subscriptionId: string) => {
 		const message = 'Cancel subscription? This will take effect at the end of the current period.'

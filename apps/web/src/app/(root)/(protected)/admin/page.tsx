@@ -1,6 +1,7 @@
 'use client'
 
 import { Card } from '@/packages/components/ui/card'
+import { AdminDashboardSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import { Users, Building2, FolderKanban, DollarSign, TrendingUp, AlertTriangle, Loader2 } from 'lucide-react'
 import { useQuery } from '@apollo/client/react'
 import {
@@ -57,6 +58,10 @@ export default function AdminDashboardPage() {
 	const stats = statsData?.adminDashboardStats
 	const activities = activityData?.adminRecentActivity || []
 	const health = healthData?.adminSystemHealth
+
+	if (statsLoading && !statsData) {
+		return <AdminDashboardSkeleton />
+	}
 
 	const getActionColor = (action: string) => {
 		switch (action.toLowerCase()) {

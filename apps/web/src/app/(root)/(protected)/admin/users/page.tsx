@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Input } from '@/packages/components/ui/input'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Select,
 	SelectContent,
@@ -47,21 +48,49 @@ import {
 export default function AdminUsersPage() {
 	const [page, setPage] = useState(1)
 	const [search, setSearch] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [roleFilter, setRoleFilter] = useState<string>('')
 	const [verifiedFilter, setVerifiedFilter] = useState<string>('')
 	const [selectedUser, setSelectedUser] = useState<any>(null)
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search)
+			setPage(1) // Reset to first page when search changes
+		}, 500) // 500ms debounce delay
+
+		return () => clearTimeout(timer)
+	}, [search])
+
+	// Reset page when filters change
+	useEffect(() => {
+		setPage(1)
+	}, [roleFilter, verifiedFilter])
+
+	// Build filters object dynamically - only include non-null values
+	const filters = useMemo(() => {
+		const filterObj: any = {}
+		if (debouncedSearch) filterObj.search = debouncedSearch
+		if (verifiedFilter === 'true') filterObj.emailVerified = true
+		if (verifiedFilter === 'false') filterObj.emailVerified = false
+		if (roleFilter && roleFilter !== 'all') {
+			if (roleFilter === 'USER') {
+				// For regular users, we need to filter by null adminRole
+				// This will be handled on the backend
+				filterObj.role = 'USER'
+			} else {
+				filterObj.role = roleFilter
+			}
+		}
+		// Return null if no filters, otherwise return object with only defined values
+		return Object.keys(filterObj).length > 0 ? filterObj : null
+	}, [debouncedSearch, verifiedFilter, roleFilter])
+
 	const { data, loading, refetch } = useQuery(AdminUsersDocument, {
 		variables: {
-			filters: (search || verifiedFilter) ? {
-				search: search || null,
-				emailVerified: verifiedFilter === 'true' ? true : verifiedFilter === 'false' ? false : null,
-				createdAfter: null,
-				createdBefore: null,
-				lastLoginAfter: null,
-				lastLoginBefore: null,
-			} : null,
+			filters,
 			pagination: {
 				page,
 				limit: 20,
@@ -92,6 +121,10 @@ export default function AdminUsersPage() {
 	const users = data?.adminUsers?.nodes || []
 	const pageInfo = data?.adminUsers?.pageInfo
 	const totalCount = data?.adminUsers?.totalCount || 0
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	const handleVerifyUser = (userId: string) => {
 		verifyUser({ variables: { id: userId } })
@@ -138,12 +171,15 @@ export default function AdminUsersPage() {
 					</Select>
 					<Select value={roleFilter} onValueChange={setRoleFilter}>
 						<SelectTrigger className="w-full md:w-[180px]">
-							<SelectValue placeholder="Role" />
+							<SelectValue placeholder="All Roles" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">All Roles</SelectItem>
-							<SelectItem value="ADMIN">Admin</SelectItem>
 							<SelectItem value="USER">User</SelectItem>
+							<SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+							<SelectItem value="ADMIN">Admin</SelectItem>
+							<SelectItem value="MODERATOR">Moderator</SelectItem>
+							<SelectItem value="SUPPORT">Support</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -161,6 +197,7 @@ export default function AdminUsersPage() {
 									<TableRow>
 										<TableHead>User</TableHead>
 										<TableHead>Email</TableHead>
+										<TableHead>Role</TableHead>
 										<TableHead>Status</TableHead>
 										<TableHead>Telegram</TableHead>
 										<TableHead>Joined</TableHead>
@@ -170,7 +207,7 @@ export default function AdminUsersPage() {
 								<TableBody>
 									{users.length === 0 ? (
 										<TableRow>
-											<TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+											<TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
 												No users found
 											</TableCell>
 										</TableRow>
@@ -180,28 +217,40 @@ export default function AdminUsersPage() {
 												<TableCell>
 													<div className="flex items-center gap-3">
 														<div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-															{user.photoUrl ? (
+															{user.avatarUrl ? (
 																<img
-																	src={user.photoUrl}
-																	alt={user.name || 'User'}
-																	className="h-10 w-10 rounded-full"
+																	src={user.avatarUrl}
+																	alt={user.fullName || 'User'}
+																	className="h-10 w-10 rounded-full object-cover"
 																/>
 															) : (
 																<span className="text-sm font-medium">
-																	{(user.name || user.email)[0].toUpperCase()}
+																	{(user.fullName || user.email)[0].toUpperCase()}
 																</span>
 															)}
 														</div>
 														<div>
-															<p className="font-medium">{user.name || 'Anonymous'}</p>
+															<p className="font-medium">{user.fullName || 'Anonymous'}</p>
 															<p className="text-xs text-muted-foreground">{user.id.slice(0, 8)}</p>
 														</div>
 													</div>
 												</TableCell>
 												<TableCell>{user.email}</TableCell>
 												<TableCell>
+													{user.adminRole ? (
+														<Badge variant="destructive" className="w-fit">
+															<Shield className="h-3 w-3 mr-1" />
+															{user.adminRole.role}
+														</Badge>
+													) : (
+														<Badge variant="secondary" className="w-fit">
+															User
+														</Badge>
+													)}
+												</TableCell>
+												<TableCell>
 													<div className="flex flex-col gap-1">
-														{user.verified ? (
+														{user.emailVerified ? (
 															<Badge variant="default" className="w-fit">
 																<UserCheck className="h-3 w-3 mr-1" />
 																Verified
@@ -212,16 +261,10 @@ export default function AdminUsersPage() {
 																Unverified
 															</Badge>
 														)}
-														{user.emailVerified && (
-															<Badge variant="secondary" className="w-fit">
-																<Mail className="h-3 w-3 mr-1" />
-																Email OK
-															</Badge>
-														)}
 													</div>
 												</TableCell>
 												<TableCell>
-													{user.telegramId ? (
+													{user.telegramChatId ? (
 														<Badge variant="secondary">Connected</Badge>
 													) : (
 														<span className="text-muted-foreground">-</span>
@@ -242,10 +285,10 @@ export default function AdminUsersPage() {
 															<DropdownMenuItem onClick={() => handleViewDetails(user)}>
 																View Details
 															</DropdownMenuItem>
-															{!user.verified && (
+															{!user.emailVerified && (
 																<DropdownMenuItem onClick={() => handleVerifyUser(user.id)}>
 																	<Shield className="h-4 w-4 mr-2" />
-																	Verify User
+																	Verify Email
 																</DropdownMenuItem>
 															)}
 															<DropdownMenuSeparator />
@@ -294,62 +337,78 @@ export default function AdminUsersPage() {
 			</Card>
 
 			<Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-				<DialogContent className="max-w-2xl">
+				<DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>User Details</DialogTitle>
 						<DialogDescription>Detailed information about the user</DialogDescription>
 					</DialogHeader>
 					{selectedUser && (
-						<div className="space-y-4">
+						<div className="space-y-6">
 							<div className="flex items-center gap-4">
 								<div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-									{selectedUser.photoUrl ? (
+									{selectedUser.avatarUrl ? (
 										<img
-											src={selectedUser.photoUrl}
-											alt={selectedUser.name || 'User'}
-											className="h-20 w-20 rounded-full"
+											src={selectedUser.avatarUrl}
+											alt={selectedUser.fullName || 'User'}
+											className="h-20 w-20 rounded-full object-cover"
 										/>
 									) : (
 										<span className="text-2xl font-medium">
-											{(selectedUser.name || selectedUser.email)[0].toUpperCase()}
+											{(selectedUser.fullName || selectedUser.email)[0].toUpperCase()}
 										</span>
 									)}
 								</div>
-								<div>
-									<h3 className="text-xl font-semibold">{selectedUser.name || 'Anonymous'}</h3>
+								<div className="flex-1">
+									<h3 className="text-xl font-semibold">{selectedUser.fullName || 'Anonymous'}</h3>
 									<p className="text-muted-foreground">{selectedUser.email}</p>
+									{selectedUser.adminRole && (
+										<Badge variant="destructive" className="mt-2">
+											<Shield className="h-3 w-3 mr-1" />
+											Admin - {selectedUser.adminRole.role}
+										</Badge>
+									)}
 								</div>
 							</div>
 
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<p className="text-sm font-medium text-muted-foreground">User ID</p>
-									<p className="mt-1">{selectedUser.id}</p>
+									<p className="mt-1 text-sm font-mono">{selectedUser.id}</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium text-muted-foreground">Verified</p>
+									<p className="text-sm font-medium text-muted-foreground">Phone</p>
+									<p className="mt-1">{selectedUser.phone || '-'}</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">Email Status</p>
 									<p className="mt-1">
-										{selectedUser.verified ? (
-											<Badge variant="default">Yes</Badge>
+										{selectedUser.emailVerified ? (
+											<Badge variant="default">
+												<Mail className="h-3 w-3 mr-1" />
+												Verified
+											</Badge>
 										) : (
-											<Badge variant="secondary">No</Badge>
+											<Badge variant="secondary">
+												<Mail className="h-3 w-3 mr-1" />
+												Unverified
+											</Badge>
 										)}
 									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium text-muted-foreground">Email Verified</p>
+									<p className="text-sm font-medium text-muted-foreground">Business Role</p>
 									<p className="mt-1">
-										{selectedUser.emailVerified ? (
-											<Badge variant="default">Yes</Badge>
+										{selectedUser.businessRole ? (
+											<Badge variant="outline">{selectedUser.businessRole}</Badge>
 										) : (
-											<Badge variant="secondary">No</Badge>
+											<span className="text-muted-foreground">Not assigned</span>
 										)}
 									</p>
 								</div>
 								<div>
 									<p className="text-sm font-medium text-muted-foreground">Telegram</p>
 									<p className="mt-1">
-										{selectedUser.telegramId ? (
+										{selectedUser.telegramChatId ? (
 											<Badge variant="secondary">Connected</Badge>
 										) : (
 											<span className="text-muted-foreground">Not connected</span>
@@ -360,7 +419,49 @@ export default function AdminUsersPage() {
 									<p className="text-sm font-medium text-muted-foreground">Joined</p>
 									<p className="mt-1">{new Date(selectedUser.createdAt).toLocaleString()}</p>
 								</div>
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">Last Updated</p>
+									<p className="mt-1">{new Date(selectedUser.updatedAt).toLocaleString()}</p>
+								</div>
+								{selectedUser.hasCompletedOnboarding !== undefined && (
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Onboarding</p>
+										<p className="mt-1">
+											{selectedUser.hasCompletedOnboarding ? (
+												<Badge variant="default">Completed</Badge>
+											) : (
+												<Badge variant="secondary">Pending</Badge>
+											)}
+										</p>
+									</div>
+								)}
 							</div>
+
+							{selectedUser.adminRole && selectedUser.adminRole.permissions && (
+								<div>
+									<p className="text-sm font-medium text-muted-foreground mb-2">Admin Permissions</p>
+									<div className="flex flex-wrap gap-2">
+										{selectedUser.adminRole.permissions.map((perm: string) => (
+											<Badge key={perm} variant="outline" className="text-xs">
+												{perm}
+											</Badge>
+										))}
+									</div>
+								</div>
+							)}
+
+							{(selectedUser._count?.ownedTeams > 0 || selectedUser._count?.teamMemberships > 0) && (
+								<div className="grid grid-cols-2 gap-4 pt-4 border-t">
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Owned Teams</p>
+										<p className="mt-1 text-2xl font-bold">{selectedUser._count?.ownedTeams || 0}</p>
+									</div>
+									<div>
+										<p className="text-sm font-medium text-muted-foreground">Team Memberships</p>
+										<p className="mt-1 text-2xl font-bold">{selectedUser._count?.teamMemberships || 0}</p>
+									</div>
+								</div>
+							)}
 						</div>
 					)}
 				</DialogContent>

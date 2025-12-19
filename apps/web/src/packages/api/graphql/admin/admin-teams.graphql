@@ -4,6 +4,7 @@
 fragment AdminTeamFields on Team {
   id
   name
+  logoUrl
   ownerId
   createdAt
   updatedAt

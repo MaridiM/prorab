@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql'
-import { UseGuards, UnauthorizedException } from '@nestjs/common'
+import { UseGuards, UsePipes, UnauthorizedException } from '@nestjs/common'
 import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal'
+import { ValidationPipe } from '@nestjs/common'
 
 import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
@@ -79,6 +80,13 @@ export class UsersResolver {
 		description: 'Загрузка аватара пользователя',
 	})
 	@UseGuards(AuthGuard)
+	@UsePipes(
+		new ValidationPipe({
+			transform: false, // Disable transformation for file uploads
+			whitelist: false,
+			forbidNonWhitelisted: false,
+		}),
+	)
 	async uploadAvatar(
 		@CurrentUser() currentUser: CurrentUserData,
 		@Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,

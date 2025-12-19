@@ -63,7 +63,8 @@ export class AdminProjectsService {
       }
     }
 
-    const [projects, total] = await Promise.all([
+    // Get statistics from all projects (without filters)
+    const [projects, total, stats] = await Promise.all([
       this.prisma.project.findMany({
         where,
         skip,
@@ -74,6 +75,36 @@ export class AdminProjectsService {
             select: {
               id: true,
               name: true,
+              owner: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  phone: true,
+                  avatarUrl: true,
+                  businessRole: true,
+                },
+              },
+              members: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      email: true,
+                      phone: true,
+                      avatarUrl: true,
+                      businessRole: true,
+                    },
+                  },
+                },
+              },
+              _count: {
+                select: {
+                  members: true,
+                  projects: true,
+                },
+              },
             },
           },
           _count: {
@@ -86,30 +117,31 @@ export class AdminProjectsService {
         },
       }),
       this.prisma.project.count({ where }),
+      // Get statistics from all projects (without filters)
+      this.prisma.project.groupBy({
+        by: ['status'],
+        _count: true,
+      }),
     ]);
 
-    // Получаем owner через team
-    const projectsWithOwner = await Promise.all(
-      projects.map(async (project) => {
-        const team = await this.prisma.team.findUnique({
-          where: { id: project.teamId },
-          include: {
-            owner: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-              },
-            },
-          },
-        });
+    // Calculate statistics (statuses are stored in uppercase: ACTIVE, COMPLETED, ARCHIVED)
+    const projectStats = {
+      active: 0,
+      completed: 0,
+      archived: 0,
+    };
+    stats.forEach((stat) => {
+      const status = stat.status.toUpperCase();
+      if (status === 'ACTIVE') projectStats.active = stat._count;
+      else if (status === 'COMPLETED') projectStats.completed = stat._count;
+      else if (status === 'ARCHIVED') projectStats.archived = stat._count;
+    });
 
-        return {
-          ...project,
-          owner: team?.owner,
-        };
-      }),
-    );
+    // Форматируем данные - owner уже включен в team
+    const projectsWithOwner = projects.map(project => ({
+      ...project,
+      owner: project.team?.owner || null,
+    }));
 
     // Convert Decimal to number for GraphQL
     const formattedProjects = projectsWithOwner.map(project => ({
@@ -126,6 +158,7 @@ export class AdminProjectsService {
       projects: formattedProjects,
       total,
       hasMore: skip + projects.length < total,
+      stats: projectStats,
     };
   }
 

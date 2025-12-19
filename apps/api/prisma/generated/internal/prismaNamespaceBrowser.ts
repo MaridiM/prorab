@@ -67,6 +67,10 @@ export const ModelName = {
   PhotoReport: 'PhotoReport',
   ReportPhoto: 'ReportPhoto',
   Task: 'Task',
+  Plan: 'Plan',
+  PlanPrice: 'PlanPrice',
+  PlanFeature: 'PlanFeature',
+  PaymentProvider: 'PaymentProvider',
   Subscription: 'Subscription',
   Payment: 'Payment',
   SupportTicket: 'SupportTicket',
@@ -383,10 +387,71 @@ export const TaskScalarFieldEnum = {
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const PlanScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  description: 'description',
+  maxActiveProjects: 'maxActiveProjects',
+  maxMembers: 'maxMembers',
+  storageGB: 'storageGB',
+  isActive: 'isActive',
+  isPopular: 'isPopular',
+  sortOrder: 'sortOrder',
+  isEarlyBird: 'isEarlyBird',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+
+
+export const PlanPriceScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  currency: 'currency',
+  price: 'price',
+  earlyBirdPrice: 'earlyBirdPrice',
+  billingCycleDays: 'billingCycleDays',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanPriceScalarFieldEnum = (typeof PlanPriceScalarFieldEnum)[keyof typeof PlanPriceScalarFieldEnum]
+
+
+export const PlanFeatureScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  name: 'name',
+  description: 'description',
+  isIncluded: 'isIncluded',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanFeatureScalarFieldEnum = (typeof PlanFeatureScalarFieldEnum)[keyof typeof PlanFeatureScalarFieldEnum]
+
+
+export const PaymentProviderScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  name: 'name',
+  isActive: 'isActive',
+  isPrimary: 'isPrimary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentProviderScalarFieldEnum = (typeof PaymentProviderScalarFieldEnum)[keyof typeof PaymentProviderScalarFieldEnum]
+
+
 export const SubscriptionScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
   plan: 'plan',
+  planId: 'planId',
   status: 'status',
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
@@ -396,6 +461,7 @@ export const SubscriptionScalarFieldEnum = {
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
   cancelledAt: 'cancelledAt',
   isEarlyBird: 'isEarlyBird',
+  currency: 'currency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -410,6 +476,8 @@ export const PaymentScalarFieldEnum = {
   amount: 'amount',
   currency: 'currency',
   status: 'status',
+  providerType: 'providerType',
+  providerPaymentId: 'providerPaymentId',
   yookassaPaymentId: 'yookassaPaymentId',
   paymentMethod: 'paymentMethod',
   description: 'description',

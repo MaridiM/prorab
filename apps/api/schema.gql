@@ -70,12 +70,48 @@ type AdminActionStatistics {
   totalActions: Int!
 }
 
+"""Input for creating a new plan"""
+input AdminCreatePlanInput {
+  """Description of the plan"""
+  description: String
+
+  """Features included in the plan"""
+  features: [AdminPlanFeatureInput!]!
+
+  """Whether this plan is marked as popular"""
+  isPopular: Boolean = false
+
+  """Maximum active projects allowed (null = unlimited)"""
+  maxActiveProjects: Int
+
+  """Maximum team members allowed"""
+  maxMembers: Int!
+
+  """Display name of the plan"""
+  name: String!
+
+  """Prices in different currencies (at least one required)"""
+  prices: [AdminPlanPriceInput!]!
+
+  """Unique slug for the plan (e.g., "lite", "foreman")"""
+  slug: String!
+
+  """Sort order for display"""
+  sortOrder: Int = 0
+
+  """Storage limit in GB"""
+  storageGB: Float!
+}
+
 type AdminPayment {
   amount: Float!
   createdAt: DateTime!
   currency: String!
   id: ID!
   status: String!
+
+  """Subscription with team and owner details"""
+  subscription: JSON
   subscriptionId: String!
   updatedAt: DateTime!
   yookassaPaymentId: String
@@ -101,6 +137,30 @@ input AdminPaymentFilters {
   status: String
 }
 
+"""Payment provider"""
+type AdminPaymentProviderModel {
+  """Configuration status"""
+  configStatus: PaymentProviderConfigStatus
+  createdAt: DateTime!
+  id: ID!
+
+  """Whether the provider is currently active"""
+  isActive: Boolean!
+
+  """Whether this is the primary provider"""
+  isPrimary: Boolean!
+
+  """Display name of the provider"""
+  name: String!
+
+  """Provider type (YOOKASSA, STRIPE)"""
+  type: PaymentProviderType!
+  updatedAt: DateTime!
+
+  """Webhook URL for this provider"""
+  webhookUrl: String
+}
+
 type AdminPaymentsConnection {
   """List of payments"""
   nodes: [AdminPayment!]!
@@ -109,6 +169,146 @@ type AdminPaymentsConnection {
   pageInfo: PageInfo!
 
   """Total count of payments"""
+  totalCount: Int!
+}
+
+"""Input for creating a new plan feature"""
+input AdminPlanFeatureInput {
+  """Feature description"""
+  description: String
+
+  """Whether this feature is included"""
+  isIncluded: Boolean = true
+
+  """Feature name"""
+  name: String!
+
+  """Sort order for display"""
+  sortOrder: Int
+}
+
+"""Plan feature"""
+type AdminPlanFeatureModel {
+  """Feature description"""
+  description: String
+  id: ID!
+
+  """Whether this feature is included"""
+  isIncluded: Boolean!
+
+  """Feature name"""
+  name: String!
+
+  """Plan ID this feature belongs to"""
+  planId: String!
+
+  """Sort order for display"""
+  sortOrder: Int!
+}
+
+"""Filters for querying plans"""
+input AdminPlanFilters {
+  """Filter prices by currency (RUB, USD, EUR)"""
+  currency: String
+
+  """Filter by active status"""
+  isActive: Boolean
+
+  """Search by name, slug, or description"""
+  search: String
+}
+
+"""Subscription plan"""
+type AdminPlanModel {
+  createdAt: DateTime!
+
+  """Description of the plan"""
+  description: String
+
+  """Features included in the plan"""
+  features: [AdminPlanFeatureModel!]!
+  id: ID!
+
+  """Whether the plan is currently active"""
+  isActive: Boolean!
+
+  """Whether early bird pricing is available"""
+  isEarlyBird: Boolean!
+
+  """Whether this plan is marked as popular"""
+  isPopular: Boolean!
+
+  """Maximum active projects allowed (null = unlimited)"""
+  maxActiveProjects: Int
+
+  """Maximum team members allowed"""
+  maxMembers: Int!
+
+  """Display name of the plan"""
+  name: String!
+
+  """Prices in different currencies"""
+  prices: [AdminPlanPriceModel!]!
+
+  """Unique slug for the plan (e.g., "lite", "foreman")"""
+  slug: String!
+
+  """Sort order for display"""
+  sortOrder: Int!
+
+  """Storage limit in GB"""
+  storageGB: Float!
+
+  """Number of subscriptions using this plan"""
+  subscriptionsCount: Int
+  updatedAt: DateTime!
+}
+
+"""Input for creating a new plan price"""
+input AdminPlanPriceInput {
+  """Billing cycle in days"""
+  billingCycleDays: Int = 30
+
+  """Currency code (RUB, USD, EUR)"""
+  currency: String!
+
+  """Early bird price (discounted)"""
+  earlyBirdPrice: Float!
+
+  """Regular price"""
+  price: Float!
+}
+
+"""Plan price in a specific currency"""
+type AdminPlanPriceModel {
+  """Billing cycle in days (default: 30)"""
+  billingCycleDays: Int!
+  createdAt: DateTime!
+
+  """Currency code (RUB, USD, EUR)"""
+  currency: String!
+
+  """Early bird price (discounted)"""
+  earlyBirdPrice: Float!
+  id: ID!
+
+  """Plan ID this price belongs to"""
+  planId: String!
+
+  """Regular price"""
+  price: Float!
+  updatedAt: DateTime!
+}
+
+"""Paginated list of plans"""
+type AdminPlansConnection {
+  """List of plans"""
+  nodes: [AdminPlanModel!]!
+
+  """Pagination information"""
+  pageInfo: PageInfo!
+
+  """Total count of plans"""
   totalCount: Int!
 }
 
@@ -138,9 +338,16 @@ input AdminProjectFilterInput {
   teamId: String
 }
 
+type AdminProjectStats {
+  active: Int!
+  archived: Int!
+  completed: Int!
+}
+
 type AdminProjectsResult {
   hasMore: Boolean!
   projects: [AdminProject!]!
+  stats: AdminProjectStats
   total: Int!
 }
 
@@ -156,7 +363,7 @@ type AdminRoleDetail {
   userId: String!
 }
 
-"""Admin role types with different permission levels"""
+"""Admin role types"""
 enum AdminRoleType {
   ADMIN
   MODERATOR
@@ -338,6 +545,42 @@ type AdminTeamsConnection {
   totalCount: Int!
 }
 
+"""Input for updating an existing plan"""
+input AdminUpdatePlanInput {
+  """Description of the plan"""
+  description: String
+
+  """Update all features (replaces existing)"""
+  features: [AdminPlanFeatureInput!]
+
+  """Whether the plan is active"""
+  isActive: Boolean
+
+  """Whether this plan is marked as popular"""
+  isPopular: Boolean
+
+  """Maximum active projects allowed"""
+  maxActiveProjects: Int
+
+  """Maximum team members allowed"""
+  maxMembers: Int
+
+  """Display name of the plan"""
+  name: String
+
+  """Update all prices (replaces existing)"""
+  prices: [AdminPlanPriceInput!]
+
+  """Unique slug for the plan"""
+  slug: String
+
+  """Sort order for display"""
+  sortOrder: Int
+
+  """Storage limit in GB"""
+  storageGB: Float
+}
+
 input AdminUpdateSupportTicketInput {
   category: String
   priority: SupportTicketPriority
@@ -410,6 +653,9 @@ input AdminUserFilters {
   """Last login before date"""
   lastLoginBefore: DateTime
 
+  """Filter by admin role type"""
+  role: AdminRoleType
+
   """Search by email, name, or phone"""
   search: String
 }
@@ -435,7 +681,9 @@ input AssignAdminRoleInput {
 
 type AuthPayload {
   message: String
-  user: User!
+  requiresTwoFactor: Boolean
+  twoFactorToken: String
+  user: User
 }
 
 type BackupCodesResponse {
@@ -666,6 +914,9 @@ type DashboardPaymentStats {
   """Revenue this month"""
   thisMonthRevenue: Float!
 
+  """Top paying teams"""
+  topPayingTeams: [TopPayingTeamItem!]!
+
   """Total payments"""
   total: Int!
 
@@ -679,6 +930,9 @@ type DashboardProjectStats {
 
   """Archived projects"""
   archived: Int!
+
+  """Projects by team"""
+  byTeam: [ProjectsByTeamItem!]!
 
   """Completed projects"""
   completed: Int!
@@ -753,6 +1007,9 @@ type DashboardTeamStats {
   """New teams this month"""
   newThisMonth: Int!
 
+  """Top teams by member count"""
+  topTeamsByMembers: [TopTeamItem!]!
+
   """Total number of teams"""
   total: Int!
 
@@ -761,8 +1018,17 @@ type DashboardTeamStats {
 }
 
 type DashboardUserStats {
+  """Active users in last month"""
+  activeLastMonth: Int!
+
+  """Active users in last week"""
+  activeLastWeek: Int!
+
   """Number of admin users"""
   admins: Int!
+
+  """Users by business role"""
+  byBusinessRole: UsersByBusinessRole!
 
   """Growth rate percentage"""
   growthRate: Float!
@@ -944,6 +1210,12 @@ type Mutation {
   """Добавить фото к фотоотчёту"""
   addPhotoToReport(input: AddPhotoInput!): ReportPhoto!
 
+  """Activate a plan (set isActive = true) - Admin only"""
+  adminActivatePlan(id: String!): AdminPlanModel!
+
+  """Archive a plan (set isActive = false) - Admin only"""
+  adminArchivePlan(id: String!): AdminPlanModel!
+
   """Archive project (admin only)"""
   adminArchiveProject(projectId: ID!): AdminProject!
 
@@ -953,8 +1225,20 @@ type Mutation {
   """Change team subscription plan (Admin only)"""
   adminChangeTeamPlan(planType: String!, teamId: String!): Team!
 
+  """Clear payment provider cache (force re-initialization) - Admin only"""
+  adminClearPaymentProviderCache(
+    """Specific provider to clear (or null for all)"""
+    type: PaymentProviderType
+  ): Boolean!
+
+  """Create a new plan - Admin only"""
+  adminCreatePlan(input: AdminCreatePlanInput!): AdminPlanModel!
+
   """Delete payment (Admin only)"""
   adminDeletePayment(id: String!): Boolean!
+
+  """Delete a plan (only if no active subscriptions exist) - Admin only"""
+  adminDeletePlan(id: String!): Boolean!
 
   """Delete project (admin only)"""
   adminDeleteProject(projectId: ID!): DeleteResult!
@@ -986,8 +1270,17 @@ type Mutation {
   """Send message in support ticket (admin only)"""
   adminSendSupportMessage(input: AdminSendMessageInput!): SupportMessage!
 
+  """Test payment provider connection - Admin only"""
+  adminTestPaymentProvider(type: PaymentProviderType!): TestConnectionResult!
+
+  """Update payment provider settings and configuration - Admin only"""
+  adminUpdatePaymentProvider(input: UpdatePaymentProviderInput!, type: PaymentProviderType!): AdminPaymentProviderModel!
+
   """Update payment status (Admin only)"""
   adminUpdatePaymentStatus(id: String!, status: String!): AdminPayment!
+
+  """Update an existing plan - Admin only"""
+  adminUpdatePlan(id: String!, input: AdminUpdatePlanInput!): AdminPlanModel!
 
   """Update project status (admin only)"""
   adminUpdateProjectStatus(projectId: ID!, status: String!): AdminProject!
@@ -1186,6 +1479,7 @@ type Mutation {
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
   verifyEmail(token: String!): Boolean!
+  verifyTwoFactorLogin(code: String!, twoFactorToken: String!): AuthPayload!
 }
 
 type NotificationSettings {
@@ -1266,6 +1560,57 @@ enum PaymentMethod {
 
   """Банковский перевод"""
   TRANSFER
+}
+
+"""Payment provider configuration (safe for admin viewing)"""
+type PaymentProviderConfig {
+  """Whether publishable key is configured (Stripe only)"""
+  hasPublishableKey: Boolean
+
+  """Whether secret key is configured (value not exposed)"""
+  hasSecretKey: Boolean!
+
+  """Whether webhook secret is configured (value not exposed)"""
+  hasWebhookSecret: Boolean!
+
+  """Shop ID (Yookassa only, not sensitive)"""
+  shopId: String
+}
+
+"""Payment provider configuration input"""
+input PaymentProviderConfigInput {
+  """Publishable key (Stripe only)"""
+  publishableKey: String
+
+  """Secret key (API key)"""
+  secretKey: String
+
+  """Shop ID (Yookassa only)"""
+  shopId: String
+
+  """Webhook secret for signature verification"""
+  webhookSecret: String
+}
+
+"""Payment provider configuration status"""
+type PaymentProviderConfigStatus {
+  """Whether publishable key is configured (Stripe)"""
+  hasPublishableKey: Boolean
+
+  """Whether secret key is configured"""
+  hasSecretKey: Boolean!
+
+  """Whether shop ID is configured (Yookassa)"""
+  hasShopId: Boolean
+
+  """Whether webhook secret is configured"""
+  hasWebhookSecret: Boolean!
+}
+
+"""Payment provider types"""
+enum PaymentProviderType {
+  STRIPE
+  YOOKASSA
 }
 
 type PaymentStats {
@@ -1533,6 +1878,17 @@ enum ProjectStatus {
   COMPLETED
 }
 
+type ProjectsByTeamItem {
+  """Projects count"""
+  projectsCount: Int!
+
+  """Team ID"""
+  teamId: String!
+
+  """Team name"""
+  teamName: String!
+}
+
 type ProviderFileStats {
   """Number of files"""
   fileCount: Int!
@@ -1594,11 +1950,39 @@ type Query {
   """Get detailed information about a specific payment (Admin only)"""
   adminPayment(id: String!): AdminPayment!
 
+  """Get specific payment provider by type - Admin only"""
+  adminPaymentProvider(
+    """Base URL for webhook URL"""
+    baseUrl: String
+    type: PaymentProviderType!
+  ): AdminPaymentProviderModel!
+
+  """Get payment provider configuration (secrets are masked) - Admin only"""
+  adminPaymentProviderConfig(type: PaymentProviderType!): PaymentProviderConfig!
+
+  """Get all payment providers - Admin only"""
+  adminPaymentProviders(
+    """Base URL for webhook URLs"""
+    baseUrl: String
+  ): [AdminPaymentProviderModel!]!
+
   """Get payment statistics (Admin only)"""
   adminPaymentStats: PaymentStats!
 
   """Get paginated list of payments with filters (Admin only)"""
   adminPayments(filters: AdminPaymentFilters, pagination: PaginationInput!): AdminPaymentsConnection!
+
+  """Get detailed information about a specific plan by ID - Admin only"""
+  adminPlan(id: String!): AdminPlanModel!
+
+  """Get detailed information about a specific plan by slug - Admin only"""
+  adminPlanBySlug(slug: String!): AdminPlanModel!
+
+  """Get all plans (with optional filters) - Admin only"""
+  adminPlans(filters: AdminPlanFilters): [AdminPlanModel!]!
+
+  """Get paginated list of plans with filters - Admin only"""
+  adminPlansPaginated(filters: AdminPlanFilters, pagination: PaginationInput!): AdminPlansConnection!
 
   """Get project by ID with details (admin only)"""
   adminProject(id: ID!): AdminProject
@@ -1659,7 +2043,12 @@ type Query {
 
   """Get paginated list of users with filters (Admin only)"""
   adminUsers(filters: AdminUserFilters, pagination: PaginationInput!): AdminUsersConnection!
-  availablePlans: [PlanLimits!]!
+
+  """Get available plans for public (active plans only)"""
+  availablePlans(
+    """Filter prices by currency (RUB, USD, EUR)"""
+    currency: String
+  ): [AdminPlanModel!]!
 
   """Получить доступные варианты хранилища"""
   availableStorageProviders: [StorageProviderOption!]!
@@ -1769,6 +2158,11 @@ type Query {
 
   """Получение участников команды"""
   teamMembers(teamId: ID!): [TeamMember!]!
+
+  """
+  Получение агрегированной статистики команды (расходы, бюджет, участники)
+  """
+  teamStats(teamId: ID!): TeamStats!
 
   """Test connection to all storage providers"""
   testStorageProviders: [ProviderTestResult!]!
@@ -1951,6 +2345,9 @@ type Subscription {
   limits: PlanLimits!
   plan: SubscriptionPlan!
   status: SubscriptionStatus!
+
+  """Team with owner and members details"""
+  team: JSON
   teamId: String!
   trialEndsAt: DateTime
   updatedAt: DateTime!
@@ -2130,6 +2527,9 @@ type TasksByStatus {
 }
 
 type Team {
+  """Team counts (resolved field)"""
+  _count: TeamCounts
+
   """ID цвета (orange, blue, etc)"""
   colorId: String
 
@@ -2149,11 +2549,22 @@ type Team {
   """Название бригады"""
   name: String!
 
+  """Team owner (resolved field)"""
+  owner: User
+
   """ID владельца команды"""
   ownerId: ID!
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+type TeamCounts {
+  """Number of team members"""
+  members: Int!
+
+  """Number of projects"""
+  projects: Int!
 }
 
 type TeamMember {
@@ -2252,6 +2663,15 @@ enum TeamRole {
   OWNER
 }
 
+type TeamStats {
+  activeProjectsCount: Int!
+  membersCount: Int!
+  profit: Float!
+  totalBudget: Float!
+  totalExpenses: Float!
+  totalHours: Float!
+}
+
 type TelegramAuthPayload {
   deepLink: String!
   expiresAt: DateTime!
@@ -2263,6 +2683,43 @@ type TelegramAuthStatusPayload {
   refreshToken: String
   sessionToken: String
   user: User
+}
+
+"""Test connection result"""
+type TestConnectionResult {
+  """Error message if failed"""
+  error: String
+
+  """Success or informational message"""
+  message: String
+
+  """Whether the connection test was successful"""
+  success: Boolean!
+}
+
+type TopPayingTeamItem {
+  """Team ID"""
+  teamId: String!
+
+  """Team name"""
+  teamName: String!
+
+  """Total paid amount"""
+  totalPaid: Float!
+}
+
+type TopTeamItem {
+  """Team ID"""
+  id: String!
+
+  """Members count"""
+  membersCount: Int!
+
+  """Team name"""
+  name: String!
+
+  """Owner name"""
+  ownerName: String!
 }
 
 type TwoFactorDisableResponse {
@@ -2343,6 +2800,18 @@ input UpdateNotificationSettingsInput {
   appSms: Boolean
   marketingEmail: Boolean
   marketingPush: Boolean
+}
+
+"""Input for updating payment provider settings"""
+input UpdatePaymentProviderInput {
+  """Provider configuration (credentials)"""
+  config: PaymentProviderConfigInput
+
+  """Whether the provider is active"""
+  isActive: Boolean
+
+  """Whether this is the primary provider (only one can be primary)"""
+  isPrimary: Boolean
 }
 
 input UpdatePayoutPaymentInput {
@@ -2590,6 +3059,17 @@ enum UserStorageProviderType {
   CLOUDINARY
   LOCAL
   R2
+}
+
+type UsersByBusinessRole {
+  """FOREMAN users"""
+  FOREMAN: Int!
+
+  """WORKER users"""
+  WORKER: Int!
+
+  """Unassigned users"""
+  unassigned: Int!
 }
 
 type WorkLog {

@@ -1,0 +1,282 @@
+# Admin Plans Management GraphQL Operations
+
+# Query all plans with optional filters
+query GetAdminPlans(
+  $isActive: Boolean
+  $search: String
+) {
+  adminPlans(filters: { isActive: $isActive, search: $search }) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    subscriptionsCount
+    createdAt
+    updatedAt
+  }
+}
+
+# Query paginated plans
+query GetAdminPlansPaginated(
+  $isActive: Boolean
+  $search: String
+  $currency: String
+  $pagination: PaginationInput!
+) {
+  adminPlansPaginated(
+    filters: {
+      isActive: $isActive
+      search: $search
+      currency: $currency
+    }
+    pagination: $pagination
+  ) {
+    nodes {
+      id
+      name
+      slug
+      description
+      isActive
+      maxActiveProjects
+      maxMembers
+      storageGB
+      isPopular
+      sortOrder
+      isEarlyBird
+      features {
+        id
+        name
+        description
+        isIncluded
+        sortOrder
+      }
+      prices {
+        id
+        currency
+        price
+        earlyBirdPrice
+        billingCycleDays
+      }
+      subscriptionsCount
+      createdAt
+      updatedAt
+    }
+    totalCount
+    pageInfo {
+      currentPage
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+# Query single plan by ID
+query GetAdminPlan($id: String!) {
+  adminPlan(id: $id) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    subscriptionsCount
+    createdAt
+    updatedAt
+  }
+}
+
+# Query plan by slug
+query GetAdminPlanBySlug($slug: String!) {
+  adminPlanBySlug(slug: $slug) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    subscriptionsCount
+    createdAt
+    updatedAt
+  }
+}
+
+# Query available plans for public display
+query GetAvailablePlans($currency: String) {
+  availablePlans(currency: $currency) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Create a new plan
+mutation CreateAdminPlan($input: AdminCreatePlanInput!) {
+  adminCreatePlan(input: $input) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Update an existing plan
+mutation UpdateAdminPlan($id: String!, $input: AdminUpdatePlanInput!) {
+  adminUpdatePlan(id: $id, input: $input) {
+    id
+    name
+    slug
+    description
+    isActive
+    maxActiveProjects
+    maxMembers
+    storageGB
+    isPopular
+    sortOrder
+    isEarlyBird
+    features {
+      id
+      name
+      description
+      isIncluded
+      sortOrder
+    }
+    prices {
+      id
+      currency
+      price
+      earlyBirdPrice
+      billingCycleDays
+    }
+    updatedAt
+  }
+}
+
+# Archive a plan
+mutation ArchiveAdminPlan($id: String!) {
+  adminArchivePlan(id: $id) {
+    id
+    isActive
+    updatedAt
+  }
+}
+
+# Activate a plan
+mutation ActivateAdminPlan($id: String!) {
+  adminActivatePlan(id: $id) {
+    id
+    isActive
+    updatedAt
+  }
+}
+
+# Delete a plan
+mutation DeleteAdminPlan($id: String!) {
+  adminDeletePlan(id: $id)
+}

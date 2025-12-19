@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Settings, LogOut, ChevronDown } from "lucide-react"
+import { Settings, LogOut, ChevronDown, Shield } from "lucide-react"
 
 import { useAuth } from "@/packages/libs/auth"
 import { UserAvatar } from "./avatar"
@@ -95,6 +95,17 @@ export function UserMenu({
           Настройки
         </DropdownMenuItem>
         
+        {/* Admin Panel - only show if user has admin role */}
+        {user.adminRole && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleNavigate("/admin")}>
+              <Shield className="w-4 h-4" />
+              Админ-панель
+            </DropdownMenuItem>
+          </>
+        )}
+        
         <DropdownMenuSeparator />
         
         <DropdownMenuItem onClick={handleLogout} destructive>
@@ -105,4 +116,3 @@ export function UserMenu({
     </DropdownMenu>
   )
 }
-

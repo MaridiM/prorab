@@ -3,6 +3,7 @@
 import { Card } from '@/packages/components/ui/card'
 import { Loader2, TrendingUp, TrendingDown, Users, DollarSign, BarChart3 } from 'lucide-react'
 import { useQuery } from '@apollo/client/react'
+import { AdminAnalyticsSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	AdminRevenueChartDocument,
 	AdminUserGrowthChartDocument,
@@ -60,6 +61,10 @@ export default function AdminAnalyticsPage() {
 	const usersLastMonth = userGrowthChartData?.data[userGrowthChartData.data.length - 1] || 0
 	const usersPrevMonth = userGrowthChartData?.data[userGrowthChartData.data.length - 2] || 0
 	const userGrowth = usersLastMonth - usersPrevMonth
+
+	if ((revenueLoading || userGrowthLoading) && !revenueData && !userGrowthData) {
+		return <AdminAnalyticsSkeleton />
+	}
 
 	return (
 		<div className="space-y-6">
@@ -142,7 +147,7 @@ export default function AdminAnalyticsPage() {
 							<XAxis dataKey="month" className="text-xs" />
 							<YAxis className="text-xs" tickFormatter={(value) => formatCurrency(value)} />
 							<Tooltip
-								formatter={(value: number | undefined) => formatCurrency(value ?? 0)}
+								formatter={(value: any) => formatCurrency(Number(value) || 0)}
 								contentStyle={{
 									backgroundColor: 'hsl(var(--background))',
 									border: '1px solid hsl(var(--border))',

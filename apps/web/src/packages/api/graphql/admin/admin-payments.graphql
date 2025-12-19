@@ -17,6 +17,8 @@ fragment AdminPaymentFields on AdminPayment {
   yookassaPaymentId
   createdAt
   updatedAt
+  # Subscription with team and user context (JSON field populated by backend)
+  subscription
 }
 
 # Queries

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	SystemSettingsDocument,
 	BulkUpdateSystemSettingsDocument,
@@ -79,6 +80,10 @@ export default function SystemSettingsPage() {
 	}, [data])
 
 	const currentSettings = settingsByCategory[selectedCategory] || []
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	const toggleSecret = (key: string) => {
 		setShowSecrets((prev) => ({ ...prev, [key]: !prev[key] }))

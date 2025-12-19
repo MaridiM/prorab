@@ -378,3 +378,4 @@ ownerId: user-123 (Иван)
 - **Release notes:** `docs/VERSION_0.5.0_RELEASE_NOTES.md`
 - **Backend changelog:** `docs/changelog.backend.md`
 - **Frontend changelog:** `docs/changelog.frontend.md`
+

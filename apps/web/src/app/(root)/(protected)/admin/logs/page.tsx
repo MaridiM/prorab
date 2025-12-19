@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Card } from '@/packages/components/ui/card'
 import { Input } from '@/packages/components/ui/input'
 import { Button } from '@/packages/components/ui/button'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import { Loader2, Search, Filter, FileText, User, Calendar } from 'lucide-react'
 import { useQuery } from '@apollo/client/react'
 import { AdminActionLogsDocument } from '@/packages/api/graphql/__generated__/output'
@@ -37,6 +38,10 @@ export default function AdminLogsPage() {
 	})
 
 	const logs = data?.adminActionLogs?.logs || []
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
+	}
 
 	// Filter logs based on search and filters
 	const filteredLogs = logs.filter((log) => {

@@ -30,11 +30,25 @@ export class AdminUsersResolver {
 	@RequirePermissions(AdminPermissions.USERS_VIEW)
 	async adminUsers(
 		@Args('filters', { type: () => AdminUserFilters, nullable: true })
-		filters: AdminUserFilters = {},
+		filters: AdminUserFilters | null | undefined,
 		@Args('pagination', { type: () => PaginationInput })
 		pagination: PaginationInput,
 	): Promise<AdminUsersConnection> {
-		return this.adminUsersService.findAll(filters, pagination) as any
+		// Handle null, undefined, or empty object - convert to empty filters object
+		// Remove any null/undefined values from filters to avoid validation issues
+		const normalizedFilters: AdminUserFilters = {}
+		if (filters) {
+			if (filters.search) normalizedFilters.search = filters.search
+			if (filters.emailVerified !== undefined && filters.emailVerified !== null) {
+				normalizedFilters.emailVerified = filters.emailVerified
+			}
+			if (filters.role) normalizedFilters.role = filters.role
+			if (filters.createdAfter) normalizedFilters.createdAfter = filters.createdAfter
+			if (filters.createdBefore) normalizedFilters.createdBefore = filters.createdBefore
+			if (filters.lastLoginAfter) normalizedFilters.lastLoginAfter = filters.lastLoginAfter
+			if (filters.lastLoginBefore) normalizedFilters.lastLoginBefore = filters.lastLoginBefore
+		}
+		return this.adminUsersService.findAll(normalizedFilters, pagination) as any
 	}
 
 	@Query(() => AdminUserDetails, {

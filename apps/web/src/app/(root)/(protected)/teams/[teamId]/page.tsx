@@ -10,6 +10,7 @@ import {
 	MyTeamsDocument,
 	ProjectStatsDocument,
 	TeamMembersDocument,
+	TeamStatsDocument,
 	TeamRole,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
@@ -143,6 +144,12 @@ export default function TeamDashboardPage() {
         }
     )
 
+	const { data: teamStatsData, loading: statsLoading } = useQuery(TeamStatsDocument, {
+		variables: { teamId },
+		skip: !isOwner || activeTab !== 'projects',
+		fetchPolicy: 'cache-and-network',
+	})
+
     const [updateSalary, { loading: updatingSalary }] = useMutation(UPDATE_MEMBER_SALARY_MUTATION)
 
     const handleUpdateSalary = async (data: any) => {
@@ -226,25 +233,26 @@ export default function TeamDashboardPage() {
 		return projects.filter(p => p?.status === ProjectStatus.ARCHIVED)
 	}, [allProjects, statusFilter, searchQuery])
 
-	// Финансовые метрики
+	// Финансовые метрики - реальные данные из базы данных
 	const financialMetrics = useMemo(() => {
-		const active = allProjects.filter(
-			p =>
-				p?.status === ProjectStatus.ACTIVE ||
-				p?.status === ProjectStatus.COMPLETED
-		)
-
-		const totalBudget = active.reduce((sum, p) => sum + (p?.budget || 0), 0)
-		// TODO: Получить реальные расходы из API
-		const totalExpenses = totalBudget * 0.65
-
-		return {
-			totalBudget,
-			totalExpenses,
-			activeProjectsCount: active.length,
-			membersCount: 1, // TODO: Получить из API
+		// Если данные загружаются или недоступны, показываем fallback
+		if (statsLoading || !teamStatsData?.teamStats) {
+			const active = allProjects.filter(
+				p =>
+					p?.status === ProjectStatus.ACTIVE ||
+					p?.status === ProjectStatus.COMPLETED
+			)
+			return {
+				totalBudget: active.reduce((sum, p) => sum + (p?.budget || 0), 0),
+				totalExpenses: 0,
+				activeProjectsCount: active.length,
+				membersCount: 0,
+			}
 		}
-	}, [allProjects])
+
+		// ✅ РЕАЛЬНЫЕ ДАННЫЕ из базы данных
+		return teamStatsData.teamStats
+	}, [teamStatsData, statsLoading, allProjects])
 
 	const handleCreateProject = () => {
 		router.push(`/teams/${teamId}/projects/new`)
@@ -255,7 +263,7 @@ export default function TeamDashboardPage() {
 	}
 
 	// Loading state
-	if ((teamsLoading || projectsLoading) && !projectsData) {
+	if ((teamsLoading || projectsLoading || statsLoading) && !projectsData) {
 		return (
 			<div className="min-h-screen bg-background">
 				{/* Header Skeleton */}

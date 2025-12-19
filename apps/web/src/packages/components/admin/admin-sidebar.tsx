@@ -16,6 +16,8 @@ import {
 	HardDrive,
 	ChevronRight,
 	Repeat,
+	Package,
+	Wallet,
 } from 'lucide-react'
 import { cn } from '@/packages/utils'
 import { useAuth } from '@/packages/libs/auth'
@@ -70,10 +72,22 @@ const navItems: NavItem[] = [
 		permission: 'subscriptions:view',
 	},
 	{
+		label: 'Subscription Plans',
+		href: '/admin/plans',
+		icon: Package,
+		permission: 'plans:view',
+	},
+	{
 		label: 'Payments',
 		href: '/admin/payments',
 		icon: CreditCard,
 		permission: 'payments:view',
+	},
+	{
+		label: 'Payment Providers',
+		href: '/admin/payment-providers',
+		icon: Wallet,
+		permission: 'payment_providers:view',
 	},
 	{
 		label: 'Support Tickets',
@@ -110,8 +124,8 @@ export function AdminSidebar() {
 	const visibleItems = navItems
 
 	return (
-		<aside className="w-64 border-r bg-card flex-shrink-0 sticky top-0 h-screen flex flex-col">
-			<div className="flex h-16 items-center border-b px-6 flex-shrink-0">
+		<aside className="w-64 border-r bg-card shrink-0 sticky top-0 h-screen flex flex-col">
+			<div className="flex h-16 items-center border-b px-6 shrink-0">
 				<div className="flex items-center gap-2">
 					<Shield className="h-6 w-6 text-primary" />
 					<div>

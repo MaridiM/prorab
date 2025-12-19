@@ -64,6 +64,14 @@ export const TaskPriority = {
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
 
 
+export const PaymentProviderType = {
+  YOOKASSA: 'YOOKASSA',
+  STRIPE: 'STRIPE'
+} as const
+
+export type PaymentProviderType = (typeof PaymentProviderType)[keyof typeof PaymentProviderType]
+
+
 export const SubscriptionPlan = {
   LITE: 'LITE',
   FOREMAN: 'FOREMAN',

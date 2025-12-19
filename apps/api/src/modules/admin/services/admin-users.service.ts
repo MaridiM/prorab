@@ -6,6 +6,7 @@ import type { User } from '@prisma/generated/client'
 export interface AdminUserFilters {
 	search?: string
 	emailVerified?: boolean
+	role?: string
 	createdAfter?: Date
 	createdBefore?: Date
 	lastLoginAfter?: Date
@@ -90,6 +91,19 @@ export class AdminUsersService {
 		// Email verified filter
 		if (filters.emailVerified !== undefined) {
 			where.emailVerified = filters.emailVerified
+		}
+
+		// Role filter
+		if (filters.role) {
+			if (filters.role === 'USER') {
+				// Filter for users without admin role
+				where.adminRole = null
+			} else {
+				// Filter for users with specific admin role
+				where.adminRole = {
+					role: filters.role,
+				}
+			}
 		}
 
 		// Date filters

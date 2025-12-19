@@ -98,6 +98,26 @@ export type ReportPhoto = Prisma.ReportPhotoModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model Plan
+ * 
+ */
+export type Plan = Prisma.PlanModel
+/**
+ * Model PlanPrice
+ * 
+ */
+export type PlanPrice = Prisma.PlanPriceModel
+/**
+ * Model PlanFeature
+ * 
+ */
+export type PlanFeature = Prisma.PlanFeatureModel
+/**
+ * Model PaymentProvider
+ * 
+ */
+export type PaymentProvider = Prisma.PaymentProviderModel
+/**
  * Model Subscription
  * 
  */

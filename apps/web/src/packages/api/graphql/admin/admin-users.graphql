@@ -5,11 +5,19 @@ fragment AdminUserFields on User {
   id
   email
   fullName
+  phone
   telegramChatId
   emailVerified
   avatarUrl
+  businessRole
+  hasCompletedOnboarding
   createdAt
   updatedAt
+  adminRole {
+    id
+    role
+    permissions
+  }
 }
 
 fragment AdminUserDetailsFields on AdminUserDetails {

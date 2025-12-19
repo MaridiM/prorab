@@ -28,6 +28,7 @@ export type SubscriptionMinAggregateOutputType = {
   id: string | null
   teamId: string | null
   plan: $Enums.SubscriptionPlan | null
+  planId: string | null
   status: $Enums.SubscriptionStatus | null
   currentPeriodStart: Date | null
   currentPeriodEnd: Date | null
@@ -37,6 +38,7 @@ export type SubscriptionMinAggregateOutputType = {
   cancelAtPeriodEnd: boolean | null
   cancelledAt: Date | null
   isEarlyBird: boolean | null
+  currency: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -45,6 +47,7 @@ export type SubscriptionMaxAggregateOutputType = {
   id: string | null
   teamId: string | null
   plan: $Enums.SubscriptionPlan | null
+  planId: string | null
   status: $Enums.SubscriptionStatus | null
   currentPeriodStart: Date | null
   currentPeriodEnd: Date | null
@@ -54,6 +57,7 @@ export type SubscriptionMaxAggregateOutputType = {
   cancelAtPeriodEnd: boolean | null
   cancelledAt: Date | null
   isEarlyBird: boolean | null
+  currency: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +66,7 @@ export type SubscriptionCountAggregateOutputType = {
   id: number
   teamId: number
   plan: number
+  planId: number
   status: number
   currentPeriodStart: number
   currentPeriodEnd: number
@@ -71,6 +76,7 @@ export type SubscriptionCountAggregateOutputType = {
   cancelAtPeriodEnd: number
   cancelledAt: number
   isEarlyBird: number
+  currency: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -81,6 +87,7 @@ export type SubscriptionMinAggregateInputType = {
   id?: true
   teamId?: true
   plan?: true
+  planId?: true
   status?: true
   currentPeriodStart?: true
   currentPeriodEnd?: true
@@ -90,6 +97,7 @@ export type SubscriptionMinAggregateInputType = {
   cancelAtPeriodEnd?: true
   cancelledAt?: true
   isEarlyBird?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -98,6 +106,7 @@ export type SubscriptionMaxAggregateInputType = {
   id?: true
   teamId?: true
   plan?: true
+  planId?: true
   status?: true
   currentPeriodStart?: true
   currentPeriodEnd?: true
@@ -107,6 +116,7 @@ export type SubscriptionMaxAggregateInputType = {
   cancelAtPeriodEnd?: true
   cancelledAt?: true
   isEarlyBird?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -115,6 +125,7 @@ export type SubscriptionCountAggregateInputType = {
   id?: true
   teamId?: true
   plan?: true
+  planId?: true
   status?: true
   currentPeriodStart?: true
   currentPeriodEnd?: true
@@ -124,6 +135,7 @@ export type SubscriptionCountAggregateInputType = {
   cancelAtPeriodEnd?: true
   cancelledAt?: true
   isEarlyBird?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -205,6 +217,7 @@ export type SubscriptionGroupByOutputType = {
   id: string
   teamId: string
   plan: $Enums.SubscriptionPlan
+  planId: string | null
   status: $Enums.SubscriptionStatus
   currentPeriodStart: Date
   currentPeriodEnd: Date
@@ -214,6 +227,7 @@ export type SubscriptionGroupByOutputType = {
   cancelAtPeriodEnd: boolean
   cancelledAt: Date | null
   isEarlyBird: boolean
+  currency: string
   createdAt: Date
   updatedAt: Date
   _count: SubscriptionCountAggregateOutputType | null
@@ -243,6 +257,7 @@ export type SubscriptionWhereInput = {
   id?: Prisma.StringFilter<"Subscription"> | string
   teamId?: Prisma.StringFilter<"Subscription"> | string
   plan?: Prisma.EnumSubscriptionPlanFilter<"Subscription"> | $Enums.SubscriptionPlan
+  planId?: Prisma.StringNullableFilter<"Subscription"> | string | null
   status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   currentPeriodEnd?: Prisma.DateTimeFilter<"Subscription"> | Date | string
@@ -252,9 +267,11 @@ export type SubscriptionWhereInput = {
   cancelAtPeriodEnd?: Prisma.BoolFilter<"Subscription"> | boolean
   cancelledAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
   isEarlyBird?: Prisma.BoolFilter<"Subscription"> | boolean
+  currency?: Prisma.StringFilter<"Subscription"> | string
   createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
+  planRef?: Prisma.XOR<Prisma.PlanNullableScalarRelationFilter, Prisma.PlanWhereInput> | null
   payments?: Prisma.PaymentListRelationFilter
 }
 
@@ -262,6 +279,7 @@ export type SubscriptionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  planId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   currentPeriodStart?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
@@ -271,9 +289,11 @@ export type SubscriptionOrderByWithRelationInput = {
   cancelAtPeriodEnd?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   team?: Prisma.TeamOrderByWithRelationInput
+  planRef?: Prisma.PlanOrderByWithRelationInput
   payments?: Prisma.PaymentOrderByRelationAggregateInput
 }
 
@@ -285,6 +305,7 @@ export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SubscriptionWhereInput[]
   NOT?: Prisma.SubscriptionWhereInput | Prisma.SubscriptionWhereInput[]
   plan?: Prisma.EnumSubscriptionPlanFilter<"Subscription"> | $Enums.SubscriptionPlan
+  planId?: Prisma.StringNullableFilter<"Subscription"> | string | null
   status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   currentPeriodEnd?: Prisma.DateTimeFilter<"Subscription"> | Date | string
@@ -293,9 +314,11 @@ export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
   cancelAtPeriodEnd?: Prisma.BoolFilter<"Subscription"> | boolean
   cancelledAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
   isEarlyBird?: Prisma.BoolFilter<"Subscription"> | boolean
+  currency?: Prisma.StringFilter<"Subscription"> | string
   createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
   team?: Prisma.XOR<Prisma.TeamScalarRelationFilter, Prisma.TeamWhereInput>
+  planRef?: Prisma.XOR<Prisma.PlanNullableScalarRelationFilter, Prisma.PlanWhereInput> | null
   payments?: Prisma.PaymentListRelationFilter
 }, "id" | "teamId" | "yookassaSubscriptionId">
 
@@ -303,6 +326,7 @@ export type SubscriptionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  planId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   currentPeriodStart?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
@@ -312,6 +336,7 @@ export type SubscriptionOrderByWithAggregationInput = {
   cancelAtPeriodEnd?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SubscriptionCountOrderByAggregateInput
@@ -326,6 +351,7 @@ export type SubscriptionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
   teamId?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
   plan?: Prisma.EnumSubscriptionPlanWithAggregatesFilter<"Subscription"> | $Enums.SubscriptionPlan
+  planId?: Prisma.StringNullableWithAggregatesFilter<"Subscription"> | string | null
   status?: Prisma.EnumSubscriptionStatusWithAggregatesFilter<"Subscription"> | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
   currentPeriodEnd?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
@@ -335,6 +361,7 @@ export type SubscriptionScalarWhereWithAggregatesInput = {
   cancelAtPeriodEnd?: Prisma.BoolWithAggregatesFilter<"Subscription"> | boolean
   cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
   isEarlyBird?: Prisma.BoolWithAggregatesFilter<"Subscription"> | boolean
+  currency?: Prisma.StringWithAggregatesFilter<"Subscription"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Subscription"> | Date | string
 }
@@ -351,9 +378,11 @@ export type SubscriptionCreateInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   team: Prisma.TeamCreateNestedOneWithoutSubscriptionInput
+  planRef?: Prisma.PlanCreateNestedOneWithoutSubscriptionsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutSubscriptionInput
 }
 
@@ -361,6 +390,7 @@ export type SubscriptionUncheckedCreateInput = {
   id?: string
   teamId: string
   plan: $Enums.SubscriptionPlan
+  planId?: string | null
   status?: $Enums.SubscriptionStatus
   currentPeriodStart: Date | string
   currentPeriodEnd: Date | string
@@ -370,6 +400,7 @@ export type SubscriptionUncheckedCreateInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSubscriptionInput
@@ -387,9 +418,11 @@ export type SubscriptionUpdateInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   team?: Prisma.TeamUpdateOneRequiredWithoutSubscriptionNestedInput
+  planRef?: Prisma.PlanUpdateOneWithoutSubscriptionsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutSubscriptionNestedInput
 }
 
@@ -397,6 +430,7 @@ export type SubscriptionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -406,6 +440,7 @@ export type SubscriptionUncheckedUpdateInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutSubscriptionNestedInput
@@ -415,6 +450,7 @@ export type SubscriptionCreateManyInput = {
   id?: string
   teamId: string
   plan: $Enums.SubscriptionPlan
+  planId?: string | null
   status?: $Enums.SubscriptionStatus
   currentPeriodStart: Date | string
   currentPeriodEnd: Date | string
@@ -424,6 +460,7 @@ export type SubscriptionCreateManyInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -440,6 +477,7 @@ export type SubscriptionUpdateManyMutationInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -448,6 +486,7 @@ export type SubscriptionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -457,6 +496,7 @@ export type SubscriptionUncheckedUpdateManyInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -466,10 +506,21 @@ export type SubscriptionNullableScalarRelationFilter = {
   isNot?: Prisma.SubscriptionWhereInput | null
 }
 
+export type SubscriptionListRelationFilter = {
+  every?: Prisma.SubscriptionWhereInput
+  some?: Prisma.SubscriptionWhereInput
+  none?: Prisma.SubscriptionWhereInput
+}
+
+export type SubscriptionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type SubscriptionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currentPeriodStart?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
@@ -479,6 +530,7 @@ export type SubscriptionCountOrderByAggregateInput = {
   cancelAtPeriodEnd?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -487,6 +539,7 @@ export type SubscriptionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currentPeriodStart?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
@@ -496,6 +549,7 @@ export type SubscriptionMaxOrderByAggregateInput = {
   cancelAtPeriodEnd?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -504,6 +558,7 @@ export type SubscriptionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teamId?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   currentPeriodStart?: Prisma.SortOrder
   currentPeriodEnd?: Prisma.SortOrder
@@ -513,6 +568,7 @@ export type SubscriptionMinOrderByAggregateInput = {
   cancelAtPeriodEnd?: Prisma.SortOrder
   cancelledAt?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -554,6 +610,48 @@ export type SubscriptionUncheckedUpdateOneWithoutTeamNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SubscriptionUpdateToOneWithWhereWithoutTeamInput, Prisma.SubscriptionUpdateWithoutTeamInput>, Prisma.SubscriptionUncheckedUpdateWithoutTeamInput>
 }
 
+export type SubscriptionCreateNestedManyWithoutPlanRefInput = {
+  create?: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput> | Prisma.SubscriptionCreateWithoutPlanRefInput[] | Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput[]
+  connectOrCreate?: Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput | Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput[]
+  createMany?: Prisma.SubscriptionCreateManyPlanRefInputEnvelope
+  connect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+}
+
+export type SubscriptionUncheckedCreateNestedManyWithoutPlanRefInput = {
+  create?: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput> | Prisma.SubscriptionCreateWithoutPlanRefInput[] | Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput[]
+  connectOrCreate?: Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput | Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput[]
+  createMany?: Prisma.SubscriptionCreateManyPlanRefInputEnvelope
+  connect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+}
+
+export type SubscriptionUpdateManyWithoutPlanRefNestedInput = {
+  create?: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput> | Prisma.SubscriptionCreateWithoutPlanRefInput[] | Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput[]
+  connectOrCreate?: Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput | Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput[]
+  upsert?: Prisma.SubscriptionUpsertWithWhereUniqueWithoutPlanRefInput | Prisma.SubscriptionUpsertWithWhereUniqueWithoutPlanRefInput[]
+  createMany?: Prisma.SubscriptionCreateManyPlanRefInputEnvelope
+  set?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  disconnect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  delete?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  connect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  update?: Prisma.SubscriptionUpdateWithWhereUniqueWithoutPlanRefInput | Prisma.SubscriptionUpdateWithWhereUniqueWithoutPlanRefInput[]
+  updateMany?: Prisma.SubscriptionUpdateManyWithWhereWithoutPlanRefInput | Prisma.SubscriptionUpdateManyWithWhereWithoutPlanRefInput[]
+  deleteMany?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
+}
+
+export type SubscriptionUncheckedUpdateManyWithoutPlanRefNestedInput = {
+  create?: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput> | Prisma.SubscriptionCreateWithoutPlanRefInput[] | Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput[]
+  connectOrCreate?: Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput | Prisma.SubscriptionCreateOrConnectWithoutPlanRefInput[]
+  upsert?: Prisma.SubscriptionUpsertWithWhereUniqueWithoutPlanRefInput | Prisma.SubscriptionUpsertWithWhereUniqueWithoutPlanRefInput[]
+  createMany?: Prisma.SubscriptionCreateManyPlanRefInputEnvelope
+  set?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  disconnect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  delete?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  connect?: Prisma.SubscriptionWhereUniqueInput | Prisma.SubscriptionWhereUniqueInput[]
+  update?: Prisma.SubscriptionUpdateWithWhereUniqueWithoutPlanRefInput | Prisma.SubscriptionUpdateWithWhereUniqueWithoutPlanRefInput[]
+  updateMany?: Prisma.SubscriptionUpdateManyWithWhereWithoutPlanRefInput | Prisma.SubscriptionUpdateManyWithWhereWithoutPlanRefInput[]
+  deleteMany?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
+}
+
 export type EnumSubscriptionPlanFieldUpdateOperationsInput = {
   set?: $Enums.SubscriptionPlan
 }
@@ -588,14 +686,17 @@ export type SubscriptionCreateWithoutTeamInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  planRef?: Prisma.PlanCreateNestedOneWithoutSubscriptionsInput
   payments?: Prisma.PaymentCreateNestedManyWithoutSubscriptionInput
 }
 
 export type SubscriptionUncheckedCreateWithoutTeamInput = {
   id?: string
   plan: $Enums.SubscriptionPlan
+  planId?: string | null
   status?: $Enums.SubscriptionStatus
   currentPeriodStart: Date | string
   currentPeriodEnd: Date | string
@@ -605,6 +706,7 @@ export type SubscriptionUncheckedCreateWithoutTeamInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSubscriptionInput
@@ -638,14 +740,17 @@ export type SubscriptionUpdateWithoutTeamInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  planRef?: Prisma.PlanUpdateOneWithoutSubscriptionsNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutSubscriptionNestedInput
 }
 
 export type SubscriptionUncheckedUpdateWithoutTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
   currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -655,9 +760,96 @@ export type SubscriptionUncheckedUpdateWithoutTeamInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutSubscriptionNestedInput
+}
+
+export type SubscriptionCreateWithoutPlanRefInput = {
+  id?: string
+  plan: $Enums.SubscriptionPlan
+  status?: $Enums.SubscriptionStatus
+  currentPeriodStart: Date | string
+  currentPeriodEnd: Date | string
+  trialEndsAt?: Date | string | null
+  yookassaSubscriptionId?: string | null
+  paymentMethodId?: string | null
+  cancelAtPeriodEnd?: boolean
+  cancelledAt?: Date | string | null
+  isEarlyBird?: boolean
+  currency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  team: Prisma.TeamCreateNestedOneWithoutSubscriptionInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutSubscriptionInput
+}
+
+export type SubscriptionUncheckedCreateWithoutPlanRefInput = {
+  id?: string
+  teamId: string
+  plan: $Enums.SubscriptionPlan
+  status?: $Enums.SubscriptionStatus
+  currentPeriodStart: Date | string
+  currentPeriodEnd: Date | string
+  trialEndsAt?: Date | string | null
+  yookassaSubscriptionId?: string | null
+  paymentMethodId?: string | null
+  cancelAtPeriodEnd?: boolean
+  cancelledAt?: Date | string | null
+  isEarlyBird?: boolean
+  currency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSubscriptionInput
+}
+
+export type SubscriptionCreateOrConnectWithoutPlanRefInput = {
+  where: Prisma.SubscriptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput>
+}
+
+export type SubscriptionCreateManyPlanRefInputEnvelope = {
+  data: Prisma.SubscriptionCreateManyPlanRefInput | Prisma.SubscriptionCreateManyPlanRefInput[]
+  skipDuplicates?: boolean
+}
+
+export type SubscriptionUpsertWithWhereUniqueWithoutPlanRefInput = {
+  where: Prisma.SubscriptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SubscriptionUpdateWithoutPlanRefInput, Prisma.SubscriptionUncheckedUpdateWithoutPlanRefInput>
+  create: Prisma.XOR<Prisma.SubscriptionCreateWithoutPlanRefInput, Prisma.SubscriptionUncheckedCreateWithoutPlanRefInput>
+}
+
+export type SubscriptionUpdateWithWhereUniqueWithoutPlanRefInput = {
+  where: Prisma.SubscriptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SubscriptionUpdateWithoutPlanRefInput, Prisma.SubscriptionUncheckedUpdateWithoutPlanRefInput>
+}
+
+export type SubscriptionUpdateManyWithWhereWithoutPlanRefInput = {
+  where: Prisma.SubscriptionScalarWhereInput
+  data: Prisma.XOR<Prisma.SubscriptionUpdateManyMutationInput, Prisma.SubscriptionUncheckedUpdateManyWithoutPlanRefInput>
+}
+
+export type SubscriptionScalarWhereInput = {
+  AND?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
+  OR?: Prisma.SubscriptionScalarWhereInput[]
+  NOT?: Prisma.SubscriptionScalarWhereInput | Prisma.SubscriptionScalarWhereInput[]
+  id?: Prisma.StringFilter<"Subscription"> | string
+  teamId?: Prisma.StringFilter<"Subscription"> | string
+  plan?: Prisma.EnumSubscriptionPlanFilter<"Subscription"> | $Enums.SubscriptionPlan
+  planId?: Prisma.StringNullableFilter<"Subscription"> | string | null
+  status?: Prisma.EnumSubscriptionStatusFilter<"Subscription"> | $Enums.SubscriptionStatus
+  currentPeriodStart?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  currentPeriodEnd?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  trialEndsAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  yookassaSubscriptionId?: Prisma.StringNullableFilter<"Subscription"> | string | null
+  paymentMethodId?: Prisma.StringNullableFilter<"Subscription"> | string | null
+  cancelAtPeriodEnd?: Prisma.BoolFilter<"Subscription"> | boolean
+  cancelledAt?: Prisma.DateTimeNullableFilter<"Subscription"> | Date | string | null
+  isEarlyBird?: Prisma.BoolFilter<"Subscription"> | boolean
+  currency?: Prisma.StringFilter<"Subscription"> | string
+  createdAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Subscription"> | Date | string
 }
 
 export type SubscriptionCreateWithoutPaymentsInput = {
@@ -672,15 +864,18 @@ export type SubscriptionCreateWithoutPaymentsInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   team: Prisma.TeamCreateNestedOneWithoutSubscriptionInput
+  planRef?: Prisma.PlanCreateNestedOneWithoutSubscriptionsInput
 }
 
 export type SubscriptionUncheckedCreateWithoutPaymentsInput = {
   id?: string
   teamId: string
   plan: $Enums.SubscriptionPlan
+  planId?: string | null
   status?: $Enums.SubscriptionStatus
   currentPeriodStart: Date | string
   currentPeriodEnd: Date | string
@@ -690,6 +885,7 @@ export type SubscriptionUncheckedCreateWithoutPaymentsInput = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: Date | string | null
   isEarlyBird?: boolean
+  currency?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -722,12 +918,70 @@ export type SubscriptionUpdateWithoutPaymentsInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   team?: Prisma.TeamUpdateOneRequiredWithoutSubscriptionNestedInput
+  planRef?: Prisma.PlanUpdateOneWithoutSubscriptionsNestedInput
 }
 
 export type SubscriptionUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+  currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  yookassaSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethodId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SubscriptionCreateManyPlanRefInput = {
+  id?: string
+  teamId: string
+  plan: $Enums.SubscriptionPlan
+  status?: $Enums.SubscriptionStatus
+  currentPeriodStart: Date | string
+  currentPeriodEnd: Date | string
+  trialEndsAt?: Date | string | null
+  yookassaSubscriptionId?: string | null
+  paymentMethodId?: string | null
+  cancelAtPeriodEnd?: boolean
+  cancelledAt?: Date | string | null
+  isEarlyBird?: boolean
+  currency?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SubscriptionUpdateWithoutPlanRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+  currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  yookassaSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethodId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  team?: Prisma.TeamUpdateOneRequiredWithoutSubscriptionNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutSubscriptionNestedInput
+}
+
+export type SubscriptionUncheckedUpdateWithoutPlanRefInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   teamId?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
@@ -740,6 +994,26 @@ export type SubscriptionUncheckedUpdateWithoutPaymentsInput = {
   cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutSubscriptionNestedInput
+}
+
+export type SubscriptionUncheckedUpdateManyWithoutPlanRefInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  teamId?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+  status?: Prisma.EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+  currentPeriodStart?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  currentPeriodEnd?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  yookassaSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethodId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelAtPeriodEnd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -779,6 +1053,7 @@ export type SubscriptionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   id?: boolean
   teamId?: boolean
   plan?: boolean
+  planId?: boolean
   status?: boolean
   currentPeriodStart?: boolean
   currentPeriodEnd?: boolean
@@ -788,9 +1063,11 @@ export type SubscriptionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   cancelAtPeriodEnd?: boolean
   cancelledAt?: boolean
   isEarlyBird?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
   payments?: boolean | Prisma.Subscription$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
@@ -799,6 +1076,7 @@ export type SubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   id?: boolean
   teamId?: boolean
   plan?: boolean
+  planId?: boolean
   status?: boolean
   currentPeriodStart?: boolean
   currentPeriodEnd?: boolean
@@ -808,15 +1086,18 @@ export type SubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   cancelAtPeriodEnd?: boolean
   cancelledAt?: boolean
   isEarlyBird?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
 
 export type SubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   teamId?: boolean
   plan?: boolean
+  planId?: boolean
   status?: boolean
   currentPeriodStart?: boolean
   currentPeriodEnd?: boolean
@@ -826,15 +1107,18 @@ export type SubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   cancelAtPeriodEnd?: boolean
   cancelledAt?: boolean
   isEarlyBird?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
 }, ExtArgs["result"]["subscription"]>
 
 export type SubscriptionSelectScalar = {
   id?: boolean
   teamId?: boolean
   plan?: boolean
+  planId?: boolean
   status?: boolean
   currentPeriodStart?: boolean
   currentPeriodEnd?: boolean
@@ -844,33 +1128,39 @@ export type SubscriptionSelectScalar = {
   cancelAtPeriodEnd?: boolean
   cancelledAt?: boolean
   isEarlyBird?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "plan" | "status" | "currentPeriodStart" | "currentPeriodEnd" | "trialEndsAt" | "yookassaSubscriptionId" | "paymentMethodId" | "cancelAtPeriodEnd" | "cancelledAt" | "isEarlyBird" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
+export type SubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamId" | "plan" | "planId" | "status" | "currentPeriodStart" | "currentPeriodEnd" | "trialEndsAt" | "yookassaSubscriptionId" | "paymentMethodId" | "cancelAtPeriodEnd" | "cancelledAt" | "isEarlyBird" | "currency" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
 export type SubscriptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
   payments?: boolean | Prisma.Subscription$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SubscriptionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
 }
 export type SubscriptionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   team?: boolean | Prisma.TeamDefaultArgs<ExtArgs>
+  planRef?: boolean | Prisma.Subscription$planRefArgs<ExtArgs>
 }
 
 export type $SubscriptionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Subscription"
   objects: {
     team: Prisma.$TeamPayload<ExtArgs>
+    planRef: Prisma.$PlanPayload<ExtArgs> | null
     payments: Prisma.$PaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     teamId: string
     plan: $Enums.SubscriptionPlan
+    planId: string | null
     status: $Enums.SubscriptionStatus
     currentPeriodStart: Date
     currentPeriodEnd: Date
@@ -880,6 +1170,7 @@ export type $SubscriptionPayload<ExtArgs extends runtime.Types.Extensions.Intern
     cancelAtPeriodEnd: boolean
     cancelledAt: Date | null
     isEarlyBird: boolean
+    currency: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["subscription"]>
@@ -1277,6 +1568,7 @@ readonly fields: SubscriptionFieldRefs;
 export interface Prisma__SubscriptionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   team<T extends Prisma.TeamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamDefaultArgs<ExtArgs>>): Prisma.Prisma__TeamClient<runtime.Types.Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  planRef<T extends Prisma.Subscription$planRefArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Subscription$planRefArgs<ExtArgs>>): Prisma.Prisma__PlanClient<runtime.Types.Result.GetResult<Prisma.$PlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   payments<T extends Prisma.Subscription$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Subscription$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1310,6 +1602,7 @@ export interface SubscriptionFieldRefs {
   readonly id: Prisma.FieldRef<"Subscription", 'String'>
   readonly teamId: Prisma.FieldRef<"Subscription", 'String'>
   readonly plan: Prisma.FieldRef<"Subscription", 'SubscriptionPlan'>
+  readonly planId: Prisma.FieldRef<"Subscription", 'String'>
   readonly status: Prisma.FieldRef<"Subscription", 'SubscriptionStatus'>
   readonly currentPeriodStart: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly currentPeriodEnd: Prisma.FieldRef<"Subscription", 'DateTime'>
@@ -1319,6 +1612,7 @@ export interface SubscriptionFieldRefs {
   readonly cancelAtPeriodEnd: Prisma.FieldRef<"Subscription", 'Boolean'>
   readonly cancelledAt: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly isEarlyBird: Prisma.FieldRef<"Subscription", 'Boolean'>
+  readonly currency: Prisma.FieldRef<"Subscription", 'String'>
   readonly createdAt: Prisma.FieldRef<"Subscription", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Subscription", 'DateTime'>
 }
@@ -1714,6 +2008,25 @@ export type SubscriptionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Subscriptions to delete.
    */
   limit?: number
+}
+
+/**
+ * Subscription.planRef
+ */
+export type Subscription$planRefArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Plan
+   */
+  select?: Prisma.PlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Plan
+   */
+  omit?: Prisma.PlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlanInclude<ExtArgs> | null
+  where?: Prisma.PlanWhereInput
 }
 
 /**

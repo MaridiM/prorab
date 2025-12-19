@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card } from '@/packages/components/ui/card'
 import { Input } from '@/packages/components/ui/input'
 import { Button } from '@/packages/components/ui/button'
 import { Badge } from '@/packages/components/ui/badge'
+import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	Loader2,
 	Search,
@@ -41,20 +42,33 @@ import {
 
 export default function AdminProjectsPage() {
 	const [searchQuery, setSearchQuery] = useState('')
+	const [debouncedSearch, setDebouncedSearch] = useState('')
 	const [filterStatus, setFilterStatus] = useState<string | null>(null)
 	const [selectedProject, setSelectedProject] = useState<any>(null)
 	const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(searchQuery)
+		}, 500) // 500ms debounce delay
+
+		return () => clearTimeout(timer)
+	}, [searchQuery])
+
+	// Build filter object with useMemo
+	const filter = useMemo(() => {
+		const filterObj: any = {}
+		if (debouncedSearch) filterObj.search = debouncedSearch
+		if (filterStatus) filterObj.status = filterStatus
+		// Only include non-null values
+		return Object.keys(filterObj).length > 0 ? filterObj : null
+	}, [debouncedSearch, filterStatus])
+
+	// Query for projects with filters
 	const { data, loading, refetch } = useQuery(AdminProjectsDocument, {
 		variables: {
-			filter: {
-				search: searchQuery || null,
-				status: filterStatus,
-				teamId: null,
-				ownerId: null,
-				startDateFrom: null,
-				startDateTo: null,
-			},
+			filter,
 			pagination: {
 				page: 1,
 				limit: 50,
@@ -82,6 +96,7 @@ export default function AdminProjectsPage() {
 
 	const projects = data?.adminProjects?.projects || []
 	const total = data?.adminProjects?.total || 0
+	const stats = (data?.adminProjects as any)?.stats || { active: 0, completed: 0, archived: 0 }
 
 	const statusOptions = ['active', 'planning', 'completed', 'on_hold', 'archived']
 
@@ -133,6 +148,10 @@ export default function AdminProjectsPage() {
 			currency: 'RUB',
 			minimumFractionDigits: 0,
 		}).format(amount)
+	}
+
+	if (loading && !data) {
+		return <AdminPageSkeleton />
 	}
 
 	return (
@@ -194,9 +213,7 @@ export default function AdminProjectsPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Active</p>
-							<p className="text-2xl font-bold">
-								{projects.filter((p: any) => p.status === 'active').length}
-							</p>
+							<p className="text-2xl font-bold">{stats.active}</p>
 						</div>
 					</div>
 				</Card>
@@ -207,9 +224,7 @@ export default function AdminProjectsPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Completed</p>
-							<p className="text-2xl font-bold">
-								{projects.filter((p: any) => p.status === 'completed').length}
-							</p>
+							<p className="text-2xl font-bold">{stats.completed}</p>
 						</div>
 					</div>
 				</Card>
@@ -220,9 +235,7 @@ export default function AdminProjectsPage() {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground">Archived</p>
-							<p className="text-2xl font-bold">
-								{projects.filter((p: any) => p.status === 'archived').length}
-							</p>
+							<p className="text-2xl font-bold">{stats.archived}</p>
 						</div>
 					</div>
 				</Card>

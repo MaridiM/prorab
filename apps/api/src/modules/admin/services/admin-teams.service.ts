@@ -197,7 +197,33 @@ export class AdminTeamsService {
       throw new NotFoundException(`Team with ID ${teamId} not found`);
     }
 
-    return team;
+    // Transform to AdminTeamDetails format
+    return {
+      team: {
+        id: team.id,
+        name: team.name,
+        ownerId: team.ownerId,
+        createdAt: team.createdAt,
+        updatedAt: team.updatedAt,
+        logoUrl: team.logoUrl,
+        logoType: team.logoType,
+        iconId: team.iconId,
+        colorId: team.colorId,
+      },
+      owner: team.owner,
+      subscription: team.subscription,
+      members: team.members.map((member: any) => ({
+        id: member.id,
+        user: member.user,
+        role: member.role,
+        createdAt: member.joinedAt,
+      })),
+      projects: team.projects,
+      _count: {
+        members: team._count.members,
+        projects: team._count.projects,
+      },
+    };
   }
 
   /**

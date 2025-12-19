@@ -1,20 +1,6 @@
-import { ObjectType, Field, ID, registerEnumType, InputType } from '@nestjs/graphql';
+import { ObjectType, Field, ID, InputType } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
-
-/**
- * Admin Role Types
- */
-export enum AdminRoleType {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  MODERATOR = 'MODERATOR',
-  SUPPORT = 'SUPPORT',
-}
-
-registerEnumType(AdminRoleType, {
-  name: 'AdminRoleType',
-  description: 'Admin role types with different permission levels',
-});
+import { AdminRoleType } from './admin-role-type.enum';
 
 /**
  * Admin Role Detail - Full admin role information with user details

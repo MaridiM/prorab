@@ -1,5 +1,7 @@
 import { Args, Field, ID, InputType, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { IsOptional, IsString, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 import { GraphQLJSON } from 'graphql-scalars';
 import { AuthGuard } from '../../../shared/guards/auth.guard';
 import { AdminGuard } from '../../../shared/guards/admin.guard';
@@ -71,6 +73,18 @@ class AdminProject {
 }
 
 @ObjectType()
+class AdminProjectStats {
+  @Field(() => Int)
+  active: number;
+
+  @Field(() => Int)
+  completed: number;
+
+  @Field(() => Int)
+  archived: number;
+}
+
+@ObjectType()
 class AdminProjectsResult {
   @Field(() => [AdminProject])
   projects: AdminProject[];
@@ -80,27 +94,44 @@ class AdminProjectsResult {
 
   @Field()
   hasMore: boolean;
+
+  @Field(() => AdminProjectStats, { nullable: true })
+  stats?: AdminProjectStats;
 }
 
 // Input types
 @InputType()
 class AdminProjectFilterInput {
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   status?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   teamId?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   ownerId?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   search?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   startDateFrom?: Date;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   startDateTo?: Date;
 }
 
