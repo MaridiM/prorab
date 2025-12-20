@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
 	User,
 	Settings,
@@ -174,8 +175,26 @@ export default function SettingsPage() {
 	const { user } = useAuth()
 	const { showToast } = useToast()
 	const { theme, setTheme, resolvedTheme } = useTheme()
+	const router = useRouter()
+	const searchParams = useSearchParams()
 
-	const [activeTab, setActiveTab] = useState<TabId>('profile')
+	// Get tab from URL, default to 'profile'
+	const tabFromUrl = searchParams.get('tab') as TabId | null
+	const activeTab = useMemo(() => {
+		const validTabs: TabId[] = ['profile', 'security', 'notifications', 'subscription', 'appearance', 'help', 'about']
+		if (tabFromUrl && validTabs.includes(tabFromUrl)) {
+			return tabFromUrl
+		}
+		return 'profile'
+	}, [tabFromUrl])
+
+	// Update URL when tab changes
+	const setActiveTab = useCallback((newTab: TabId) => {
+		const params = new URLSearchParams(searchParams.toString())
+		params.set('tab', newTab)
+		router.push(`/settings?${params.toString()}`, { scroll: false })
+	}, [router, searchParams])
+
 	const [showPasswordForm, setShowPasswordForm] = useState(false)
 	const [emailCooldown, setEmailCooldown] = useState(0)
 

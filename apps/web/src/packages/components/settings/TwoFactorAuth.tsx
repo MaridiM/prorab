@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { motion } from 'framer-motion'
-import { QRCodeSVG } from 'react-qr-code'
+import QRCode from 'react-qr-code'
 import {
 	Shield,
 	ShieldCheck,
@@ -251,11 +251,10 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 									<div className="relative">
 										{/* QR Code Container */}
 										<div className="p-6 bg-white rounded-2xl shadow-lg border-2 border-primary/20">
-											<QRCodeSVG
+											<QRCode
 												value={qrData.qrCodeUrl}
 												size={256}
 												level="M"
-												includeMargin={true}
 												className="w-full h-full"
 											/>
 										</div>

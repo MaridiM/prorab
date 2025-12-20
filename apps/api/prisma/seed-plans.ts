@@ -66,8 +66,8 @@ const PLANS_DATA: PlanData[] = [
     sortOrder: 1,
     prices: [
       { currency: 'RUB', price: 490, earlyBirdPrice: 290 },
-      { currency: 'USD', price: 5, earlyBirdPrice: 3 },
-      { currency: 'EUR', price: 5, earlyBirdPrice: 3 },
+      { currency: 'USD', price: 7, earlyBirdPrice: 4 },
+      { currency: 'EUR', price: 7, earlyBirdPrice: 4 },
     ],
     features: [
       { name: 'Базовый функционал', description: 'Управление проектами и задачами', sortOrder: 1 },
@@ -90,8 +90,8 @@ const PLANS_DATA: PlanData[] = [
     sortOrder: 2,
     prices: [
       { currency: 'RUB', price: 990, earlyBirdPrice: 690 },
-      { currency: 'USD', price: 10, earlyBirdPrice: 7 },
-      { currency: 'EUR', price: 10, earlyBirdPrice: 7 },
+      { currency: 'USD', price: 15, earlyBirdPrice: 10 },
+      { currency: 'EUR', price: 15, earlyBirdPrice: 10 },
     ],
     features: [
       { name: 'Расчёты зарплаты', description: 'Автоматический расчёт выплат', sortOrder: 1 },
@@ -117,8 +117,8 @@ const PLANS_DATA: PlanData[] = [
     sortOrder: 3,
     prices: [
       { currency: 'RUB', price: 1990, earlyBirdPrice: 1490 },
-      { currency: 'USD', price: 20, earlyBirdPrice: 15 },
-      { currency: 'EUR', price: 20, earlyBirdPrice: 15 },
+      { currency: 'USD', price: 25, earlyBirdPrice: 20 },
+      { currency: 'EUR', price: 25, earlyBirdPrice: 20 },
     ],
     features: [
       { name: 'Неограниченное количество проектов', sortOrder: 1 },

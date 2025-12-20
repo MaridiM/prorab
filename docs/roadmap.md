@@ -4,11 +4,11 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-19, 15:30)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-19)
 
 **Версии приложений:**
-- API: v1.0.0 🎉
-- Web: v1.0.0 🎉
+- API: v1.0.2
+- Web: v1.0.2
 
 ### Общий прогресс: **100% MVP + Stage 13 (100%) + Stage 14 (100%) + Stage 15 (100% Complete)** 🎉✅✅✅
 
@@ -32,8 +32,13 @@
 - ✅ Documentation (100%) - Testing guide, implementation docs
 - 📝 **Note:** System Settings Migration (.env → DB) выделена в Stage 15 (optional)
 
+**Последние обновления (v1.0.2):**
+- ✅ **2FA Login Flow** - Полная реализация двухфакторной аутентификации при входе
+- ✅ **URL-Based Settings** - Настройки теперь сохраняют выбранную вкладку в URL
+- ✅ **Admin Search Debounce** - Добавлен debounce для поиска в админке
+
 **Текущие и завершённые этапы:**
-- 🚧 **Stage 15: Subscription Plans & Payment Providers Management** - In Progress (Phase 5/7 - 57% Complete) 🚧
+- ✅ **Stage 15: Subscription Plans & Payment Providers Management** - 100% Complete ✅
 - ✅ **Stage 14: Role System Normalization** - 100% Complete ✅
 - ✅ **Stage 13: RBAC System** - 100% Complete ✅
 - ✅ **Admin Panel Analysis** - 7/8 модулей полностью готовы (87% готово) 📊
@@ -110,7 +115,30 @@
 
 ---
 
-**Последние изменения (2025-12-17, 02:00):**
+**Последние изменения (2025-12-19, 23:00):**
+
+**🔧 Stage 15 Bugfixes & Improvements:**
+- ✅ **Payment Providers Configuration UI:** Added dialog for entering Yookassa/Stripe credentials
+  - Shop ID, Secret Key, Webhook Secret fields for Yookassa
+  - Secret Key, Publishable Key, Webhook Secret fields for Stripe
+  - Active/Primary toggle switches
+  - Test Connection and Clear Cache buttons
+- ✅ **Fixed Admin Permissions:** Added missing `payment_providers:view`, `payment_providers:manage`, `plans:view`, `plans:manage` to ADMIN and SUPER_ADMIN roles
+- ✅ **Fixed useToast Hook:** Updated hook to support object-style parameters (`{ title, description, variant }`)
+- ✅ **Fixed Build Errors:**
+  - UpdatePaymentProviderInput type errors (added null values for optional fields)
+  - AdminUserFilters role property missing
+  - GraphQL codegen regenerated
+
+**Files Modified:**
+- `apps/web/src/app/(root)/(protected)/admin/payment-providers/page.tsx` - Added configuration dialog (600+ LOC)
+- `apps/web/src/packages/hooks/use-toast.ts` - Updated toast function signature
+- `apps/web/src/app/(root)/(protected)/admin/roles/assign-role-dialog.tsx` - Added role filter
+- `apps/api/fix-permissions.ts` - Script to add missing permissions to admin roles
+
+---
+
+**Предыдущие изменения (2025-12-17, 02:00):**
 
 **💼📊 Stage 9 Phase 2 Days 8-13: DISCOVERY + VERIFICATION - COMPLETE! ✨**
 

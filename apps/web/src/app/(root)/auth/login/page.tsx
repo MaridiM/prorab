@@ -1,17 +1,19 @@
 "use client"
 
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { motion, Variants } from "framer-motion"
-import { ArrowRight, Loader2, Mail, Lock } from "lucide-react"
+import { motion, Variants, AnimatePresence } from "framer-motion"
+import { ArrowRight, Loader2, Mail, Lock, Shield, ArrowLeft } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "@apollo/client/react"
 
 import { Button, Card, Input, PasswordInput, Form, FormField, FormItem, FormLabel, FormControl, FormMessage, TelegramLoginButton } from "@/packages/components"
 import { loginSchema, TLoginSchema } from "@/packages/schemas"
 import { useAutoValidateForm, useToast } from "@/packages/hooks"
 import { useAuth } from "@/packages/libs/auth/auth.context"
+import { VerifyTwoFactorLoginDocument } from "@/packages/api/graphql/__generated__/output"
 
 const fadeIn: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -29,8 +31,13 @@ export default function LoginPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { success, error } = useToast()
-    const { login: authLogin, isLoading } = useAuth()
-    
+    const { login: authLogin, isLoading, refetchUser } = useAuth()
+
+    // 2FA state
+    const [showTwoFactor, setShowTwoFactor] = useState(false)
+    const [twoFactorToken, setTwoFactorToken] = useState('')
+    const [twoFactorCode, setTwoFactorCode] = useState('')
+
     // Get redirect URL from query params (if coming from invite link)
     const redirectUrl = searchParams.get('redirect')
     const registerUrl = useMemo(() => {
@@ -48,11 +55,39 @@ export default function LoginPage() {
     // Auto-validate form with debounce
     useAutoValidateForm(form, ['email', 'password'])
 
+    // 2FA verification mutation
+    const [verifyTwoFactor, { loading: verifyingTwoFactor }] = useMutation(VerifyTwoFactorLoginDocument, {
+        onCompleted: async (data) => {
+            if (data.verifyTwoFactorLogin.user) {
+                success("Вход выполнен успешно")
+                await refetchUser()
+
+                if (redirectUrl) {
+                    router.push(redirectUrl)
+                } else {
+                    const hasOnboarding = data.verifyTwoFactorLogin.user.hasCompletedOnboarding
+                    router.push(hasOnboarding ? '/dashboard' : '/onboarding')
+                }
+            }
+        },
+        onError: (err) => {
+            error(err.message || 'Неверный код двухфакторной аутентификации')
+        }
+    })
+
     const onSubmit = async (data: TLoginSchema) => {
         try {
-            await authLogin(data.email, data.password)
+            const result = await authLogin(data.email, data.password)
+
+            // Check if 2FA is required
+            if (result?.requiresTwoFactor && result?.twoFactorToken) {
+                setTwoFactorToken(result.twoFactorToken)
+                setShowTwoFactor(true)
+                return
+            }
+
             success("Вход выполнен успешно")
-            
+
             // Check if there's a redirect URL (e.g., from invite link)
             if (redirectUrl) {
                 setTimeout(() => {
@@ -66,17 +101,121 @@ export default function LoginPage() {
         }
     }
 
+    const handleTwoFactorSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (twoFactorCode.length !== 6) {
+            error('Введите 6-значный код')
+            return
+        }
+
+        await verifyTwoFactor({
+            variables: {
+                twoFactorToken,
+                code: twoFactorCode,
+            }
+        })
+    }
+
+    const handleBackToLogin = () => {
+        setShowTwoFactor(false)
+        setTwoFactorToken('')
+        setTwoFactorCode('')
+    }
+
     const handleTelegramSuccess = useCallback((user: any) => {
         success("Вход через Telegram выполнен успешно!")
         // AuthContext handles redirect automatically based on hasCompletedOnboarding
         window.location.href = user.hasCompletedOnboarding ? '/dashboard' : '/onboarding'
     }, [success])
 
+    // 2FA Verification Screen
+    if (showTwoFactor) {
+        return (
+            <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
+                {/* Decorative gradient */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+
+                <motion.div
+                    className="text-center mb-8"
+                    variants={fadeIn}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    <motion.div
+                        className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/60 text-white mb-4 shadow-lg shadow-primary/30"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                    >
+                        <Shield className="w-7 h-7" />
+                    </motion.div>
+                    <h1 className="text-2xl font-bold tracking-tight">Двухфакторная аутентификация</h1>
+                    <p className="text-muted-foreground mt-2 text-sm">
+                        Введите код из приложения аутентификации
+                    </p>
+                </motion.div>
+
+                <motion.form
+                    className="space-y-5"
+                    onSubmit={handleTwoFactorSubmit}
+                    variants={fadeIn}
+                    initial="hidden"
+                    animate="visible"
+                    transition={{ delay: 0.2 }}
+                >
+                    <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5" />
+                            Код подтверждения
+                        </label>
+                        <Input
+                            type="text"
+                            placeholder="000000"
+                            value={twoFactorCode}
+                            onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            maxLength={6}
+                            autoFocus
+                            className="h-14 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all text-center text-2xl tracking-[0.5em] font-mono"
+                        />
+                        <p className="text-xs text-muted-foreground text-center mt-2">
+                            Введите 6-значный код из Google Authenticator или другого приложения
+                        </p>
+                    </div>
+
+                    <Button
+                        type="submit"
+                        disabled={verifyingTwoFactor || twoFactorCode.length !== 6}
+                        className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
+                    >
+                        {verifyingTwoFactor ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                Подтвердить
+                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleBackToLogin}
+                        className="w-full h-10 rounded-xl text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Назад к входу
+                    </Button>
+                </motion.form>
+            </Card>
+        )
+    }
+
     return (
         <Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
             {/* Decorative gradient */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary via-accent to-primary" />
-            
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+
             {/* Logo Header */}
             <motion.div
                 className="text-center mb-8"
@@ -86,7 +225,7 @@ export default function LoginPage() {
                 transition={{ delay: 0.1 }}
             >
                 <motion.div
-                    className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
+                    className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-amber-500 text-accent-foreground font-bold text-xl mb-4 shadow-lg shadow-accent/30"
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}

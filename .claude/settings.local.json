@@ -177,7 +177,8 @@
       "Bash(pnpm exec tsx:*)",
       "Bash(type \"G:\\\\Projects\\\\prorab\\\\v-1\\\\apps\\\\web\\\\src\\\\app\\\\\\(root\\)\\\\\\(protected\\)\\\\admin\\\\payment-providers\\\\page.tsx\")",
       "Bash(head:*)",
-      "Bash(pnpm run codegen:*)"
+      "Bash(pnpm run codegen:*)",
+      "Bash(node check-providers.js:*)"
     ],
     "deny": [],
     "ask": []

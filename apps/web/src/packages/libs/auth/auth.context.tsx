@@ -29,14 +29,20 @@ interface User {
   } | null
 }
 
+interface LoginResult {
+  requiresTwoFactor?: boolean
+  twoFactorToken?: string
+}
+
 interface AuthContextType {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<LoginResult | void>
   register: (data: RegisterData) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  refetchUser: () => Promise<void>
   hasPermission: (permission: string) => boolean
   isForeman: boolean
   isWorker: boolean
@@ -175,7 +181,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [user, isLoading, router])
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<LoginResult | void> => {
     const response = await loginMutation({
       variables: { input: { email, password } }
     })
@@ -184,7 +190,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw new Error(response.error.message || 'Ошибка входа')
     }
 
-    const userData = response.data?.login?.user
+    const loginData = response.data?.login
+
+    // Check if 2FA is required
+    if (loginData?.requiresTwoFactor && loginData?.twoFactorToken) {
+      return {
+        requiresTwoFactor: true,
+        twoFactorToken: loginData.twoFactorToken
+      }
+    }
+
+    const userData = loginData?.user
     if (userData) {
       console.log('[AuthContext] Login success, user data:', {
         hasCompletedOnboarding: userData.hasCompletedOnboarding,
@@ -292,6 +308,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         register,
         logout,
         refreshUser,
+        refetchUser: refreshUser,
         hasPermission,
         isForeman,
         isWorker,

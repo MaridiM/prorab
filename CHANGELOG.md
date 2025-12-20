@@ -5,6 +5,78 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-12-19 - 2FA Login & Settings UX Improvements
+
+### Added
+
+- **🔐 Two-Factor Authentication (2FA) Login Flow:**
+  - Complete 2FA verification during login when enabled
+  - Dedicated 2FA code input screen with shield icon
+  - Support for TOTP codes from Google Authenticator, Authy, etc.
+  - Support for backup codes during login
+  - Backend: `verifyTwoFactorLogin` mutation with temporary token flow
+  - Frontend: Beautiful animated 2FA verification UI
+  - Secure 5-minute expiry for 2FA pending tokens in Redis
+
+- **🔗 URL-Based Settings Navigation:**
+  - Settings tabs now use URL query parameters (`/settings?tab=security`)
+  - Page refresh preserves current tab (no more reset to Profile)
+  - Direct links to specific settings sections work correctly
+  - Browser back/forward navigation works with tabs
+
+### Fixed
+
+- **🔧 Admin Pages - Debounce for Search/Filters:**
+  - Added 500ms debounce to roles page search
+  - Added debounce to subscriptions page with filter reset on search
+  - Added debounce to payments page with proper filter handling
+  - Prevents unnecessary API calls during typing
+
+- **🛠️ TypeScript Fixes:**
+  - Fixed AdminRoleType import in resolver and service
+  - Fixed QRCode component import in TwoFactorAuth
+  - Fixed stats type in admin projects page
+
+### Changed
+
+- `apps/api/src/modules/auth/auth.service.ts` - Added 2FA check during login
+- `apps/api/src/modules/auth/auth.resolver.ts` - Added verifyTwoFactorLogin mutation
+- `apps/api/src/modules/auth/models/auth.model.ts` - Added requiresTwoFactor and twoFactorToken fields
+- `apps/web/src/app/(root)/auth/login/page.tsx` - Complete 2FA UI with code input
+- `apps/web/src/app/(root)/(protected)/settings/page.tsx` - URL-based tab routing
+- `apps/web/src/packages/libs/auth/auth.context.tsx` - Updated login to return 2FA result
+
+---
+
+## [1.0.1] - 2025-12-19 - Bugfixes & Improvements
+
+### Fixed
+
+- **🔧 Payment Providers Configuration UI:**
+  - Added configuration dialog for entering Yookassa/Stripe API credentials
+  - Shop ID, Secret Key, Webhook Secret fields for Yookassa
+  - Secret Key, Publishable Key, Webhook Secret fields for Stripe
+  - Active/Primary toggle switches in config dialog
+  - Test Connection and Clear Cache actions
+
+- **🔐 Admin Permissions:**
+  - Added missing `payment_providers:view`, `payment_providers:manage`, `plans:view`, `plans:manage` to ADMIN and SUPER_ADMIN roles
+  - Created `fix-permissions.ts` script for database update
+
+- **🛠️ Build Fixes:**
+  - Fixed useToast hook to support object-style parameters (`{ title, description, variant }`)
+  - Fixed UpdatePaymentProviderInput type errors (added null values for optional fields)
+  - Fixed AdminUserFilters missing role property
+  - Regenerated GraphQL types
+
+### Changed
+
+- `apps/web/src/app/(root)/(protected)/admin/payment-providers/page.tsx` - Complete rewrite with config dialog (600+ LOC)
+- `apps/web/src/packages/hooks/use-toast.ts` - Updated toast function signature
+- `apps/web/src/app/(root)/(protected)/admin/roles/assign-role-dialog.tsx` - Added role filter
+
+---
+
 ## [1.0.0] - 2025-12-19 🎉 MVP RELEASE
 
 ### Added

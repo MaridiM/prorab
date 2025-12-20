@@ -74,6 +74,8 @@ export default function AdminProjectsPage() {
 				limit: 50,
 			},
 		},
+		fetchPolicy: 'cache-and-network',
+		notifyOnNetworkStatusChange: true,
 	})
 
 	const [deleteProject] = useMutation(AdminDeleteProjectDocument, {
@@ -92,9 +94,21 @@ export default function AdminProjectsPage() {
 		onCompleted: () => {
 			refetch()
 		},
+		refetchQueries: [{ query: AdminProjectsDocument, variables: { filter, pagination: { page: 1, limit: 50 } } }],
 	})
 
-	const projects = data?.adminProjects?.projects || []
+	// Remove duplicates by ID to prevent project duplication
+	const projects = useMemo(() => {
+		const projectsList = data?.adminProjects?.projects || []
+		const uniqueProjects = new Map<string, any>()
+		projectsList.forEach((project: any) => {
+			if (project?.id && !uniqueProjects.has(project.id)) {
+				uniqueProjects.set(project.id, project)
+			}
+		})
+		return Array.from(uniqueProjects.values())
+	}, [data?.adminProjects?.projects])
+
 	const total = data?.adminProjects?.total || 0
 	const stats = (data?.adminProjects as any)?.stats || { active: 0, completed: 0, archived: 0 }
 
@@ -137,9 +151,15 @@ export default function AdminProjectsPage() {
 	}
 
 	const handleStatusChange = async (projectId: string, status: string) => {
-		await updateStatus({
-			variables: { projectId, status },
-		})
+		try {
+			await updateStatus({
+				variables: { projectId, status },
+			})
+			// Force refetch to update the list
+			await refetch()
+		} catch (error) {
+			console.error('Failed to update project status:', error)
+		}
 	}
 
 	const formatCurrency = (amount: number) => {
@@ -167,9 +187,18 @@ export default function AdminProjectsPage() {
 					<div className="flex-1 relative">
 						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
+							type="text"
 							placeholder="Search by project name or description..."
 							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
+							onChange={(e) => {
+								e.preventDefault()
+								setSearchQuery(e.target.value)
+							}}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault()
+								}
+							}}
 							className="pl-10"
 						/>
 					</div>
@@ -324,6 +353,7 @@ export default function AdminProjectsPage() {
 												<Button
 													variant="ghost"
 													size="sm"
+													title="Просмотреть детали проекта"
 													onClick={() => {
 														setSelectedProject(project)
 														setShowDetailsDialog(true)
@@ -334,7 +364,7 @@ export default function AdminProjectsPage() {
 
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
-														<Button variant="ghost" size="sm">
+														<Button variant="ghost" size="sm" title="Изменить статус проекта">
 															Status
 														</Button>
 													</DropdownMenuTrigger>
@@ -342,7 +372,10 @@ export default function AdminProjectsPage() {
 														{statusOptions.map((status) => (
 															<DropdownMenuItem
 																key={status}
-																onClick={() => handleStatusChange(project.id, status)}
+																onClick={(e) => {
+																	e.preventDefault()
+																	handleStatusChange(project.id, status)
+																}}
 																disabled={project.status === status}
 															>
 																{getStatusLabel(status)}
@@ -355,6 +388,7 @@ export default function AdminProjectsPage() {
 													<Button
 														variant="outline"
 														size="sm"
+														title="Архивировать проект"
 														onClick={() => handleArchive(project.id)}
 													>
 														<Archive className="h-4 w-4" />
@@ -364,6 +398,7 @@ export default function AdminProjectsPage() {
 												<Button
 													variant="destructive"
 													size="sm"
+													title="Удалить проект"
 													onClick={() => handleDelete(project.id)}
 												>
 													<Trash2 className="h-4 w-4" />

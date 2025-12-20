@@ -28,6 +28,23 @@ mutation Login($input: LoginInput!) {
       businessRole
       businessRoleAssignedAt
     }
+    requiresTwoFactor
+    twoFactorToken
+  }
+}
+
+mutation VerifyTwoFactorLogin($twoFactorToken: String!, $code: String!) {
+  verifyTwoFactorLogin(twoFactorToken: $twoFactorToken, code: $code) {
+    user {
+      id
+      email
+      fullName
+      phone
+      emailVerified
+      hasCompletedOnboarding
+      businessRole
+      businessRoleAssignedAt
+    }
   }
 }
 

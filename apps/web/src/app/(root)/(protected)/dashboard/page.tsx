@@ -30,6 +30,7 @@ import {
 	Eye,
 	AlertCircle,
 	CheckCircle2,
+	Shield,
 } from 'lucide-react'
 
 import {
@@ -1298,6 +1299,8 @@ export default function DashboardPage() {
 
 	// No teams state
 	if (teams.length === 0) {
+		const isAdmin = user?.adminRole
+		
 		return (
 			<div className="min-h-screen bg-background flex items-center justify-center">
 				<motion.div
@@ -1315,14 +1318,27 @@ export default function DashboardPage() {
 					<p className="text-muted-foreground text-lg mb-8">
 						Создайте свою первую бригаду, чтобы начать вести учёт объектов и расходов
 					</p>
-					<Button
-						onClick={() => router.push('/onboarding')}
-						size="lg"
-						className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25"
-					>
-						<Plus className="w-5 h-5 mr-2" />
-						Создать бригаду
-					</Button>
+					<div className="flex flex-col sm:flex-row gap-3 justify-center">
+						<Button
+							onClick={() => router.push('/onboarding')}
+							size="lg"
+							className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25"
+						>
+							<Plus className="w-5 h-5 mr-2" />
+							Создать бригаду
+						</Button>
+						{isAdmin && (
+							<Button
+								onClick={() => router.push('/admin')}
+								size="lg"
+								variant="outline"
+								className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 shadow-lg"
+							>
+								<Shield className="w-5 h-5 mr-2" />
+								Войти в админ панель
+							</Button>
+						)}
+					</div>
 				</motion.div>
 			</div>
 		)
@@ -1462,6 +1478,16 @@ export default function DashboardPage() {
 
 						{/* Actions */}
 						<div className="flex items-center gap-3">
+							{user?.adminRole && (
+								<Button
+									variant="outline"
+									onClick={() => router.push('/admin')}
+									className="hidden md:flex items-center gap-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+								>
+									<Shield className="w-4 h-4" />
+									<span>Админ панель</span>
+								</Button>
+							)}
 							<Button
 								variant="ghost"
 								onClick={() => router.push('/teams')}
