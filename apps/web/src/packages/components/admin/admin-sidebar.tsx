@@ -18,6 +18,9 @@ import {
 	Repeat,
 	Package,
 	Wallet,
+	Bell,
+	Merge,
+	ScrollText,
 } from 'lucide-react'
 import { cn } from '@/packages/utils'
 import { useAuth } from '@/packages/libs/auth'
@@ -57,6 +60,18 @@ const navItems: NavItem[] = [
 		label: 'Teams',
 		href: '/admin/teams',
 		icon: Building2,
+		permission: 'teams:view',
+	},
+	{
+		label: 'Team Operations',
+		href: '/admin/teams/operations',
+		icon: Merge,
+		permission: 'teams:view',
+	},
+	{
+		label: 'Communications',
+		href: '/admin/communications',
+		icon: Bell,
 		permission: 'teams:view',
 	},
 	{
@@ -106,6 +121,12 @@ const navItems: NavItem[] = [
 		href: '/admin/logs',
 		icon: FileText,
 		permission: 'audit_logs:view',
+	},
+	{
+		label: 'Team Audit',
+		href: '/admin/audit',
+		icon: ScrollText,
+		permission: 'settings:view',
 	},
 	{
 		label: 'Analytics',
@@ -163,7 +184,7 @@ export function AdminSidebar() {
 				})}
 			</nav>
 
-			<div className="border-t bg-card p-4 flex-shrink-0">
+			<div className="border-t bg-card p-4 shrink-0">
 				<div className="flex items-center gap-3">
 					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
 						{user?.fullName?.charAt(0) || 'A'}

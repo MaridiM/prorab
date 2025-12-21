@@ -58,6 +58,16 @@ export type ProjectPayout = Prisma.ProjectPayoutModel
  */
 export type WorkLog = Prisma.WorkLogModel
 /**
+ * Model CustomRole
+ * 
+ */
+export type CustomRole = Prisma.CustomRoleModel
+/**
+ * Model RoleAssignmentHistory
+ * 
+ */
+export type RoleAssignmentHistory = Prisma.RoleAssignmentHistoryModel
+/**
  * Model TeamMember
  * 
  */

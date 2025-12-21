@@ -449,12 +449,12 @@ export default function SettingsPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/50">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
-				<div className="container mx-auto px-4 py-8">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-8">
 					<Skeleton className="h-12 w-full mb-6" />
 					<Skeleton className="h-96 rounded-2xl" />
 				</div>
@@ -471,7 +471,7 @@ export default function SettingsPage() {
 					backHref="/dashboard"
 				/>
 
-				<div className="container mx-auto px-4 py-6">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-6">
 					<div className="flex flex-col lg:flex-row gap-6">
 						{/* Desktop Sidebar Navigation */}
 						<aside className="hidden lg:block w-64 flex-shrink-0">
@@ -516,7 +516,7 @@ export default function SettingsPage() {
 						</div>
 
 						{/* Main Content Area */}
-						<main className="flex-1 min-w-0 max-w-3xl pb-24 lg:pb-8">
+						<main className="flex-1 min-w-0 pb-24 lg:pb-8">
 					{/* Tab Content */}
 					<AnimatePresence mode="wait">
 						{/* Profile Tab */}

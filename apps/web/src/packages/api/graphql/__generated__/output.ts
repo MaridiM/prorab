@@ -1001,6 +1001,33 @@ export enum LogoType {
   Uploaded = 'UPLOADED'
 }
 
+/** Member activity metrics */
+export type MemberActivity = {
+  __typename?: 'MemberActivity';
+  /** Total actions count (work logs, expenses, etc.) */
+  actionsCount: Scalars['Int']['output'];
+  /** User avatar URL */
+  avatarUrl: Maybe<Scalars['String']['output']>;
+  /** User email */
+  email: Maybe<Scalars['String']['output']>;
+  /** Total hours logged */
+  hoursLogged: Scalars['Float']['output'];
+  /** Date joined the team */
+  joinedAt: Scalars['DateTime']['output'];
+  /** Last activity timestamp */
+  lastActiveAt: Maybe<Scalars['DateTime']['output']>;
+  /** Position in team */
+  position: Maybe<Scalars['String']['output']>;
+  /** Projects participated in */
+  projectsCount: Scalars['Int']['output'];
+  /** Team role (OWNER/MEMBER) */
+  role: Scalars['String']['output'];
+  /** User ID */
+  userId: Scalars['String']['output'];
+  /** User full name */
+  userName: Scalars['String']['output'];
+};
+
 export type MemberAnalytics = {
   __typename?: 'MemberAnalytics';
   avatarUrl: Maybe<Scalars['String']['output']>;
@@ -1995,6 +2022,15 @@ export type PlanLimits = {
   storageGB: Scalars['Float']['output'];
 };
 
+/** Position distribution count */
+export type PositionCount = {
+  __typename?: 'PositionCount';
+  /** Count of members with this position */
+  count: Scalars['Int']['output'];
+  /** Position name */
+  position: Scalars['String']['output'];
+};
+
 export type Project = {
   __typename?: 'Project';
   /** Адрес объекта */
@@ -2120,6 +2156,21 @@ export enum ProjectStatus {
   Completed = 'COMPLETED'
 }
 
+/** Storage usage per project */
+export type ProjectStorageUsage = {
+  __typename?: 'ProjectStorageUsage';
+  /** Number of files */
+  filesCount: Scalars['Int']['output'];
+  /** Percentage of total team storage */
+  percentage: Scalars['Float']['output'];
+  /** Project ID */
+  projectId: Scalars['String']['output'];
+  /** Project name */
+  projectName: Scalars['String']['output'];
+  /** Used storage in bytes */
+  usedBytes: Scalars['Float']['output'];
+};
+
 export type ProjectsByTeamItem = {
   __typename?: 'ProjectsByTeamItem';
   /** Projects count */
@@ -2230,8 +2281,20 @@ export type Query = {
   adminSystemHealth: SystemHealth;
   /** Get detailed information about a specific team (Admin only) */
   adminTeam: AdminTeamDetails;
+  /** Get combined team analytics (all data in one call) */
+  adminTeamAnalytics: TeamAnalytics;
+  /** Get team composition analysis (roles, positions, salary distribution) */
+  adminTeamComposition: TeamComposition;
+  /** Get team growth chart data (members and projects over time) */
+  adminTeamGrowthChart: TeamGrowthChart;
+  /** Get team KPIs (Key Performance Indicators) */
+  adminTeamKPIs: TeamKpIs;
+  /** Get member activity metrics for a team */
+  adminTeamMemberActivity: Array<MemberActivity>;
   /** Get statistics for a specific team (Admin only) */
   adminTeamStats: AdminTeamStats;
+  /** Get storage usage breakdown for a team */
+  adminTeamStorageUsage: TeamStorageUsage;
   /** Get paginated list of teams with filters (Admin only) */
   adminTeams: AdminTeamsConnection;
   /** Get detailed information about a specific user (Admin only) */
@@ -2464,7 +2527,38 @@ export type QueryAdminTeamArgs = {
 };
 
 
+export type QueryAdminTeamAnalyticsArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamCompositionArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamGrowthChartArgs = {
+  months?: Scalars['Int']['input'];
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamKpIsArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamMemberActivityArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
 export type QueryAdminTeamStatsArgs = {
+  teamId: Scalars['String']['input'];
+};
+
+
+export type QueryAdminTeamStorageUsageArgs = {
   teamId: Scalars['String']['input'];
 };
 
@@ -2711,6 +2805,28 @@ export type ReportPhoto = {
 export type ResetPasswordInput = {
   newPassword: Scalars['String']['input'];
   token: Scalars['String']['input'];
+};
+
+/** Role distribution count */
+export type RoleCount = {
+  __typename?: 'RoleCount';
+  /** Count of members with this role */
+  count: Scalars['Int']['output'];
+  /** Role name */
+  role: Scalars['String']['output'];
+};
+
+/** Salary type distribution */
+export type SalaryDistribution = {
+  __typename?: 'SalaryDistribution';
+  /** Members with fixed salary */
+  fixed: Scalars['Int']['output'];
+  /** Members without salary settings */
+  none: Scalars['Int']['output'];
+  /** Members with percentage-based salary */
+  percentage: Scalars['Int']['output'];
+  /** Total salary amount (fixed + calculated) */
+  totalAmount: Scalars['Float']['output'];
 };
 
 export type Session = {
@@ -3018,12 +3134,86 @@ export type Team = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+/** Combined team analytics data */
+export type TeamAnalytics = {
+  __typename?: 'TeamAnalytics';
+  /** Team composition analysis */
+  composition: TeamComposition;
+  /** Growth chart data */
+  growthChart: TeamGrowthChart;
+  /** Key performance indicators */
+  kpis: TeamKpIs;
+  /** Member activity metrics */
+  memberActivity: Array<MemberActivity>;
+  /** Storage usage breakdown */
+  storageUsage: TeamStorageUsage;
+  /** Team ID */
+  teamId: Scalars['String']['output'];
+  /** Team name */
+  teamName: Scalars['String']['output'];
+};
+
+/** Team composition analysis */
+export type TeamComposition = {
+  __typename?: 'TeamComposition';
+  /** Members grouped by position */
+  byPosition: Array<PositionCount>;
+  /** Members grouped by role */
+  byRole: Array<RoleCount>;
+  /** Salary type distribution */
+  salaryDistribution: SalaryDistribution;
+  /** Total team members count */
+  totalMembers: Scalars['Int']['output'];
+};
+
 export type TeamCounts = {
   __typename?: 'TeamCounts';
   /** Number of team members */
   members: Scalars['Int']['output'];
   /** Number of projects */
   projects: Scalars['Int']['output'];
+};
+
+/** Team growth chart data over time */
+export type TeamGrowthChart = {
+  __typename?: 'TeamGrowthChart';
+  /** Month labels (e.g., "Jan 2025") */
+  labels: Array<Scalars['String']['output']>;
+  /** Member count data points */
+  memberData: Array<Scalars['Int']['output']>;
+  /** Project count data points */
+  projectData: Array<Scalars['Int']['output']>;
+};
+
+/** Team key performance indicators */
+export type TeamKpIs = {
+  __typename?: 'TeamKPIs';
+  /** Active projects count */
+  activeProjectsCount: Scalars['Int']['output'];
+  /** Archived projects count */
+  archivedProjectsCount: Scalars['Int']['output'];
+  /** Average hours per member */
+  avgHoursPerMember: Scalars['Float']['output'];
+  /** Average project duration in days */
+  avgProjectDurationDays: Scalars['Int']['output'];
+  /** Completed projects count */
+  completedProjectsCount: Scalars['Int']['output'];
+  /** Member retention rate (0-100%) */
+  memberRetention: Scalars['Float']['output'];
+  /** Profit (budget - expenses) */
+  profit: Scalars['Float']['output'];
+  /** Project completion rate (0-100%) */
+  projectCompletionRate: Scalars['Float']['output'];
+  /** Total budget across projects */
+  totalBudget: Scalars['Float']['output'];
+  /** Total expenses amount */
+  totalExpenses: Scalars['Float']['output'];
+  /** Total hours worked by team */
+  totalHoursWorked: Scalars['Float']['output'];
+  /** Total team members */
+  totalMembers: Scalars['Int']['output'];
+  /** Total revenue from projects */
+  totalRevenue: Scalars['Float']['output'];
 };
 
 export type TeamMember = {
@@ -3116,6 +3306,21 @@ export type TeamStats = {
   totalBudget: Scalars['Float']['output'];
   totalExpenses: Scalars['Float']['output'];
   totalHours: Scalars['Float']['output'];
+};
+
+/** Team storage usage breakdown */
+export type TeamStorageUsage = {
+  __typename?: 'TeamStorageUsage';
+  /** Storage breakdown by project */
+  byProject: Array<ProjectStorageUsage>;
+  /** Total storage limit in bytes */
+  totalBytes: Scalars['Float']['output'];
+  /** Used storage in bytes */
+  usedBytes: Scalars['Float']['output'];
+  /** Used storage in gigabytes */
+  usedGB: Scalars['Float']['output'];
+  /** Used percentage (0-100) */
+  usedPercentage: Scalars['Float']['output'];
 };
 
 export type TelegramAuthPayload = {
@@ -4017,6 +4222,69 @@ export type AdminDeleteSupportTicketMutationVariables = Exact<{
 
 export type AdminDeleteSupportTicketMutation = { __typename?: 'Mutation', adminDeleteSupportTicket: { __typename?: 'DeleteResult', success: boolean, message: string } };
 
+export type TeamGrowthChartFieldsFragment = { __typename?: 'TeamGrowthChart', labels: Array<string>, memberData: Array<number>, projectData: Array<number> };
+
+export type MemberActivityFieldsFragment = { __typename?: 'MemberActivity', userId: string, userName: string, avatarUrl: string | null, email: string | null, role: string, position: string | null, actionsCount: number, lastActiveAt: string | null, hoursLogged: number, projectsCount: number, joinedAt: string };
+
+export type RoleCountFieldsFragment = { __typename?: 'RoleCount', role: string, count: number };
+
+export type PositionCountFieldsFragment = { __typename?: 'PositionCount', position: string, count: number };
+
+export type SalaryDistributionFieldsFragment = { __typename?: 'SalaryDistribution', fixed: number, percentage: number, none: number, totalAmount: number };
+
+export type TeamCompositionFieldsFragment = { __typename?: 'TeamComposition', totalMembers: number, byRole: Array<{ __typename?: 'RoleCount', role: string, count: number }>, byPosition: Array<{ __typename?: 'PositionCount', position: string, count: number }>, salaryDistribution: { __typename?: 'SalaryDistribution', fixed: number, percentage: number, none: number, totalAmount: number } };
+
+export type ProjectStorageUsageFieldsFragment = { __typename?: 'ProjectStorageUsage', projectId: string, projectName: string, usedBytes: number, filesCount: number, percentage: number };
+
+export type TeamStorageUsageFieldsFragment = { __typename?: 'TeamStorageUsage', totalBytes: number, usedBytes: number, usedPercentage: number, usedGB: number, byProject: Array<{ __typename?: 'ProjectStorageUsage', projectId: string, projectName: string, usedBytes: number, filesCount: number, percentage: number }> };
+
+export type TeamKpIsFieldsFragment = { __typename?: 'TeamKPIs', memberRetention: number, projectCompletionRate: number, avgProjectDurationDays: number, totalRevenue: number, activeProjectsCount: number, completedProjectsCount: number, archivedProjectsCount: number, totalMembers: number, totalHoursWorked: number, avgHoursPerMember: number, totalExpenses: number, totalBudget: number, profit: number };
+
+export type TeamAnalyticsFieldsFragment = { __typename?: 'TeamAnalytics', teamId: string, teamName: string, kpis: { __typename?: 'TeamKPIs', memberRetention: number, projectCompletionRate: number, avgProjectDurationDays: number, totalRevenue: number, activeProjectsCount: number, completedProjectsCount: number, archivedProjectsCount: number, totalMembers: number, totalHoursWorked: number, avgHoursPerMember: number, totalExpenses: number, totalBudget: number, profit: number }, growthChart: { __typename?: 'TeamGrowthChart', labels: Array<string>, memberData: Array<number>, projectData: Array<number> }, memberActivity: Array<{ __typename?: 'MemberActivity', userId: string, userName: string, avatarUrl: string | null, email: string | null, role: string, position: string | null, actionsCount: number, lastActiveAt: string | null, hoursLogged: number, projectsCount: number, joinedAt: string }>, composition: { __typename?: 'TeamComposition', totalMembers: number, byRole: Array<{ __typename?: 'RoleCount', role: string, count: number }>, byPosition: Array<{ __typename?: 'PositionCount', position: string, count: number }>, salaryDistribution: { __typename?: 'SalaryDistribution', fixed: number, percentage: number, none: number, totalAmount: number } }, storageUsage: { __typename?: 'TeamStorageUsage', totalBytes: number, usedBytes: number, usedPercentage: number, usedGB: number, byProject: Array<{ __typename?: 'ProjectStorageUsage', projectId: string, projectName: string, usedBytes: number, filesCount: number, percentage: number }> } };
+
+export type AdminTeamGrowthChartQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+  months?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AdminTeamGrowthChartQuery = { __typename?: 'Query', adminTeamGrowthChart: { __typename?: 'TeamGrowthChart', labels: Array<string>, memberData: Array<number>, projectData: Array<number> } };
+
+export type AdminTeamMemberActivityQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamMemberActivityQuery = { __typename?: 'Query', adminTeamMemberActivity: Array<{ __typename?: 'MemberActivity', userId: string, userName: string, avatarUrl: string | null, email: string | null, role: string, position: string | null, actionsCount: number, lastActiveAt: string | null, hoursLogged: number, projectsCount: number, joinedAt: string }> };
+
+export type AdminTeamCompositionQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamCompositionQuery = { __typename?: 'Query', adminTeamComposition: { __typename?: 'TeamComposition', totalMembers: number, byRole: Array<{ __typename?: 'RoleCount', role: string, count: number }>, byPosition: Array<{ __typename?: 'PositionCount', position: string, count: number }>, salaryDistribution: { __typename?: 'SalaryDistribution', fixed: number, percentage: number, none: number, totalAmount: number } } };
+
+export type AdminTeamStorageUsageQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamStorageUsageQuery = { __typename?: 'Query', adminTeamStorageUsage: { __typename?: 'TeamStorageUsage', totalBytes: number, usedBytes: number, usedPercentage: number, usedGB: number, byProject: Array<{ __typename?: 'ProjectStorageUsage', projectId: string, projectName: string, usedBytes: number, filesCount: number, percentage: number }> } };
+
+export type AdminTeamKpIsQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamKpIsQuery = { __typename?: 'Query', adminTeamKPIs: { __typename?: 'TeamKPIs', memberRetention: number, projectCompletionRate: number, avgProjectDurationDays: number, totalRevenue: number, activeProjectsCount: number, completedProjectsCount: number, archivedProjectsCount: number, totalMembers: number, totalHoursWorked: number, avgHoursPerMember: number, totalExpenses: number, totalBudget: number, profit: number } };
+
+export type AdminTeamAnalyticsQueryVariables = Exact<{
+  teamId: Scalars['String']['input'];
+}>;
+
+
+export type AdminTeamAnalyticsQuery = { __typename?: 'Query', adminTeamAnalytics: { __typename?: 'TeamAnalytics', teamId: string, teamName: string, kpis: { __typename?: 'TeamKPIs', memberRetention: number, projectCompletionRate: number, avgProjectDurationDays: number, totalRevenue: number, activeProjectsCount: number, completedProjectsCount: number, archivedProjectsCount: number, totalMembers: number, totalHoursWorked: number, avgHoursPerMember: number, totalExpenses: number, totalBudget: number, profit: number }, growthChart: { __typename?: 'TeamGrowthChart', labels: Array<string>, memberData: Array<number>, projectData: Array<number> }, memberActivity: Array<{ __typename?: 'MemberActivity', userId: string, userName: string, avatarUrl: string | null, email: string | null, role: string, position: string | null, actionsCount: number, lastActiveAt: string | null, hoursLogged: number, projectsCount: number, joinedAt: string }>, composition: { __typename?: 'TeamComposition', totalMembers: number, byRole: Array<{ __typename?: 'RoleCount', role: string, count: number }>, byPosition: Array<{ __typename?: 'PositionCount', position: string, count: number }>, salaryDistribution: { __typename?: 'SalaryDistribution', fixed: number, percentage: number, none: number, totalAmount: number } }, storageUsage: { __typename?: 'TeamStorageUsage', totalBytes: number, usedBytes: number, usedPercentage: number, usedGB: number, byProject: Array<{ __typename?: 'ProjectStorageUsage', projectId: string, projectName: string, usedBytes: number, filesCount: number, percentage: number }> } } };
+
 export type AdminTeamFieldsFragment = { __typename?: 'Team', id: string, name: string, logoUrl: string | null, ownerId: string, createdAt: string, updatedAt: string };
 
 export type AdminTeamDetailsFieldsFragment = { __typename?: 'AdminTeamDetails', team: { __typename?: 'Team', id: string, name: string, logoUrl: string | null, ownerId: string, createdAt: string, updatedAt: string }, owner: { __typename?: 'User', id: string, email: string, fullName: string, avatarUrl: string | null }, subscription: { __typename?: 'Subscription', id: string, plan: SubscriptionPlan, status: SubscriptionStatus, currentPeriodEnd: string } | null, projects: Array<{ __typename?: 'Project', id: string, name: string, status: ProjectStatus, budget: number | null, createdAt: string }>, _count: { __typename?: 'AdminTeamCounts', members: number, projects: number } };
@@ -4818,6 +5086,16 @@ export const SystemHealthFieldsFragmentDoc = {"kind":"Document","definitions":[{
 export const PageInfoFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<PageInfoFieldsFragment, unknown>;
 export const AdminPaymentFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminPaymentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminPayment"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subscriptionId"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}},{"kind":"Field","name":{"kind":"Name","value":"currency"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"yookassaPaymentId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"subscription"}}]}}]} as unknown as DocumentNode<AdminPaymentFieldsFragment, unknown>;
 export const AdminSubscriptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminSubscriptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Subscription"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodStart"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"cancelAtPeriodEnd"}},{"kind":"Field","name":{"kind":"Name","value":"trialEndsAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"team"}}]}}]} as unknown as DocumentNode<AdminSubscriptionFieldsFragment, unknown>;
+export const TeamKpIsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamKPIsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamKPIs"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberRetention"}},{"kind":"Field","name":{"kind":"Name","value":"projectCompletionRate"}},{"kind":"Field","name":{"kind":"Name","value":"avgProjectDurationDays"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"archivedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"avgHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalBudget"}},{"kind":"Field","name":{"kind":"Name","value":"profit"}}]}}]} as unknown as DocumentNode<TeamKpIsFieldsFragment, unknown>;
+export const TeamGrowthChartFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamGrowthChartFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamGrowthChart"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"memberData"}},{"kind":"Field","name":{"kind":"Name","value":"projectData"}}]}}]} as unknown as DocumentNode<TeamGrowthChartFieldsFragment, unknown>;
+export const MemberActivityFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberActivityFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberActivity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"actionsCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastActiveAt"}},{"kind":"Field","name":{"kind":"Name","value":"hoursLogged"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}}]} as unknown as DocumentNode<MemberActivityFieldsFragment, unknown>;
+export const RoleCountFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RoleCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}}]} as unknown as DocumentNode<RoleCountFieldsFragment, unknown>;
+export const PositionCountFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PositionCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}}]} as unknown as DocumentNode<PositionCountFieldsFragment, unknown>;
+export const SalaryDistributionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SalaryDistributionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SalaryDistribution"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fixed"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}},{"kind":"Field","name":{"kind":"Name","value":"none"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}}]}}]} as unknown as DocumentNode<SalaryDistributionFieldsFragment, unknown>;
+export const TeamCompositionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamCompositionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamComposition"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"byRole"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RoleCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"byPosition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PositionCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"salaryDistribution"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SalaryDistributionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RoleCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PositionCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SalaryDistributionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SalaryDistribution"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fixed"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}},{"kind":"Field","name":{"kind":"Name","value":"none"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}}]}}]} as unknown as DocumentNode<TeamCompositionFieldsFragment, unknown>;
+export const ProjectStorageUsageFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filesCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}}]} as unknown as DocumentNode<ProjectStorageUsageFieldsFragment, unknown>;
+export const TeamStorageUsageFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedPercentage"}},{"kind":"Field","name":{"kind":"Name","value":"usedGB"}},{"kind":"Field","name":{"kind":"Name","value":"byProject"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectStorageUsageFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filesCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}}]} as unknown as DocumentNode<TeamStorageUsageFieldsFragment, unknown>;
+export const TeamAnalyticsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"teamName"}},{"kind":"Field","name":{"kind":"Name","value":"kpis"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamKPIsFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"growthChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamGrowthChartFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"memberActivity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberActivityFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"composition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamCompositionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"storageUsage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamStorageUsageFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RoleCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PositionCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SalaryDistributionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SalaryDistribution"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fixed"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}},{"kind":"Field","name":{"kind":"Name","value":"none"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filesCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamKPIsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamKPIs"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberRetention"}},{"kind":"Field","name":{"kind":"Name","value":"projectCompletionRate"}},{"kind":"Field","name":{"kind":"Name","value":"avgProjectDurationDays"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"archivedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"avgHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalBudget"}},{"kind":"Field","name":{"kind":"Name","value":"profit"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamGrowthChartFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamGrowthChart"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"memberData"}},{"kind":"Field","name":{"kind":"Name","value":"projectData"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberActivityFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberActivity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"actionsCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastActiveAt"}},{"kind":"Field","name":{"kind":"Name","value":"hoursLogged"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamCompositionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamComposition"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"byRole"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RoleCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"byPosition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PositionCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"salaryDistribution"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SalaryDistributionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedPercentage"}},{"kind":"Field","name":{"kind":"Name","value":"usedGB"}},{"kind":"Field","name":{"kind":"Name","value":"byProject"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectStorageUsageFields"}}]}}]}}]} as unknown as DocumentNode<TeamAnalyticsFieldsFragment, unknown>;
 export const AdminTeamFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminTeamFieldsFragment, unknown>;
 export const AdminTeamDetailsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"members"}},{"kind":"Field","name":{"kind":"Name","value":"projects"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]} as unknown as DocumentNode<AdminTeamDetailsFieldsFragment, unknown>;
 export const AdminTeamStatsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProjects"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenseAmount"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjects"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjects"}}]}}]} as unknown as DocumentNode<AdminTeamStatsFieldsFragment, unknown>;
@@ -4910,6 +5188,12 @@ export const AdminSupportStatisticsDocument = {"kind":"Document","definitions":[
 export const AdminUpdateSupportTicketDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminUpdateSupportTicket"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminUpdateSupportTicketInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminUpdateSupportTicket"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ticketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"closedAt"}}]}}]}}]} as unknown as DocumentNode<AdminUpdateSupportTicketMutation, AdminUpdateSupportTicketMutationVariables>;
 export const AdminSendSupportMessageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminSendSupportMessage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminSendMessageInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminSendSupportMessage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ticketId"}},{"kind":"Field","name":{"kind":"Name","value":"fromUser"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]}}]} as unknown as DocumentNode<AdminSendSupportMessageMutation, AdminSendSupportMessageMutationVariables>;
 export const AdminDeleteSupportTicketDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AdminDeleteSupportTicket"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminDeleteSupportTicket"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ticketId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ticketId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<AdminDeleteSupportTicketMutation, AdminDeleteSupportTicketMutationVariables>;
+export const AdminTeamGrowthChartDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamGrowthChart"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"months"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}},"defaultValue":{"kind":"IntValue","value":"12"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamGrowthChart"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}},{"kind":"Argument","name":{"kind":"Name","value":"months"},"value":{"kind":"Variable","name":{"kind":"Name","value":"months"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamGrowthChartFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamGrowthChartFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamGrowthChart"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"memberData"}},{"kind":"Field","name":{"kind":"Name","value":"projectData"}}]}}]} as unknown as DocumentNode<AdminTeamGrowthChartQuery, AdminTeamGrowthChartQueryVariables>;
+export const AdminTeamMemberActivityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamMemberActivity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamMemberActivity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberActivityFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberActivityFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberActivity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"actionsCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastActiveAt"}},{"kind":"Field","name":{"kind":"Name","value":"hoursLogged"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}}]} as unknown as DocumentNode<AdminTeamMemberActivityQuery, AdminTeamMemberActivityQueryVariables>;
+export const AdminTeamCompositionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamComposition"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamComposition"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamCompositionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RoleCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PositionCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SalaryDistributionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SalaryDistribution"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fixed"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}},{"kind":"Field","name":{"kind":"Name","value":"none"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamCompositionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamComposition"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"byRole"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RoleCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"byPosition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PositionCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"salaryDistribution"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SalaryDistributionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}}]}}]} as unknown as DocumentNode<AdminTeamCompositionQuery, AdminTeamCompositionQueryVariables>;
+export const AdminTeamStorageUsageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamStorageUsage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamStorageUsage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamStorageUsageFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filesCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedPercentage"}},{"kind":"Field","name":{"kind":"Name","value":"usedGB"}},{"kind":"Field","name":{"kind":"Name","value":"byProject"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectStorageUsageFields"}}]}}]}}]} as unknown as DocumentNode<AdminTeamStorageUsageQuery, AdminTeamStorageUsageQueryVariables>;
+export const AdminTeamKpIsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamKPIs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamKPIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamKPIsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamKPIsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamKPIs"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberRetention"}},{"kind":"Field","name":{"kind":"Name","value":"projectCompletionRate"}},{"kind":"Field","name":{"kind":"Name","value":"avgProjectDurationDays"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"archivedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"avgHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalBudget"}},{"kind":"Field","name":{"kind":"Name","value":"profit"}}]}}]} as unknown as DocumentNode<AdminTeamKpIsQuery, AdminTeamKpIsQueryVariables>;
+export const AdminTeamAnalyticsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamAnalytics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamAnalyticsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamKPIsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamKPIs"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"memberRetention"}},{"kind":"Field","name":{"kind":"Name","value":"projectCompletionRate"}},{"kind":"Field","name":{"kind":"Name","value":"avgProjectDurationDays"}},{"kind":"Field","name":{"kind":"Name","value":"totalRevenue"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"archivedProjectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalHoursWorked"}},{"kind":"Field","name":{"kind":"Name","value":"avgHoursPerMember"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalBudget"}},{"kind":"Field","name":{"kind":"Name","value":"profit"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamGrowthChartFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamGrowthChart"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"labels"}},{"kind":"Field","name":{"kind":"Name","value":"memberData"}},{"kind":"Field","name":{"kind":"Name","value":"projectData"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MemberActivityFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MemberActivity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"userName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"actionsCount"}},{"kind":"Field","name":{"kind":"Name","value":"lastActiveAt"}},{"kind":"Field","name":{"kind":"Name","value":"hoursLogged"}},{"kind":"Field","name":{"kind":"Name","value":"projectsCount"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RoleCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RoleCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionCountFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PositionCount"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"position"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SalaryDistributionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SalaryDistribution"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fixed"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}},{"kind":"Field","name":{"kind":"Name","value":"none"}},{"kind":"Field","name":{"kind":"Name","value":"totalAmount"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamCompositionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamComposition"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"byRole"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RoleCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"byPosition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PositionCountFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"salaryDistribution"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SalaryDistributionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ProjectStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ProjectStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"filesCount"}},{"kind":"Field","name":{"kind":"Name","value":"percentage"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamStorageUsageFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamStorageUsage"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedBytes"}},{"kind":"Field","name":{"kind":"Name","value":"usedPercentage"}},{"kind":"Field","name":{"kind":"Name","value":"usedGB"}},{"kind":"Field","name":{"kind":"Name","value":"byProject"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ProjectStorageUsageFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TeamAnalyticsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TeamAnalytics"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"teamName"}},{"kind":"Field","name":{"kind":"Name","value":"kpis"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamKPIsFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"growthChart"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamGrowthChartFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"memberActivity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MemberActivityFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"composition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamCompositionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"storageUsage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TeamStorageUsageFields"}}]}}]}}]} as unknown as DocumentNode<AdminTeamAnalyticsQuery, AdminTeamAnalyticsQueryVariables>;
 export const AdminTeamsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeams"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamFilters"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PaginationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeams"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"pagination"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pagination"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PageInfoFields"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PageInfoFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PageInfo"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]} as unknown as DocumentNode<AdminTeamsQuery, AdminTeamsQueryVariables>;
 export const AdminTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamDetailsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Team"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"subscription"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"plan"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"currentPeriodEnd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"budget"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"_count"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"members"}},{"kind":"Field","name":{"kind":"Name","value":"projects"}}]}}]}}]} as unknown as DocumentNode<AdminTeamQuery, AdminTeamQueryVariables>;
 export const AdminTeamStatsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AdminTeamStats"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"adminTeamStats"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AdminTeamStatsFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AdminTeamStatsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AdminTeamStats"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalMembers"}},{"kind":"Field","name":{"kind":"Name","value":"totalProjects"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenses"}},{"kind":"Field","name":{"kind":"Name","value":"totalExpenseAmount"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjects"}},{"kind":"Field","name":{"kind":"Name","value":"completedProjects"}}]}}]} as unknown as DocumentNode<AdminTeamStatsQuery, AdminTeamStatsQueryVariables>;

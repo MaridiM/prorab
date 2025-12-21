@@ -1,0 +1,168 @@
+# ==================== FRAGMENTS ====================
+
+fragment CustomRoleFields on CustomRole {
+  id
+  teamId
+  name
+  description
+  color
+  permissions
+  parentRoleId
+  level
+  isActive
+  isBuiltIn
+  sortOrder
+  createdBy
+  modifiedBy
+  createdAt
+  updatedAt
+  memberCount
+  effectivePermissions
+}
+
+fragment RoleAssignmentHistoryFields on RoleAssignmentHistory {
+  id
+  memberId
+  teamId
+  previousRole
+  newRole
+  roleId
+  assignedBy
+  reason
+  createdAt
+}
+
+fragment PermissionDefinitionFields on PermissionDefinition {
+  key
+  name
+  description
+  category
+}
+
+fragment PermissionCategoryFields on PermissionCategory {
+  key
+  label
+  description
+  icon
+  permissions {
+    ...PermissionDefinitionFields
+  }
+}
+
+fragment RoleHierarchyNodeFields on RoleHierarchyNode {
+  id
+  name
+  color
+  level
+  memberCount
+  permissionCount
+  isBuiltIn
+}
+
+fragment RoleStatisticsFields on RoleStatistics {
+  totalRoles
+  activeRoles
+  inactiveRoles
+  builtInRoles
+  totalMembers
+  membersWithCustomRoles
+  membersWithDefaultRoles
+}
+
+# ==================== QUERIES ====================
+
+query AdminGetTeamRoles($teamId: String!) {
+  adminGetTeamRoles(teamId: $teamId) {
+    ...CustomRoleFields
+    parentRole {
+      id
+      name
+      color
+    }
+    childRoles {
+      id
+      name
+      color
+    }
+  }
+}
+
+query AdminGetRoleById($roleId: ID!) {
+  adminGetRoleById(roleId: $roleId) {
+    ...CustomRoleFields
+    parentRole {
+      id
+      name
+      color
+      permissions
+    }
+    childRoles {
+      id
+      name
+      color
+      memberCount
+    }
+  }
+}
+
+query AdminGetRoleHierarchy($teamId: String!) {
+  adminGetRoleHierarchy(teamId: $teamId) {
+    ...RoleHierarchyNodeFields
+    children {
+      ...RoleHierarchyNodeFields
+      children {
+        ...RoleHierarchyNodeFields
+      }
+    }
+  }
+}
+
+query AdminGetPermissionCategories {
+  adminGetPermissionCategories {
+    ...PermissionCategoryFields
+  }
+}
+
+query AdminGetRoleAssignmentHistory($teamId: String!, $limit: Int = 50) {
+  adminGetRoleAssignmentHistory(teamId: $teamId, limit: $limit) {
+    ...RoleAssignmentHistoryFields
+  }
+}
+
+query AdminGetMemberRoleHistory($memberId: String!, $limit: Int = 20) {
+  adminGetMemberRoleHistory(memberId: $memberId, limit: $limit) {
+    ...RoleAssignmentHistoryFields
+  }
+}
+
+query AdminGetRoleStatistics($teamId: String!) {
+  adminGetRoleStatistics(teamId: $teamId) {
+    ...RoleStatisticsFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation AdminCreateCustomRole($input: CreateCustomRoleInput!) {
+  adminCreateCustomRole(input: $input) {
+    ...CustomRoleFields
+  }
+}
+
+mutation AdminUpdateCustomRole($input: UpdateCustomRoleInput!) {
+  adminUpdateCustomRole(input: $input) {
+    ...CustomRoleFields
+  }
+}
+
+mutation AdminDeleteCustomRole($roleId: ID!) {
+  adminDeleteCustomRole(roleId: $roleId)
+}
+
+mutation AdminAssignRole($input: AssignRoleInput!) {
+  adminAssignRole(input: $input)
+}
+
+mutation AdminBulkAssignRole($input: BulkAssignRoleInput!) {
+  adminBulkAssignRole(input: $input)
+}

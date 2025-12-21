@@ -175,7 +175,7 @@ export default function StorageSettingsPage() {
 	// Early return for loading state (after all hooks)
 	if (settingsLoading) {
 		return (
-			<div className="container mx-auto py-6 space-y-6">
+			<div className="w-full py-6 space-y-6">
 				<Skeleton className="h-12 w-64" />
 				<Skeleton className="h-96" />
 			</div>
@@ -183,7 +183,7 @@ export default function StorageSettingsPage() {
 	}
 
 	return (
-		<div className="container mx-auto py-6 space-y-6">
+		<div className="w-full py-6 space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold">Storage Management</h1>
 				<p className="text-muted-foreground mt-1">Manage storage provider settings and monitor usage</p>

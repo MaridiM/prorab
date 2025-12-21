@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./styles/globals.css";
 import { ApolloClientProvider } from "@/packages/libs";
@@ -40,7 +41,9 @@ export default async function RootLayout({
           <ApolloClientProvider>
             <AuthProvider>
               <NextIntlClientProvider messages={messages}>
-                {children}
+                <Suspense fallback={null}>
+                  {children}
+                </Suspense>
               </NextIntlClientProvider>
             </AuthProvider>
           </ApolloClientProvider>

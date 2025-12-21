@@ -4,7 +4,7 @@ import { PrismaService } from '../../core/prisma/prisma.service'
 import { User } from '../../../prisma/generated/client'
 import { nanoid } from 'nanoid'
 
-interface TelegramUser {
+export interface TelegramUser {
 	id: number
 	first_name: string
 	last_name?: string
@@ -47,7 +47,7 @@ export class TelegramAuthService {
 	/**
 	 * Связать token с chat_id (вызывается из бота)
 	 */
-	async linkAuthToken(token: string, chatId: string): Promise<void> {
+	async linkAuthToken(token: string, chatId: string, telegramUser?: TelegramUser): Promise<void> {
 		const authToken = await this.prisma.telegramAuthToken.findUnique({
 			where: { token },
 		})
@@ -66,7 +66,14 @@ export class TelegramAuthService {
 
 		await this.prisma.telegramAuthToken.update({
 			where: { token },
-			data: { chatId, used: true },
+			data: { 
+				chatId, 
+				used: true,
+				telegramFirstName: telegramUser?.first_name,
+				telegramLastName: telegramUser?.last_name,
+				telegramUsername: telegramUser?.username,
+				telegramPhotoUrl: telegramUser?.photo_url,
+			},
 		})
 
 		this.logger.log(`Linked token ${token.substring(0, 8)}... with chat_id ${chatId}`)
@@ -77,7 +84,7 @@ export class TelegramAuthService {
 	 */
 	async checkAuthToken(
 		token: string,
-	): Promise<{ completed: boolean; chatId?: string }> {
+	): Promise<{ completed: boolean; chatId?: string; telegramUser?: TelegramUser }> {
 		const authToken = await this.prisma.telegramAuthToken.findUnique({
 			where: { token },
 		})
@@ -86,9 +93,24 @@ export class TelegramAuthService {
 			return { completed: false }
 		}
 
+		/* eslint-disable @typescript-eslint/naming-convention */
+		// Construct TelegramUser from stored data if available
+		let telegramUser: TelegramUser | undefined
+		if (authToken.telegramFirstName && authToken.chatId) {
+			telegramUser = {
+				id: parseInt(authToken.chatId, 10), // This might be approximate if chatId is string
+				first_name: authToken.telegramFirstName,
+				last_name: authToken.telegramLastName || undefined,
+				username: authToken.telegramUsername || undefined,
+				photo_url: authToken.telegramPhotoUrl || undefined,
+			}
+		}
+		/* eslint-enable @typescript-eslint/naming-convention */
+
 		return {
 			completed: authToken.used && !!authToken.chatId,
 			chatId: authToken.chatId || undefined,
+			telegramUser,
 		}
 	}
 

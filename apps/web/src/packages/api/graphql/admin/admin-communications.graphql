@@ -1,0 +1,87 @@
+# ==================== FRAGMENTS ====================
+
+fragment TeamAnnouncementFields on TeamAnnouncement {
+  id
+  teamId
+  title
+  content
+  priority
+  type
+  isPinned
+  expiresAt
+  publishedAt
+  createdBy
+  createdAt
+  updatedAt
+  isPublished
+  isExpired
+  readCount
+  totalMembers
+  hasRead
+}
+
+fragment AnnouncementStatisticsFields on AnnouncementStatistics {
+  total
+  published
+  drafts
+  pinned
+  expired
+  lowPriority
+  normalPriority
+  highPriority
+  urgentPriority
+}
+
+# ==================== QUERIES ====================
+
+query AdminGetAnnouncements($filter: AnnouncementFilterInput) {
+  adminGetAnnouncements(filter: $filter) {
+    ...TeamAnnouncementFields
+  }
+}
+
+query AdminGetAnnouncementById($id: String!) {
+  adminGetAnnouncementById(id: $id) {
+    ...TeamAnnouncementFields
+  }
+}
+
+query AdminGetAnnouncementStatistics($teamId: String) {
+  adminGetAnnouncementStatistics(teamId: $teamId) {
+    ...AnnouncementStatisticsFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation AdminCreateAnnouncement($input: CreateAnnouncementInput!) {
+  adminCreateAnnouncement(input: $input) {
+    ...TeamAnnouncementFields
+  }
+}
+
+mutation AdminUpdateAnnouncement($input: UpdateAnnouncementInput!) {
+  adminUpdateAnnouncement(input: $input) {
+    ...TeamAnnouncementFields
+  }
+}
+
+mutation AdminDeleteAnnouncement($id: String!) {
+  adminDeleteAnnouncement(id: $id)
+}
+
+mutation AdminPublishAnnouncement($id: String!) {
+  adminPublishAnnouncement(id: $id) {
+    ...TeamAnnouncementFields
+  }
+}
+
+mutation AdminUnpublishAnnouncement($id: String!) {
+  adminUnpublishAnnouncement(id: $id) {
+    ...TeamAnnouncementFields
+  }
+}
+
+mutation AdminMarkAnnouncementAsRead($announcementId: String!) {
+  adminMarkAnnouncementAsRead(announcementId: $announcementId)
+}

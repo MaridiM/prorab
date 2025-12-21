@@ -379,3 +379,5 @@ ownerId: user-123 (Иван)
 - **Backend changelog:** `docs/changelog.backend.md`
 - **Frontend changelog:** `docs/changelog.frontend.md`
 
+
+

@@ -1,0 +1,158 @@
+# Team Analytics Queries for Admin Panel
+# Stage 16: Day 8 - Team Analytics Dashboard
+
+# Fragment for team growth chart
+fragment TeamGrowthChartFields on TeamGrowthChart {
+  labels
+  memberData
+  projectData
+}
+
+# Fragment for member activity
+fragment MemberActivityFields on MemberActivity {
+  userId
+  userName
+  avatarUrl
+  email
+  role
+  position
+  actionsCount
+  lastActiveAt
+  hoursLogged
+  projectsCount
+  joinedAt
+}
+
+# Fragment for role count
+fragment RoleCountFields on RoleCount {
+  role
+  count
+}
+
+# Fragment for position count
+fragment PositionCountFields on PositionCount {
+  position
+  count
+}
+
+# Fragment for salary distribution
+fragment SalaryDistributionFields on SalaryDistribution {
+  fixed
+  percentage
+  none
+  totalAmount
+}
+
+# Fragment for team composition
+fragment TeamCompositionFields on TeamComposition {
+  byRole {
+    ...RoleCountFields
+  }
+  byPosition {
+    ...PositionCountFields
+  }
+  salaryDistribution {
+    ...SalaryDistributionFields
+  }
+  totalMembers
+}
+
+# Fragment for project storage usage
+fragment ProjectStorageUsageFields on ProjectStorageUsage {
+  projectId
+  projectName
+  usedBytes
+  filesCount
+  percentage
+}
+
+# Fragment for team storage usage
+fragment TeamStorageUsageFields on TeamStorageUsage {
+  totalBytes
+  usedBytes
+  usedPercentage
+  usedGB
+  byProject {
+    ...ProjectStorageUsageFields
+  }
+}
+
+# Fragment for team KPIs
+fragment TeamKPIsFields on TeamKPIs {
+  memberRetention
+  projectCompletionRate
+  avgProjectDurationDays
+  totalRevenue
+  activeProjectsCount
+  completedProjectsCount
+  archivedProjectsCount
+  totalMembers
+  totalHoursWorked
+  avgHoursPerMember
+  totalExpenses
+  totalBudget
+  profit
+}
+
+# Full team analytics fragment
+fragment TeamAnalyticsFields on TeamAnalytics {
+  teamId
+  teamName
+  kpis {
+    ...TeamKPIsFields
+  }
+  growthChart {
+    ...TeamGrowthChartFields
+  }
+  memberActivity {
+    ...MemberActivityFields
+  }
+  composition {
+    ...TeamCompositionFields
+  }
+  storageUsage {
+    ...TeamStorageUsageFields
+  }
+}
+
+# Query: Get team growth chart data
+query AdminTeamGrowthChart($teamId: String!, $months: Int = 12) {
+  adminTeamGrowthChart(teamId: $teamId, months: $months) {
+    ...TeamGrowthChartFields
+  }
+}
+
+# Query: Get member activity metrics
+query AdminTeamMemberActivity($teamId: String!) {
+  adminTeamMemberActivity(teamId: $teamId) {
+    ...MemberActivityFields
+  }
+}
+
+# Query: Get team composition
+query AdminTeamComposition($teamId: String!) {
+  adminTeamComposition(teamId: $teamId) {
+    ...TeamCompositionFields
+  }
+}
+
+# Query: Get team storage usage
+query AdminTeamStorageUsage($teamId: String!) {
+  adminTeamStorageUsage(teamId: $teamId) {
+    ...TeamStorageUsageFields
+  }
+}
+
+# Query: Get team KPIs
+query AdminTeamKPIs($teamId: String!) {
+  adminTeamKPIs(teamId: $teamId) {
+    ...TeamKPIsFields
+  }
+}
+
+# Query: Get full team analytics (all data in one call)
+query AdminTeamAnalytics($teamId: String!) {
+  adminTeamAnalytics(teamId: $teamId) {
+    ...TeamAnalyticsFields
+  }
+}

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Toaster } from 'sonner'
 
 export default function ProtectedLayout({
@@ -7,7 +8,9 @@ export default function ProtectedLayout({
 }) {
 	return (
 		<>
-			{children}
+			<Suspense fallback={null}>
+				{children}
+			</Suspense>
 			<Toaster position="top-right" richColors />
 		</>
 	)

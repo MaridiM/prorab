@@ -5,6 +5,207 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-12-20 - Stage 16: Advanced Team & Role Management 🚧
+
+### 🚧 В РАЗРАБОТКЕ
+
+**Stage 16: Advanced Team & Role Management (Days 8-14)**
+
+#### Day 8: Team Analytics Dashboard ✅ COMPLETE
+- ✅ **Backend (3 files, ~520 LOC):**
+  - `admin-team-analytics.model.ts` - 10 GraphQL ObjectTypes (TeamGrowthChart, MemberActivity, TeamComposition, TeamKPIs, TeamAnalytics и др.)
+  - `admin-team-analytics.service.ts` - 6 методов аналитики (getTeamGrowthChart, getMemberActivityMetrics, getTeamComposition, getStorageUsageByTeam, getTeamKPIs, getTeamAnalytics)
+  - `admin-team-analytics.resolver.ts` - 6 GraphQL queries с RequirePermissions guards
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (5 files, ~650 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/analytics/page.tsx` - Полная страница аналитики с KPI cards, графиками и таблицами
+  - `TeamGrowthChart.tsx` - Recharts LineChart для роста команды (участники + проекты за 12 месяцев)
+  - `MemberActivityTable.tsx` - Таблица активности с поиском и сортировкой
+  - `TeamCompositionCharts.tsx` - Pie charts для ролей, positions progress bars, salary distribution
+  - `StorageUsageCard.tsx` - Визуализация использования хранилища с breakdown по проектам
+- ✅ **GraphQL (1 file, ~145 LOC):**
+  - `admin-team-analytics.graphql` - 6 queries, 10 fragments
+  - GraphQL codegen выполнен успешно
+- ✅ **Features:**
+  - 7 KPI карточек (участники, проекты, часы, прибыль, retention, completion rate, средняя длительность)
+  - График роста за 12 месяцев с динамикой участников и проектов
+  - Таблица активности участников с поиском, сортировкой и аватарами
+  - Pie chart распределения по ролям
+  - Progress bars распределения по должностям
+  - Salary distribution (фикс/процент/не указана) с общим ФОТ
+  - Storage usage с breakdown по проектам и цветовыми индикаторами
+
+**Итого Day 8: 9 файлов, ~1,315 LOC**
+
+#### Day 9: Role & Permission Builder ✅ COMPLETE
+- ✅ **Prisma Schema Updates (~65 LOC):**
+  - `CustomRole` model - Пользовательские роли с иерархией и наследованием прав
+  - `RoleAssignmentHistory` model - История назначения ролей
+  - `TeamMember.customRoleId` - Связь участника с кастомной ролью
+- ✅ **Backend (4 files, ~830 LOC):**
+  - `team-permissions.ts` - 62 team-level permissions в 9 категориях, labels и helpers (~450 LOC)
+  - `admin-role-builder.model.ts` - 10 GraphQL ObjectTypes и 5 InputTypes (CustomRole, RoleHierarchy, PermissionCategory и др.) (~195 LOC)
+  - `admin-role-builder.service.ts` - 11 методов (CRUD ролей, назначение, иерархия, статистика) (~445 LOC)
+  - `admin-role-builder.resolver.ts` - 11 GraphQL queries/mutations с permission guards (~140 LOC)
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (6 files, ~915 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx` - Страница управления ролями с табами (~220 LOC)
+  - `RoleList.tsx` - Таблица ролей с редактированием и удалением (~155 LOC)
+  - `RoleHierarchyTree.tsx` - Древовидная визуализация иерархии ролей (~100 LOC)
+  - `PermissionEditor.tsx` - Редактор прав с категориями и наследованием (~175 LOC)
+  - `RoleFormDialog.tsx` - Форма создания/редактирования роли с валидацией (~255 LOC)
+  - `index.ts` - Экспорт компонентов
+- ✅ **GraphQL (1 file, ~160 LOC):**
+  - `admin-role-builder.graphql` - 7 queries, 4 mutations, 6 fragments
+- ✅ **Features:**
+  - Создание, редактирование, удаление кастомных ролей
+  - Иерархия ролей с наследованием прав (parent/child relationships)
+  - Визуальный редактор с 62 правами в 9 категориях (Проекты, Участники, Расходы, Учёт времени, Выплаты, Задачи, Фотоотчёты, Настройки команды, Приглашения)
+  - Просмотр эффективных прав (с учётом наследования)
+  - Назначение ролей участникам (единично и массово)
+  - История назначения ролей с причинами
+  - Статистика по ролям (всего, активных, системных, участников)
+  - Древовидная визуализация иерархии
+  - Цветовая маркировка ролей
+  - Защита встроенных ролей от изменения
+  - Предотвращение циклических зависимостей
+
+**Итого Day 9: 11 файлов (1 schema + 4 backend + 6 frontend), ~1,970 LOC**
+
+#### Day 10: Team Member Management ✅ COMPLETE
+- ✅ **Backend (3 files, ~840 LOC):**
+  - `admin-team-members.model.ts` - 6 ObjectTypes, 6 InputTypes, 2 enums (~290 LOC)
+  - `admin-team-members.service.ts` - 8 методов (listing, filtering, bulk ops, transfer, activity, stats, export) (~430 LOC)
+  - `admin-team-members.resolver.ts` - 5 queries, 3 mutations (~120 LOC)
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (4 files, ~490 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/members/page.tsx` - Страница управления участниками (~205 LOC)
+  - `MemberTable.tsx` - Таблица участников с чекбоксами (~140 LOC)
+  - `MemberFilters.tsx` - Фильтры по поиску, ролям, зарплатам (~40 LOC)
+  - `index.ts` - Экспорт компонентов
+- ✅ **GraphQL (1 file, ~110 LOC):**
+  - `admin-team-members.graphql` - 5 queries, 3 mutations, 4 fragments
+- ✅ **Features:**
+  - Расширенная фильтрация (поиск, роли, должности, salary types, даты, активность)
+  - Массовые операции (update, remove) с детальным отчётом об успехах/ошибках
+  - Перенос участников между командами
+  - История активности (joined, role changes, salary changes, work logs)
+  - Статистика команды (активные/неактивные, распределение зарплат, средние часы, ФОТ)
+  - Экспорт данных (CSV, JSON, XLSX)
+  - Pagination support
+  - Bulk selection в UI
+  - Защита владельца от удаления
+
+**Итого Day 10: 8 файлов (3 backend + 4 frontend + 1 GraphQL), ~1,440 LOC**
+
+#### Day 11: Team Communication Tools ✅ COMPLETE
+- ✅ **Prisma Schema Updates (~85 LOC):**
+  - `TeamAnnouncement` model - Объявления с приоритетами, типами, закреплением, истечением
+  - `AnnouncementRead` model - Отслеживание прочтения объявлений
+  - `AnnouncementPriority` enum - LOW, NORMAL, HIGH, URGENT
+  - `AnnouncementType` enum - INFO, WARNING, SUCCESS, ERROR, MAINTENANCE
+  - `Team.announcements` relation
+- ✅ **Backend (3 files, ~620 LOC):**
+  - `admin-communications.model.ts` - 2 enums, 2 ObjectTypes, 3 InputTypes (~165 LOC)
+  - `admin-communications.service.ts` - 9 методов (CRUD объявлений, публикация, read tracking, статистика) (~315 LOC)
+  - `admin-communications.resolver.ts` - 3 queries, 6 mutations (~140 LOC)
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (5 files, ~740 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/communications/page.tsx` - Страница управления объявлениями (~210 LOC)
+  - `AnnouncementList.tsx` - Список объявлений с badges и действиями (~205 LOC)
+  - `AnnouncementFilters.tsx` - Фильтры (опубликовано, закреплено, активно) (~55 LOC)
+  - `AnnouncementFormDialog.tsx` - Диалог создания/редактирования (~265 LOC)
+  - `index.ts` - Экспорт компонентов
+- ✅ **GraphQL (1 file, ~90 LOC):**
+  - `admin-communications.graphql` - 3 queries, 6 mutations, 2 fragments
+- ✅ **Features:**
+  - Создание, редактирование, удаление объявлений
+  - Глобальные объявления (teamId = null) и командные
+  - 4 приоритета (LOW, NORMAL, HIGH, URGENT) с цветовой маркировкой
+  - 5 типов (INFO, WARNING, SUCCESS, ERROR, MAINTENANCE)
+  - Закрепление объявлений (pinning)
+  - Дата истечения с автоматической пометкой истёкших
+  - Черновики и публикация (draft/published states)
+  - Отслеживание прочтений по пользователям
+  - Статистика (total, published, drafts, pinned, expired, breakdown по приоритетам)
+  - Фильтрация (publishedOnly, pinnedOnly, activeOnly, priorities, types)
+  - Rich UI с badges для статусов и типов
+
+**Итого Day 11: 9 файлов (1 schema + 3 backend + 5 frontend), ~1,535 LOC**
+
+#### Day 12: Advanced Team Features ✅ COMPLETE
+- ✅ **Prisma Schema Updates (~75 LOC):**
+  - `TeamTemplate` model - Шаблоны команд с настройками и ролями
+  - `TeamMergeLog` model - История объединения команд
+  - `TeamCloneLog` model - История клонирования команд
+  - `User.createdTemplates` relation
+- ✅ **Backend (3 files, ~1,005 LOC):**
+  - `admin-team-operations.model.ts` - 8 ObjectTypes, 7 InputTypes (~320 LOC)
+  - `admin-team-operations.service.ts` - 12 методов (templates CRUD, merge, clone, logs, stats) (~545 LOC)
+  - `admin-team-operations.resolver.ts` - 8 queries, 5 mutations (~140 LOC)
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (6 files, ~735 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/teams/operations/page.tsx` - Страница управления операциями (~160 LOC)
+  - `TemplateGallery.tsx` - Галерея шаблонов с карточками (~130 LOC)
+  - `TemplateEditor.tsx` - Редактор шаблонов (~130 LOC)
+  - `MergeTeamsWizard.tsx` - Мастер слияния с предпросмотром (~180 LOC)
+  - `CloneTeamDialog.tsx` - Диалог клонирования (~125 LOC)
+  - `OperationLogs.tsx` - История операций (~85 LOC)
+  - `index.ts` - Экспорт компонентов
+- ✅ **GraphQL (1 file, ~140 LOC):**
+  - `admin-team-operations.graphql` - 6 queries, 5 mutations, 8 fragments
+- ✅ **Features:**
+  - Создание, редактирование, удаление шаблонов команд
+  - Публичные и приватные шаблоны
+  - Объединение команд (merge) с предпросмотром изменений
+  - Обнаружение конфликтов участников
+  - Клонирование команд с выборочным копированием (роли, проекты, участники)
+  - Создание команд из шаблонов
+  - История всех операций (merge logs, clone logs)
+  - Статистика операций
+  - Warnings при потенциальных проблемах
+  - Опция удаления исходной команды после слияния
+
+**Итого Day 12: 10 файлов (1 schema + 3 backend + 6 frontend), ~1,955 LOC**
+
+#### Day 13: Team Audit & Compliance ✅ COMPLETE
+- ✅ **Prisma Schema Updates (~120 LOC):**
+  - `TeamAuditLog` model - Детальные логи с категориями, изменениями, IP, User Agent
+  - `DataRetentionPolicy` model - Политики хранения данных
+  - `DataExportRequest` model - Запросы на экспорт данных
+  - 4 enums: AuditCategory, DataExportType, ExportStatus, ExportFormat
+  - `Team.auditLogs` и `Team.retentionPolicies` relations
+- ✅ **Backend (3 files, ~880 LOC):**
+  - `admin-audit.model.ts` - 9 ObjectTypes, 5 InputTypes, 4 enums (~350 LOC)
+  - `admin-audit.service.ts` - 9 методов (audit logs, statistics, retention, exports, compliance) (~410 LOC)
+  - `admin-audit.resolver.ts` - 5 queries, 4 mutations (~120 LOC)
+  - Зарегистрировано в `admin.module.ts`
+- ✅ **Frontend (2 files, ~230 LOC):**
+  - `apps/web/src/app/(root)/(protected)/admin/audit/page.tsx` - Страница аудита с табами (~230 LOC)
+- ✅ **GraphQL (1 file, ~90 LOC):**
+  - `admin-audit.graphql` - 5 queries, 4 mutations, 5 fragments
+- ✅ **Features:**
+  - Детальные логи аудита с фильтрацией
+  - 8 категорий аудита (MEMBER_MANAGEMENT, PROJECT_MANAGEMENT, FINANCIAL и др.)
+  - Отслеживание изменений (oldValue/newValue)
+  - IP адрес и User Agent
+  - Статистика: total, 24h, 7d, 30d, by category, top actions, unique users
+  - Политики хранения данных по типам ресурсов
+  - Запросы на экспорт данных (TEAM_DATA, USER_DATA, GDPR_FULL, AUDIT_LOGS)
+  - Форматы экспорта: JSON, CSV, PDF
+  - Compliance reports с GDPR флагами
+  - Pagination support
+
+**Итого Day 13: 6 файлов (1 schema + 3 backend + 2 frontend), ~1,320 LOC**
+
+#### Day 14: Integration & Polish (Planned)
+- ⏳ Navigation updates
+- ⏳ Documentation
+
+**Документация:** `docs/stages/STAGE_16_ADVANCED_TEAM_MANAGEMENT.md`
+
+---
+
 ## [1.0.2] - 2025-12-19 - 2FA Login & Settings UX Improvements
 
 ### Added

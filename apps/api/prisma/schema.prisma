@@ -58,6 +58,7 @@ model User {
   salaryChanges        TeamMemberSalaryHistory[] @relation("SalaryChangedBy")
   adminRole            AdminRole?
   adminActionLogs      AdminActionLog[]          @relation("AdminActionLogs")
+  createdTemplates     TeamTemplate[]            @relation("TeamTemplateCreator")
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -147,8 +148,12 @@ model PasswordResetToken {
 
 model TelegramAuthToken {
   id        String   @id @default(uuid())
-  token     String   @unique
-  chatId    String?  @map("chat_id")
+  token            String   @unique
+  chatId           String?  @map("chat_id")
+  telegramFirstName String? @map("telegram_first_name")
+  telegramLastName  String? @map("telegram_last_name")
+  telegramUsername  String? @map("telegram_username")
+  telegramPhotoUrl  String? @map("telegram_photo_url")
   used      Boolean  @default(false)
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
@@ -172,12 +177,16 @@ model Team {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  owner           User          @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  owner           User               @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members         TeamMember[]
   projects        Project[]
   inviteCodes     InviteCode[]
-  currentForUsers User[]        @relation("CurrentTeam")
-  subscription    Subscription?
+  currentForUsers User[]             @relation("CurrentTeam")
+  subscription        Subscription?
+  customRoles         CustomRole[]
+  announcements       TeamAnnouncement[]
+  auditLogs           TeamAuditLog[]
+  retentionPolicies   DataRetentionPolicy[]
 
   @@index([ownerId])
   @@map("teams")
@@ -249,6 +258,67 @@ model WorkLog {
   @@map("work_logs")
 }
 
+// ==================== CUSTOM TEAM ROLES ====================
+
+model CustomRole {
+  id          String  @id @default(uuid())
+  teamId      String  @map("team_id")
+  name        String  @db.VarChar(100) // "Старший прораб", "Бухгалтер"
+  description String? @db.Text
+  color       String? @db.VarChar(20) // Hex color for UI display
+
+  // Permissions (JSON array of permission keys)
+  permissions String[] @default([])
+
+  // Hierarchy
+  parentRoleId String? @map("parent_role_id") // Inherit permissions from parent
+  level        Int     @default(0) // Role hierarchy level (0 = base, higher = more privileged)
+
+  // Metadata
+  isActive   Boolean @default(true) @map("is_active")
+  isBuiltIn  Boolean @default(false) @map("is_built_in") // System-defined roles (cannot be deleted)
+  sortOrder  Int     @default(0) @map("sort_order")
+  createdBy  String  @map("created_by")
+  modifiedBy String? @map("modified_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  parentRole   CustomRole?  @relation("RoleHierarchy", fields: [parentRoleId], references: [id], onDelete: SetNull)
+  childRoles   CustomRole[] @relation("RoleHierarchy")
+  teamMembers  TeamMember[]
+  assignmentHistory RoleAssignmentHistory[]
+
+  @@unique([teamId, name])
+  @@index([teamId])
+  @@index([parentRoleId])
+  @@index([teamId, isActive])
+  @@index([teamId, sortOrder])
+  @@map("custom_roles")
+}
+
+model RoleAssignmentHistory {
+  id           String   @id @default(uuid())
+  memberId     String   @map("member_id")
+  teamId       String   @map("team_id")
+  previousRole String?  @map("previous_role") // Role name or ID
+  newRole      String   @map("new_role") // Role name or ID
+  roleId       String?  @map("role_id") // CustomRole ID if applicable
+  assignedBy   String   @map("assigned_by") // User ID who made the change
+  reason       String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  role CustomRole? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@index([memberId])
+  @@index([teamId])
+  @@index([roleId])
+  @@index([createdAt])
+  @@map("role_assignment_history")
+}
+
 model TeamMember {
   id       String   @id @default(uuid())
   teamId   String   @map("team_id")
@@ -257,12 +327,16 @@ model TeamMember {
   position String?  @db.VarChar(100) // Job position/specialization (e.g., "Прораб", "Электрик", "Маляр")
   joinedAt DateTime @default(now()) @map("joined_at")
 
+  // Custom Role Assignment (optional - overrides default role permissions)
+  customRoleId String? @map("custom_role_id")
+
   // Salary fields
   salaryType   String   @default("none") @map("salary_type") // "fixed", "percentage", "none"
   salaryAmount Decimal? @map("salary_amount") @db.Decimal(12, 2)
 
   team          Team                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user          User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customRole    CustomRole?               @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
   payouts       ProjectPayout[]
   workLogs      WorkLog[]
   assignedTasks Task[]                    @relation("AssignedTasks")
@@ -273,6 +347,7 @@ model TeamMember {
   @@index([teamId])
   @@index([teamId, salaryType])
   @@index([teamId, position])
+  @@index([customRoleId])
   @@map("team_members")
 }
 
@@ -876,4 +951,204 @@ model SystemStatistics {
 
   @@index([date])
   @@map("system_statistics")
+}
+
+// ==================== TEAM COMMUNICATIONS ====================
+
+model TeamAnnouncement {
+  id          String   @id @default(uuid())
+  teamId      String?  @map("team_id") // null = global announcement
+  title       String   @db.VarChar(200)
+  content     String   @db.Text
+  priority    AnnouncementPriority @default(NORMAL)
+  type        AnnouncementType     @default(INFO)
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  expiresAt   DateTime? @map("expires_at")
+  publishedAt DateTime? @map("published_at")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  team      Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  readBy    AnnouncementRead[]
+
+  @@index([teamId])
+  @@index([publishedAt])
+  @@index([expiresAt])
+  @@map("team_announcements")
+}
+
+model AnnouncementRead {
+  id             String   @id @default(uuid())
+  announcementId String   @map("announcement_id")
+  userId         String   @map("user_id")
+  readAt         DateTime @default(now()) @map("read_at")
+
+  announcement TeamAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([userId])
+  @@map("announcement_reads")
+}
+
+enum AnnouncementPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum AnnouncementType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+  MAINTENANCE
+}
+
+// ==================== TEAM OPERATIONS ====================
+
+model TeamTemplate {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  settings    Json     // Team settings structure
+  roles       Json     // Default custom roles configuration
+  projectSetup Json?   // Optional default project structure
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdById String   @map("created_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  createdBy User @relation("TeamTemplateCreator", fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@index([isPublic])
+  @@map("team_templates")
+}
+
+model TeamMergeLog {
+  id            String   @id @default(uuid())
+  sourceTeamId  String   @map("source_team_id")
+  targetTeamId  String   @map("target_team_id")
+  mergedById    String   @map("merged_by_id")
+  membersMoved  Int      @map("members_moved")
+  projectsMoved Int      @map("projects_moved")
+  dataSnapshot  Json     @map("data_snapshot") // Full snapshot before merge
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([sourceTeamId])
+  @@index([targetTeamId])
+  @@index([mergedById])
+  @@map("team_merge_logs")
+}
+
+model TeamCloneLog {
+  id             String   @id @default(uuid())
+  sourceTeamId   String   @map("source_team_id")
+  clonedTeamId   String   @map("cloned_team_id")
+  clonedById     String   @map("cloned_by_id")
+  clonedSettings Json     @map("cloned_settings") // What was cloned (roles, projects, etc)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([sourceTeamId])
+  @@index([clonedTeamId])
+  @@index([clonedById])
+  @@map("team_clone_logs")
+}
+
+// ==================== AUDIT & COMPLIANCE ====================
+
+model TeamAuditLog {
+  id         String        @id @default(uuid())
+  teamId     String        @map("team_id")
+  userId     String?       @map("user_id")
+  action     String        @db.VarChar(100)
+  category   AuditCategory
+  resource   String        @db.VarChar(100)
+  resourceId String?       @map("resource_id")
+  oldValue   Json?         @map("old_value")
+  newValue   Json?         @map("new_value")
+  ipAddress  String?       @map("ip_address") @db.VarChar(45)
+  userAgent  String?       @map("user_agent") @db.Text
+  metadata   Json?
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId, createdAt])
+  @@index([userId])
+  @@index([category])
+  @@index([createdAt])
+  @@map("team_audit_logs")
+}
+
+model DataRetentionPolicy {
+  id            String   @id @default(uuid())
+  teamId        String?  @map("team_id")
+  resourceType  String   @db.VarChar(50)
+  retentionDays Int      @map("retention_days")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  team Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, resourceType])
+  @@index([teamId])
+  @@index([isActive])
+  @@map("data_retention_policies")
+}
+
+model DataExportRequest {
+  id            String         @id @default(uuid())
+  teamId        String?        @map("team_id")
+  userId        String?        @map("user_id")
+  requestedById String         @map("requested_by_id")
+  type          DataExportType
+  status        ExportStatus   @default(PENDING)
+  format        ExportFormat   @default(JSON)
+  fileUrl       String?        @map("file_url")
+  expiresAt     DateTime?      @map("expires_at")
+  completedAt   DateTime?      @map("completed_at")
+  errorMessage  String?        @map("error_message") @db.Text
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  @@index([teamId])
+  @@index([userId])
+  @@index([requestedById])
+  @@index([status])
+  @@map("data_export_requests")
+}
+
+enum AuditCategory {
+  MEMBER_MANAGEMENT
+  PROJECT_MANAGEMENT
+  FINANCIAL
+  SETTINGS
+  PERMISSIONS
+  DATA_ACCESS
+  AUTHENTICATION
+  INTEGRATIONS
+}
+
+enum DataExportType {
+  TEAM_DATA
+  USER_DATA
+  GDPR_FULL
+  AUDIT_LOGS
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ExportFormat {
+  JSON
+  CSV
+  PDF
 }

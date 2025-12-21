@@ -59,6 +59,8 @@ export const ModelName = {
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
+  CustomRole: 'CustomRole',
+  RoleAssignmentHistory: 'RoleAssignmentHistory',
   TeamMember: 'TeamMember',
   TeamMemberSalaryHistory: 'TeamMemberSalaryHistory',
   InviteCode: 'InviteCode',
@@ -249,6 +251,42 @@ export const WorkLogScalarFieldEnum = {
 export type WorkLogScalarFieldEnum = (typeof WorkLogScalarFieldEnum)[keyof typeof WorkLogScalarFieldEnum]
 
 
+export const CustomRoleScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  name: 'name',
+  description: 'description',
+  color: 'color',
+  permissions: 'permissions',
+  parentRoleId: 'parentRoleId',
+  level: 'level',
+  isActive: 'isActive',
+  isBuiltIn: 'isBuiltIn',
+  sortOrder: 'sortOrder',
+  createdBy: 'createdBy',
+  modifiedBy: 'modifiedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomRoleScalarFieldEnum = (typeof CustomRoleScalarFieldEnum)[keyof typeof CustomRoleScalarFieldEnum]
+
+
+export const RoleAssignmentHistoryScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  teamId: 'teamId',
+  previousRole: 'previousRole',
+  newRole: 'newRole',
+  roleId: 'roleId',
+  assignedBy: 'assignedBy',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type RoleAssignmentHistoryScalarFieldEnum = (typeof RoleAssignmentHistoryScalarFieldEnum)[keyof typeof RoleAssignmentHistoryScalarFieldEnum]
+
+
 export const TeamMemberScalarFieldEnum = {
   id: 'id',
   teamId: 'teamId',
@@ -256,6 +294,7 @@ export const TeamMemberScalarFieldEnum = {
   role: 'role',
   position: 'position',
   joinedAt: 'joinedAt',
+  customRoleId: 'customRoleId',
   salaryType: 'salaryType',
   salaryAmount: 'salaryAmount'
 } as const

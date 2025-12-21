@@ -1209,14 +1209,14 @@ export default function DashboardPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/50 backdrop-blur-xl">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<div className="flex items-center justify-between">
 							<Skeleton className="h-12 w-48" />
 							<Skeleton className="h-10 w-10 rounded-full" />
 						</div>
 					</div>
 				</div>
-				<div className="container mx-auto px-4 py-8">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-8">
 					<Skeleton className="h-24 w-96 mb-8" />
 					<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 						{[1, 2, 3, 4].map(i => (
@@ -1503,7 +1503,7 @@ export default function DashboardPage() {
 			</motion.header>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<motion.div initial="hidden" animate="visible" variants={stagger}>
 					{/* Welcome Header */}
 					<WelcomeHeader 

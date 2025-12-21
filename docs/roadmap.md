@@ -4,13 +4,44 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-19)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-20)
 
 **Версии приложений:**
-- API: v1.0.2
-- Web: v1.0.2
+- API: v1.1.0-dev
+- Web: v1.1.0-dev
 
-### Общий прогресс: **100% MVP + Stage 13 (100%) + Stage 14 (100%) + Stage 15 (100% Complete)** 🎉✅✅✅
+### Общий прогресс: **100% MVP + Stage 13-15 (100%) + Stage 16 (🚧 В разработке)** 🎉✅
+
+**🚧 STAGE 16: ADVANCED TEAM & ROLE MANAGEMENT - В РАЗРАБОТКЕ (71%)**
+- ✅ Day 8: Team Analytics Dashboard - **ЗАВЕРШЕНО** (9 файлов, 1,315 LOC)
+- ✅ Day 9: Role & Permission Builder - **ЗАВЕРШЕНО** (11 файлов, 1,970 LOC)
+  - ✨ 62 team-level permissions в 9 категориях
+  - 🎨 Визуальный редактор с иерархией и наследованием
+  - 📊 Древовидная визуализация ролей
+  - 🔒 Массовое назначение + история изменений
+- ✅ Day 10: Team Member Management - **ЗАВЕРШЕНО** (8 файлов, 1,440 LOC)
+  - 🔍 Расширенная фильтрация (8+ критериев)
+  - ⚡ Массовые операции (update, remove, transfer)
+  - 📋 История активности участников
+  - 📊 Статистика и экспорт (CSV/JSON/XLSX)
+- ✅ Day 11: Team Communication Tools - **ЗАВЕРШЕНО** (9 файлов, 1,535 LOC)
+  - 📢 Система объявлений с 4 приоритетами и 5 типами
+  - 📌 Закрепление и даты истечения
+  - 📊 Отслеживание прочтений и статистика
+  - 🌐 Глобальные и командные объявления
+- ✅ Day 12: Advanced Team Features - **ЗАВЕРШЕНО** (10 файлов, 1,955 LOC)
+  - 📋 Шаблоны команд (публичные/приватные)
+  - 🔀 Объединение команд с предпросмотром
+  - 📑 Клонирование с выборочным копированием
+  - 📊 История операций и статистика
+- ✅ Day 13: Team Audit & Compliance - **ЗАВЕРШЕНО** (6 файлов, 1,320 LOC)
+  - 🔍 Детальные логи аудита с 8 категориями
+  - 📊 Статистика (24h, 7d, 30d, by category)
+  - 🗃️ Политики хранения данных
+  - 📥 Экспорт данных (GDPR, JSON/CSV/PDF)
+- ⏳ Day 14: Integration & Polish - Ожидает
+- 📄 **Документация:** `docs/stages/STAGE_16_ADVANCED_TEAM_MANAGEMENT.md`
+- 📊 **Прогресс:** 53 файлов, 9,535 LOC (6/7 дней)
 
 **✅ STAGE 15: SUBSCRIPTION PLANS & PAYMENT PROVIDERS MANAGEMENT - 100% COMPLETE!** 🎉
 - ✅ Phase 1: Database Schema (100% Complete) - 4 models, 3 plans, multi-currency, providers seeded
@@ -90,6 +121,15 @@
   - FAQ Management (выведен в отдельный проект)
 
 **Следующие приоритеты:**
+- 🚧 **Stage 16: Advanced Team & Role Management** - **В РАЗРАБОТКЕ** 🔨
+  - 🚧 Day 8: Team Analytics Dashboard
+  - ⏳ Day 9: Role & Permission Builder
+  - ⏳ Day 10: Team Member Management
+  - ⏳ Day 11: Team Communication Tools
+  - ⏳ Day 12: Advanced Team Features
+  - ⏳ Day 13: Team Audit & Compliance
+  - ⏳ Day 14: Integration & Polish
+  - 📄 Follow: `docs/stages/STAGE_16_ADVANCED_TEAM_MANAGEMENT.md`
 - ✅ **Stage 15: Subscription Plans Management** - **100% COMPLETE!** 🎉
   - ✅ All 7 phases completed (4,793 LOC + 2,700 LOC documentation)
   - ✅ Multi-currency support (RUB, USD, EUR)
@@ -98,10 +138,11 @@
 - ✅ **Real Database Data Integration** - **COMPLETED** ✅
   - ✅ TeamStats GraphQL query implemented
   - ✅ 100% elimination of mock data
-- 🚀 **Production Deployment** - Deploy all stages (Stages 13-15) 🎯 **NEXT PRIORITY**
+- 🚀 **Production Deployment** - Deploy all stages (Stages 13-16) 🎯
   - Stage 13: Verify RBAC permissions system
   - Stage 14: Run migrate-business-roles.sql
   - Stage 15: Run migration scripts, seed plans, configure payment providers
+  - Stage 16: Apply new database migrations
   - Follow: `docs/STAGE_15_DEPLOYMENT_CHECKLIST.md`
 - 🧪 **Browser Testing** - Comprehensive end-to-end testing
   - Follow: `docs/STAGE_15_TESTING_GUIDE.md`
@@ -110,12 +151,31 @@
   - Test subscription plans CRUD through admin panel
   - Test payment provider switching (Yookassa ↔ Stripe)
   - Test multi-currency pricing display
-- 🟢 **Stage 16: Support Tickets** - Full implementation (Optional)
-- 🟢 **Stage 17: FAQ Management** - CRUD interface (Optional - moved to separate project)
+  - Test team analytics dashboard
+- 🟢 **Stage 17: Support Tickets** - Full implementation (Optional)
+- 🟢 **Stage 18: FAQ Management** - CRUD interface (Optional - moved to separate project)
 
 ---
 
-**Последние изменения (2025-12-19, 23:00):**
+**Последние изменения (2025-12-20, 12:00):**
+
+**🚧 Stage 16: Advanced Team & Role Management - STARTED**
+- 📄 Создан `docs/stages/STAGE_16_ADVANCED_TEAM_MANAGEMENT.md` - полная спецификация
+- 📝 Обновлён `CHANGELOG.md` - добавлена версия v1.1.0
+- 📝 Обновлён `docs/roadmap.md` - добавлен Stage 16
+
+**Структура Stage 16:**
+- Day 8: Team Analytics Dashboard (KPIs, графики роста, активность)
+- Day 9: Role & Permission Builder (кастомные роли, иерархия)
+- Day 10: Team Member Management (массовые операции)
+- Day 11: Team Communication Tools (объявления, шаблоны)
+- Day 12: Advanced Team Features (объединение, клонирование)
+- Day 13: Team Audit & Compliance (аудит, GDPR)
+- Day 14: Integration & Polish (тестирование, документация)
+
+---
+
+**Предыдущие изменения (2025-12-19, 23:00):**
 
 **🔧 Stage 15 Bugfixes & Improvements:**
 - ✅ **Payment Providers Configuration UI:** Added dialog for entering Yookassa/Stripe credentials

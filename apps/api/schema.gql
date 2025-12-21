@@ -1153,6 +1153,42 @@ enum LogoType {
   UPLOADED
 }
 
+"""Member activity metrics"""
+type MemberActivity {
+  """Total actions count (work logs, expenses, etc.)"""
+  actionsCount: Int!
+
+  """User avatar URL"""
+  avatarUrl: String
+
+  """User email"""
+  email: String
+
+  """Total hours logged"""
+  hoursLogged: Float!
+
+  """Date joined the team"""
+  joinedAt: DateTime!
+
+  """Last activity timestamp"""
+  lastActiveAt: DateTime
+
+  """Position in team"""
+  position: String
+
+  """Projects participated in"""
+  projectsCount: Int!
+
+  """Team role (OWNER/MEMBER)"""
+  role: String!
+
+  """User ID"""
+  userId: String!
+
+  """User full name"""
+  userName: String!
+}
+
 type MemberAnalytics {
   avatarUrl: String
   averagePayoutPerProject: Float!
@@ -1723,6 +1759,15 @@ type PlanLimits {
   storageGB: Float!
 }
 
+"""Position distribution count"""
+type PositionCount {
+  """Count of members with this position"""
+  count: Int!
+
+  """Position name"""
+  position: String!
+}
+
 type Project {
   """Адрес объекта"""
   address: String
@@ -1878,6 +1923,24 @@ enum ProjectStatus {
   COMPLETED
 }
 
+"""Storage usage per project"""
+type ProjectStorageUsage {
+  """Number of files"""
+  filesCount: Int!
+
+  """Percentage of total team storage"""
+  percentage: Float!
+
+  """Project ID"""
+  projectId: String!
+
+  """Project name"""
+  projectName: String!
+
+  """Used storage in bytes"""
+  usedBytes: Float!
+}
+
 type ProjectsByTeamItem {
   """Projects count"""
   projectsCount: Int!
@@ -2023,8 +2086,47 @@ type Query {
   """Get detailed information about a specific team (Admin only)"""
   adminTeam(id: String!): AdminTeamDetails!
 
+  """Get combined team analytics (all data in one call)"""
+  adminTeamAnalytics(
+    """Team ID"""
+    teamId: String!
+  ): TeamAnalytics!
+
+  """Get team composition analysis (roles, positions, salary distribution)"""
+  adminTeamComposition(
+    """Team ID"""
+    teamId: String!
+  ): TeamComposition!
+
+  """Get team growth chart data (members and projects over time)"""
+  adminTeamGrowthChart(
+    """Number of months"""
+    months: Int! = 12
+
+    """Team ID"""
+    teamId: String!
+  ): TeamGrowthChart!
+
+  """Get team KPIs (Key Performance Indicators)"""
+  adminTeamKPIs(
+    """Team ID"""
+    teamId: String!
+  ): TeamKPIs!
+
+  """Get member activity metrics for a team"""
+  adminTeamMemberActivity(
+    """Team ID"""
+    teamId: String!
+  ): [MemberActivity!]!
+
   """Get statistics for a specific team (Admin only)"""
   adminTeamStats(teamId: String!): AdminTeamStats!
+
+  """Get storage usage breakdown for a team"""
+  adminTeamStorageUsage(
+    """Team ID"""
+    teamId: String!
+  ): TeamStorageUsage!
 
   """Get paginated list of teams with filters (Admin only)"""
   adminTeams(filters: AdminTeamFilters, pagination: PaginationInput!): AdminTeamsConnection!
@@ -2208,6 +2310,30 @@ type ReportPhoto {
 input ResetPasswordInput {
   newPassword: String!
   token: String!
+}
+
+"""Role distribution count"""
+type RoleCount {
+  """Count of members with this role"""
+  count: Int!
+
+  """Role name"""
+  role: String!
+}
+
+"""Salary type distribution"""
+type SalaryDistribution {
+  """Members with fixed salary"""
+  fixed: Int!
+
+  """Members without salary settings"""
+  none: Int!
+
+  """Members with percentage-based salary"""
+  percentage: Int!
+
+  """Total salary amount (fixed + calculated)"""
+  totalAmount: Float!
 }
 
 type Session {
@@ -2559,12 +2685,105 @@ type Team {
   updatedAt: DateTime!
 }
 
+"""Combined team analytics data"""
+type TeamAnalytics {
+  """Team composition analysis"""
+  composition: TeamComposition!
+
+  """Growth chart data"""
+  growthChart: TeamGrowthChart!
+
+  """Key performance indicators"""
+  kpis: TeamKPIs!
+
+  """Member activity metrics"""
+  memberActivity: [MemberActivity!]!
+
+  """Storage usage breakdown"""
+  storageUsage: TeamStorageUsage!
+
+  """Team ID"""
+  teamId: String!
+
+  """Team name"""
+  teamName: String!
+}
+
+"""Team composition analysis"""
+type TeamComposition {
+  """Members grouped by position"""
+  byPosition: [PositionCount!]!
+
+  """Members grouped by role"""
+  byRole: [RoleCount!]!
+
+  """Salary type distribution"""
+  salaryDistribution: SalaryDistribution!
+
+  """Total team members count"""
+  totalMembers: Int!
+}
+
 type TeamCounts {
   """Number of team members"""
   members: Int!
 
   """Number of projects"""
   projects: Int!
+}
+
+"""Team growth chart data over time"""
+type TeamGrowthChart {
+  """Month labels (e.g., "Jan 2025")"""
+  labels: [String!]!
+
+  """Member count data points"""
+  memberData: [Int!]!
+
+  """Project count data points"""
+  projectData: [Int!]!
+}
+
+"""Team key performance indicators"""
+type TeamKPIs {
+  """Active projects count"""
+  activeProjectsCount: Int!
+
+  """Archived projects count"""
+  archivedProjectsCount: Int!
+
+  """Average hours per member"""
+  avgHoursPerMember: Float!
+
+  """Average project duration in days"""
+  avgProjectDurationDays: Int!
+
+  """Completed projects count"""
+  completedProjectsCount: Int!
+
+  """Member retention rate (0-100%)"""
+  memberRetention: Float!
+
+  """Profit (budget - expenses)"""
+  profit: Float!
+
+  """Project completion rate (0-100%)"""
+  projectCompletionRate: Float!
+
+  """Total budget across projects"""
+  totalBudget: Float!
+
+  """Total expenses amount"""
+  totalExpenses: Float!
+
+  """Total hours worked by team"""
+  totalHoursWorked: Float!
+
+  """Total team members"""
+  totalMembers: Int!
+
+  """Total revenue from projects"""
+  totalRevenue: Float!
 }
 
 type TeamMember {
@@ -2670,6 +2889,24 @@ type TeamStats {
   totalBudget: Float!
   totalExpenses: Float!
   totalHours: Float!
+}
+
+"""Team storage usage breakdown"""
+type TeamStorageUsage {
+  """Storage breakdown by project"""
+  byProject: [ProjectStorageUsage!]!
+
+  """Total storage limit in bytes"""
+  totalBytes: Float!
+
+  """Used storage in bytes"""
+  usedBytes: Float!
+
+  """Used storage in gigabytes"""
+  usedGB: Float!
+
+  """Used percentage (0-100)"""
+  usedPercentage: Float!
 }
 
 type TelegramAuthPayload {

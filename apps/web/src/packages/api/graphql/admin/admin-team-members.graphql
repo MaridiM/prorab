@@ -1,0 +1,118 @@
+# ==================== FRAGMENTS ====================
+
+fragment TeamMemberExtendedFields on TeamMemberExtended {
+  id
+  teamId
+  userId
+  role
+  position
+  joinedAt
+  salaryType
+  salaryAmount
+  customRoleId
+  userName
+  email
+  avatarUrl
+  phone
+  customRoleName
+  customRoleColor
+  projectsCount
+  hoursLogged
+  totalExpenses
+  tasksCount
+  totalPayouts
+  lastActiveAt
+}
+
+fragment MemberActivityEventFields on MemberActivityEvent {
+  id
+  type
+  description
+  metadata
+  relatedId
+  relatedType
+  createdAt
+  triggeredBy
+  triggeredByName
+}
+
+fragment BulkOperationResultFields on BulkOperationResult {
+  successCount
+  failedCount
+  errors
+  successIds
+  failedIds
+}
+
+fragment MemberStatisticsFields on MemberStatistics {
+  totalMembers
+  activeMembers
+  inactiveMembers
+  withCustomRoles
+  withFixedSalary
+  withPercentageSalary
+  withNoSalary
+  averageHours
+  totalPayroll
+}
+
+# ==================== QUERIES ====================
+
+query AdminGetTeamMembers(
+  $teamId: String!
+  $filter: MemberFilterInput
+  $pagination: PaginationInput
+) {
+  adminGetTeamMembers(teamId: $teamId, filter: $filter, pagination: $pagination) {
+    ...TeamMemberExtendedFields
+  }
+}
+
+query AdminGetMemberById($memberId: ID!) {
+  adminGetMemberById(memberId: $memberId) {
+    ...TeamMemberExtendedFields
+  }
+}
+
+query AdminGetMemberActivityHistory(
+  $memberId: String!
+  $pagination: PaginationInput
+) {
+  adminGetMemberActivityHistory(memberId: $memberId, pagination: $pagination) {
+    events {
+      ...MemberActivityEventFields
+    }
+    totalCount
+    hasMore
+  }
+}
+
+query AdminGetMemberStatistics($teamId: String!) {
+  adminGetMemberStatistics(teamId: $teamId) {
+    ...MemberStatisticsFields
+  }
+}
+
+query AdminExportMembers($teamId: String!, $format: MemberExportFormat!) {
+  adminExportMembers(teamId: $teamId, format: $format)
+}
+
+# ==================== MUTATIONS ====================
+
+mutation AdminBulkUpdateMembers($input: BulkUpdateMembersInput!) {
+  adminBulkUpdateMembers(input: $input) {
+    ...BulkOperationResultFields
+  }
+}
+
+mutation AdminBulkRemoveMembers($input: BulkRemoveMembersInput!) {
+  adminBulkRemoveMembers(input: $input) {
+    ...BulkOperationResultFields
+  }
+}
+
+mutation AdminTransferMember($input: TransferMemberInput!) {
+  adminTransferMember(input: $input) {
+    ...TeamMemberExtendedFields
+  }
+}

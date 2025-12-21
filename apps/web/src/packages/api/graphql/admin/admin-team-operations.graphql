@@ -1,0 +1,151 @@
+# ==================== FRAGMENTS ====================
+
+fragment TeamTemplateFields on TeamTemplate {
+  id
+  name
+  description
+  settings
+  roles
+  projectSetup
+  isPublic
+  createdById
+  createdAt
+  updatedAt
+  createdByName
+}
+
+fragment TeamMergeLogFields on TeamMergeLog {
+  id
+  sourceTeamId
+  targetTeamId
+  mergedById
+  membersMoved
+  projectsMoved
+  dataSnapshot
+  notes
+  createdAt
+  sourceTeamName
+  targetTeamName
+  mergedByName
+}
+
+fragment TeamCloneLogFields on TeamCloneLog {
+  id
+  sourceTeamId
+  clonedTeamId
+  clonedById
+  clonedSettings
+  createdAt
+  sourceTeamName
+  clonedTeamName
+  clonedByName
+}
+
+fragment MergePreviewFields on MergePreview {
+  sourceTeamId
+  sourceTeamName
+  targetTeamId
+  targetTeamName
+  membersToMove
+  projectsToMove
+  conflictingMembers
+  warnings
+  canMerge
+}
+
+fragment MergeResultFields on MergeResult {
+  success
+  mergeLogId
+  membersMoved
+  projectsMoved
+  errors
+}
+
+fragment CloneResultFields on CloneResult {
+  success
+  clonedTeamId
+  cloneLogId
+  error
+}
+
+fragment TeamOperationsStatisticsFields on TeamOperationsStatistics {
+  totalTemplates
+  publicTemplates
+  totalMerges
+  totalClones
+  teamsCreatedFromTemplates
+}
+
+# ==================== QUERIES ====================
+
+query AdminGetTeamTemplates($filter: TeamTemplateFilterInput) {
+  adminGetTeamTemplates(filter: $filter) {
+    ...TeamTemplateFields
+  }
+}
+
+query AdminGetTeamTemplateById($id: String!) {
+  adminGetTeamTemplateById(id: $id) {
+    ...TeamTemplateFields
+  }
+}
+
+query AdminGetMergePreview($sourceTeamId: String!, $targetTeamId: String!) {
+  adminGetMergePreview(sourceTeamId: $sourceTeamId, targetTeamId: $targetTeamId) {
+    ...MergePreviewFields
+  }
+}
+
+query AdminGetMergeLogs {
+  adminGetMergeLogs {
+    ...TeamMergeLogFields
+  }
+}
+
+query AdminGetCloneLogs {
+  adminGetCloneLogs {
+    ...TeamCloneLogFields
+  }
+}
+
+query AdminGetTeamOperationsStatistics {
+  adminGetTeamOperationsStatistics {
+    ...TeamOperationsStatisticsFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation AdminCreateTeamTemplate($input: CreateTeamTemplateInput!) {
+  adminCreateTeamTemplate(input: $input) {
+    ...TeamTemplateFields
+  }
+}
+
+mutation AdminUpdateTeamTemplate($input: UpdateTeamTemplateInput!) {
+  adminUpdateTeamTemplate(input: $input) {
+    ...TeamTemplateFields
+  }
+}
+
+mutation AdminDeleteTeamTemplate($id: String!) {
+  adminDeleteTeamTemplate(id: $id)
+}
+
+mutation AdminMergeTeams($input: MergeTeamsInput!) {
+  adminMergeTeams(input: $input) {
+    ...MergeResultFields
+  }
+}
+
+mutation AdminCloneTeam($input: CloneTeamInput!) {
+  adminCloneTeam(input: $input) {
+    ...CloneResultFields
+  }
+}
+
+mutation AdminCreateTeamFromTemplate($input: CreateTeamFromTemplateInput!) {
+  adminCreateTeamFromTemplate(input: $input) {
+    ...CloneResultFields
+  }
+}

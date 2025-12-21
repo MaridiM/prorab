@@ -71,7 +71,7 @@ export class TelegramBot {
 					return
 				}
 
-				await this.telegramAuthService.linkAuthToken(token, chatId)
+				await this.telegramAuthService.linkAuthToken(token, chatId, telegramUser)
 
 				await ctx.reply(
 					'✅ *Авторизация успешна!*\n\n' +

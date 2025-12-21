@@ -262,6 +262,7 @@ export type TeamWhereInput = {
   inviteCodes?: Prisma.InviteCodeListRelationFilter
   currentForUsers?: Prisma.UserListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
+  customRoles?: Prisma.CustomRoleListRelationFilter
 }
 
 export type TeamOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type TeamOrderByWithRelationInput = {
   inviteCodes?: Prisma.InviteCodeOrderByRelationAggregateInput
   currentForUsers?: Prisma.UserOrderByRelationAggregateInput
   subscription?: Prisma.SubscriptionOrderByWithRelationInput
+  customRoles?: Prisma.CustomRoleOrderByRelationAggregateInput
 }
 
 export type TeamWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type TeamWhereUniqueInput = Prisma.AtLeast<{
   inviteCodes?: Prisma.InviteCodeListRelationFilter
   currentForUsers?: Prisma.UserListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
+  customRoles?: Prisma.CustomRoleListRelationFilter
 }, "id">
 
 export type TeamOrderByWithAggregationInput = {
@@ -355,6 +358,7 @@ export type TeamCreateInput = {
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateInput = {
@@ -373,6 +377,7 @@ export type TeamUncheckedCreateInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUpdateInput = {
@@ -391,6 +396,7 @@ export type TeamUpdateInput = {
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateInput = {
@@ -409,6 +415,7 @@ export type TeamUncheckedUpdateInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamCreateManyInput = {
@@ -586,6 +593,20 @@ export type BigIntFieldUpdateOperationsInput = {
   divide?: bigint | number
 }
 
+export type TeamCreateNestedOneWithoutCustomRolesInput = {
+  create?: Prisma.XOR<Prisma.TeamCreateWithoutCustomRolesInput, Prisma.TeamUncheckedCreateWithoutCustomRolesInput>
+  connectOrCreate?: Prisma.TeamCreateOrConnectWithoutCustomRolesInput
+  connect?: Prisma.TeamWhereUniqueInput
+}
+
+export type TeamUpdateOneRequiredWithoutCustomRolesNestedInput = {
+  create?: Prisma.XOR<Prisma.TeamCreateWithoutCustomRolesInput, Prisma.TeamUncheckedCreateWithoutCustomRolesInput>
+  connectOrCreate?: Prisma.TeamCreateOrConnectWithoutCustomRolesInput
+  upsert?: Prisma.TeamUpsertWithoutCustomRolesInput
+  connect?: Prisma.TeamWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TeamUpdateToOneWithWhereWithoutCustomRolesInput, Prisma.TeamUpdateWithoutCustomRolesInput>, Prisma.TeamUncheckedUpdateWithoutCustomRolesInput>
+}
+
 export type TeamCreateNestedOneWithoutMembersInput = {
   create?: Prisma.XOR<Prisma.TeamCreateWithoutMembersInput, Prisma.TeamUncheckedCreateWithoutMembersInput>
   connectOrCreate?: Prisma.TeamCreateOrConnectWithoutMembersInput
@@ -657,6 +678,7 @@ export type TeamCreateWithoutOwnerInput = {
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutOwnerInput = {
@@ -674,6 +696,7 @@ export type TeamUncheckedCreateWithoutOwnerInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutOwnerInput = {
@@ -701,6 +724,7 @@ export type TeamCreateWithoutCurrentForUsersInput = {
   projects?: Prisma.ProjectCreateNestedManyWithoutTeamInput
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutCurrentForUsersInput = {
@@ -718,6 +742,7 @@ export type TeamUncheckedCreateWithoutCurrentForUsersInput = {
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutTeamInput
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutCurrentForUsersInput = {
@@ -783,6 +808,7 @@ export type TeamUpdateWithoutCurrentForUsersInput = {
   projects?: Prisma.ProjectUpdateManyWithoutTeamNestedInput
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutCurrentForUsersInput = {
@@ -799,6 +825,95 @@ export type TeamUncheckedUpdateWithoutCurrentForUsersInput = {
   members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutTeamNestedInput
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
+}
+
+export type TeamCreateWithoutCustomRolesInput = {
+  id?: string
+  name: string
+  logoType?: $Enums.LogoType
+  logoUrl?: string | null
+  iconId?: string | null
+  colorId?: string | null
+  storageUsedBytes?: bigint | number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutOwnedTeamsInput
+  members?: Prisma.TeamMemberCreateNestedManyWithoutTeamInput
+  projects?: Prisma.ProjectCreateNestedManyWithoutTeamInput
+  inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
+  currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+}
+
+export type TeamUncheckedCreateWithoutCustomRolesInput = {
+  id?: string
+  name: string
+  logoType?: $Enums.LogoType
+  logoUrl?: string | null
+  iconId?: string | null
+  colorId?: string | null
+  ownerId: string
+  storageUsedBytes?: bigint | number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutTeamInput
+  inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
+  currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+}
+
+export type TeamCreateOrConnectWithoutCustomRolesInput = {
+  where: Prisma.TeamWhereUniqueInput
+  create: Prisma.XOR<Prisma.TeamCreateWithoutCustomRolesInput, Prisma.TeamUncheckedCreateWithoutCustomRolesInput>
+}
+
+export type TeamUpsertWithoutCustomRolesInput = {
+  update: Prisma.XOR<Prisma.TeamUpdateWithoutCustomRolesInput, Prisma.TeamUncheckedUpdateWithoutCustomRolesInput>
+  create: Prisma.XOR<Prisma.TeamCreateWithoutCustomRolesInput, Prisma.TeamUncheckedCreateWithoutCustomRolesInput>
+  where?: Prisma.TeamWhereInput
+}
+
+export type TeamUpdateToOneWithWhereWithoutCustomRolesInput = {
+  where?: Prisma.TeamWhereInput
+  data: Prisma.XOR<Prisma.TeamUpdateWithoutCustomRolesInput, Prisma.TeamUncheckedUpdateWithoutCustomRolesInput>
+}
+
+export type TeamUpdateWithoutCustomRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  logoType?: Prisma.EnumLogoTypeFieldUpdateOperationsInput | $Enums.LogoType
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  colorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageUsedBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedTeamsNestedInput
+  members?: Prisma.TeamMemberUpdateManyWithoutTeamNestedInput
+  projects?: Prisma.ProjectUpdateManyWithoutTeamNestedInput
+  inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
+  currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+}
+
+export type TeamUncheckedUpdateWithoutCustomRolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  logoType?: Prisma.EnumLogoTypeFieldUpdateOperationsInput | $Enums.LogoType
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  colorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  storageUsedBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutTeamNestedInput
+  inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
+  currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
 }
 
@@ -817,6 +932,7 @@ export type TeamCreateWithoutMembersInput = {
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutMembersInput = {
@@ -834,6 +950,7 @@ export type TeamUncheckedCreateWithoutMembersInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutMembersInput = {
@@ -867,6 +984,7 @@ export type TeamUpdateWithoutMembersInput = {
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutMembersInput = {
@@ -884,6 +1002,7 @@ export type TeamUncheckedUpdateWithoutMembersInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamCreateWithoutInviteCodesInput = {
@@ -901,6 +1020,7 @@ export type TeamCreateWithoutInviteCodesInput = {
   projects?: Prisma.ProjectCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutInviteCodesInput = {
@@ -918,6 +1038,7 @@ export type TeamUncheckedCreateWithoutInviteCodesInput = {
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutInviteCodesInput = {
@@ -951,6 +1072,7 @@ export type TeamUpdateWithoutInviteCodesInput = {
   projects?: Prisma.ProjectUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutInviteCodesInput = {
@@ -968,6 +1090,7 @@ export type TeamUncheckedUpdateWithoutInviteCodesInput = {
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamCreateWithoutProjectsInput = {
@@ -985,6 +1108,7 @@ export type TeamCreateWithoutProjectsInput = {
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutProjectsInput = {
@@ -1002,6 +1126,7 @@ export type TeamUncheckedCreateWithoutProjectsInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutProjectsInput = {
@@ -1035,6 +1160,7 @@ export type TeamUpdateWithoutProjectsInput = {
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutProjectsInput = {
@@ -1052,6 +1178,7 @@ export type TeamUncheckedUpdateWithoutProjectsInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamCreateWithoutSubscriptionInput = {
@@ -1069,6 +1196,7 @@ export type TeamCreateWithoutSubscriptionInput = {
   projects?: Prisma.ProjectCreateNestedManyWithoutTeamInput
   inviteCodes?: Prisma.InviteCodeCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserCreateNestedManyWithoutCurrentTeamInput
+  customRoles?: Prisma.CustomRoleCreateNestedManyWithoutTeamInput
 }
 
 export type TeamUncheckedCreateWithoutSubscriptionInput = {
@@ -1086,6 +1214,7 @@ export type TeamUncheckedCreateWithoutSubscriptionInput = {
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutTeamInput
   inviteCodes?: Prisma.InviteCodeUncheckedCreateNestedManyWithoutTeamInput
   currentForUsers?: Prisma.UserUncheckedCreateNestedManyWithoutCurrentTeamInput
+  customRoles?: Prisma.CustomRoleUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type TeamCreateOrConnectWithoutSubscriptionInput = {
@@ -1119,6 +1248,7 @@ export type TeamUpdateWithoutSubscriptionInput = {
   projects?: Prisma.ProjectUpdateManyWithoutTeamNestedInput
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutSubscriptionInput = {
@@ -1136,6 +1266,7 @@ export type TeamUncheckedUpdateWithoutSubscriptionInput = {
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutTeamNestedInput
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamCreateManyOwnerInput = {
@@ -1165,6 +1296,7 @@ export type TeamUpdateWithoutOwnerInput = {
   inviteCodes?: Prisma.InviteCodeUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateWithoutOwnerInput = {
@@ -1182,6 +1314,7 @@ export type TeamUncheckedUpdateWithoutOwnerInput = {
   inviteCodes?: Prisma.InviteCodeUncheckedUpdateManyWithoutTeamNestedInput
   currentForUsers?: Prisma.UserUncheckedUpdateManyWithoutCurrentTeamNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTeamNestedInput
+  customRoles?: Prisma.CustomRoleUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type TeamUncheckedUpdateManyWithoutOwnerInput = {
@@ -1206,6 +1339,7 @@ export type TeamCountOutputType = {
   projects: number
   inviteCodes: number
   currentForUsers: number
+  customRoles: number
 }
 
 export type TeamCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1213,6 +1347,7 @@ export type TeamCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   projects?: boolean | TeamCountOutputTypeCountProjectsArgs
   inviteCodes?: boolean | TeamCountOutputTypeCountInviteCodesArgs
   currentForUsers?: boolean | TeamCountOutputTypeCountCurrentForUsersArgs
+  customRoles?: boolean | TeamCountOutputTypeCountCustomRolesArgs
 }
 
 /**
@@ -1253,6 +1388,13 @@ export type TeamCountOutputTypeCountCurrentForUsersArgs<ExtArgs extends runtime.
   where?: Prisma.UserWhereInput
 }
 
+/**
+ * TeamCountOutputType without action
+ */
+export type TeamCountOutputTypeCountCustomRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomRoleWhereInput
+}
+
 
 export type TeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1271,6 +1413,7 @@ export type TeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   inviteCodes?: boolean | Prisma.Team$inviteCodesArgs<ExtArgs>
   currentForUsers?: boolean | Prisma.Team$currentForUsersArgs<ExtArgs>
   subscription?: boolean | Prisma.Team$subscriptionArgs<ExtArgs>
+  customRoles?: boolean | Prisma.Team$customRolesArgs<ExtArgs>
   _count?: boolean | Prisma.TeamCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["team"]>
 
@@ -1323,6 +1466,7 @@ export type TeamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   inviteCodes?: boolean | Prisma.Team$inviteCodesArgs<ExtArgs>
   currentForUsers?: boolean | Prisma.Team$currentForUsersArgs<ExtArgs>
   subscription?: boolean | Prisma.Team$subscriptionArgs<ExtArgs>
+  customRoles?: boolean | Prisma.Team$customRolesArgs<ExtArgs>
   _count?: boolean | Prisma.TeamCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TeamIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1341,6 +1485,7 @@ export type $TeamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     inviteCodes: Prisma.$InviteCodePayload<ExtArgs>[]
     currentForUsers: Prisma.$UserPayload<ExtArgs>[]
     subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
+    customRoles: Prisma.$CustomRolePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1753,6 +1898,7 @@ export interface Prisma__TeamClient<T, Null = never, ExtArgs extends runtime.Typ
   inviteCodes<T extends Prisma.Team$inviteCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Team$inviteCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InviteCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   currentForUsers<T extends Prisma.Team$currentForUsersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Team$currentForUsersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.Team$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Team$subscriptionArgs<ExtArgs>>): Prisma.Prisma__SubscriptionClient<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  customRoles<T extends Prisma.Team$customRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Team$customRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2300,6 +2446,30 @@ export type Team$subscriptionArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   include?: Prisma.SubscriptionInclude<ExtArgs> | null
   where?: Prisma.SubscriptionWhereInput
+}
+
+/**
+ * Team.customRoles
+ */
+export type Team$customRolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomRole
+   */
+  select?: Prisma.CustomRoleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomRole
+   */
+  omit?: Prisma.CustomRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomRoleInclude<ExtArgs> | null
+  where?: Prisma.CustomRoleWhereInput
+  orderBy?: Prisma.CustomRoleOrderByWithRelationInput | Prisma.CustomRoleOrderByWithRelationInput[]
+  cursor?: Prisma.CustomRoleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomRoleScalarFieldEnum | Prisma.CustomRoleScalarFieldEnum[]
 }
 
 /**

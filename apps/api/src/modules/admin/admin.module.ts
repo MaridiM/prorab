@@ -17,6 +17,12 @@ import { AdminProjectsService } from './services/admin-projects.service';
 import { AdminSupportService } from './services/admin-support.service';
 import { AdminPlansService } from './services/admin-plans.service';
 import { AdminPaymentProvidersService } from './services/admin-payment-providers.service';
+import { AdminTeamAnalyticsService } from './services/admin-team-analytics.service';
+import { AdminRoleBuilderService } from './services/admin-role-builder.service';
+import { AdminTeamMembersService } from './services/admin-team-members.service';
+import { AdminCommunicationsService } from './services/admin-communications.service';
+import { AdminTeamOperationsService } from './services/admin-team-operations.service';
+import { AdminAuditService } from './services/admin-audit.service';
 import { AdminSettingsResolver } from './resolvers/admin-settings.resolver';
 import { AdminLogsResolver } from './resolvers/admin-logs.resolver';
 import { AdminStorageResolver } from './resolvers/admin-storage.resolver';
@@ -30,6 +36,12 @@ import { AdminProjectsResolver } from './resolvers/admin-projects.resolver';
 import { AdminSupportResolver } from './resolvers/admin-support.resolver';
 import { AdminPlansResolver } from './resolvers/admin-plans.resolver';
 import { AdminPaymentProvidersResolver } from './resolvers/admin-payment-providers.resolver';
+import { AdminTeamAnalyticsResolver } from './resolvers/admin-team-analytics.resolver';
+import { AdminRoleBuilderResolver } from './resolvers/admin-role-builder.resolver';
+import { AdminTeamMembersResolver } from './resolvers/admin-team-members.resolver';
+import { AdminCommunicationsResolver } from './resolvers/admin-communications.resolver';
+import { AdminTeamOperationsResolver } from './resolvers/admin-team-operations.resolver';
+import { AdminAuditResolver } from './resolvers/admin-audit.resolver';
 
 @Module({
   imports: [AuthModule, StorageModule],
@@ -53,6 +65,12 @@ import { AdminPaymentProvidersResolver } from './resolvers/admin-payment-provide
     AdminSupportService,
     AdminPlansService,
     AdminPaymentProvidersService,
+    AdminTeamAnalyticsService,
+    AdminRoleBuilderService,
+    AdminTeamMembersService,
+    AdminCommunicationsService,
+    AdminTeamOperationsService,
+    AdminAuditService,
 
     // Resolvers
     AdminSettingsResolver,
@@ -68,6 +86,12 @@ import { AdminPaymentProvidersResolver } from './resolvers/admin-payment-provide
     AdminSupportResolver,
     AdminPlansResolver,
     AdminPaymentProvidersResolver,
+    AdminTeamAnalyticsResolver,
+    AdminRoleBuilderResolver,
+    AdminTeamMembersResolver,
+    AdminCommunicationsResolver,
+    AdminTeamOperationsResolver,
+    AdminAuditResolver,
   ],
   exports: [
     SystemSettingsService,
@@ -83,6 +107,12 @@ import { AdminPaymentProvidersResolver } from './resolvers/admin-payment-provide
     AdminSupportService,
     AdminPlansService,
     AdminPaymentProvidersService,
+    AdminTeamAnalyticsService,
+    AdminRoleBuilderService,
+    AdminTeamMembersService,
+    AdminCommunicationsService,
+    AdminTeamOperationsService,
+    AdminAuditService,
     EncryptionService,
     PaymentProviderFactory,
   ],

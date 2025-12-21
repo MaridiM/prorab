@@ -276,21 +276,12 @@ export class AuthResolver {
 		@UserAgent() userAgent?: string,
 		@ClientIp() ip?: string,
 	): Promise<TelegramAuthStatusPayload> {
-		const { completed, chatId } = await this.telegramAuthService.checkAuthToken(
+		const { completed, chatId, telegramUser } = await this.telegramAuthService.checkAuthToken(
 			input.token,
 		)
 
-		if (!completed || !chatId) {
+		if (!completed || !chatId || !telegramUser) {
 			return { completed: false }
-		}
-
-		// Получить Telegram user data из бота (chat_id уже есть)
-		// Для упрощения используем mock данные, в реальности нужно получить из Telegram API
-		const telegramUser = {
-			id: parseInt(chatId), // В реальности получим из Telegram
-			first_name: 'Telegram User',
-			username: undefined as string | undefined,
-			photo_url: undefined as string | undefined,
 		}
 
 		// Создать или найти пользователя

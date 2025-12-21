@@ -1,0 +1,133 @@
+# ==================== FRAGMENTS ====================
+
+fragment TeamAuditLogFields on TeamAuditLog {
+  id
+  teamId
+  userId
+  action
+  category
+  resource
+  resourceId
+  oldValue
+  newValue
+  ipAddress
+  userAgent
+  metadata
+  createdAt
+  userName
+  teamName
+}
+
+fragment DataRetentionPolicyFields on DataRetentionPolicy {
+  id
+  teamId
+  resourceType
+  retentionDays
+  isActive
+  createdAt
+  updatedAt
+  teamName
+}
+
+fragment DataExportRequestFields on DataExportRequest {
+  id
+  teamId
+  userId
+  requestedById
+  type
+  status
+  format
+  fileUrl
+  expiresAt
+  completedAt
+  errorMessage
+  createdAt
+  teamName
+  userName
+  requestedByName
+}
+
+fragment AuditStatisticsFields on AuditStatistics {
+  totalLogs
+  logsLast24h
+  logsLast7d
+  logsLast30d
+  byCategory {
+    category
+    count
+  }
+  topActions
+  uniqueUsers
+}
+
+fragment ComplianceReportFields on ComplianceReport {
+  teamId
+  teamName
+  totalAuditLogs
+  activePolicies
+  pendingExports
+  hasGDPRCompliance
+  hasDataRetention
+  lastAuditDate
+  generatedAt
+}
+
+# ==================== QUERIES ====================
+
+query AdminGetAuditLogs($filter: AuditLogFilterInput, $pagination: PaginationInput) {
+  adminGetAuditLogs(filter: $filter, pagination: $pagination) {
+    logs {
+      ...TeamAuditLogFields
+    }
+    totalCount
+    hasMore
+  }
+}
+
+query AdminGetAuditStatistics($teamId: String) {
+  adminGetAuditStatistics(teamId: $teamId) {
+    ...AuditStatisticsFields
+  }
+}
+
+query AdminGetRetentionPolicies($teamId: String) {
+  adminGetRetentionPolicies(teamId: $teamId) {
+    ...DataRetentionPolicyFields
+  }
+}
+
+query AdminGetDataExportRequests($teamId: String) {
+  adminGetDataExportRequests(teamId: $teamId) {
+    ...DataExportRequestFields
+  }
+}
+
+query AdminGetComplianceReport($teamId: String!) {
+  adminGetComplianceReport(teamId: $teamId) {
+    ...ComplianceReportFields
+  }
+}
+
+# ==================== MUTATIONS ====================
+
+mutation AdminCreateRetentionPolicy($input: CreateRetentionPolicyInput!) {
+  adminCreateRetentionPolicy(input: $input) {
+    ...DataRetentionPolicyFields
+  }
+}
+
+mutation AdminUpdateRetentionPolicy($input: UpdateRetentionPolicyInput!) {
+  adminUpdateRetentionPolicy(input: $input) {
+    ...DataRetentionPolicyFields
+  }
+}
+
+mutation AdminDeleteRetentionPolicy($id: String!) {
+  adminDeleteRetentionPolicy(id: $id)
+}
+
+mutation AdminCreateDataExportRequest($input: CreateDataExportInput!) {
+  adminCreateDataExportRequest(input: $input) {
+    ...DataExportRequestFields
+  }
+}
