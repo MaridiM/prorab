@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useLazyQuery } from '@apollo/client'
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
 import { Loader2, AlertTriangle } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import {
@@ -23,7 +23,7 @@ import {
 import { Checkbox } from '@/packages/components/ui/checkbox'
 import { Card, CardContent } from '@/packages/components/ui/card'
 import {
-  AdminGetTeamsDocument,
+  AdminTeamsDocument,
   AdminGetMergePreviewDocument,
   AdminMergeTeamsDocument,
 } from '@/packages/api/graphql/__generated__/output'
@@ -39,8 +39,11 @@ export function MergeTeamsWizard({ onClose }: MergeTeamsWizardProps) {
   const [deleteSource, setDeleteSource] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
 
-  const { data: teamsData } = useQuery(AdminGetTeamsDocument, {
-    variables: { pagination: { limit: 100, offset: 0 } },
+  const { data: teamsData } = useQuery(AdminTeamsDocument, {
+    variables: { 
+      filters: null,
+      pagination: { page: 1, limit: 100 } 
+    },
   })
 
   const [getPreview, { data: previewData, loading: previewLoading }] = useLazyQuery(
@@ -88,7 +91,7 @@ export function MergeTeamsWizard({ onClose }: MergeTeamsWizardProps) {
     })
   }
 
-  const teams = teamsData?.adminGetTeams?.teams || []
+  const teams = teamsData?.adminTeams?.nodes || []
   const preview = previewData?.adminGetMergePreview
 
   return (

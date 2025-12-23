@@ -179,7 +179,8 @@
       "Bash(head:*)",
       "Bash(pnpm run codegen:*)",
       "Bash(node check-providers.js:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(timeout 30 pnpm dev:*)"
     ],
     "deny": [],
     "ask": []

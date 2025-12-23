@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, ID, Float, InputType, registerEnumType } from '@nestjs/graphql';
+import { IsOptional, IsString, IsBoolean } from 'class-validator';
 import { PageInfo } from './shared/page-info.model';
 
 // ==================== OBJECT TYPES ====================
@@ -119,12 +120,18 @@ export class AdminPlansConnection {
 @InputType({ description: 'Filters for querying plans' })
 export class AdminPlanFilters {
   @Field(() => String, { nullable: true, description: 'Search by name, slug, or description' })
+  @IsOptional()
+  @IsString()
   search?: string;
 
   @Field(() => Boolean, { nullable: true, description: 'Filter by active status' })
+  @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 
   @Field(() => String, { nullable: true, description: 'Filter prices by currency (RUB, USD, EUR)' })
+  @IsOptional()
+  @IsString()
   currency?: string;
 }
 

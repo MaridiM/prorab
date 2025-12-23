@@ -235,21 +235,6 @@ export class MemberFilterInput {
   joinedBefore?: Date
 }
 
-@InputType({ description: 'Pagination input' })
-export class PaginationInput {
-  @Field(() => Int, { nullable: true, defaultValue: 0, description: 'Offset' })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  offset?: number
-
-  @Field(() => Int, { nullable: true, defaultValue: 50, description: 'Limit' })
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  limit?: number
-}
 
 @InputType({ description: 'Bulk update member input' })
 export class BulkUpdateMembersInput {

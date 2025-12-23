@@ -13,12 +13,12 @@ import {
   BulkOperationResult,
   MemberStatistics,
   MemberFilterInput,
-  PaginationInput,
   BulkUpdateMembersInput,
   BulkRemoveMembersInput,
   TransferMemberInput,
   MemberExportFormat,
 } from '../models/admin-team-members.model'
+import { PaginationInput } from '../dto/pagination.input'
 
 @Resolver()
 @UseGuards(AuthGuard, AdminGuard, PermissionsGuard)
@@ -88,7 +88,7 @@ export class AdminTeamMembersResolver {
     name: 'adminBulkUpdateMembers',
     description: 'Bulk update team members',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async bulkUpdateMembers(
     @Args('input') input: BulkUpdateMembersInput,
     @CurrentUser('id') userId: string,
@@ -100,7 +100,7 @@ export class AdminTeamMembersResolver {
     name: 'adminBulkRemoveMembers',
     description: 'Bulk remove team members',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async bulkRemoveMembers(@Args('input') input: BulkRemoveMembersInput): Promise<BulkOperationResult> {
     return this.teamMembersService.bulkRemoveMembers(input)
   }
@@ -109,7 +109,7 @@ export class AdminTeamMembersResolver {
     name: 'adminTransferMember',
     description: 'Transfer member to another team',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async transferMember(
     @Args('input') input: TransferMemberInput,
     @CurrentUser('id') userId: string,

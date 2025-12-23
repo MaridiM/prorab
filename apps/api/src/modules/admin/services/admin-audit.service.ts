@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from '../../../shared/services/prisma.service'
+import { PrismaService } from '../../../core/prisma/prisma.service'
 import {
   TeamAuditLog,
   DataRetentionPolicy,
@@ -12,9 +12,9 @@ import {
   CreateRetentionPolicyInput,
   UpdateRetentionPolicyInput,
   CreateDataExportInput,
-  PaginationInput,
   AuditCategory,
 } from '../models/admin-audit.model'
+import { PaginationInput } from '../dto/pagination.input'
 
 @Injectable()
 export class AdminAuditService {
@@ -41,7 +41,8 @@ export class AdminAuditService {
     }
 
     const limit = pagination?.limit || 50
-    const offset = pagination?.offset || 0
+    const page = pagination?.page || 1
+    const offset = (page - 1) * limit
 
     const [logs, totalCount] = await Promise.all([
       this.prisma.teamAuditLog.findMany({

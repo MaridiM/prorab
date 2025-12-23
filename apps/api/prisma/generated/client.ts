@@ -192,3 +192,43 @@ export type AdminActionLog = Prisma.AdminActionLogModel
  * 
  */
 export type SystemStatistics = Prisma.SystemStatisticsModel
+/**
+ * Model TeamAnnouncement
+ * 
+ */
+export type TeamAnnouncement = Prisma.TeamAnnouncementModel
+/**
+ * Model AnnouncementRead
+ * 
+ */
+export type AnnouncementRead = Prisma.AnnouncementReadModel
+/**
+ * Model TeamTemplate
+ * 
+ */
+export type TeamTemplate = Prisma.TeamTemplateModel
+/**
+ * Model TeamMergeLog
+ * 
+ */
+export type TeamMergeLog = Prisma.TeamMergeLogModel
+/**
+ * Model TeamCloneLog
+ * 
+ */
+export type TeamCloneLog = Prisma.TeamCloneLogModel
+/**
+ * Model TeamAuditLog
+ * 
+ */
+export type TeamAuditLog = Prisma.TeamAuditLogModel
+/**
+ * Model DataRetentionPolicy
+ * 
+ */
+export type DataRetentionPolicy = Prisma.DataRetentionPolicyModel
+/**
+ * Model DataExportRequest
+ * 
+ */
+export type DataExportRequest = Prisma.DataExportRequestModel

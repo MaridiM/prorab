@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, InputType, Int, registerEnumType } from '@nestjs/graphql'
 import { IsString, IsOptional, IsNotEmpty, IsEnum, IsInt, Min, IsBoolean, IsUUID } from 'class-validator'
-import GraphQLJSON from 'graphql-type-json'
+import { GraphQLJSON } from 'graphql-scalars'
+import { PaginationInput } from '../dto/pagination.input'
 
 // ==================== ENUMS ====================
 
@@ -341,17 +342,3 @@ export class CreateDataExportInput {
   format?: ExportFormat
 }
 
-@InputType({ description: 'Pagination input' })
-export class PaginationInput {
-  @Field(() => Int, { nullable: true, defaultValue: 50 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  limit?: number
-
-  @Field(() => Int, { nullable: true, defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  offset?: number
-}

@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common'
-import { PrismaService } from '../../../shared/services/prisma.service'
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger } from '@nestjs/common'
+import { PrismaService } from '../../../core/prisma/prisma.service'
 import {
   TeamTemplate,
   TeamMergeLog,
@@ -18,6 +18,8 @@ import {
 
 @Injectable()
 export class AdminTeamOperationsService {
+  private readonly logger = new Logger(AdminTeamOperationsService.name)
+
   constructor(private prisma: PrismaService) {}
 
   // ==================== TEAM TEMPLATES ====================
@@ -34,57 +36,74 @@ export class AdminTeamOperationsService {
       }
     }
 
-    const templates = await this.prisma.teamTemplate.findMany({
-      where,
-      include: {
-        createdBy: {
-          select: { fullName: true },
+    try {
+      const templates = await this.prisma.teamTemplate.findMany({
+        where,
+        include: {
+          createdBy: {
+            select: { fullName: true },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+        orderBy: { createdAt: 'desc' },
+      })
 
-    return templates.map((t) => ({
-      id: t.id,
-      name: t.name,
-      description: t.description,
-      settings: t.settings,
-      roles: t.roles,
-      projectSetup: t.projectSetup,
-      isPublic: t.isPublic,
-      createdById: t.createdById,
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-      createdByName: t.createdBy.fullName,
-    }))
+      return templates.map((t) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description,
+        settings: t.settings,
+        roles: t.roles,
+        projectSetup: t.projectSetup,
+        isPublic: t.isPublic,
+        createdById: t.createdById,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        createdByName: t.createdBy.fullName,
+      }))
+    } catch (error: any) {
+      // Table doesn't exist yet - return empty array
+      if (error?.code === 'P2021' || error?.meta?.driverAdapterError?.kind === 'TableDoesNotExist') {
+        this.logger.warn('TeamTemplate table does not exist, returning empty array')
+        return []
+      }
+      throw error
+    }
   }
 
   async getTeamTemplateById(id: string): Promise<TeamTemplate> {
-    const template = await this.prisma.teamTemplate.findUnique({
-      where: { id },
-      include: {
-        createdBy: {
-          select: { fullName: true },
+    try {
+      const template = await this.prisma.teamTemplate.findUnique({
+        where: { id },
+        include: {
+          createdBy: {
+            select: { fullName: true },
+          },
         },
-      },
-    })
+      })
 
-    if (!template) {
-      throw new NotFoundException(`Template with ID ${id} not found`)
-    }
+      if (!template) {
+        throw new NotFoundException(`Template with ID ${id} not found`)
+      }
 
-    return {
-      id: template.id,
-      name: template.name,
-      description: template.description,
-      settings: template.settings,
-      roles: template.roles,
-      projectSetup: template.projectSetup,
-      isPublic: template.isPublic,
-      createdById: template.createdById,
-      createdAt: template.createdAt,
-      updatedAt: template.updatedAt,
-      createdByName: template.createdBy.fullName,
+      return {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        settings: template.settings,
+        roles: template.roles,
+        projectSetup: template.projectSetup,
+        isPublic: template.isPublic,
+        createdById: template.createdById,
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        createdByName: template.createdBy.fullName,
+      }
+    } catch (error: any) {
+      // Table doesn't exist yet
+      if (error?.code === 'P2021' || error?.meta?.driverAdapterError?.kind === 'TableDoesNotExist') {
+        throw new NotFoundException(`Template with ID ${id} not found`)
+      }
+      throw error
     }
   }
 
@@ -386,13 +405,13 @@ export class AdminTeamOperationsService {
         for (const role of sourceTeam.customRoles) {
           await this.prisma.customRole.create({
             data: {
-              teamId: clonedTeam.id,
+              team: { connect: { id: clonedTeam.id } },
               name: role.name,
               description: role.description,
               permissions: role.permissions,
               color: role.color,
-              parentRoleId: null, // Reset hierarchy
               isBuiltIn: false,
+              createdBy: userId,
             },
           })
         }
@@ -409,9 +428,9 @@ export class AdminTeamOperationsService {
               status: 'ACTIVE',
               startDate: new Date(),
               budget: project.budget,
-              clientName: project.clientName,
-              clientContact: project.clientContact,
+              clientPhone: project.clientPhone,
               address: project.address,
+              createdById: userId,
             },
           })
         }
@@ -472,12 +491,13 @@ export class AdminTeamOperationsService {
         for (const roleData of (template.roles as any).roles) {
           await this.prisma.customRole.create({
             data: {
-              teamId: team.id,
+              team: { connect: { id: team.id } },
               name: roleData.name,
               description: roleData.description,
               permissions: roleData.permissions,
               color: roleData.color,
               isBuiltIn: false,
+              createdBy: input.ownerId,
             },
           })
         }
@@ -501,12 +521,13 @@ export class AdminTeamOperationsService {
   // ==================== LOGS ====================
 
   async getMergeLogs(): Promise<TeamMergeLog[]> {
-    const logs = await this.prisma.teamMergeLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    })
+    try {
+      const logs = await this.prisma.teamMergeLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      })
 
-    return logs.map((log) => ({
+      return logs.map((log) => ({
       id: log.id,
       sourceTeamId: log.sourceTeamId,
       targetTeamId: log.targetTeamId,
@@ -516,43 +537,75 @@ export class AdminTeamOperationsService {
       dataSnapshot: log.dataSnapshot,
       notes: log.notes,
       createdAt: log.createdAt,
-      sourceTeamName: (log.dataSnapshot as any)?.sourceTeam?.name,
-      targetTeamName: (log.dataSnapshot as any)?.targetTeam?.name,
-    }))
+        sourceTeamName: (log.dataSnapshot as any)?.sourceTeam?.name,
+        targetTeamName: (log.dataSnapshot as any)?.targetTeam?.name,
+      }))
+    } catch (error: any) {
+      // Table doesn't exist yet - return empty array
+      if (error?.code === 'P2021' || error?.meta?.driverAdapterError?.kind === 'TableDoesNotExist') {
+        this.logger.warn('TeamMergeLog table does not exist, returning empty array')
+        return []
+      }
+      throw error
+    }
   }
 
   async getCloneLogs(): Promise<TeamCloneLog[]> {
-    const logs = await this.prisma.teamCloneLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    })
+    try {
+      const logs = await this.prisma.teamCloneLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      })
 
-    return logs.map((log) => ({
+      return logs.map((log) => ({
       id: log.id,
       sourceTeamId: log.sourceTeamId,
       clonedTeamId: log.clonedTeamId,
-      clonedById: log.clonedById,
-      clonedSettings: log.clonedSettings,
-      createdAt: log.createdAt,
-    }))
+        clonedById: log.clonedById,
+        clonedSettings: log.clonedSettings,
+        createdAt: log.createdAt,
+      }))
+    } catch (error: any) {
+      // Table doesn't exist yet - return empty array
+      if (error?.code === 'P2021' || error?.meta?.driverAdapterError?.kind === 'TableDoesNotExist') {
+        this.logger.warn('TeamCloneLog table does not exist, returning empty array')
+        return []
+      }
+      throw error
+    }
   }
 
   // ==================== STATISTICS ====================
 
   async getTeamOperationsStatistics(): Promise<TeamOperationsStatistics> {
-    const [totalTemplates, publicTemplates, totalMerges, totalClones] = await Promise.all([
-      this.prisma.teamTemplate.count(),
-      this.prisma.teamTemplate.count({ where: { isPublic: true } }),
-      this.prisma.teamMergeLog.count(),
-      this.prisma.teamCloneLog.count(),
-    ])
+    try {
+      const [totalTemplates, publicTemplates, totalMerges, totalClones] = await Promise.all([
+        this.prisma.teamTemplate.count(),
+        this.prisma.teamTemplate.count({ where: { isPublic: true } }),
+        this.prisma.teamMergeLog.count(),
+        this.prisma.teamCloneLog.count(),
+      ])
 
-    return {
-      totalTemplates,
-      publicTemplates,
-      totalMerges,
-      totalClones,
-      teamsCreatedFromTemplates: 0, // Would need additional tracking
+      return {
+        totalTemplates,
+        publicTemplates,
+        totalMerges,
+        totalClones,
+        teamsCreatedFromTemplates: 0, // Would need additional tracking
+      }
+    } catch (error: any) {
+      // Tables don't exist yet - return zeros
+      if (error?.code === 'P2021' || error?.meta?.driverAdapterError?.kind === 'TableDoesNotExist') {
+        this.logger.warn('Team operations tables do not exist, returning zero statistics')
+        return {
+          totalTemplates: 0,
+          publicTemplates: 0,
+          totalMerges: 0,
+          totalClones: 0,
+          teamsCreatedFromTemplates: 0,
+        }
+      }
+      throw error
     }
   }
 }

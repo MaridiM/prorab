@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { ArrowLeft, Users, FolderKanban, Clock, TrendingUp, HardDrive, Wallet } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/packages/components/ui/card'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import {
@@ -23,7 +23,7 @@ import {
 } from '@/packages/components/ui/select'
 import { Checkbox } from '@/packages/components/ui/checkbox'
 import {
-  AdminGetTeamsDocument,
+  AdminTeamsDocument,
   AdminCloneTeamDocument,
 } from '@/packages/api/graphql/__generated__/output'
 import { toast } from 'sonner'
@@ -39,8 +39,11 @@ export function CloneTeamDialog({ onClose }: CloneTeamDialogProps) {
   const [cloneProjects, setCloneProjects] = useState(false)
   const [cloneMembers, setCloneMembers] = useState(false)
 
-  const { data: teamsData } = useQuery(AdminGetTeamsDocument, {
-    variables: { pagination: { limit: 100, offset: 0 } },
+  const { data: teamsData } = useQuery(AdminTeamsDocument, {
+    variables: { 
+      filters: null,
+      pagination: { page: 1, limit: 100 } 
+    },
   })
 
   const [cloneTeam, { loading: cloning }] = useMutation(AdminCloneTeamDocument, {
@@ -79,7 +82,7 @@ export function CloneTeamDialog({ onClose }: CloneTeamDialogProps) {
     })
   }
 
-  const teams = teamsData?.adminGetTeams?.teams || []
+  const teams = teamsData?.adminTeams?.nodes || []
 
   return (
     <Dialog open onOpenChange={onClose}>

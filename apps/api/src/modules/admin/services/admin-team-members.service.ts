@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common'
-import { PrismaService } from '../../../shared/services/prisma.service'
+import { PrismaService } from '../../../core/prisma/prisma.service'
 import {
   TeamMemberExtended,
   MemberActivityEvent,
@@ -8,12 +8,12 @@ import {
   BulkOperationResult,
   MemberStatistics,
   MemberFilterInput,
-  PaginationInput,
   BulkUpdateMembersInput,
   BulkRemoveMembersInput,
   TransferMemberInput,
   MemberExportFormat,
 } from '../models/admin-team-members.model'
+import { PaginationInput } from '../dto/pagination.input'
 
 @Injectable()
 export class AdminTeamMembersService {
@@ -92,7 +92,7 @@ export class AdminTeamMembersService {
           },
         },
       },
-      skip: pagination?.offset || 0,
+      skip: pagination ? (pagination.page - 1) * (pagination.limit || 50) : 0,
       take: pagination?.limit || 50,
       orderBy: { joinedAt: 'desc' },
     })
@@ -448,8 +448,9 @@ export class AdminTeamMembersService {
     // Sort all events by date
     events.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
-    const offset = pagination?.offset || 0
+    const page = pagination?.page || 1
     const limit = pagination?.limit || 50
+    const offset = (page - 1) * limit
 
     return {
       events: events.slice(offset, offset + limit),

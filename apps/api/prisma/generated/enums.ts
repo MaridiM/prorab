@@ -172,3 +172,67 @@ export const SettingValueType = {
 } as const
 
 export type SettingValueType = (typeof SettingValueType)[keyof typeof SettingValueType]
+
+
+export const AnnouncementPriority = {
+  LOW: 'LOW',
+  NORMAL: 'NORMAL',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT'
+} as const
+
+export type AnnouncementPriority = (typeof AnnouncementPriority)[keyof typeof AnnouncementPriority]
+
+
+export const AnnouncementType = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
+  MAINTENANCE: 'MAINTENANCE'
+} as const
+
+export type AnnouncementType = (typeof AnnouncementType)[keyof typeof AnnouncementType]
+
+
+export const AuditCategory = {
+  MEMBER_MANAGEMENT: 'MEMBER_MANAGEMENT',
+  PROJECT_MANAGEMENT: 'PROJECT_MANAGEMENT',
+  FINANCIAL: 'FINANCIAL',
+  SETTINGS: 'SETTINGS',
+  PERMISSIONS: 'PERMISSIONS',
+  DATA_ACCESS: 'DATA_ACCESS',
+  AUTHENTICATION: 'AUTHENTICATION',
+  INTEGRATIONS: 'INTEGRATIONS'
+} as const
+
+export type AuditCategory = (typeof AuditCategory)[keyof typeof AuditCategory]
+
+
+export const DataExportType = {
+  TEAM_DATA: 'TEAM_DATA',
+  USER_DATA: 'USER_DATA',
+  GDPR_FULL: 'GDPR_FULL',
+  AUDIT_LOGS: 'AUDIT_LOGS'
+} as const
+
+export type DataExportType = (typeof DataExportType)[keyof typeof DataExportType]
+
+
+export const ExportStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type ExportStatus = (typeof ExportStatus)[keyof typeof ExportStatus]
+
+
+export const ExportFormat = {
+  JSON: 'JSON',
+  CSV: 'CSV',
+  PDF: 'PDF'
+} as const
+
+export type ExportFormat = (typeof ExportFormat)[keyof typeof ExportFormat]

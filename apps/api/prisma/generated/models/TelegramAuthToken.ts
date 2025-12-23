@@ -28,6 +28,10 @@ export type TelegramAuthTokenMinAggregateOutputType = {
   id: string | null
   token: string | null
   chatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
+  telegramUsername: string | null
+  telegramPhotoUrl: string | null
   used: boolean | null
   expiresAt: Date | null
   createdAt: Date | null
@@ -37,6 +41,10 @@ export type TelegramAuthTokenMaxAggregateOutputType = {
   id: string | null
   token: string | null
   chatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
+  telegramUsername: string | null
+  telegramPhotoUrl: string | null
   used: boolean | null
   expiresAt: Date | null
   createdAt: Date | null
@@ -46,6 +54,10 @@ export type TelegramAuthTokenCountAggregateOutputType = {
   id: number
   token: number
   chatId: number
+  telegramFirstName: number
+  telegramLastName: number
+  telegramUsername: number
+  telegramPhotoUrl: number
   used: number
   expiresAt: number
   createdAt: number
@@ -57,6 +69,10 @@ export type TelegramAuthTokenMinAggregateInputType = {
   id?: true
   token?: true
   chatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
+  telegramUsername?: true
+  telegramPhotoUrl?: true
   used?: true
   expiresAt?: true
   createdAt?: true
@@ -66,6 +82,10 @@ export type TelegramAuthTokenMaxAggregateInputType = {
   id?: true
   token?: true
   chatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
+  telegramUsername?: true
+  telegramPhotoUrl?: true
   used?: true
   expiresAt?: true
   createdAt?: true
@@ -75,6 +95,10 @@ export type TelegramAuthTokenCountAggregateInputType = {
   id?: true
   token?: true
   chatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
+  telegramUsername?: true
+  telegramPhotoUrl?: true
   used?: true
   expiresAt?: true
   createdAt?: true
@@ -157,6 +181,10 @@ export type TelegramAuthTokenGroupByOutputType = {
   id: string
   token: string
   chatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
+  telegramUsername: string | null
+  telegramPhotoUrl: string | null
   used: boolean
   expiresAt: Date
   createdAt: Date
@@ -187,6 +215,10 @@ export type TelegramAuthTokenWhereInput = {
   id?: Prisma.StringFilter<"TelegramAuthToken"> | string
   token?: Prisma.StringFilter<"TelegramAuthToken"> | string
   chatId?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramFirstName?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramLastName?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramUsername?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramPhotoUrl?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
   used?: Prisma.BoolFilter<"TelegramAuthToken"> | boolean
   expiresAt?: Prisma.DateTimeFilter<"TelegramAuthToken"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"TelegramAuthToken"> | Date | string
@@ -196,6 +228,10 @@ export type TelegramAuthTokenOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
   chatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramPhotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   used?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -208,6 +244,10 @@ export type TelegramAuthTokenWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.TelegramAuthTokenWhereInput[]
   NOT?: Prisma.TelegramAuthTokenWhereInput | Prisma.TelegramAuthTokenWhereInput[]
   chatId?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramFirstName?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramLastName?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramUsername?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
+  telegramPhotoUrl?: Prisma.StringNullableFilter<"TelegramAuthToken"> | string | null
   used?: Prisma.BoolFilter<"TelegramAuthToken"> | boolean
   expiresAt?: Prisma.DateTimeFilter<"TelegramAuthToken"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"TelegramAuthToken"> | Date | string
@@ -217,6 +257,10 @@ export type TelegramAuthTokenOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
   chatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramPhotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   used?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -232,6 +276,10 @@ export type TelegramAuthTokenScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"TelegramAuthToken"> | string
   token?: Prisma.StringWithAggregatesFilter<"TelegramAuthToken"> | string
   chatId?: Prisma.StringNullableWithAggregatesFilter<"TelegramAuthToken"> | string | null
+  telegramFirstName?: Prisma.StringNullableWithAggregatesFilter<"TelegramAuthToken"> | string | null
+  telegramLastName?: Prisma.StringNullableWithAggregatesFilter<"TelegramAuthToken"> | string | null
+  telegramUsername?: Prisma.StringNullableWithAggregatesFilter<"TelegramAuthToken"> | string | null
+  telegramPhotoUrl?: Prisma.StringNullableWithAggregatesFilter<"TelegramAuthToken"> | string | null
   used?: Prisma.BoolWithAggregatesFilter<"TelegramAuthToken"> | boolean
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"TelegramAuthToken"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TelegramAuthToken"> | Date | string
@@ -241,6 +289,10 @@ export type TelegramAuthTokenCreateInput = {
   id?: string
   token: string
   chatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
   used?: boolean
   expiresAt: Date | string
   createdAt?: Date | string
@@ -250,6 +302,10 @@ export type TelegramAuthTokenUncheckedCreateInput = {
   id?: string
   token: string
   chatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
   used?: boolean
   expiresAt: Date | string
   createdAt?: Date | string
@@ -259,6 +315,10 @@ export type TelegramAuthTokenUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   chatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -268,6 +328,10 @@ export type TelegramAuthTokenUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   chatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -277,6 +341,10 @@ export type TelegramAuthTokenCreateManyInput = {
   id?: string
   token: string
   chatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
   used?: boolean
   expiresAt: Date | string
   createdAt?: Date | string
@@ -286,6 +354,10 @@ export type TelegramAuthTokenUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   chatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -295,6 +367,10 @@ export type TelegramAuthTokenUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   chatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   used?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -304,6 +380,10 @@ export type TelegramAuthTokenCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
+  telegramUsername?: Prisma.SortOrder
+  telegramPhotoUrl?: Prisma.SortOrder
   used?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -313,6 +393,10 @@ export type TelegramAuthTokenMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
+  telegramUsername?: Prisma.SortOrder
+  telegramPhotoUrl?: Prisma.SortOrder
   used?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -322,6 +406,10 @@ export type TelegramAuthTokenMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   token?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
+  telegramUsername?: Prisma.SortOrder
+  telegramPhotoUrl?: Prisma.SortOrder
   used?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -333,6 +421,10 @@ export type TelegramAuthTokenSelect<ExtArgs extends runtime.Types.Extensions.Int
   id?: boolean
   token?: boolean
   chatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
+  telegramUsername?: boolean
+  telegramPhotoUrl?: boolean
   used?: boolean
   expiresAt?: boolean
   createdAt?: boolean
@@ -342,6 +434,10 @@ export type TelegramAuthTokenSelectCreateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   token?: boolean
   chatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
+  telegramUsername?: boolean
+  telegramPhotoUrl?: boolean
   used?: boolean
   expiresAt?: boolean
   createdAt?: boolean
@@ -351,6 +447,10 @@ export type TelegramAuthTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   token?: boolean
   chatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
+  telegramUsername?: boolean
+  telegramPhotoUrl?: boolean
   used?: boolean
   expiresAt?: boolean
   createdAt?: boolean
@@ -360,12 +460,16 @@ export type TelegramAuthTokenSelectScalar = {
   id?: boolean
   token?: boolean
   chatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
+  telegramUsername?: boolean
+  telegramPhotoUrl?: boolean
   used?: boolean
   expiresAt?: boolean
   createdAt?: boolean
 }
 
-export type TelegramAuthTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chatId" | "used" | "expiresAt" | "createdAt", ExtArgs["result"]["telegramAuthToken"]>
+export type TelegramAuthTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "chatId" | "telegramFirstName" | "telegramLastName" | "telegramUsername" | "telegramPhotoUrl" | "used" | "expiresAt" | "createdAt", ExtArgs["result"]["telegramAuthToken"]>
 
 export type $TelegramAuthTokenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TelegramAuthToken"
@@ -374,6 +478,10 @@ export type $TelegramAuthTokenPayload<ExtArgs extends runtime.Types.Extensions.I
     id: string
     token: string
     chatId: string | null
+    telegramFirstName: string | null
+    telegramLastName: string | null
+    telegramUsername: string | null
+    telegramPhotoUrl: string | null
     used: boolean
     expiresAt: Date
     createdAt: Date
@@ -803,6 +911,10 @@ export interface TelegramAuthTokenFieldRefs {
   readonly id: Prisma.FieldRef<"TelegramAuthToken", 'String'>
   readonly token: Prisma.FieldRef<"TelegramAuthToken", 'String'>
   readonly chatId: Prisma.FieldRef<"TelegramAuthToken", 'String'>
+  readonly telegramFirstName: Prisma.FieldRef<"TelegramAuthToken", 'String'>
+  readonly telegramLastName: Prisma.FieldRef<"TelegramAuthToken", 'String'>
+  readonly telegramUsername: Prisma.FieldRef<"TelegramAuthToken", 'String'>
+  readonly telegramPhotoUrl: Prisma.FieldRef<"TelegramAuthToken", 'String'>
   readonly used: Prisma.FieldRef<"TelegramAuthToken", 'Boolean'>
   readonly expiresAt: Prisma.FieldRef<"TelegramAuthToken", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"TelegramAuthToken", 'DateTime'>

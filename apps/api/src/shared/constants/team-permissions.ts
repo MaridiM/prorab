@@ -435,7 +435,7 @@ export const getAllPermissions = (): TeamPermissions[] => {
 /**
  * Get permissions by category
  */
-export const getPermissionsByCategory = (category: keyof typeof PERMISSION_CATEGORIES): TeamPermissions[] => {
+export const getPermissionsByCategory = (category: keyof typeof PERMISSION_CATEGORIES): readonly TeamPermissions[] => {
   return PERMISSION_CATEGORIES[category].permissions
 }
 

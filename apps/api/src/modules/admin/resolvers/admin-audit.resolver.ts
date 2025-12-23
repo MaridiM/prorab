@@ -3,9 +3,9 @@ import { UseGuards } from '@nestjs/common'
 import { AuthGuard } from '../../../shared/guards/auth.guard'
 import { AdminGuard } from '../../../shared/guards/admin.guard'
 import { PermissionsGuard } from '../../../shared/guards/permissions.guard'
-import { RequirePermissions } from '../../../shared/decorators/permissions.decorator'
+import { RequirePermissions } from '../../../shared/decorators/require-permissions.decorator'
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator'
-import { AdminPermissions } from '../models/admin.model'
+import { AdminPermissions } from '../../../shared/constants/admin-permissions'
 import { AdminAuditService } from '../services/admin-audit.service'
 import {
   TeamAuditLog,
@@ -18,8 +18,8 @@ import {
   CreateRetentionPolicyInput,
   UpdateRetentionPolicyInput,
   CreateDataExportInput,
-  PaginationInput,
 } from '../models/admin-audit.model'
+import { PaginationInput } from '../dto/pagination.input'
 
 @Resolver()
 @UseGuards(AuthGuard, AdminGuard, PermissionsGuard)
@@ -56,7 +56,7 @@ export class AdminAuditResolver {
   }
 
   @Mutation(() => DataRetentionPolicy, { name: 'adminCreateRetentionPolicy' })
-  @RequirePermissions(AdminPermissions.SETTINGS_MANAGE)
+  @RequirePermissions(AdminPermissions.SETTINGS_UPDATE)
   async createRetentionPolicy(
     @Args('input') input: CreateRetentionPolicyInput,
   ): Promise<DataRetentionPolicy> {
@@ -64,7 +64,7 @@ export class AdminAuditResolver {
   }
 
   @Mutation(() => DataRetentionPolicy, { name: 'adminUpdateRetentionPolicy' })
-  @RequirePermissions(AdminPermissions.SETTINGS_MANAGE)
+  @RequirePermissions(AdminPermissions.SETTINGS_UPDATE)
   async updateRetentionPolicy(
     @Args('input') input: UpdateRetentionPolicyInput,
   ): Promise<DataRetentionPolicy> {
@@ -72,7 +72,7 @@ export class AdminAuditResolver {
   }
 
   @Mutation(() => Boolean, { name: 'adminDeleteRetentionPolicy' })
-  @RequirePermissions(AdminPermissions.SETTINGS_MANAGE)
+  @RequirePermissions(AdminPermissions.SETTINGS_UPDATE)
   async deleteRetentionPolicy(
     @Args('id', { type: () => String }) id: string,
   ): Promise<boolean> {
@@ -90,7 +90,7 @@ export class AdminAuditResolver {
   }
 
   @Mutation(() => DataExportRequest, { name: 'adminCreateDataExportRequest' })
-  @RequirePermissions(AdminPermissions.SETTINGS_MANAGE)
+  @RequirePermissions(AdminPermissions.SETTINGS_UPDATE)
   async createDataExportRequest(
     @Args('input') input: CreateDataExportInput,
     @CurrentUser('id') userId: string,

@@ -101,7 +101,7 @@ export class AdminRoleBuilderResolver {
     name: 'adminCreateCustomRole',
     description: 'Create a new custom role',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async createCustomRole(
     @Args('input') input: CreateCustomRoleInput,
     @CurrentUser('id') userId: string,
@@ -113,7 +113,7 @@ export class AdminRoleBuilderResolver {
     name: 'adminUpdateCustomRole',
     description: 'Update an existing custom role',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async updateCustomRole(
     @Args('input') input: UpdateCustomRoleInput,
     @CurrentUser('id') userId: string,
@@ -125,7 +125,7 @@ export class AdminRoleBuilderResolver {
     name: 'adminDeleteCustomRole',
     description: 'Delete a custom role',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async deleteCustomRole(@Args('roleId', { type: () => ID }) roleId: string): Promise<boolean> {
     return this.roleBuilderService.deleteRole(roleId)
   }
@@ -134,7 +134,7 @@ export class AdminRoleBuilderResolver {
     name: 'adminAssignRole',
     description: 'Assign a custom role to a team member',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async assignRole(@Args('input') input: AssignRoleInput, @CurrentUser('id') userId: string): Promise<boolean> {
     return this.roleBuilderService.assignRole(input, userId)
   }
@@ -143,7 +143,7 @@ export class AdminRoleBuilderResolver {
     name: 'adminBulkAssignRole',
     description: 'Assign a custom role to multiple team members',
   })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async bulkAssignRole(
     @Args('input') input: BulkAssignRoleInput,
     @CurrentUser('id') userId: string,

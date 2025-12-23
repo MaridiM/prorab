@@ -103,8 +103,8 @@ export class AdminPlansService {
       ];
     }
 
-    // Active filter
-    if (filters.isActive !== undefined) {
+    // Active filter (only add if explicitly set, not null)
+    if (filters.isActive !== undefined && filters.isActive !== null) {
       where.isActive = filters.isActive;
     }
 

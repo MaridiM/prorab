@@ -81,7 +81,15 @@ export const ModelName = {
   AdminRole: 'AdminRole',
   SystemSettings: 'SystemSettings',
   AdminActionLog: 'AdminActionLog',
-  SystemStatistics: 'SystemStatistics'
+  SystemStatistics: 'SystemStatistics',
+  TeamAnnouncement: 'TeamAnnouncement',
+  AnnouncementRead: 'AnnouncementRead',
+  TeamTemplate: 'TeamTemplate',
+  TeamMergeLog: 'TeamMergeLog',
+  TeamCloneLog: 'TeamCloneLog',
+  TeamAuditLog: 'TeamAuditLog',
+  DataRetentionPolicy: 'DataRetentionPolicy',
+  DataExportRequest: 'DataExportRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -194,6 +202,10 @@ export const TelegramAuthTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
   chatId: 'chatId',
+  telegramFirstName: 'telegramFirstName',
+  telegramLastName: 'telegramLastName',
+  telegramUsername: 'telegramUsername',
+  telegramPhotoUrl: 'telegramPhotoUrl',
   used: 'used',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt'
@@ -651,6 +663,127 @@ export const SystemStatisticsScalarFieldEnum = {
 export type SystemStatisticsScalarFieldEnum = (typeof SystemStatisticsScalarFieldEnum)[keyof typeof SystemStatisticsScalarFieldEnum]
 
 
+export const TeamAnnouncementScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  title: 'title',
+  content: 'content',
+  priority: 'priority',
+  type: 'type',
+  isPinned: 'isPinned',
+  expiresAt: 'expiresAt',
+  publishedAt: 'publishedAt',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamAnnouncementScalarFieldEnum = (typeof TeamAnnouncementScalarFieldEnum)[keyof typeof TeamAnnouncementScalarFieldEnum]
+
+
+export const AnnouncementReadScalarFieldEnum = {
+  id: 'id',
+  announcementId: 'announcementId',
+  userId: 'userId',
+  readAt: 'readAt'
+} as const
+
+export type AnnouncementReadScalarFieldEnum = (typeof AnnouncementReadScalarFieldEnum)[keyof typeof AnnouncementReadScalarFieldEnum]
+
+
+export const TeamTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  settings: 'settings',
+  roles: 'roles',
+  projectSetup: 'projectSetup',
+  isPublic: 'isPublic',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TeamTemplateScalarFieldEnum = (typeof TeamTemplateScalarFieldEnum)[keyof typeof TeamTemplateScalarFieldEnum]
+
+
+export const TeamMergeLogScalarFieldEnum = {
+  id: 'id',
+  sourceTeamId: 'sourceTeamId',
+  targetTeamId: 'targetTeamId',
+  mergedById: 'mergedById',
+  membersMoved: 'membersMoved',
+  projectsMoved: 'projectsMoved',
+  dataSnapshot: 'dataSnapshot',
+  notes: 'notes',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamMergeLogScalarFieldEnum = (typeof TeamMergeLogScalarFieldEnum)[keyof typeof TeamMergeLogScalarFieldEnum]
+
+
+export const TeamCloneLogScalarFieldEnum = {
+  id: 'id',
+  sourceTeamId: 'sourceTeamId',
+  clonedTeamId: 'clonedTeamId',
+  clonedById: 'clonedById',
+  clonedSettings: 'clonedSettings',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamCloneLogScalarFieldEnum = (typeof TeamCloneLogScalarFieldEnum)[keyof typeof TeamCloneLogScalarFieldEnum]
+
+
+export const TeamAuditLogScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  action: 'action',
+  category: 'category',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type TeamAuditLogScalarFieldEnum = (typeof TeamAuditLogScalarFieldEnum)[keyof typeof TeamAuditLogScalarFieldEnum]
+
+
+export const DataRetentionPolicyScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  resourceType: 'resourceType',
+  retentionDays: 'retentionDays',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DataRetentionPolicyScalarFieldEnum = (typeof DataRetentionPolicyScalarFieldEnum)[keyof typeof DataRetentionPolicyScalarFieldEnum]
+
+
+export const DataExportRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  requestedById: 'requestedById',
+  type: 'type',
+  status: 'status',
+  format: 'format',
+  fileUrl: 'fileUrl',
+  expiresAt: 'expiresAt',
+  completedAt: 'completedAt',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt'
+} as const
+
+export type DataExportRequestScalarFieldEnum = (typeof DataExportRequestScalarFieldEnum)[keyof typeof DataExportRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -665,6 +798,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: 'JsonNull'
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

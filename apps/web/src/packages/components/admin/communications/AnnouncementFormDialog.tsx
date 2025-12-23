@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import {

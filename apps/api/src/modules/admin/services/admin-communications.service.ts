@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
-import { PrismaService } from '../../../shared/services/prisma.service'
+import { PrismaService } from '../../../core/prisma/prisma.service'
 import {
   TeamAnnouncement,
   AnnouncementStatistics,

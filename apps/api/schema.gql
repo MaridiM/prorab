@@ -671,12 +671,131 @@ type AdminUsersConnection {
   totalCount: Int!
 }
 
+"""Filter for announcements"""
+input AnnouncementFilterInput {
+  """Show only active (not expired)"""
+  activeOnly: Boolean
+
+  """Show only pinned"""
+  pinnedOnly: Boolean
+
+  """Filter by priorities"""
+  priorities: [AnnouncementPriority!]
+
+  """Show only published"""
+  publishedOnly: Boolean
+
+  """Filter by team ID"""
+  teamId: String
+
+  """Filter by types"""
+  types: [AnnouncementType!]
+}
+
+"""Priority level of announcement"""
+enum AnnouncementPriority {
+  HIGH
+  LOW
+  NORMAL
+  URGENT
+}
+
+"""Announcement statistics"""
+type AnnouncementStatistics {
+  """Draft announcements"""
+  drafts: Int!
+
+  """Expired announcements"""
+  expired: Int!
+
+  """Announcements by priority: HIGH"""
+  highPriority: Int!
+
+  """Announcements by priority: LOW"""
+  lowPriority: Int!
+
+  """Announcements by priority: NORMAL"""
+  normalPriority: Int!
+
+  """Pinned announcements"""
+  pinned: Int!
+
+  """Published announcements"""
+  published: Int!
+
+  """Total announcements"""
+  total: Int!
+
+  """Announcements by priority: URGENT"""
+  urgentPriority: Int!
+}
+
+"""Type of announcement"""
+enum AnnouncementType {
+  ERROR
+  INFO
+  MAINTENANCE
+  SUCCESS
+  WARNING
+}
+
 input AssignAdminRoleInput {
   ipWhitelist: [String!]
   permissions: [String!]
   role: AdminRoleType!
   twoFactorEnforced: Boolean
   userId: String!
+}
+
+"""Input for assigning a role to a member"""
+input AssignRoleInput {
+  """Custom role ID (null to clear custom role)"""
+  customRoleId: ID
+
+  """Team member ID"""
+  memberId: String!
+
+  """Assignment reason"""
+  reason: String
+}
+
+enum AuditCategory {
+  AUTHENTICATION
+  DATA_ACCESS
+  FINANCIAL
+  INTEGRATIONS
+  MEMBER_MANAGEMENT
+  PERMISSIONS
+  PROJECT_MANAGEMENT
+  SETTINGS
+}
+
+"""Filter for audit logs"""
+input AuditLogFilterInput {
+  category: AuditCategory
+  dateFrom: DateTime
+  dateTo: DateTime
+  resource: String
+  teamId: String
+  userId: String
+}
+
+"""Audit logs connection with pagination"""
+type AuditLogsConnection {
+  hasMore: Boolean!
+  logs: [TeamAuditLog!]!
+  totalCount: Int!
+}
+
+"""Audit statistics"""
+type AuditStatistics {
+  byCategory: [CategoryCount!]!
+  logsLast7d: Int!
+  logsLast24h: Int!
+  logsLast30d: Int!
+  topActions: [String!]!
+  totalLogs: Int!
+  uniqueUsers: Int!
 }
 
 type AuthPayload {
@@ -690,9 +809,69 @@ type BackupCodesResponse {
   backupCodes: [String!]!
 }
 
+"""Input for bulk role assignment"""
+input BulkAssignRoleInput {
+  """Custom role ID (null to clear custom roles)"""
+  customRoleId: ID
+
+  """Team member IDs"""
+  memberIds: [String!]!
+
+  """Assignment reason"""
+  reason: String
+}
+
 input BulkCreateWorkLogInput {
   """Array of work logs to create"""
   workLogs: [CreateWorkLogInput!]!
+}
+
+"""Bulk operation result"""
+type BulkOperationResult {
+  """Error messages"""
+  errors: [String!]
+
+  """Number of failed operations"""
+  failedCount: Int!
+
+  """IDs of failed items"""
+  failedIds: [String!]
+
+  """Number of successful operations"""
+  successCount: Int!
+
+  """IDs of successfully processed items"""
+  successIds: [String!]
+}
+
+"""Bulk remove members input"""
+input BulkRemoveMembersInput {
+  """Member IDs to remove"""
+  memberIds: [String!]!
+
+  """Reason for removal"""
+  reason: String
+}
+
+"""Bulk update member input"""
+input BulkUpdateMembersInput {
+  """Assign custom role"""
+  customRoleId: ID
+
+  """Member IDs to update"""
+  memberIds: [String!]!
+
+  """Update position"""
+  position: String
+
+  """Reason for bulk update"""
+  reason: String
+
+  """Update salary amount"""
+  salaryAmount: Float
+
+  """Update salary type"""
+  salaryType: String
 }
 
 type BulkUpdateResult {
@@ -727,6 +906,12 @@ enum BusinessRole {
   WORKER
 }
 
+"""Count by category"""
+type CategoryCount {
+  category: AuditCategory!
+  count: Int!
+}
+
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
@@ -748,6 +933,23 @@ type ChartData {
 
 input CheckTelegramAuthInput {
   token: String!
+}
+
+"""Result of clone operation"""
+type CloneResult {
+  cloneLogId: String!
+  clonedTeamId: String!
+  error: String
+  success: Boolean!
+}
+
+"""Input for cloning team"""
+input CloneTeamInput {
+  cloneMembers: Boolean = false
+  cloneProjects: Boolean = false
+  cloneRoles: Boolean = true
+  newTeamName: String!
+  sourceTeamId: String!
 }
 
 input CompleteOnboardingInput {
@@ -773,9 +975,78 @@ input CompleteOnboardingInput {
   teamName: String!
 }
 
+"""Compliance report"""
+type ComplianceReport {
+  activePolicies: Int!
+  generatedAt: DateTime!
+  hasDataRetention: Boolean!
+  hasGDPRCompliance: Boolean!
+  lastAuditDate: DateTime!
+  pendingExports: Int!
+  teamId: String!
+  teamName: String!
+  totalAuditLogs: Int!
+}
+
 type ConnectionTestResult {
   message: String!
   success: Boolean!
+}
+
+"""Input for creating announcement"""
+input CreateAnnouncementInput {
+  """Announcement content"""
+  content: String!
+
+  """Expiration date"""
+  expiresAt: DateTime
+  isPinned: Boolean = false
+  priority: AnnouncementPriority = NORMAL
+
+  """Publish immediately"""
+  publishNow: Boolean = false
+
+  """Team ID (null = global)"""
+  teamId: String
+
+  """Announcement title"""
+  title: String!
+  type: AnnouncementType = INFO
+}
+
+"""Input for creating a custom role"""
+input CreateCustomRoleInput {
+  """Role color (hex)"""
+  color: String
+
+  """Role description"""
+  description: String
+
+  """Hierarchy level (auto-calculated if not provided)"""
+  level: Int
+
+  """Role name"""
+  name: String!
+
+  """Parent role ID for inheritance"""
+  parentRoleId: ID
+
+  """Permission keys"""
+  permissions: [String!]!
+
+  """Sort order"""
+  sortOrder: Int
+
+  """Team ID"""
+  teamId: String!
+}
+
+"""Input for creating data export request"""
+input CreateDataExportInput {
+  format: ExportFormat = JSON
+  teamId: String
+  type: DataExportType!
+  userId: String
 }
 
 input CreateExpenseInput {
@@ -848,6 +1119,14 @@ input CreateProjectInput {
   teamId: String!
 }
 
+"""Input for creating retention policy"""
+input CreateRetentionPolicyInput {
+  isActive: Boolean = true
+  resourceType: String!
+  retentionDays: Int!
+  teamId: String
+}
+
 input CreateSubscriptionInput {
   plan: String!
   teamId: String!
@@ -887,6 +1166,23 @@ input CreateTaskInput {
   title: String!
 }
 
+"""Input for creating team from template"""
+input CreateTeamFromTemplateInput {
+  ownerId: String!
+  teamName: String!
+  templateId: String!
+}
+
+"""Input for creating team template"""
+input CreateTeamTemplateInput {
+  description: String
+  isPublic: Boolean = false
+  name: String!
+  projectSetup: JSON
+  roles: JSON!
+  settings: JSON!
+}
+
 input CreateWorkLogInput {
   """Date of work (ISO string)"""
   date: String!
@@ -902,6 +1198,66 @@ input CreateWorkLogInput {
 
   """Project ID"""
   projectId: ID!
+}
+
+"""Custom team role with permissions"""
+type CustomRole {
+  """Child roles"""
+  childRoles: [CustomRole!]
+
+  """Role color (hex)"""
+  color: String
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Creator user ID"""
+  createdBy: String!
+
+  """Role description"""
+  description: String
+
+  """Effective permissions (including inherited)"""
+  effectivePermissions: [String!]
+
+  """Role ID"""
+  id: ID!
+
+  """Is role active"""
+  isActive: Boolean!
+
+  """Is built-in system role (cannot be deleted)"""
+  isBuiltIn: Boolean!
+
+  """Role hierarchy level (0 = base)"""
+  level: Int!
+
+  """Number of members with this role"""
+  memberCount: Int
+
+  """Last modifier user ID"""
+  modifiedBy: String
+
+  """Role name (e.g., "Старший прораб", "Бухгалтер")"""
+  name: String!
+
+  """Parent role"""
+  parentRole: CustomRole
+
+  """Parent role ID for inheritance"""
+  parentRoleId: ID
+
+  """Array of permission keys"""
+  permissions: [String!]!
+
+  """Display sort order"""
+  sortOrder: Int!
+
+  """Team ID"""
+  teamId: String!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
 }
 
 type DashboardPaymentStats {
@@ -1043,6 +1399,44 @@ type DashboardUserStats {
   verified: Int!
 }
 
+"""Data export request"""
+type DataExportRequest {
+  completedAt: DateTime
+  createdAt: DateTime!
+  errorMessage: String
+  expiresAt: DateTime
+  fileUrl: String
+  format: ExportFormat!
+  id: ID!
+  requestedById: String!
+  requestedByName: String
+  status: ExportStatus!
+  teamId: String
+  teamName: String
+  type: DataExportType!
+  userId: String
+  userName: String
+}
+
+enum DataExportType {
+  AUDIT_LOGS
+  GDPR_FULL
+  TEAM_DATA
+  USER_DATA
+}
+
+"""Data retention policy"""
+type DataRetentionPolicy {
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  resourceType: String!
+  retentionDays: Int!
+  teamId: String
+  teamName: String
+  updatedAt: DateTime!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -1095,6 +1489,19 @@ type Expense {
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
+}
+
+enum ExportFormat {
+  CSV
+  JSON
+  PDF
+}
+
+enum ExportStatus {
+  COMPLETED
+  FAILED
+  PENDING
+  PROCESSING
 }
 
 type FileTypeStats {
@@ -1189,6 +1596,61 @@ type MemberActivity {
   userName: String!
 }
 
+"""Paginated member activity"""
+type MemberActivityConnection {
+  """Activity events"""
+  events: [MemberActivityEvent!]!
+
+  """Has more pages"""
+  hasMore: Boolean!
+
+  """Total count"""
+  totalCount: Int!
+}
+
+"""Member activity event"""
+type MemberActivityEvent {
+  """Event timestamp"""
+  createdAt: DateTime!
+
+  """Event description"""
+  description: String!
+
+  """Event ID"""
+  id: ID!
+
+  """Additional details (JSON)"""
+  metadata: String
+
+  """Related entity ID"""
+  relatedId: String
+
+  """Related entity type"""
+  relatedType: String
+
+  """Triggered by user ID"""
+  triggeredBy: String
+
+  """Triggered by user name"""
+  triggeredByName: String
+
+  """Activity type"""
+  type: MemberActivityType!
+}
+
+"""Types of member activity events"""
+enum MemberActivityType {
+  EXPENSE_ADDED
+  JOINED
+  PAYOUT_RECEIVED
+  REMOVED
+  ROLE_CHANGED
+  SALARY_CHANGED
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  WORKLOG_ADDED
+}
+
 type MemberAnalytics {
   avatarUrl: String
   averagePayoutPerProject: Float!
@@ -1207,6 +1669,40 @@ type MemberAnalytics {
   totalPayouts: Float!
 }
 
+"""Export format for member data"""
+enum MemberExportFormat {
+  CSV
+  JSON
+  XLSX
+}
+
+"""Filter for team members"""
+input MemberFilterInput {
+  """Filter by custom role IDs"""
+  customRoleIds: [String!]
+
+  """Filter by active status (last 30 days)"""
+  isActive: Boolean
+
+  """Joined after date"""
+  joinedAfter: DateTime
+
+  """Joined before date"""
+  joinedBefore: DateTime
+
+  """Filter by positions"""
+  positions: [String!]
+
+  """Filter by roles"""
+  roles: [String!]
+
+  """Filter by salary types"""
+  salaryTypes: [String!]
+
+  """Search by name, email, position"""
+  search: String
+}
+
 type MemberPayoutDetail {
   """Calculated payout for this member"""
   calculatedPayout: Float!
@@ -1221,6 +1717,66 @@ type MemberPayoutDetail {
 
   """Payout status: pending, paid"""
   status: String!
+}
+
+"""Member statistics summary"""
+type MemberStatistics {
+  """Active members (activity in last 30 days)"""
+  activeMembers: Int!
+
+  """Average hours per member"""
+  averageHours: Float!
+
+  """Inactive members"""
+  inactiveMembers: Int!
+
+  """Total members"""
+  totalMembers: Int!
+
+  """Total payroll (fixed salaries)"""
+  totalPayroll: Float!
+
+  """Members with custom roles"""
+  withCustomRoles: Int!
+
+  """Members with fixed salary"""
+  withFixedSalary: Int!
+
+  """Members with no salary"""
+  withNoSalary: Int!
+
+  """Members with percentage salary"""
+  withPercentageSalary: Int!
+}
+
+"""Preview of team merge operation"""
+type MergePreview {
+  canMerge: Boolean!
+  conflictingMembers: Int!
+  membersToMove: Int!
+  projectsToMove: Int!
+  sourceTeamId: String!
+  sourceTeamName: String!
+  targetTeamId: String!
+  targetTeamName: String!
+  warnings: [String!]!
+}
+
+"""Result of merge operation"""
+type MergeResult {
+  errors: [String!]
+  membersMoved: Int!
+  mergeLogId: String!
+  projectsMoved: Int!
+  success: Boolean!
+}
+
+"""Input for merging teams"""
+input MergeTeamsInput {
+  deleteSourceTeam: Boolean = false
+  notes: String
+  sourceTeamId: String!
+  targetTeamId: String!
 }
 
 type MigrationFailure {
@@ -1255,6 +1811,18 @@ type Mutation {
   """Archive project (admin only)"""
   adminArchiveProject(projectId: ID!): AdminProject!
 
+  """Assign a custom role to a team member"""
+  adminAssignRole(input: AssignRoleInput!): Boolean!
+
+  """Assign a custom role to multiple team members"""
+  adminBulkAssignRole(input: BulkAssignRoleInput!): Int!
+
+  """Bulk remove team members"""
+  adminBulkRemoveMembers(input: BulkRemoveMembersInput!): BulkOperationResult!
+
+  """Bulk update team members"""
+  adminBulkUpdateMembers(input: BulkUpdateMembersInput!): BulkOperationResult!
+
   """Cancel subscription (Admin only)"""
   adminCancelSubscription(cancelAtPeriodEnd: Boolean! = true, id: String!): Subscription!
 
@@ -1266,9 +1834,22 @@ type Mutation {
     """Specific provider to clear (or null for all)"""
     type: PaymentProviderType
   ): Boolean!
+  adminCloneTeam(input: CloneTeamInput!): CloneResult!
+  adminCreateAnnouncement(input: CreateAnnouncementInput!): TeamAnnouncement!
+
+  """Create a new custom role"""
+  adminCreateCustomRole(input: CreateCustomRoleInput!): CustomRole!
+  adminCreateDataExportRequest(input: CreateDataExportInput!): DataExportRequest!
 
   """Create a new plan - Admin only"""
   adminCreatePlan(input: AdminCreatePlanInput!): AdminPlanModel!
+  adminCreateRetentionPolicy(input: CreateRetentionPolicyInput!): DataRetentionPolicy!
+  adminCreateTeamFromTemplate(input: CreateTeamFromTemplateInput!): CloneResult!
+  adminCreateTeamTemplate(input: CreateTeamTemplateInput!): TeamTemplate!
+  adminDeleteAnnouncement(id: String!): Boolean!
+
+  """Delete a custom role"""
+  adminDeleteCustomRole(roleId: ID!): Boolean!
 
   """Delete payment (Admin only)"""
   adminDeletePayment(id: String!): Boolean!
@@ -1278,6 +1859,7 @@ type Mutation {
 
   """Delete project (admin only)"""
   adminDeleteProject(projectId: ID!): DeleteResult!
+  adminDeleteRetentionPolicy(id: String!): Boolean!
 
   """Delete subscription (Admin only)"""
   adminDeleteSubscription(id: String!): Boolean!
@@ -1287,9 +1869,13 @@ type Mutation {
 
   """Delete a team (Admin only)"""
   adminDeleteTeam(id: String!): Boolean!
+  adminDeleteTeamTemplate(id: String!): Boolean!
 
   """Delete a user account (Admin only)"""
   adminDeleteUser(id: String!): Boolean!
+  adminMarkAnnouncementAsRead(announcementId: String!): Boolean!
+  adminMergeTeams(input: MergeTeamsInput!): MergeResult!
+  adminPublishAnnouncement(id: String!): TeamAnnouncement!
 
   """Reactivate cancelled subscription (Admin only)"""
   adminReactivateSubscription(id: String!): Subscription!
@@ -1309,6 +1895,14 @@ type Mutation {
   """Test payment provider connection - Admin only"""
   adminTestPaymentProvider(type: PaymentProviderType!): TestConnectionResult!
 
+  """Transfer member to another team"""
+  adminTransferMember(input: TransferMemberInput!): TeamMemberExtended!
+  adminUnpublishAnnouncement(id: String!): TeamAnnouncement!
+  adminUpdateAnnouncement(input: UpdateAnnouncementInput!): TeamAnnouncement!
+
+  """Update an existing custom role"""
+  adminUpdateCustomRole(input: UpdateCustomRoleInput!): CustomRole!
+
   """Update payment provider settings and configuration - Admin only"""
   adminUpdatePaymentProvider(input: UpdatePaymentProviderInput!, type: PaymentProviderType!): AdminPaymentProviderModel!
 
@@ -1320,6 +1914,7 @@ type Mutation {
 
   """Update project status (admin only)"""
   adminUpdateProjectStatus(projectId: ID!, status: String!): AdminProject!
+  adminUpdateRetentionPolicy(input: UpdateRetentionPolicyInput!): DataRetentionPolicy!
 
   """Update subscription (Admin only)"""
   adminUpdateSubscription(id: String!, input: UpdateSubscriptionInput!): Subscription!
@@ -1329,6 +1924,7 @@ type Mutation {
 
   """Update team information (Admin only)"""
   adminUpdateTeam(id: String!, input: AdminUpdateTeamInput!): Team!
+  adminUpdateTeamTemplate(input: UpdateTeamTemplateInput!): TeamTemplate!
 
   """Update user information (Admin only)"""
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
@@ -1721,6 +2317,39 @@ type PayoutSummary {
   totalPayouts: Float!
 }
 
+"""Permission category for UI grouping"""
+type PermissionCategory {
+  """Category description"""
+  description: String!
+
+  """Icon name"""
+  icon: String!
+
+  """Category key"""
+  key: String!
+
+  """Category label"""
+  label: String!
+
+  """Permissions in this category"""
+  permissions: [PermissionDefinition!]!
+}
+
+"""Permission definition with metadata"""
+type PermissionDefinition {
+  """Category key"""
+  category: String!
+
+  """Permission description"""
+  description: String!
+
+  """Permission key"""
+  key: String!
+
+  """Permission name"""
+  name: String!
+}
+
 type PersonnelAnalytics {
   averageHoursPerMember: Float!
   averagePayoutPerMember: Float!
@@ -2009,6 +2638,56 @@ type Query {
 
   """Get comprehensive dashboard statistics (Admin only)"""
   adminDashboardStats: DashboardStats!
+
+  """Export team members data"""
+  adminExportMembers(format: MemberExportFormat!, teamId: String!): String!
+  adminGetAnnouncementById(id: String!): TeamAnnouncement!
+  adminGetAnnouncementStatistics(teamId: String): AnnouncementStatistics!
+  adminGetAnnouncements(filter: AnnouncementFilterInput): [TeamAnnouncement!]!
+  adminGetAuditLogs(filter: AuditLogFilterInput, pagination: PaginationInput): AuditLogsConnection!
+  adminGetAuditStatistics(teamId: String): AuditStatistics!
+  adminGetCloneLogs: [TeamCloneLog!]!
+  adminGetComplianceReport(teamId: String!): ComplianceReport!
+  adminGetDataExportRequests(teamId: String): [DataExportRequest!]!
+
+  """Get member activity history with pagination"""
+  adminGetMemberActivityHistory(memberId: String!, pagination: PaginationInput): MemberActivityConnection!
+
+  """Get member details by ID"""
+  adminGetMemberById(memberId: ID!): TeamMemberExtended!
+
+  """Get role assignment history for a specific member"""
+  adminGetMemberRoleHistory(limit: Int = 20, memberId: String!): [RoleAssignmentHistory!]!
+
+  """Get team member statistics"""
+  adminGetMemberStatistics(teamId: String!): MemberStatistics!
+  adminGetMergeLogs: [TeamMergeLog!]!
+  adminGetMergePreview(sourceTeamId: String!, targetTeamId: String!): MergePreview!
+
+  """Get all available permissions organized by category"""
+  adminGetPermissionCategories: [PermissionCategory!]!
+  adminGetRetentionPolicies(teamId: String): [DataRetentionPolicy!]!
+
+  """Get role assignment history for a team"""
+  adminGetRoleAssignmentHistory(limit: Int = 50, teamId: String!): [RoleAssignmentHistory!]!
+
+  """Get a custom role by ID"""
+  adminGetRoleById(roleId: ID!): CustomRole!
+
+  """Get role hierarchy tree for a team"""
+  adminGetRoleHierarchy(teamId: String!): [RoleHierarchyNode!]!
+
+  """Get role statistics for a team"""
+  adminGetRoleStatistics(teamId: String!): RoleStatistics!
+
+  """Get team members with filtering and pagination"""
+  adminGetTeamMembers(filter: MemberFilterInput, pagination: PaginationInput, teamId: String!): [TeamMemberExtended!]!
+  adminGetTeamOperationsStatistics: TeamOperationsStatistics!
+
+  """Get all custom roles for a team"""
+  adminGetTeamRoles(teamId: String!): [CustomRole!]!
+  adminGetTeamTemplateById(id: String!): TeamTemplate!
+  adminGetTeamTemplates(filter: TeamTemplateFilterInput): [TeamTemplate!]!
 
   """Get detailed information about a specific payment (Admin only)"""
   adminPayment(id: String!): AdminPayment!
@@ -2312,6 +2991,36 @@ input ResetPasswordInput {
   token: String!
 }
 
+"""Role assignment history entry"""
+type RoleAssignmentHistory {
+  """User ID who made the assignment"""
+  assignedBy: String!
+
+  """Assignment timestamp"""
+  createdAt: DateTime!
+
+  """History entry ID"""
+  id: ID!
+
+  """Team member ID"""
+  memberId: String!
+
+  """New role name/ID"""
+  newRole: String!
+
+  """Previous role name/ID"""
+  previousRole: String
+
+  """Assignment reason"""
+  reason: String
+
+  """CustomRole ID if applicable"""
+  roleId: ID
+
+  """Team ID"""
+  teamId: String!
+}
+
 """Role distribution count"""
 type RoleCount {
   """Count of members with this role"""
@@ -2319,6 +3028,57 @@ type RoleCount {
 
   """Role name"""
   role: String!
+}
+
+"""Role hierarchy tree node"""
+type RoleHierarchyNode {
+  """Child roles"""
+  children: [RoleHierarchyNode!]
+
+  """Role color"""
+  color: String
+
+  """Role ID"""
+  id: ID!
+
+  """Is built-in role"""
+  isBuiltIn: Boolean!
+
+  """Hierarchy level"""
+  level: Int!
+
+  """Number of members"""
+  memberCount: Int!
+
+  """Role name"""
+  name: String!
+
+  """Number of permissions"""
+  permissionCount: Int!
+}
+
+"""Role statistics"""
+type RoleStatistics {
+  """Active roles"""
+  activeRoles: Int!
+
+  """Built-in roles"""
+  builtInRoles: Int!
+
+  """Inactive roles"""
+  inactiveRoles: Int!
+
+  """Members with custom roles"""
+  membersWithCustomRoles: Int!
+
+  """Members with default roles"""
+  membersWithDefaultRoles: Int!
+
+  """Total team members"""
+  totalMembers: Int!
+
+  """Total custom roles"""
+  totalRoles: Int!
 }
 
 """Salary type distribution"""
@@ -2709,6 +3469,92 @@ type TeamAnalytics {
   teamName: String!
 }
 
+"""Team announcement"""
+type TeamAnnouncement {
+  """Announcement content"""
+  content: String!
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Creator user ID"""
+  createdBy: String!
+
+  """Expiration date"""
+  expiresAt: DateTime
+
+  """Has current user read this"""
+  hasRead: Boolean
+
+  """Announcement ID"""
+  id: ID!
+
+  """Is announcement expired"""
+  isExpired: Boolean!
+
+  """Is pinned to top"""
+  isPinned: Boolean!
+
+  """Is announcement published"""
+  isPublished: Boolean!
+
+  """Priority level"""
+  priority: AnnouncementPriority!
+
+  """Publication date"""
+  publishedAt: DateTime
+
+  """Number of reads"""
+  readCount: Int!
+
+  """Team ID (null = global)"""
+  teamId: String
+
+  """Announcement title"""
+  title: String!
+
+  """Total team members (for read percentage)"""
+  totalMembers: Int!
+
+  """Announcement type"""
+  type: AnnouncementType!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+}
+
+"""Team audit log entry"""
+type TeamAuditLog {
+  action: String!
+  category: AuditCategory!
+  createdAt: DateTime!
+  id: ID!
+  ipAddress: String
+  metadata: JSON
+  newValue: JSON
+  oldValue: JSON
+  resource: String!
+  resourceId: String
+  teamId: String!
+  teamName: String
+  userAgent: String
+  userId: String
+  userName: String
+}
+
+"""Team clone operation log"""
+type TeamCloneLog {
+  clonedById: String!
+  clonedByName: String
+  clonedSettings: JSON!
+  clonedTeamId: String!
+  clonedTeamName: String
+  createdAt: DateTime!
+  id: ID!
+  sourceTeamId: String!
+  sourceTeamName: String
+}
+
 """Team composition analysis"""
 type TeamComposition {
   """Members grouped by position"""
@@ -2823,6 +3669,72 @@ type TeamMemberDetails {
   user: User!
 }
 
+"""Extended team member information"""
+type TeamMemberExtended {
+  """User avatar URL"""
+  avatarUrl: String
+
+  """Custom role color"""
+  customRoleColor: String
+
+  """Custom role ID"""
+  customRoleId: ID
+
+  """Custom role name"""
+  customRoleName: String
+
+  """User email"""
+  email: String!
+
+  """Total hours logged"""
+  hoursLogged: Float!
+
+  """Member ID"""
+  id: ID!
+
+  """Join date"""
+  joinedAt: DateTime!
+
+  """Last activity timestamp"""
+  lastActiveAt: DateTime
+
+  """User phone"""
+  phone: String
+
+  """Position/Job title"""
+  position: String
+
+  """Total projects participated"""
+  projectsCount: Int!
+
+  """Team role (OWNER/MEMBER)"""
+  role: String!
+
+  """Salary amount"""
+  salaryAmount: Float
+
+  """Salary type (fixed/percentage/none)"""
+  salaryType: String!
+
+  """Total tasks assigned"""
+  tasksCount: Int!
+
+  """Team ID"""
+  teamId: String!
+
+  """Total expenses added"""
+  totalExpenses: Float!
+
+  """Total payouts received"""
+  totalPayouts: Float!
+
+  """User ID"""
+  userId: String!
+
+  """User full name"""
+  userName: String!
+}
+
 type TeamMemberInfo {
   createdAt: DateTime!
   id: ID!
@@ -2873,6 +3785,31 @@ type TeamMemberStats {
   totalPayouts: Float!
 }
 
+"""Team merge operation log"""
+type TeamMergeLog {
+  createdAt: DateTime!
+  dataSnapshot: JSON!
+  id: ID!
+  membersMoved: Int!
+  mergedById: String!
+  mergedByName: String
+  notes: String
+  projectsMoved: Int!
+  sourceTeamId: String!
+  sourceTeamName: String
+  targetTeamId: String!
+  targetTeamName: String
+}
+
+"""Team operations statistics"""
+type TeamOperationsStatistics {
+  publicTemplates: Int!
+  teamsCreatedFromTemplates: Int!
+  totalClones: Int!
+  totalMerges: Int!
+  totalTemplates: Int!
+}
+
 """Роль участника в конкретной команде"""
 enum TeamRole {
   """Участник команды - ограниченные права"""
@@ -2907,6 +3844,27 @@ type TeamStorageUsage {
 
   """Used percentage (0-100)"""
   usedPercentage: Float!
+}
+
+"""Team template for creating teams from predefined configurations"""
+type TeamTemplate {
+  createdAt: DateTime!
+  createdById: String!
+  createdByName: String
+  description: String
+  id: ID!
+  isPublic: Boolean!
+  name: String!
+  projectSetup: JSON
+  roles: JSON!
+  settings: JSON!
+  updatedAt: DateTime!
+}
+
+"""Filter for team templates"""
+input TeamTemplateFilterInput {
+  createdById: String
+  publicOnly: Boolean
 }
 
 type TelegramAuthPayload {
@@ -2959,6 +3917,21 @@ type TopTeamItem {
   ownerName: String!
 }
 
+"""Transfer member to another team"""
+input TransferMemberInput {
+  """Member ID to transfer"""
+  memberId: String!
+
+  """New position in target team"""
+  newPosition: String
+
+  """Transfer reason"""
+  reason: String
+
+  """Target team ID"""
+  targetTeamId: String!
+}
+
 type TwoFactorDisableResponse {
   success: Boolean!
 }
@@ -2982,6 +3955,46 @@ type TwoFactorStatus {
 input UpdateAdminPermissionsInput {
   permissions: [String!]!
   roleId: String!
+}
+
+"""Input for updating announcement"""
+input UpdateAnnouncementInput {
+  content: String
+  expiresAt: DateTime
+
+  """Announcement ID"""
+  id: ID!
+  isPinned: Boolean
+  priority: AnnouncementPriority
+  title: String
+  type: AnnouncementType
+}
+
+"""Input for updating a custom role"""
+input UpdateCustomRoleInput {
+  """Role color (hex)"""
+  color: String
+
+  """Role description"""
+  description: String
+
+  """Role ID"""
+  id: ID!
+
+  """Is role active"""
+  isActive: Boolean
+
+  """Role name"""
+  name: String
+
+  """Parent role ID for inheritance"""
+  parentRoleId: ID
+
+  """Permission keys"""
+  permissions: [String!]
+
+  """Sort order"""
+  sortOrder: Int
 }
 
 input UpdateExpenseInput {
@@ -3106,6 +4119,13 @@ input UpdateProjectInput {
   startDate: DateTime
 }
 
+"""Input for updating retention policy"""
+input UpdateRetentionPolicyInput {
+  id: ID!
+  isActive: Boolean
+  retentionDays: Int
+}
+
 input UpdateStoragePreferenceInput {
   """Preferred storage provider (local, cloudinary, or r2)"""
   provider: UserStorageProviderType!
@@ -3170,6 +4190,17 @@ input UpdateTeamInput {
   logoFile: Upload
   name: String
   teamId: ID!
+}
+
+"""Input for updating team template"""
+input UpdateTeamTemplateInput {
+  description: String
+  id: ID!
+  isPublic: Boolean
+  name: String
+  projectSetup: JSON
+  roles: JSON
+  settings: JSON
 }
 
 input UpdateTwoFactorInput {

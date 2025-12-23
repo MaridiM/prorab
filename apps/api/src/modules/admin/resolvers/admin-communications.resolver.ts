@@ -3,9 +3,9 @@ import { UseGuards } from '@nestjs/common'
 import { AuthGuard } from '../../../shared/guards/auth.guard'
 import { AdminGuard } from '../../../shared/guards/admin.guard'
 import { PermissionsGuard } from '../../../shared/guards/permissions.guard'
-import { RequirePermissions } from '../../../shared/decorators/permissions.decorator'
+import { RequirePermissions } from '../../../shared/decorators/require-permissions.decorator'
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator'
-import { AdminPermissions } from '../models/admin.model'
+import { AdminPermissions } from '../../../shared/constants/admin-permissions'
 import { AdminCommunicationsService } from '../services/admin-communications.service'
 import {
   TeamAnnouncement,
@@ -50,7 +50,7 @@ export class AdminCommunicationsResolver {
   // ==================== MUTATIONS ====================
 
   @Mutation(() => TeamAnnouncement, { name: 'adminCreateAnnouncement' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async createAnnouncement(
     @Args('input') input: CreateAnnouncementInput,
     @CurrentUser('id') userId: string,
@@ -59,7 +59,7 @@ export class AdminCommunicationsResolver {
   }
 
   @Mutation(() => TeamAnnouncement, { name: 'adminUpdateAnnouncement' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async updateAnnouncement(
     @Args('input') input: UpdateAnnouncementInput,
   ): Promise<TeamAnnouncement> {
@@ -67,7 +67,7 @@ export class AdminCommunicationsResolver {
   }
 
   @Mutation(() => Boolean, { name: 'adminDeleteAnnouncement' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async deleteAnnouncement(
     @Args('id', { type: () => String }) id: string,
   ): Promise<boolean> {
@@ -75,7 +75,7 @@ export class AdminCommunicationsResolver {
   }
 
   @Mutation(() => TeamAnnouncement, { name: 'adminPublishAnnouncement' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async publishAnnouncement(
     @Args('id', { type: () => String }) id: string,
   ): Promise<TeamAnnouncement> {
@@ -83,7 +83,7 @@ export class AdminCommunicationsResolver {
   }
 
   @Mutation(() => TeamAnnouncement, { name: 'adminUnpublishAnnouncement' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async unpublishAnnouncement(
     @Args('id', { type: () => String }) id: string,
   ): Promise<TeamAnnouncement> {

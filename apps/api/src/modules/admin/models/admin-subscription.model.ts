@@ -1,4 +1,6 @@
 import { ObjectType, Field, Int, ID, Float, InputType } from '@nestjs/graphql';
+import { IsOptional, IsString, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SubscriptionModel } from '../../subscriptions/models/subscription.model';
 import { Team } from '../../teams/models/team.model';
 import { PageInfo } from './shared/page-info.model';
@@ -6,21 +8,36 @@ import { PageInfo } from './shared/page-info.model';
 @InputType()
 export class AdminSubscriptionFilters {
   @Field(() => String, { nullable: true, description: 'Search by team name or owner email' })
+  @IsOptional()
+  @IsString()
   search?: string;
 
   @Field(() => String, { nullable: true, description: 'Filter by plan (LITE, FOREMAN, BRIGADE)' })
+  @IsOptional()
+  @IsString()
   plan?: string;
 
   @Field(() => String, { nullable: true, description: 'Filter by status' })
+  @IsOptional()
+  @IsString()
   status?: string;
 
   @Field(() => Date, { nullable: true, description: 'Created after date' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   createdAfter?: Date;
 
   @Field(() => Date, { nullable: true, description: 'Created before date' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   createdBefore?: Date;
 
   @Field(() => Date, { nullable: true, description: 'Expiring before date' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   expiringBefore?: Date;
 }
 

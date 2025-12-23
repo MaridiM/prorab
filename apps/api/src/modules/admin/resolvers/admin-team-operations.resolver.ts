@@ -3,9 +3,9 @@ import { UseGuards } from '@nestjs/common'
 import { AuthGuard } from '../../../shared/guards/auth.guard'
 import { AdminGuard } from '../../../shared/guards/admin.guard'
 import { PermissionsGuard } from '../../../shared/guards/permissions.guard'
-import { RequirePermissions } from '../../../shared/decorators/permissions.decorator'
+import { RequirePermissions } from '../../../shared/decorators/require-permissions.decorator'
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator'
-import { AdminPermissions } from '../models/admin.model'
+import { AdminPermissions } from '../../../shared/constants/admin-permissions'
 import { AdminTeamOperationsService } from '../services/admin-team-operations.service'
 import {
   TeamTemplate,
@@ -48,7 +48,7 @@ export class AdminTeamOperationsResolver {
   }
 
   @Mutation(() => TeamTemplate, { name: 'adminCreateTeamTemplate' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async createTeamTemplate(
     @Args('input') input: CreateTeamTemplateInput,
     @CurrentUser('id') userId: string,
@@ -57,7 +57,7 @@ export class AdminTeamOperationsResolver {
   }
 
   @Mutation(() => TeamTemplate, { name: 'adminUpdateTeamTemplate' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async updateTeamTemplate(
     @Args('input') input: UpdateTeamTemplateInput,
   ): Promise<TeamTemplate> {
@@ -65,7 +65,7 @@ export class AdminTeamOperationsResolver {
   }
 
   @Mutation(() => Boolean, { name: 'adminDeleteTeamTemplate' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async deleteTeamTemplate(
     @Args('id', { type: () => String }) id: string,
   ): Promise<boolean> {
@@ -84,7 +84,7 @@ export class AdminTeamOperationsResolver {
   }
 
   @Mutation(() => MergeResult, { name: 'adminMergeTeams' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async mergeTeams(
     @Args('input') input: MergeTeamsInput,
     @CurrentUser('id') userId: string,
@@ -95,7 +95,7 @@ export class AdminTeamOperationsResolver {
   // ==================== TEAM CLONE ====================
 
   @Mutation(() => CloneResult, { name: 'adminCloneTeam' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async cloneTeam(
     @Args('input') input: CloneTeamInput,
     @CurrentUser('id') userId: string,
@@ -104,7 +104,7 @@ export class AdminTeamOperationsResolver {
   }
 
   @Mutation(() => CloneResult, { name: 'adminCreateTeamFromTemplate' })
-  @RequirePermissions(AdminPermissions.TEAMS_MANAGE)
+  @RequirePermissions(AdminPermissions.TEAMS_UPDATE)
   async createTeamFromTemplate(
     @Args('input') input: CreateTeamFromTemplateInput,
   ): Promise<CloneResult> {
