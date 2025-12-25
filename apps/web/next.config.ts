@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin'
+import path from 'path';
 
 import { name, version } from "./package.json";
+
+// Определяем корень workspace (monorepo root)
+// apps/web/next.config.ts находится в apps/web, поэтому поднимаемся на 2 уровня вверх
+const workspaceRoot = path.resolve(process.cwd(), '../..');
 
 const withNextIntl = createNextIntlPlugin('./src/packages/libs/i18n/request.ts')
 
@@ -33,6 +38,7 @@ const nextConfig: NextConfig = {
     ],
   },
   turbopack: {
+    root: workspaceRoot,
     rules: {
       "*.svg": {
         loaders: [

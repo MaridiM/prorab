@@ -1,9 +1,11 @@
 /**
  * Application constants
- * Version is automatically synced from package.json via NEXT_PUBLIC_APP_VERSION env variable
+ * Version is read directly from package.json
  */
+import { version } from '../../../package.json'
 
-export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0'
+export const APP_VERSION = version
+
 
 
 

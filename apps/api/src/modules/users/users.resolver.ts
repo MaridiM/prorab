@@ -1,7 +1,6 @@
 import { Args, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql'
-import { UseGuards, UsePipes, UnauthorizedException } from '@nestjs/common'
+import { UseGuards, UnauthorizedException } from '@nestjs/common'
 import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal'
-import { ValidationPipe } from '@nestjs/common'
 
 import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
@@ -14,6 +13,8 @@ import { UpdateProfileInput } from './dto/update-profile.input'
 import { UpdateNotificationSettingsInput } from './dto/update-notification-settings.input'
 import { DeleteAccountInput } from './dto/delete-account.input'
 import { UpdateStoragePreferenceInput } from './dto/update-storage-preference.input'
+import { RequestChangeEmailInput } from './dto/request-change-email.input'
+import { ConfirmEmailChangeInput } from './dto/confirm-email-change.input'
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -80,13 +81,6 @@ export class UsersResolver {
 		description: 'Загрузка аватара пользователя',
 	})
 	@UseGuards(AuthGuard)
-	@UsePipes(
-		new ValidationPipe({
-			transform: false, // Disable transformation for file uploads
-			whitelist: false,
-			forbidNonWhitelisted: false,
-		}),
-	)
 	async uploadAvatar(
 		@CurrentUser() currentUser: CurrentUserData,
 		@Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,
@@ -165,6 +159,35 @@ export class UsersResolver {
 			throw new UnauthorizedException('User not authenticated');
 		}
 		return this.usersService.updateStoragePreference(currentUser.id, input.provider)
+	}
+
+	/**
+	 * Request email change (requires 2FA if enabled)
+	 */
+	@Mutation(() => Boolean, {
+		description: 'Запросить изменение email адреса. Требуется 2FA код, если двухфакторная аутентификация включена.',
+	})
+	@UseGuards(AuthGuard)
+	async requestEmailChange(
+		@CurrentUser() currentUser: CurrentUserData,
+		@Args('input') input: RequestChangeEmailInput,
+	): Promise<boolean> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+		return this.usersService.requestEmailChange(currentUser.id, input)
+	}
+
+	/**
+	 * Confirm email change using token from email
+	 */
+	@Mutation(() => Boolean, {
+		description: 'Подтвердить изменение email адреса по токену из письма',
+	})
+	async confirmEmailChange(
+		@Args('input') input: ConfirmEmailChangeInput,
+	): Promise<boolean> {
+		return this.usersService.confirmEmailChange(input.token)
 	}
 }
 

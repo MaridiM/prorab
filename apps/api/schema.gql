@@ -988,6 +988,11 @@ type ComplianceReport {
   totalAuditLogs: Int!
 }
 
+input ConfirmEmailChangeInput {
+  """Токен подтверждения из email"""
+  token: String!
+}
+
 type ConnectionTestResult {
   message: String!
   success: Boolean!
@@ -1956,6 +1961,9 @@ type Mutation {
   """Завершение онбординга: создание команды и первого проекта"""
   completeOnboarding(input: CompleteOnboardingInput!): OnboardingResult!
 
+  """Подтвердить изменение email адреса по токену из письма"""
+  confirmEmailChange(input: ConfirmEmailChangeInput!): Boolean!
+
   """Создать расход"""
   createExpense(input: CreateExpenseInput!): Expense!
 
@@ -2040,6 +2048,11 @@ type Mutation {
 
   """Изменить порядок фотографий"""
   reorderReportPhotos(photoIds: [String!]!, reportId: String!): Boolean!
+
+  """
+  Запросить изменение email адреса. Требуется 2FA код, если двухфакторная аутентификация включена.
+  """
+  requestEmailChange(input: RequestChangeEmailInput!): Boolean!
   resendVerificationEmail: Boolean!
   resetPassword(input: ResetPasswordInput!): Boolean!
 
@@ -2049,6 +2062,9 @@ type Mutation {
   revokeAllSessions: Boolean!
   revokeAllSessionsIncludingCurrent: Boolean!
   revokeSession(sessionId: String!): Boolean!
+
+  """Отправка приглашения в команду по email"""
+  sendInviteByEmail(input: SendInviteByEmailInput!): SendInviteResult!
 
   """Test connection for a service category (admin only)"""
   testServiceConnection(category: SettingCategory!): ConnectionTestResult!
@@ -2986,6 +3002,14 @@ type ReportPhoto {
   width: Int
 }
 
+input RequestChangeEmailInput {
+  """Новый email адрес"""
+  newEmail: String!
+
+  """Код двухфакторной аутентификации (требуется, если 2FA включена)"""
+  twoFactorCode: String
+}
+
 input ResetPasswordInput {
   newPassword: String!
   token: String!
@@ -3094,6 +3118,25 @@ type SalaryDistribution {
 
   """Total salary amount (fixed + calculated)"""
   totalAmount: Float!
+}
+
+input SendInviteByEmailInput {
+  """Email адрес приглашаемого пользователя"""
+  email: String!
+
+  """Срок действия приглашения в днях (по умолчанию 7)"""
+  expiresInDays: Int = 7
+
+  """ID команды"""
+  teamId: ID!
+}
+
+type SendInviteResult {
+  """Было ли письмо успешно отправлено"""
+  emailSent: Boolean!
+
+  """Созданный код приглашения"""
+  inviteCode: InviteCode!
 }
 
 type Session {

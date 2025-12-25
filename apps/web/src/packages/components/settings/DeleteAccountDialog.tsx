@@ -144,19 +144,19 @@ export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 							<AlertTriangle className="h-5 w-5 text-destructive" />
 							Вы уверены?
 						</AlertDialogTitle>
-						<AlertDialogDescription className="space-y-3">
-							<p>
+						<div className="text-sm text-muted-foreground space-y-3">
+							<AlertDialogDescription>
 								Вы собираетесь удалить свой аккаунт. Это действие нельзя будет отменить.
-							</p>
-							<p className="font-medium">
+							</AlertDialogDescription>
+							<AlertDialogDescription className="font-medium">
 								Все ваши данные, команды и проекты будут безвозвратно удалены.
-							</p>
+							</AlertDialogDescription>
 							{userEmail && (
-								<p className="text-sm">
+								<AlertDialogDescription className="text-sm">
 									Аккаунт: <span className="font-mono">{userEmail}</span>
-								</p>
+								</AlertDialogDescription>
 							)}
-						</AlertDialogDescription>
+						</div>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>Отмена</AlertDialogCancel>
@@ -178,13 +178,13 @@ export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 							<AlertTriangle className="h-5 w-5 text-destructive" />
 							Подтвердите удаление
 						</AlertDialogTitle>
-						<AlertDialogDescription className="space-y-4">
-							<p className="font-medium text-destructive">
+						<div className="text-sm text-muted-foreground space-y-4">
+							<AlertDialogDescription className="font-medium text-destructive">
 								Это последнее предупреждение!
-							</p>
-							<p>
+							</AlertDialogDescription>
+							<AlertDialogDescription>
 								Для подтверждения удаления аккаунта введите свой пароль:
-							</p>
+							</AlertDialogDescription>
 							<div className="space-y-2">
 								<Label htmlFor="delete-password">Пароль</Label>
 								<Input
@@ -201,7 +201,7 @@ export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 									}}
 								/>
 							</div>
-						</AlertDialogDescription>
+						</div>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={loading}>Отмена</AlertDialogCancel>

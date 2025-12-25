@@ -44,7 +44,7 @@ import { useAuth } from '@/packages/libs/auth'
 import { Button, Skeleton, Badge, ProgressBar, UserMenu } from '@/packages/components'
 import { ProjectStatus } from '@/packages/schemas'
 import { useToast } from '@/packages/hooks'
-import { cn } from '@/packages/utils'
+import { cn, isAuthError, handleAuthError } from '@/packages/utils'
 
 // ============ Animation Variants ============
 const fadeIn = {
@@ -1008,6 +1008,15 @@ export default function DashboardPage() {
 
 	const teams = (teamsData?.myTeams || []) as Team[]
 
+	// Check for authentication errors and redirect
+	useEffect(() => {
+		if (teamsError && isAuthError(teamsError)) {
+			// Session not found, expired, deleted, or invalid - clear cookies and redirect
+			// handleAuthError has built-in protection against multiple redirects
+			handleAuthError('/auth/login');
+		}
+	}, [teamsError]);
+
 	// Set default team
 	useEffect(() => {
 		if (teams.length > 0 && !currentTeamId) {
@@ -1235,12 +1244,17 @@ export default function DashboardPage() {
 
 	// Error state
 	if (teamsError) {
-		const isNetworkError = teamsError.message === 'Failed to fetch' ||
-			teamsError.message?.includes('Failed to fetch');
+		// Check if it's an authentication error (session not found, expired, deleted, or invalid)
+		const authError = isAuthError(teamsError);
+		const errorMessage = teamsError.message || '';
+		const isNetworkError = errorMessage === 'Failed to fetch' ||
+			errorMessage.includes('Failed to fetch');
 		
-		const errorMessage = isNetworkError 
+		const displayMessage = isNetworkError 
 			? 'Не удалось подключиться к серверу. Проверьте, что API сервер запущен на порту 8080.'
-			: teamsError.message || 'Произошла ошибка при загрузке данных';
+			: authError
+			? 'Сессия истекла или недействительна'
+			: errorMessage || 'Произошла ошибка при загрузке данных';
 		
 		return (
 			<div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -1253,19 +1267,29 @@ export default function DashboardPage() {
 						<AlertCircle className="w-10 h-10 text-red-500" />
 					</div>
 					<h2 className="text-2xl font-bold mb-3">Ошибка загрузки</h2>
-					<p className="text-muted-foreground mb-2">{errorMessage}</p>
+					<p className="text-muted-foreground mb-2">{displayMessage}</p>
 					{isNetworkError && teamsError.message && (
 						<p className="text-sm text-muted-foreground/70 mb-6 font-mono bg-muted/50 p-2 rounded">
 							{teamsError.message}
 						</p>
 					)}
 					<div className="flex flex-col gap-2 mb-4">
-						<Button 
-							onClick={() => refetchTeams()} 
-							size="lg"
-						>
-							Попробовать снова
-						</Button>
+						{!authError && (
+							<Button 
+								onClick={() => refetchTeams()} 
+								size="lg"
+							>
+								Попробовать снова
+							</Button>
+						)}
+						{authError && (
+							<Button 
+								onClick={() => handleAuthError('/auth/login')} 
+								size="lg"
+							>
+								Войти снова
+							</Button>
+						)}
 						{isNetworkError && (
 							<Button 
 								onClick={() => window.location.reload()} 

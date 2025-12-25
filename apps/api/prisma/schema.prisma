@@ -877,6 +877,9 @@ enum SettingCategory {
   EMAIL // Brevo settings
   TELEGRAM // Telegram bot settings
   STORAGE // R2 storage settings
+  SMS // SMS provider settings (Twilio)
+  SOCIAL // Social auth settings (OAuth)
+  ANALYTICS // Analytics settings (GA, Metrika, PostHog)
   AI // AI service settings
   SECURITY // Security configurations
   GENERAL // General app settings

@@ -129,6 +129,23 @@ mutation CreateInviteLink($teamId: ID!, $expiresInDays: Int) {
   }
 }
 
+mutation SendInviteByEmail($input: SendInviteByEmailInput!) {
+  sendInviteByEmail(input: $input) {
+    inviteCode {
+      id
+      teamId
+      code
+      expiresAt
+      usedBy
+      usedAt
+      createdAt
+      isActive
+      inviteUrl
+    }
+    emailSent
+  }
+}
+
 mutation JoinTeamByInvite($code: String!) {
   joinTeamByInvite(code: $code) {
     id

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Home, RefreshCw, AlertTriangle } from "lucide-react"
+import { isAuthError, handleAuthError } from "@/packages/utils"
 
 export default function Error({
     error,
@@ -18,28 +19,11 @@ export default function Error({
     useEffect(() => {
         console.error(error)
         
-        // Check if error is authentication-related
-        const errorMessage = error.message || String(error);
-        const isAuthError = 
-            errorMessage.includes('User not authenticated') ||
-            errorMessage.includes('Требуется авторизация') ||
-            errorMessage.includes('Сессия истекла') ||
-            errorMessage.includes('Unauthorized') ||
-            errorMessage.toLowerCase().includes('unauthorized') ||
-            error.digest?.includes('401') ||
-            error.digest?.includes('UNAUTHENTICATED');
-
-        if (isAuthError) {
-            // Clear session token
-            document.cookie.split(";").forEach((c) => {
-                if (c.trim().startsWith('session_token=')) {
-                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                }
-            });
-            // Redirect to login
-            router.push('/auth/login');
+        // Check if error is authentication-related (session expired, invalid, not found, or deleted)
+        if (isAuthError(error)) {
+            handleAuthError('/auth/login')
         }
-    }, [error, router])
+    }, [error])
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">

@@ -6,6 +6,7 @@ import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { createClient as createWsClient } from 'graphql-ws';
 
 import { SERVER_URL, WEBSOCKET_URL } from '@/packages/constants/url';
+import { isAuthError, handleAuthError } from '@/packages/utils';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -70,7 +71,8 @@ const errorLink = onError((errorResponse) => {
 
     // Check for authentication errors and redirect to login
     // Only redirect for actual authentication failures, not for permission/access errors
-    const isAuthError = (message: string, extensions?: any): boolean => {
+    // This is a local helper that checks message and extensions (more specific than the utility)
+    const isAuthErrorLocal = (message: string, extensions?: any): boolean => {
         // Check for explicit authentication error codes (most reliable)
         if (extensions?.code === 'UNAUTHENTICATED' || extensions?.statusCode === 401) {
             return true;
@@ -120,14 +122,19 @@ const errorLink = onError((errorResponse) => {
             }
             
             // Check if it's an authentication error (not a permission error)
-            const isAuth = isAuthError(message, extensions);
+            const isAuth = isAuthErrorLocal(message, extensions);
             
             // Only redirect for queries that require authentication (like 'me', 'myTeams')
             // These queries failing means the session is invalid
-            const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => operationName.includes(name));
+            const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
+                operationName === name || operationName.includes(name)
+            );
             
             if (requiresAuth && isAuth) {
                 shouldRedirect = true;
+                if (isDevelopment) {
+                    console.log(`[Apollo Client] Authentication error detected in ${operationName}, will redirect to login`)
+                }
             }
             
             if (isDevelopment) {
@@ -137,21 +144,11 @@ const errorLink = onError((errorResponse) => {
         
         // Redirect to login if authentication error (but not for project queries)
         if (shouldRedirect && isBrowser) {
-            // Don't redirect if already on login page to avoid loops
-            if (window.location.pathname.startsWith('/auth/login')) {
-                return;
-            }
-            
             if (isDevelopment) {
                 console.log(`[Apollo Client] Redirecting to login due to authentication error in operation: ${operationName}`)
             }
-            // Clear any auth-related data
-            document.cookie.split(";").forEach((c) => {
-                if (c.trim().startsWith('session_token=')) {
-                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                }
-            });
-            window.location.href = '/auth/login';
+            // Use utility function to clear cookies and redirect
+            handleAuthError('/auth/login');
             return;
         }
     }
@@ -171,28 +168,24 @@ const errorLink = onError((errorResponse) => {
             const netErr = networkError as any;
             if (netErr.result?.errors) {
                 netErr.result.errors.forEach(({ message, extensions }: any) => {
-                    // Only redirect for queries that require global authentication
-                    const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => operationName.includes(name));
-                    if (requiresAuth && isAuthError(message, extensions)) {
-                        shouldRedirect = true;
+                // Only redirect for queries that require global authentication
+                const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
+                    operationName === name || operationName.includes(name)
+                );
+                if (requiresAuth && isAuthErrorLocal(message, extensions)) {
+                    shouldRedirect = true;
+                    if (isDevelopment) {
+                        console.log(`[Apollo Client] Network authentication error detected in ${operationName}, will redirect to login`)
                     }
+                }
                     if (isDevelopment) {
                         console.log(`[Protocol error]: Message: ${message}, Extensions: ${JSON.stringify(extensions)}`)
                     }
                 });
 
                 if (shouldRedirect && isBrowser) {
-                    // Don't redirect if already on login page to avoid loops
-                    if (window.location.pathname.startsWith('/auth/login')) {
-                        return;
-                    }
-
-                    document.cookie.split(";").forEach((c) => {
-                        if (c.trim().startsWith('session_token=')) {
-                            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                        }
-                    });
-                    window.location.href = '/auth/login';
+                    // Use utility function to clear cookies and redirect
+                    handleAuthError('/auth/login');
                     return;
                 }
             } else {
@@ -208,38 +201,29 @@ const errorLink = onError((errorResponse) => {
                 // But only redirect if it's not a project query
                 if (statusCode === 401 && !isProjectQuery) {
                     // Only redirect for queries that require global authentication
-                    const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => operationName.includes(name));
+                    const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
+                        operationName === name || operationName.includes(name)
+                    );
 
                     if (isBrowser && requiresAuth) {
-                        // Don't redirect if already on login page to avoid loops
-                        if (window.location.pathname.startsWith('/auth/login')) {
-                            return;
+                        if (isDevelopment) {
+                            console.log(`[Apollo Client] 401 error detected in ${operationName}, will redirect to login`)
                         }
-
-                        // Clear session token
-                        document.cookie.split(";").forEach((c) => {
-                            if (c.trim().startsWith('session_token=')) {
-                                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                            }
-                        });
-                        window.location.href = '/auth/login';
+                        // Use utility function to clear cookies and redirect
+                        handleAuthError('/auth/login');
                         return;
                     }
-                } else if (!isProjectQuery && isAuthError(errorMessage)) {
+                } else if (!isProjectQuery && isAuthErrorLocal(errorMessage)) {
                     // Check for auth error messages in network errors (but not for project queries)
-                    const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => operationName.includes(name));
+                    const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
+                        operationName === name || operationName.includes(name)
+                    );
                     if (isBrowser && requiresAuth) {
-                        // Don't redirect if already on login page to avoid loops
-                        if (window.location.pathname.startsWith('/auth/login')) {
-                            return;
+                        if (isDevelopment) {
+                            console.log(`[Apollo Client] Auth error message detected in ${operationName}, will redirect to login`)
                         }
-
-                        document.cookie.split(";").forEach((c) => {
-                            if (c.trim().startsWith('session_token=')) {
-                                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                            }
-                        });
-                        window.location.href = '/auth/login';
+                        // Use utility function to clear cookies and redirect
+                        handleAuthError('/auth/login');
                         return;
                     }
                 }

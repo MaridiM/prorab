@@ -77,7 +77,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 	}
 
 	async onModuleInit(): Promise<void> {
-		await this.$connect()
+		try {
+			await this.$connect()
+			this.logger.log('✅ Successfully connected to database')
+		} catch (error: any) {
+			if (error.code === 'ECONNREFUSED' || error.code === 'P1001') {
+				this.logger.error('❌ Database connection refused!')
+				this.logger.error('Please check:')
+				this.logger.error('1. Is PostgreSQL database running?')
+				this.logger.error('2. Is DATABASE_URL correctly set in .env file?')
+				this.logger.error(`3. Current DATABASE_URL: ${this.maskConnectionString(this.databaseUrl)}`)
+				this.logger.error('4. Try connecting manually: psql <your-database-url>')
+			}
+			// Пробрасываем ошибку дальше, чтобы приложение не запустилось с неработающей БД
+			throw error
+		}
 	}
 
 	async onModuleDestroy(): Promise<void> {

@@ -48,15 +48,8 @@ export default function OnboardingInvitePage() {
 		setIsSubmitting(true)
 
 		try {
-			// TODO: Call GraphQL mutation JoinTeamByInvite
-			// await joinTeamByInvite({
-			//   code: data.code,
-			// })
-
-			console.log('Joining team with code:', data.code)
-
-			// Redirect to dashboard
-			router.push('/dashboard')
+			// Redirect to invite page with code
+			router.push(`/invite/${data.code}`)
 		} catch (error) {
 			console.error('Failed to join team:', error)
 			setIsSubmitting(false)
@@ -111,18 +104,22 @@ export default function OnboardingInvitePage() {
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="ABC123"
+										placeholder="ABC12345"
 										{...field}
-										className="h-14 text-center text-2xl font-mono uppercase tracking-widest rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
-										maxLength={6}
+										className="h-14 text-center text-xl font-mono uppercase tracking-widest rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all"
+										maxLength={8}
 										autoFocus
 										onChange={(e) => {
-											field.onChange(e.target.value.toUpperCase())
+											// Filter out I, O, 1, 0 characters
+											const filtered = e.target.value
+												.toUpperCase()
+												.replace(/[IO10]/g, '')
+											field.onChange(filtered)
 										}}
 									/>
 								</FormControl>
 								<FormDescription className="text-xs text-center">
-									Введите 6-значный код (буквы и цифры)
+									Введите 8-значный код (буквы A-Z, кроме I и O, цифры 2-9)
 								</FormDescription>
 								<FormMessage />
 							</FormItem>

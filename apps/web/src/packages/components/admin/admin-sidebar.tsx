@@ -99,12 +99,6 @@ const navItems: NavItem[] = [
 		permission: 'payments:view',
 	},
 	{
-		label: 'Payment Providers',
-		href: '/admin/payment-providers',
-		icon: Wallet,
-		permission: 'payment_providers:view',
-	},
-	{
 		label: 'Support Tickets',
 		href: '/admin/support',
 		icon: Ticket,

@@ -8,6 +8,7 @@ import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
 import { UpdateTeamInput } from './dto/update-team.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { StorageService } from '../../core/storage/storage.service';
+import { MailService } from '../../core/mail/mail.service';
 import { LogoType } from './models/logo-type.enum';
 import { BusinessRole } from '../users/models/user.model';
 import { TeamRole } from './models/team-member.model';
@@ -27,6 +28,7 @@ export class TeamsService extends CoreService {
     config: ConfigService,
     private storageService: StorageService,
     private csvExportService: CsvExportService,
+    private mailService: MailService,
   ) {
     super(prisma, redis, config);
   }
@@ -553,6 +555,97 @@ export class TeamsService extends CoreService {
     this.logger.log(`Created invite code ${code} for team ${teamId}, expires ${expiresAt.toISOString()}`);
 
     return inviteCode;
+  }
+
+  /**
+   * Отправка приглашения по email
+   */
+  async sendInviteByEmail(
+    userId: string,
+    teamId: string,
+    email: string,
+    expiresInDays: number = 7,
+  ): Promise<{ inviteCode: any; emailSent: boolean }> {
+    // 1. Проверяем что команда существует и пользователь - владелец
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!team) {
+      throw new BadRequestException('Команда не найдена');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Только владелец может отправлять приглашения по email');
+    }
+
+    // 2. Валидация email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new BadRequestException('Некорректный email адрес');
+    }
+
+    // 3. Проверяем, не является ли email Telegram placeholder
+    const { isTelegramPlaceholderEmail } = await import('../../shared/utils/email.utils');
+    if (isTelegramPlaceholderEmail(email)) {
+      throw new BadRequestException(
+        'Нельзя отправить приглашение на Telegram placeholder email. Используйте обычный email адрес.',
+      );
+    }
+
+    // 4. Проверяем, не зарегистрирован ли уже пользователь с таким email в команде
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        emailNormalized: email.toLowerCase().trim(),
+      },
+      include: {
+        teamMemberships: {
+          where: {
+            teamId,
+          },
+        },
+      },
+    });
+
+    if (existingUser && existingUser.teamMemberships.length > 0) {
+      throw new BadRequestException('Пользователь с таким email уже состоит в команде');
+    }
+
+    // 5. Создаём код приглашения
+    const inviteCode = await this.createInviteLink(userId, teamId, expiresInDays);
+
+    // 6. Формируем URL приглашения
+    const frontendUrl = this.config.get<string>('frontendUrl') || 'http://localhost:3000';
+    const inviteUrl = `${frontendUrl}/invite/${inviteCode.code}`;
+
+    // 7. Отправляем email
+    const emailSent = await this.mailService.sendTeamInviteEmail(
+      email,
+      team.name,
+      team.owner.fullName || 'Владелец команды',
+      inviteCode.code,
+      inviteUrl,
+    );
+
+    if (emailSent) {
+      this.logger.log(`Invite email sent to ${email} for team ${teamId}`);
+    } else {
+      this.logger.warn(`Failed to send invite email to ${email} for team ${teamId}, but invite code was created`);
+    }
+
+    return {
+      inviteCode,
+      emailSent,
+    };
   }
 
   /**

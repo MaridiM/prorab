@@ -10,6 +10,8 @@ import { json, urlencoded } from 'express'
 
 import { AppModule } from './app.module'
 import { PrismaService } from './core/prisma/prisma.service'
+import { GraphQLValidationPipe } from './shared/pipes/graphql-validation.pipe'
+import { SystemSettingsService } from './modules/admin/services/system-settings.service'
 
 const IS_DEV = process.env.NODE_ENV !== 'production'
 
@@ -68,9 +70,9 @@ async function bootstrap() {
 	app.use(json({ limit: '10mb' }))
 	app.use(urlencoded({ extended: true, limit: '10mb' }))
 
-	// ✅ Global validation pipe
+	// ✅ Global validation pipe (customized to handle GraphQLUpload)
 	app.useGlobalPipes(
-		new ValidationPipe({
+		new GraphQLValidationPipe({
 			whitelist: true,
 			transform: true,
 			forbidNonWhitelisted: true,
@@ -102,6 +104,16 @@ async function bootstrap() {
 	// ✅ Prisma shutdown hooks
 	const prismaService = app.get(PrismaService)
 	prismaService.enableShutdownHooks(app)
+
+	// ✅ Initialize system settings and sync environment variables
+	try {
+		const systemSettingsService = app.get(SystemSettingsService)
+		await systemSettingsService.initializeDefaultSettings()
+		await systemSettingsService.syncEnvToDatabase()
+		logger.log('✅ System settings initialized and synchronized')
+	} catch (error) {
+		logger.warn('⚠️  Failed to initialize/sync system settings:', error.message)
+	}
 
 	// ✅ Start server
 	const port = config.get<number>('port') ?? 8080

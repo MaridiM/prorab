@@ -29,9 +29,24 @@ export class TelegramAuthService {
 		const authTokenTtl = this.config.get<number>('telegram.authTokenTtl', 600000)
 		const expiresAt = new Date(Date.now() + authTokenTtl)
 
-		await this.prisma.telegramAuthToken.create({
-			data: { token, expiresAt },
-		})
+		try {
+			await this.prisma.telegramAuthToken.create({
+				data: { token, expiresAt },
+			})
+		} catch (error: any) {
+			// Обработка ошибок подключения к базе данных
+			if (error.code === 'ECONNREFUSED' || error.code === 'P1001') {
+				this.logger.error('Database connection refused. Please check:')
+				this.logger.error('1. Is PostgreSQL database running?')
+				this.logger.error('2. Is DATABASE_URL correctly set in .env file?')
+				this.logger.error('3. Can you connect to the database manually?')
+				throw new BadRequestException(
+					'База данных недоступна. Пожалуйста, проверьте подключение к базе данных.'
+				)
+			}
+			// Пробрасываем другие ошибки дальше
+			throw error
+		}
 
 		const botUsername = this.config.get<string>('telegram.botUsername', 'ProRabSpaceBot')
 		const deepLink = `https://t.me/${botUsername}?start=auth_${token}`

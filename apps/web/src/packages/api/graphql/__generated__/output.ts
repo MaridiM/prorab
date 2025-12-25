@@ -888,6 +888,11 @@ export type ComplianceReport = {
   totalAuditLogs: Scalars['Int']['output'];
 };
 
+export type ConfirmEmailChangeInput = {
+  /** Токен подтверждения из email */
+  token: Scalars['String']['input'];
+};
+
 export type ConnectionTestResult = {
   __typename?: 'ConnectionTestResult';
   message: Scalars['String']['output'];
@@ -1680,6 +1685,8 @@ export type Mutation = {
   closeProject: Project;
   /** Завершение онбординга: создание команды и первого проекта */
   completeOnboarding: OnboardingResult;
+  /** Подтвердить изменение email адреса по токену из письма */
+  confirmEmailChange: Scalars['Boolean']['output'];
   /** Создать расход */
   createExpense: Expense;
   /** Создание ссылки-приглашения в команду (только для владельца) */
@@ -1741,6 +1748,8 @@ export type Mutation = {
   removeTeamMember: Scalars['Boolean']['output'];
   /** Изменить порядок фотографий */
   reorderReportPhotos: Scalars['Boolean']['output'];
+  /** Запросить изменение email адреса. Требуется 2FA код, если двухфакторная аутентификация включена. */
+  requestEmailChange: Scalars['Boolean']['output'];
   resendVerificationEmail: Scalars['Boolean']['output'];
   resetPassword: Scalars['Boolean']['output'];
   /** Восстановить проект */
@@ -1749,6 +1758,8 @@ export type Mutation = {
   revokeAllSessions: Scalars['Boolean']['output'];
   revokeAllSessionsIncludingCurrent: Scalars['Boolean']['output'];
   revokeSession: Scalars['Boolean']['output'];
+  /** Отправка приглашения в команду по email */
+  sendInviteByEmail: SendInviteResult;
   /** Test connection for a service category (admin only) */
   testServiceConnection: ConnectionTestResult;
   /** Test connection to a specific storage provider */
@@ -2139,6 +2150,11 @@ export type MutationCompleteOnboardingArgs = {
 };
 
 
+export type MutationConfirmEmailChangeArgs = {
+  input: ConfirmEmailChangeInput;
+};
+
+
 export type MutationCreateExpenseArgs = {
   input: CreateExpenseInput;
 };
@@ -2294,6 +2310,11 @@ export type MutationReorderReportPhotosArgs = {
 };
 
 
+export type MutationRequestEmailChangeArgs = {
+  input: RequestChangeEmailInput;
+};
+
+
 export type MutationResetPasswordArgs = {
   input: ResetPasswordInput;
 };
@@ -2311,6 +2332,11 @@ export type MutationRevokeAdminRoleArgs = {
 
 export type MutationRevokeSessionArgs = {
   sessionId: Scalars['String']['input'];
+};
+
+
+export type MutationSendInviteByEmailArgs = {
+  input: SendInviteByEmailInput;
 };
 
 
@@ -3628,6 +3654,13 @@ export type ReportPhoto = {
   width: Maybe<Scalars['Int']['output']>;
 };
 
+export type RequestChangeEmailInput = {
+  /** Новый email адрес */
+  newEmail: Scalars['String']['input'];
+  /** Код двухфакторной аутентификации (требуется, если 2FA включена) */
+  twoFactorCode: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ResetPasswordInput = {
   newPassword: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -3716,6 +3749,23 @@ export type SalaryDistribution = {
   percentage: Scalars['Int']['output'];
   /** Total salary amount (fixed + calculated) */
   totalAmount: Scalars['Float']['output'];
+};
+
+export type SendInviteByEmailInput = {
+  /** Email адрес приглашаемого пользователя */
+  email: Scalars['String']['input'];
+  /** Срок действия приглашения в днях (по умолчанию 7) */
+  expiresInDays: InputMaybe<Scalars['Int']['input']>;
+  /** ID команды */
+  teamId: Scalars['ID']['input'];
+};
+
+export type SendInviteResult = {
+  __typename?: 'SendInviteResult';
+  /** Было ли письмо успешно отправлено */
+  emailSent: Scalars['Boolean']['output'];
+  /** Созданный код приглашения */
+  inviteCode: InviteCode;
 };
 
 export type Session = {
@@ -6473,6 +6523,13 @@ export type CreateInviteLinkMutationVariables = Exact<{
 
 export type CreateInviteLinkMutation = { __typename?: 'Mutation', createInviteLink: { __typename?: 'InviteCode', id: string, teamId: string, code: string, expiresAt: string, usedBy: string | null, usedAt: string | null, createdAt: string, isActive: boolean, inviteUrl: string } };
 
+export type SendInviteByEmailMutationVariables = Exact<{
+  input: SendInviteByEmailInput;
+}>;
+
+
+export type SendInviteByEmailMutation = { __typename?: 'Mutation', sendInviteByEmail: { __typename?: 'SendInviteResult', emailSent: boolean, inviteCode: { __typename?: 'InviteCode', id: string, teamId: string, code: string, expiresAt: string, usedBy: string | null, usedAt: string | null, createdAt: string, isActive: boolean, inviteUrl: string } } };
+
 export type JoinTeamByInviteMutationVariables = Exact<{
   code: Scalars['String']['input'];
 }>;
@@ -6878,6 +6935,7 @@ export const CompleteOnboardingDocument = {"kind":"Document","definitions":[{"ki
 export const UpdateTeamDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateTeam"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateTeamInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateTeam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoType"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"iconId"}},{"kind":"Field","name":{"kind":"Name","value":"colorId"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<UpdateTeamMutation, UpdateTeamMutationVariables>;
 export const RemoveTeamMemberDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RemoveTeamMember"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"removeTeamMember"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}},{"kind":"Argument","name":{"kind":"Name","value":"memberId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"memberId"}}}]}]}}]} as unknown as DocumentNode<RemoveTeamMemberMutation, RemoveTeamMemberMutationVariables>;
 export const CreateInviteLinkDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateInviteLink"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"expiresInDays"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createInviteLink"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}},{"kind":"Argument","name":{"kind":"Name","value":"expiresInDays"},"value":{"kind":"Variable","name":{"kind":"Name","value":"expiresInDays"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"usedBy"}},{"kind":"Field","name":{"kind":"Name","value":"usedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"inviteUrl"}}]}}]}}]} as unknown as DocumentNode<CreateInviteLinkMutation, CreateInviteLinkMutationVariables>;
+export const SendInviteByEmailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SendInviteByEmail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SendInviteByEmailInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sendInviteByEmail"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inviteCode"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"usedBy"}},{"kind":"Field","name":{"kind":"Name","value":"usedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"inviteUrl"}}]}},{"kind":"Field","name":{"kind":"Name","value":"emailSent"}}]}}]}}]} as unknown as DocumentNode<SendInviteByEmailMutation, SendInviteByEmailMutationVariables>;
 export const JoinTeamByInviteDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"JoinTeamByInvite"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"code"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"joinTeamByInvite"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"code"},"value":{"kind":"Variable","name":{"kind":"Name","value":"code"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"role"}},{"kind":"Field","name":{"kind":"Name","value":"joinedAt"}},{"kind":"Field","name":{"kind":"Name","value":"team"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logoType"}},{"kind":"Field","name":{"kind":"Name","value":"logoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"iconId"}},{"kind":"Field","name":{"kind":"Name","value":"colorId"}}]}}]}}]}}]} as unknown as DocumentNode<JoinTeamByInviteMutation, JoinTeamByInviteMutationVariables>;
 export const TeamInvitesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TeamInvites"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"teamInvites"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"teamId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"teamId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"teamId"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"usedBy"}},{"kind":"Field","name":{"kind":"Name","value":"usedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}},{"kind":"Field","name":{"kind":"Name","value":"inviteUrl"}}]}}]}}]} as unknown as DocumentNode<TeamInvitesQuery, TeamInvitesQueryVariables>;
 export const DeleteInviteCodeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteInviteCode"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"codeId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteInviteCode"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"codeId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"codeId"}}}]}]}}]} as unknown as DocumentNode<DeleteInviteCodeMutation, DeleteInviteCodeMutationVariables>;

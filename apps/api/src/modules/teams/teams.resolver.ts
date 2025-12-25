@@ -1,15 +1,18 @@
 import { Args, ID, Int, Mutation, Query, Resolver, ResolveField } from '@nestjs/graphql';
 import { UseGuards, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TeamsService } from './teams.service';
 import { CompleteOnboardingInput } from './dto/complete-onboarding.input';
 import { UpdateTeamInput } from './dto/update-team.input';
 import { CreateInviteLinkInput } from './dto/create-invite-link.input';
 import { JoinTeamByInviteInput } from './dto/join-team-by-invite.input';
+import { SendInviteByEmailInput } from './dto/send-invite-by-email.input';
 import { UpdateMemberPositionInput } from './dto/update-member-position.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { Team } from './models/team.model';
 import { TeamMember } from './models/team-member.model';
 import { InviteCode } from './models/invite-code.model';
+import { SendInviteResult } from './models/send-invite-result.model';
 import { PersonnelAnalytics } from './models/personnel-analytics.model';
 import { TeamMemberSalaryHistory } from './models/salary-history.model';
 import { TeamStats } from './models/team-stats.model';
@@ -139,6 +142,25 @@ export class TeamsResolver {
   }
 
   /**
+   * Мутация: отправка приглашения по email
+   */
+  @Mutation(() => SendInviteResult, {
+    description: 'Отправка приглашения в команду по email',
+  })
+  @UseGuards(AuthGuard)
+  async sendInviteByEmail(
+    @Args('input') input: SendInviteByEmailInput,
+    @CurrentUser() user: { id: string },
+  ): Promise<SendInviteResult> {
+    return this.teamsService.sendInviteByEmail(
+      user.id,
+      input.teamId,
+      input.email,
+      input.expiresInDays,
+    );
+  }
+
+  /**
    * Мутация: присоединение к команде по коду приглашения
    */
   @Mutation(() => TeamMember, {
@@ -238,6 +260,8 @@ export class TeamsResolver {
  */
 @Resolver(() => InviteCode)
 export class InviteCodeResolver {
+  constructor(private configService: ConfigService) {}
+
   /**
    * Resolve поле isActive: проверяет, активен ли код (не использован и не истёк)
    */
@@ -256,7 +280,7 @@ export class InviteCodeResolver {
    */
   @ResolveField(() => String)
   inviteUrl(inviteCode: InviteCode): string {
-    // URL будет формироваться на фронтенде с правильным хостом
-    return `/invite/${inviteCode.code}`;
+    const frontendUrl = this.configService.get<string>('frontendUrl') || 'http://localhost:3000';
+    return `${frontendUrl}/invite/${inviteCode.code}`;
   }
 }

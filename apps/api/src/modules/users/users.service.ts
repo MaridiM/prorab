@@ -1,13 +1,18 @@
-import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common'
+import { Injectable, BadRequestException, UnauthorizedException, Logger, Inject, forwardRef } from '@nestjs/common'
 import { FileUpload } from 'graphql-upload-minimal'
 import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import * as argon2 from 'argon2'
+import { nanoid } from 'nanoid'
 
 import { PrismaService } from '../../core/prisma/prisma.service'
+import { RedisService } from '../../core/redis/redis.service'
+import { MailService } from '../../core/mail/mail.service'
 import { UpdateProfileInput } from './dto/update-profile.input'
+import { RequestChangeEmailInput } from './dto/request-change-email.input'
 import { UserStoragePreference, StorageProviderOption, UserStorageProviderType } from './models/user-storage.model'
 import { StorageProviderType } from '../../core/storage/interfaces/storage-provider.interface'
+import { TwoFactorService } from '../auth/two-factor.service'
 
 interface CreateUserData {
 	email: string
@@ -22,8 +27,16 @@ export class UsersService {
 	private readonly logger = new Logger(UsersService.name);
 	private readonly baseUrl = process.env.BASE_URL || 'http://localhost:8080';
 	private readonly uploadPath = join(process.cwd(), 'uploads', 'avatars');
+	private readonly emailChangeTokenTtl = 24 * 60 * 60 * 1000; // 24 hours
+	private readonly rateLimitWindow = 60 * 60 * 1000; // 1 hour
 
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly redisService: RedisService,
+		private readonly mailService: MailService,
+		@Inject(forwardRef(() => TwoFactorService))
+		private readonly twoFactorService: TwoFactorService,
+	) {}
 
 	async create(data: CreateUserData) {
 		return this.prisma.user.create({
@@ -479,6 +492,164 @@ export class UsersService {
 			default:
 				return UserStorageProviderType.LOCAL
 		}
+	}
+
+	// ==================== Email Change ====================
+
+	/**
+	 * Request email change with 2FA verification if enabled
+	 */
+	async requestEmailChange(userId: string, input: RequestChangeEmailInput): Promise<boolean> {
+		// Rate limiting
+		await this.checkRateLimit('change_email', userId)
+
+		// Get user
+		const user = await this.findById(userId)
+		if (!user) {
+			throw new BadRequestException('Пользователь не найден')
+		}
+
+		// Normalize new email
+		const newEmailNormalized = input.newEmail.trim().toLowerCase()
+		const newEmail = newEmailNormalized
+
+		// Check if new email is the same as current
+		if (user.emailNormalized === newEmailNormalized) {
+			throw new BadRequestException('Новый email совпадает с текущим')
+		}
+
+		// Check if new email is already taken
+		const existingUser = await this.findByEmailNormalized(newEmailNormalized)
+		if (existingUser && existingUser.id !== userId) {
+			throw new BadRequestException('Этот email уже используется другим пользователем')
+		}
+
+		// Check if 2FA is enabled
+		const twoFactorStatus = await this.twoFactorService.getStatus(userId)
+		if (twoFactorStatus.enabled) {
+			// Verify 2FA code if provided
+			if (!input.twoFactorCode) {
+				throw new BadRequestException('Требуется код двухфакторной аутентификации')
+			}
+
+			const isValid = await this.twoFactorService.verify2FAToken(userId, input.twoFactorCode)
+			if (!isValid) {
+				throw new UnauthorizedException('Неверный код двухфакторной аутентификации')
+			}
+		}
+
+		// Generate verification token
+		const token = nanoid(48)
+		const expiresAt = new Date(Date.now() + this.emailChangeTokenTtl)
+
+		// Store email change request in Redis (with old email for reference)
+		await this.redisService.set(
+			`email_change:${token}`,
+			JSON.stringify({
+				userId,
+				oldEmail: user.email,
+				newEmail,
+				newEmailNormalized,
+			}),
+			this.emailChangeTokenTtl,
+		)
+
+		// Send verification email to new address
+		await this.mailService.sendEmailChangeConfirmationEmail(
+			newEmail,
+			user.fullName,
+			token,
+			user.email,
+		)
+
+		// Increment rate limit
+		await this.incrementRateLimit('change_email', userId)
+
+		this.logger.log(`Email change requested for user ${userId}: ${user.email} -> ${newEmail}`)
+
+		return true
+	}
+
+	/**
+	 * Confirm email change using token from email
+	 */
+	async confirmEmailChange(token: string): Promise<boolean> {
+		// Get email change data from Redis
+		const changeDataStr = await this.redisService.get(`email_change:${token}`)
+		if (!changeDataStr) {
+			throw new BadRequestException('Недействительный или истёкший токен подтверждения')
+		}
+
+		const changeData = JSON.parse(changeDataStr)
+		const { userId, oldEmail, newEmail, newEmailNormalized } = changeData
+
+		// Verify user still exists
+		const user = await this.findById(userId)
+		if (!user) {
+			throw new BadRequestException('Пользователь не найден')
+		}
+
+		// Verify email hasn't changed since request
+		if (user.emailNormalized !== oldEmail.toLowerCase()) {
+			throw new BadRequestException('Email уже был изменён')
+		}
+
+		// Check if new email is still available
+		const existingUser = await this.findByEmailNormalized(newEmailNormalized)
+		if (existingUser && existingUser.id !== userId) {
+			throw new BadRequestException('Этот email уже используется другим пользователем')
+		}
+
+		// Update user email
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				email: newEmail,
+				emailNormalized: newEmailNormalized,
+				emailVerified: true, // New email is verified by clicking the link
+			},
+		})
+
+		// Delete old verification tokens
+		await this.prisma.verificationToken.deleteMany({
+			where: { userId },
+		})
+
+		// Delete email change token from Redis
+		await this.redisService.del(`email_change:${token}`)
+
+		this.logger.log(`Email changed for user ${userId}: ${oldEmail} -> ${newEmail}`)
+
+		return true
+	}
+
+	/**
+	 * Check rate limit for email change
+	 */
+	private async checkRateLimit(action: string, identifier: string): Promise<void> {
+		const key = `rate_limit:${action}:${identifier}`
+		const count = await this.redisService.getRateLimit(key)
+
+		if (count && count >= 3) {
+			throw new BadRequestException(
+				'Слишком много запросов. Пожалуйста, попробуйте позже.',
+			)
+		}
+	}
+
+	/**
+	 * Increment rate limit counter
+	 */
+	private async incrementRateLimit(action: string, identifier: string): Promise<void> {
+		const key = `rate_limit:${action}:${identifier}`
+		await this.redisService.incrementRateLimit(key, this.rateLimitWindow)
+	}
+
+	/**
+	 * Normalize email address (lowercase, trim)
+	 */
+	private normalizeEmail(email: string): string {
+		return email.trim().toLowerCase()
 	}
 }
 

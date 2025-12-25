@@ -101,7 +101,7 @@ import {
 	DeleteAccountDialog,
 	Switch,
 } from '@/packages/components'
-import { cn } from '@/packages/utils'
+import { cn, isTelegramPlaceholderEmail, isTelegramUser, getTelegramEmailMessage } from '@/packages/utils'
 
 // Schemas
 const profileSchema = z.object({
@@ -548,8 +548,8 @@ export default function SettingsPage() {
 
 												{/* Form Fields */}
 												<div className="p-6 space-y-6">
-													{/* Email Verification Alert */}
-													{me && !me.emailVerified && (
+													{/* Email Verification Alert - Only show for non-Telegram users */}
+													{me && !me.emailVerified && !isTelegramPlaceholderEmail(me.email) && (
 														<div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 															<div className="flex items-start gap-3">
 																<AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -583,6 +583,23 @@ export default function SettingsPage() {
 														</div>
 													)}
 
+													{/* Telegram Email Info */}
+													{me && isTelegramPlaceholderEmail(me.email) && (
+														<div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+															<div className="flex items-start gap-3">
+																<Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+																<div>
+																	<p className="font-medium text-blue-600 dark:text-blue-400 mb-1">
+																		Telegram-пользователь
+																	</p>
+																	<p className="text-sm text-muted-foreground">
+																		{getTelegramEmailMessage(me.email)}
+																	</p>
+																</div>
+															</div>
+														</div>
+													)}
+
 													{/* Email (read-only) */}
 													<div className="space-y-2">
 														<label className="text-sm font-medium flex items-center gap-2">
@@ -602,6 +619,15 @@ export default function SettingsPage() {
 																>
 																	<CheckCircle2 className="w-3 h-3 mr-1" />
 																	Подтверждён
+																</Badge>
+															)}
+															{me && isTelegramUser(me) && (
+																<Badge
+																	variant="secondary"
+																	className="bg-blue-500/10 text-blue-600 border-blue-500/20 self-start sm:self-auto"
+																>
+																	<MessageCircle className="w-3 h-3 mr-1" />
+																	Telegram
 																</Badge>
 															)}
 														</div>

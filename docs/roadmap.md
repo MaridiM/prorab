@@ -4,13 +4,117 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-24)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-25)
 
 **Версии приложений:**
-- API: v1.4.0
-- Web: v1.4.0
+- API: v1.4.3 (в разработке)
+- Web: v1.4.3 (в разработке)
 
 ### Общий прогресс: **100% MVP + Stages 13-16 (100%)** 🎉✅
+
+**🔄 НОВАЯ ЗАДАЧА: Email Change with 2FA Verification - v1.4.4** 📋
+
+- 📋 Реализация изменения email с двухфакторной верификацией
+- 🔒 Интеграция с существующей системой 2FA
+- 📧 Отправка письма подтверждения на новый email
+- 🔄 Автоматический сброс старого email при подтверждении
+- 📊 **Прогресс:** 0% (0/8 фаз выполнено)
+  - ⏳ PHASE 1: Backend - DTOs и Models (2 шага)
+    - ⏳ Создать `ChangeEmailInput` DTO с полями `newEmail` и `twoFactorCode` (опционально)
+    - ⏳ Создать `ChangeEmailResult` model с полями `success`, `pendingVerification`, `message`
+  - ⏳ PHASE 2: Backend - Email Change Service Logic (4 шага)
+    - ⏳ Добавить метод `initiateEmailChange()` в `AuthService` с проверкой 2FA
+    - ⏳ Добавить метод `verifyEmailChange()` для подтверждения нового email
+    - ⏳ Добавить валидацию нового email (формат, уникальность, не Telegram placeholder)
+    - ⏳ Добавить создание токена подтверждения и отправку письма
+  - ⏳ PHASE 3: Backend - 2FA Verification Integration (3 шага)
+    - ⏳ Проверка статуса 2FA пользователя перед изменением email
+    - ⏳ Интеграция с `TwoFactorService.verify2FAToken()` если 2FA включена
+    - ⏳ Обработка случая, когда 2FA не включена (пропуск верификации)
+  - ⏳ PHASE 4: Backend - GraphQL Resolver (2 шага)
+    - ⏳ Добавить мутацию `initiateEmailChange` в `AuthResolver`
+    - ⏳ Добавить мутацию `verifyEmailChange` для подтверждения по токену
+  - ⏳ PHASE 5: Frontend - GraphQL Mutations & Queries (2 шага)
+    - ⏳ Создать GraphQL мутации `InitiateEmailChange` и `VerifyEmailChange`
+    - ⏳ Запустить `npm run codegen` для генерации TypeScript типов
+  - ⏳ PHASE 6: Frontend - Email Change UI Component (4 шага)
+    - ⏳ Добавить секцию "Email" в раздел "Безопасность" на странице настроек
+    - ⏳ Создать форму с полем нового email и кнопкой "Изменить email"
+    - ⏳ Добавить проверку на Telegram placeholder email (скрыть для Telegram users)
+    - ⏳ Добавить отображение статуса (pending verification, success, error)
+  - ⏳ PHASE 7: Frontend - 2FA Verification Dialog (3 шага)
+    - ⏳ Создать диалог для ввода 2FA кода перед изменением email
+    - ⏳ Интегрировать диалог в процесс изменения email (показывать только если 2FA включена)
+    - ⏳ Добавить обработку ошибок и успешной верификации
+  - ⏳ PHASE 8: Testing & Documentation (3 шага)
+    - ⏳ Протестировать изменение email с включенной 2FA
+    - ⏳ Протестировать изменение email без 2FA
+    - ⏳ Создать документацию `docs/features/EMAIL_CHANGE_WITH_2FA.md`
+- 📄 **Документация:** `docs/features/EMAIL_CHANGE_WITH_2FA.md` (будет создана)
+- ⏱️ **Оценка:** 6-8 часов
+- 📦 **План:** +1,200 LOC (Backend: ~600 LOC, Frontend: ~600 LOC)
+- 🎯 **Цель:** Полноценная система изменения email с защитой через 2FA
+- 🔗 **Зависимости:** Требует завершения System Settings Expansion (v1.4.3)
+
+**✅ ЗАВЕРШЕНО: System Settings Expansion - v1.4.3** 🎉
+
+- 📋 Добавление 3 новых категорий интеграций (SMS, Social, Analytics)
+- 🔗 Консолидация админ-страниц в System Settings (Plans, Roles, Logs)
+- 🔄 Синхронизация .env → Database при старте приложения
+- 📊 **Прогресс:** 100% (7/7 фаз выполнено) ✅
+  - ✅ PHASE 1: Backend - Database Schema (3 шага) ✅
+    - ✅ Prisma schema updated (SMS, SOCIAL, ANALYTICS enum values)
+    - ✅ Migration created and applied
+    - ✅ TypeScript enum updated
+  - ✅ PHASE 2: Backend - Default Settings & Env Sync (3 шага) ✅
+    - ✅ Added 11 default settings (SMS, Social, Analytics)
+    - ✅ Created syncEnvToDatabase() method (24 env mappings)
+    - ✅ Added startup initialization in main.ts
+  - ✅ PHASE 3: Frontend - Extract Admin Components (5 шагов) ✅
+    - ✅ Created Subscription Plans Panel (1,272 LOC)
+    - ✅ Created Admin Roles Panel (322 LOC)
+    - ✅ Moved Role Dialogs (2 files)
+    - ✅ Created Audit Logs Panel (245 LOC)
+    - ✅ Created Barrel Exports (6 index.ts)
+  - ✅ PHASE 4: Frontend - Integration Settings Update ✅
+    - ✅ Added 3 new categories (SMS, Social, Analytics)
+    - ✅ Updated grid from 7 to 10 columns
+  - ✅ PHASE 5: Frontend - System Settings Tabs Update ✅
+    - ✅ Added 3 new tabs (Plans, Roles, Logs)
+    - ✅ Updated grid from 2 to 5 columns
+    - ✅ URL routing for all tabs
+  - ✅ PHASE 6: Frontend - Navigation & Redirects ✅
+    - ✅ Created redirects for /admin/plans, /admin/roles, /admin/logs
+  - ✅ PHASE 7: GraphQL Type Regeneration ✅
+    - ✅ Frontend types regenerated (SMS, SOCIAL, ANALYTICS)
+- 📄 **Документация:** `docs/SYSTEM_SETTINGS_EXPANSION.md`
+- ⏱️ **Фактически:** ~4 часа (все задачи выполнены)
+- 📦 **Создано:** 12 files, modified 10 files
+- 🎯 **Результат:** 5 табов (было 2), 10 категорий интеграций (было 7), +512 net LOC
+
+**✅ ЗАВЕРШЕНО: System Settings Reorganization - v1.4.2** 🎉
+
+- 📋 Централизация конфигураций админ-панели
+- 🎯 Двухуровневая навигация (Integrations → Payment Providers)
+- 🔗 URL routing для всех табов
+- 📱 Deep linking (можно делиться ссылками)
+- ⚙️ Модульная компонентная архитектура
+- 📊 **Прогресс:** 100% (11/11 задач выполнено) ✅
+  - ✅ Директории созданы
+  - ✅ settings-category-panel.tsx (~210 LOC)
+  - ✅ integration-settings.tsx (~215 LOC)
+  - ✅ provider-table.tsx (~210 LOC)
+  - ✅ provider-config-dialog.tsx (~225 LOC)
+  - ✅ payment-providers-panel.tsx (~310 LOC)
+  - ✅ system-settings-tabs.tsx (~85 LOC)
+  - ✅ Barrel exports (3 index.ts files)
+  - ✅ /admin/settings/page.tsx рефакторинг (338 → 16 LOC)
+  - ✅ /admin/payment-providers/page.tsx redirect (590 → 21 LOC)
+  - ✅ admin-sidebar.tsx обновлён
+- 📄 **Документация:** `docs/stages/SYSTEM_SETTINGS_REORGANIZATION.md`
+- ⏱️ **Фактически:** ~11 часов (все задачи выполнены)
+- 📦 **Создано:** 10 файлов (~1,485 LOC)
+- ♻️ **Рефакторинг:** 3 файла (~900 LOC сокращено до ~37 LOC)
 
 **✅ STAGE 16: ADVANCED TEAM & ROLE MANAGEMENT - 100% COMPLETE!** 🎉
 - ✅ Day 8: Team Analytics Dashboard - **ЗАВЕРШЕНО** (9 файлов, 1,315 LOC)

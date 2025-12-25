@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 
@@ -12,6 +12,7 @@ import {
   type User as GqlUser,
   BusinessRole
 } from '@/packages/api/graphql'
+import { isAuthError as checkAuthError, clearAuthCookies } from '@/packages/utils'
 
 interface User {
   id: string
@@ -74,6 +75,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const isRedirectingRef = useRef(false)
   const router = useRouter()
 
   // Apollo mutations
@@ -91,12 +93,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   const refreshUser = useCallback(async () => {
+    // Prevent multiple calls if already redirecting
+    if (isRedirectingRef.current) {
+      return
+    }
+
+    // Don't fetch if already on auth pages and no session token
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname
+      if ((pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) && !hasSessionToken()) {
+        setUser(null)
+        setIsLoading(false)
+        return
+      }
+    }
+
     try {
       const { data, error } = await fetchMe()
 
       if (error || !data?.me) {
+        // Check if it's an authentication error (session not found, expired, or deleted)
+        if (error && checkAuthError(error)) {
+          // Prevent multiple redirects
+          if (!isRedirectingRef.current && typeof document !== 'undefined') {
+            isRedirectingRef.current = true
+            clearAuthCookies();
+            // Only redirect if not already on auth pages
+            const pathname = window.location.pathname
+            if (!pathname.startsWith('/auth')) {
+              router.replace('/auth/login');
+            }
+          }
+        }
         setUser(null)
       } else {
+        // Reset redirecting flag on successful fetch
+        isRedirectingRef.current = false
         setUser({
           id: data.me.id,
           email: data.me.email,
@@ -113,20 +145,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } : null
         })
       }
-    } catch {
+    } catch (err: any) {
+      // Check if it's an authentication error (session not found, expired, or deleted)
+      if (checkAuthError(err) && typeof document !== 'undefined' && !isRedirectingRef.current) {
+        isRedirectingRef.current = true
+        // Clear cookies and redirect to login
+        clearAuthCookies();
+        const pathname = window.location.pathname
+        if (!pathname.startsWith('/auth')) {
+          router.replace('/auth/login');
+        }
+      }
       setUser(null)
     } finally {
       setIsLoading(false)
     }
-  }, [fetchMe])
+  }, [fetchMe, router, hasSessionToken])
+
+  // Reset redirecting flag on mount
+  useEffect(() => {
+    isRedirectingRef.current = false
+  }, [])
 
   useEffect(() => {
     refreshUser()
   }, [refreshUser])
 
   // Quick redirect for authenticated users on auth pages (before user loads)
+  // BUT only if we're not already redirecting to avoid loops
   useEffect(() => {
-    if (isLoading && hasSessionToken()) {
+    if (isLoading && hasSessionToken() && !isRedirectingRef.current) {
       const pathname = window.location.pathname
       // If we have a session token but user is still loading, and we're on auth pages
       // redirect immediately to prevent showing login page
@@ -138,7 +186,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Auto-redirect based on onboarding status and auth pages
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading || isRedirectingRef.current) return
 
     const pathname = window.location.pathname
 
@@ -175,13 +223,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         pathname !== '/' &&
         (pathname.startsWith('/dashboard') || pathname.startsWith('/teams') || pathname.startsWith('/onboarding'))
       ) {
-        router.replace('/auth/login')
+        // Only redirect if not already redirecting
+        if (!isRedirectingRef.current) {
+          isRedirectingRef.current = true
+          clearAuthCookies()
+          router.replace('/auth/login')
+        }
         return
       }
     }
   }, [user, isLoading, router])
 
   const login = useCallback(async (email: string, password: string): Promise<LoginResult | void> => {
+    // Reset redirecting flag on login attempt
+    isRedirectingRef.current = false
+
     const response = await loginMutation({
       variables: { input: { email, password } }
     })
@@ -206,6 +262,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         hasCompletedOnboarding: userData.hasCompletedOnboarding,
         email: userData.email
       })
+
+      // Reset redirecting flag on successful login
+      isRedirectingRef.current = false
 
       setUser({
         id: userData.id,
@@ -232,6 +291,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [loginMutation, router])
 
   const register = useCallback(async (registerData: RegisterData) => {
+    // Reset redirecting flag on register attempt
+    isRedirectingRef.current = false
+
     const response = await registerMutation({
       variables: {
         input: {
@@ -253,6 +315,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         hasCompletedOnboarding: userData.hasCompletedOnboarding,
         email: userData.email
       })
+
+      // Reset redirecting flag on successful register
+      isRedirectingRef.current = false
 
       setUser({
         id: userData.id,

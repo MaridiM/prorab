@@ -1,6 +1,7 @@
 import {
 	BadRequestException,
 	Injectable,
+	Logger,
 	UnauthorizedException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -32,6 +33,7 @@ export interface LoginResult {
 
 @Injectable()
 export class AuthService {
+	private readonly logger = new Logger(AuthService.name)
 	private readonly sessionTtl: number
 	private readonly refreshTokenTtl: number
 	private readonly verificationTokenTtl: number
@@ -317,7 +319,15 @@ export class AuthService {
 
 		const user = await this.usersService.findById(userId)
 		if (user) {
-			await this.mailService.sendVerificationEmail(user.email, user.fullName, token)
+			// Check if email is a Telegram placeholder (cannot receive emails)
+			const { shouldSkipEmail } = await import('../../shared/utils/email.utils')
+			if (!shouldSkipEmail(user.email, user)) {
+				await this.mailService.sendVerificationEmail(user.email, user.fullName, token, user)
+			} else {
+				this.logger.log(
+					`Verification email skipped for Telegram user: ${user.email}. Email is already verified for Telegram OAuth users.`,
+				)
+			}
 		}
 
 		return token
@@ -352,6 +362,14 @@ export class AuthService {
 			throw new BadRequestException('Email уже подтверждён')
 		}
 
+		// Check if user is Telegram OAuth user (email is already verified)
+		const { shouldSkipEmail } = await import('../../shared/utils/email.utils')
+		if (shouldSkipEmail(user.email, user)) {
+			throw new BadRequestException(
+				'Пользователи Telegram не могут получать письма на placeholder email. Email уже подтверждён автоматически.',
+			)
+		}
+
 		await this.incrementRateLimit('verify_email', userId)
 		await this.createVerificationToken(userId)
 
@@ -372,11 +390,33 @@ export class AuthService {
 			return true
 		}
 
+		// Check if user is Telegram OAuth user (no password)
+		if (user.oauthProvider === 'telegram' && !user.passwordHash) {
+			// Telegram users don't have passwords, so password reset doesn't make sense
+			// Log warning but return true to prevent email enumeration
+			this.logger.warn(
+				`Password reset requested for Telegram OAuth user: ${user.email}. Telegram users don't have passwords.`,
+			)
+			await this.incrementRateLimit('forgot_password', ip ?? 'unknown')
+			return true
+		}
+
+		// Check if email is a Telegram placeholder (cannot receive emails)
+		const { shouldSkipEmail } = await import('../../shared/utils/email.utils')
+		if (shouldSkipEmail(user.email, user)) {
+			this.logger.warn(
+				`Password reset email skipped for Telegram placeholder email: ${user.email}. User should use Telegram login.`,
+			)
+			// Still return true to prevent email enumeration
+			await this.incrementRateLimit('forgot_password', ip ?? 'unknown')
+			return true
+		}
+
 		const token = this.generateToken()
 		const expiresAt = new Date(Date.now() + this.passwordResetTokenTtl)
 
 		await this.usersService.createPasswordResetToken(user.id, token, expiresAt)
-		await this.mailService.sendPasswordResetEmail(user.email, user.fullName, token)
+		await this.mailService.sendPasswordResetEmail(user.email, user.fullName, token, user)
 
 		await this.incrementRateLimit('forgot_password', ip ?? 'unknown')
 		return true
