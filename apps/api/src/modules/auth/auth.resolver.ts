@@ -7,6 +7,9 @@ import { LoginInput } from './dto/login.input'
 import { RegisterInput } from './dto/register.input'
 import { ResetPasswordInput } from './dto/reset-password.input'
 import { ChangePasswordInput } from './dto/change-password.input'
+import { ChangeEmailInput } from './dto/change-email.input'
+import { VerifyEmailChangeInput } from './dto/verify-email-change.input'
+import { ChangeEmailResult } from './models/change-email-result.model'
 import { AuthGuard } from '../../shared/guards/auth.guard'
 import { Public } from '../../shared/decorators/public.decorator'
 import {
@@ -250,6 +253,27 @@ export class AuthResolver {
 			input.newPassword,
 			sessionToken,
 		)
+	}
+
+	// ==================== Email Change ====================
+
+	@UseGuards(AuthGuard)
+	@Mutation(() => ChangeEmailResult, {
+		description: 'Инициировать изменение email адреса (требуется 2FA, если включена)',
+	})
+	async initiateEmailChange(
+		@Args('input') input: ChangeEmailInput,
+		@CurrentUser() user: CurrentUserData,
+	): Promise<ChangeEmailResult> {
+		return this.authService.initiateEmailChange(user.id, input.newEmail, input.twoFactorCode)
+	}
+
+	@Public()
+	@Mutation(() => Boolean, {
+		description: 'Подтвердить изменение email адреса по токену из письма',
+	})
+	async verifyEmailChange(@Args('input') input: VerifyEmailChangeInput): Promise<boolean> {
+		return this.authService.verifyEmailChange(input.token)
 	}
 
 	// ==================== Telegram OAuth ====================

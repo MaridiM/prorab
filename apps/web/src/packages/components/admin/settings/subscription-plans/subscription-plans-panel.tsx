@@ -479,6 +479,7 @@ function PlanDetailDialog({
 	const [isActive, setIsActive] = useState(true)
 	const [isEarlyBird, setIsEarlyBird] = useState(false)
 	const [sortOrder, setSortOrder] = useState(0)
+	const [trialDays, setTrialDays] = useState<number | null>(null)
 	const [prices, setPrices] = useState<
 		Array<{
 			currency: string
@@ -511,6 +512,7 @@ function PlanDetailDialog({
 			setIsActive(plan.isActive)
 			setIsEarlyBird(plan.isEarlyBird)
 			setSortOrder(plan.sortOrder)
+			setTrialDays(plan.trialDays ?? null)
 			setPrices(
 				plan.prices.map((p) => ({
 					currency: p.currency,
@@ -567,6 +569,7 @@ function PlanDetailDialog({
 					isPopular,
 					isActive,
 					sortOrder,
+					trialDays: trialDays ?? undefined,
 					prices: prices.map((p) => ({
 						currency: p.currency,
 						price: p.price,
@@ -723,6 +726,24 @@ function PlanDetailDialog({
 											onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
 											min={0}
 										/>
+									</div>
+								</div>
+								<div className="grid grid-cols-2 gap-4 mt-4">
+									<div className="space-y-2">
+										<Label htmlFor="trialDays">Пробный период (дней)</Label>
+										<Input
+											id="trialDays"
+											type="number"
+											value={trialDays ?? ''}
+											onChange={(e) =>
+												setTrialDays(e.target.value ? parseInt(e.target.value) : null)
+											}
+											placeholder="Нет пробного периода"
+											min={0}
+										/>
+										<p className="text-xs text-muted-foreground">
+											Количество дней бесплатного пробного периода для новых пользователей
+										</p>
 									</div>
 								</div>
 								<div className="flex flex-wrap items-center gap-6 pt-2">
@@ -1028,6 +1049,7 @@ function PlanDetailDialog({
 										setIsActive(plan.isActive)
 										setIsEarlyBird(plan.isEarlyBird)
 										setSortOrder(plan.sortOrder)
+										setTrialDays(plan.trialDays ?? null)
 										setPrices(
 											plan.prices.map((p) => ({
 												currency: p.currency,
@@ -1117,6 +1139,18 @@ function PlanDetailDialog({
 									<div className="flex items-center justify-between">
 										<span className="text-sm text-muted-foreground">Хранилище</span>
 										<span className="font-semibold">{plan.storageGB} ГБ</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-sm text-muted-foreground">Пробный период</span>
+										<span className="font-semibold">
+											{plan.trialDays ? (
+												<>
+													{plan.trialDays} {plan.trialDays === 1 ? 'день' : plan.trialDays < 5 ? 'дня' : 'дней'}
+												</>
+											) : (
+												<span className="text-muted-foreground">Нет</span>
+											)}
+										</span>
 									</div>
 								</CardContent>
 							</Card>

@@ -109,6 +109,8 @@ export type AdminCreatePlanInput = {
   sortOrder: InputMaybe<Scalars['Int']['input']>;
   /** Storage limit in GB */
   storageGB: Scalars['Float']['input'];
+  /** Number of trial days for new subscriptions (null = no trial) */
+  trialDays: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type AdminPayment = {
@@ -239,6 +241,8 @@ export type AdminPlanModel = {
   storageGB: Scalars['Float']['output'];
   /** Number of subscriptions using this plan */
   subscriptionsCount: Maybe<Scalars['Int']['output']>;
+  /** Number of trial days for new subscriptions (null = no trial) */
+  trialDays: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -521,6 +525,8 @@ export type AdminUpdatePlanInput = {
   sortOrder: InputMaybe<Scalars['Int']['input']>;
   /** Storage limit in GB */
   storageGB: InputMaybe<Scalars['Float']['input']>;
+  /** Number of trial days for new subscriptions (null = no trial) */
+  trialDays: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type AdminUpdateSupportTicketInput = {
@@ -814,6 +820,23 @@ export type CategoryCount = {
   __typename?: 'CategoryCount';
   category: AuditCategory;
   count: Scalars['Int']['output'];
+};
+
+export type ChangeEmailInput = {
+  /** Новый email адрес */
+  newEmail: Scalars['String']['input'];
+  /** Код двухфакторной аутентификации (требуется, если 2FA включена) */
+  twoFactorCode: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ChangeEmailResult = {
+  __typename?: 'ChangeEmailResult';
+  /** Сообщение о результате операции */
+  message: Scalars['String']['output'];
+  /** Требуется ли подтверждение нового email (письмо отправлено) */
+  pendingVerification: Scalars['Boolean']['output'];
+  /** Успешно ли инициировано изменение email */
+  success: Scalars['Boolean']['output'];
 };
 
 export type ChangePasswordInput = {
@@ -1732,6 +1755,8 @@ export type Mutation = {
   /** Initialize default system settings (super admin only) */
   initializeDefaultSettings: Scalars['Boolean']['output'];
   initializePayment: PaymentUrl;
+  /** Инициировать изменение email адреса (требуется 2FA, если включена) */
+  initiateEmailChange: ChangeEmailResult;
   /** Присоединение к команде по коду приглашения */
   joinTeamByInvite: TeamMember;
   login: AuthPayload;
@@ -1803,6 +1828,8 @@ export type Mutation = {
   /** Загрузить фото в фотоотчёт (с обработкой) */
   uploadPhotoToReport: ReportPhoto;
   verifyEmail: Scalars['Boolean']['output'];
+  /** Подтвердить изменение email адреса по токену из письма */
+  verifyEmailChange: Scalars['Boolean']['output'];
   verifyTwoFactorLogin: AuthPayload;
 };
 
@@ -2261,6 +2288,11 @@ export type MutationInitializePaymentArgs = {
 };
 
 
+export type MutationInitiateEmailChangeArgs = {
+  input: ChangeEmailInput;
+};
+
+
 export type MutationJoinTeamByInviteArgs = {
   code: Scalars['String']['input'];
 };
@@ -2461,6 +2493,11 @@ export type MutationUploadPhotoToReportArgs = {
 
 export type MutationVerifyEmailArgs = {
   token: Scalars['String']['input'];
+};
+
+
+export type MutationVerifyEmailChangeArgs = {
+  input: VerifyEmailChangeInput;
 };
 
 
@@ -3780,10 +3817,13 @@ export type Session = {
 /** System setting categories */
 export enum SettingCategory {
   Ai = 'AI',
+  Analytics = 'ANALYTICS',
   Email = 'EMAIL',
   General = 'GENERAL',
   Payment = 'PAYMENT',
   Security = 'SECURITY',
+  Sms = 'SMS',
+  Social = 'SOCIAL',
   Storage = 'STORAGE',
   Telegram = 'TELEGRAM'
 }
@@ -4844,6 +4884,11 @@ export type UsersByBusinessRole = {
   WORKER: Scalars['Int']['output'];
   /** Unassigned users */
   unassigned: Scalars['Int']['output'];
+};
+
+export type VerifyEmailChangeInput = {
+  /** Токен подтверждения изменения email */
+  token: Scalars['String']['input'];
 };
 
 export type WorkLog = {
@@ -6022,6 +6067,20 @@ export type ChangePasswordMutationVariables = Exact<{
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: boolean };
 
+export type InitiateEmailChangeMutationVariables = Exact<{
+  input: ChangeEmailInput;
+}>;
+
+
+export type InitiateEmailChangeMutation = { __typename?: 'Mutation', initiateEmailChange: { __typename?: 'ChangeEmailResult', success: boolean, pendingVerification: boolean, message: string } };
+
+export type VerifyEmailChangeMutationVariables = Exact<{
+  input: VerifyEmailChangeInput;
+}>;
+
+
+export type VerifyEmailChangeMutation = { __typename?: 'Mutation', verifyEmailChange: boolean };
+
 export type UpdateProfileMutationVariables = Exact<{
   input: UpdateProfileInput;
 }>;
@@ -6865,6 +6924,8 @@ export const ResendVerificationEmailDocument = {"kind":"Document","definitions":
 export const ForgotPasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ForgotPassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"email"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"forgotPassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"email"},"value":{"kind":"Variable","name":{"kind":"Name","value":"email"}}}]}]}}]} as unknown as DocumentNode<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
 export const ResetPasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResetPassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ResetPasswordInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resetPassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ResetPasswordMutation, ResetPasswordMutationVariables>;
 export const ChangePasswordDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangePassword"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangePasswordInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changePassword"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const InitiateEmailChangeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"InitiateEmailChange"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangeEmailInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"initiateEmailChange"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}},{"kind":"Field","name":{"kind":"Name","value":"pendingVerification"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<InitiateEmailChangeMutation, InitiateEmailChangeMutationVariables>;
+export const VerifyEmailChangeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"VerifyEmailChange"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"VerifyEmailChangeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"verifyEmailChange"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<VerifyEmailChangeMutation, VerifyEmailChangeMutationVariables>;
 export const UpdateProfileDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateProfile"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateProfileInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateProfile"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"fullName"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}}]}}]}}]} as unknown as DocumentNode<UpdateProfileMutation, UpdateProfileMutationVariables>;
 export const UpdateNotificationSettingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotificationSettings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotificationSettingsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotificationSettings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"appPush"}},{"kind":"Field","name":{"kind":"Name","value":"appEmail"}},{"kind":"Field","name":{"kind":"Name","value":"appSms"}},{"kind":"Field","name":{"kind":"Name","value":"marketingPush"}},{"kind":"Field","name":{"kind":"Name","value":"marketingEmail"}}]}}]}}]} as unknown as DocumentNode<UpdateNotificationSettingsMutation, UpdateNotificationSettingsMutationVariables>;
 export const RevokeSessionDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RevokeSession"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"revokeSession"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"sessionId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"sessionId"}}}]}]}}]} as unknown as DocumentNode<RevokeSessionMutation, RevokeSessionMutationVariables>;

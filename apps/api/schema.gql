@@ -101,6 +101,9 @@ input AdminCreatePlanInput {
 
   """Storage limit in GB"""
   storageGB: Float!
+
+  """Number of trial days for new subscriptions (null = no trial)"""
+  trialDays: Int
 }
 
 type AdminPayment {
@@ -261,6 +264,9 @@ type AdminPlanModel {
 
   """Number of subscriptions using this plan"""
   subscriptionsCount: Int
+
+  """Number of trial days for new subscriptions (null = no trial)"""
+  trialDays: Int
   updatedAt: DateTime!
 }
 
@@ -579,6 +585,9 @@ input AdminUpdatePlanInput {
 
   """Storage limit in GB"""
   storageGB: Float
+
+  """Number of trial days for new subscriptions (null = no trial)"""
+  trialDays: Int
 }
 
 input AdminUpdateSupportTicketInput {
@@ -912,6 +921,25 @@ type CategoryCount {
   count: Int!
 }
 
+input ChangeEmailInput {
+  """Новый email адрес"""
+  newEmail: String!
+
+  """Код двухфакторной аутентификации (требуется, если 2FA включена)"""
+  twoFactorCode: String
+}
+
+type ChangeEmailResult {
+  """Сообщение о результате операции"""
+  message: String!
+
+  """Требуется ли подтверждение нового email (письмо отправлено)"""
+  pendingVerification: Boolean!
+
+  """Успешно ли инициировано изменение email"""
+  success: Boolean!
+}
+
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
@@ -1134,6 +1162,9 @@ input CreateRetentionPolicyInput {
 
 input CreateSubscriptionInput {
   plan: String!
+
+  """Plan ID from database (new Plan model)"""
+  planId: String
   teamId: String!
   useEarlyBird: Boolean
 }
@@ -2028,6 +2059,9 @@ type Mutation {
   initializeDefaultSettings: Boolean!
   initializePayment(subscriptionId: String!): PaymentUrl!
 
+  """Инициировать изменение email адреса (требуется 2FA, если включена)"""
+  initiateEmailChange(input: ChangeEmailInput!): ChangeEmailResult!
+
   """Присоединение к команде по коду приглашения"""
   joinTeamByInvite(code: String!): TeamMember!
   login(input: LoginInput!): AuthPayload!
@@ -2127,6 +2161,9 @@ type Mutation {
   """Загрузить фото в фотоотчёт (с обработкой)"""
   uploadPhotoToReport(input: UploadPhotoInput!): ReportPhoto!
   verifyEmail(token: String!): Boolean!
+
+  """Подтвердить изменение email адреса по токену из письма"""
+  verifyEmailChange(input: VerifyEmailChangeInput!): Boolean!
   verifyTwoFactorLogin(code: String!, twoFactorToken: String!): AuthPayload!
 }
 
@@ -3150,10 +3187,13 @@ type Session {
 """System setting categories"""
 enum SettingCategory {
   AI
+  ANALYTICS
   EMAIL
   GENERAL
   PAYMENT
   SECURITY
+  SMS
+  SOCIAL
   STORAGE
   TELEGRAM
 }
@@ -4381,6 +4421,11 @@ type UsersByBusinessRole {
 
   """Unassigned users"""
   unassigned: Int!
+}
+
+input VerifyEmailChangeInput {
+  """Токен подтверждения изменения email"""
+  token: String!
 }
 
 type WorkLog {

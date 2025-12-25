@@ -31,6 +31,7 @@ export type PlanAvgAggregateOutputType = {
   maxMembers: number | null
   storageGB: number | null
   sortOrder: number | null
+  trialDays: number | null
 }
 
 export type PlanSumAggregateOutputType = {
@@ -38,6 +39,7 @@ export type PlanSumAggregateOutputType = {
   maxMembers: number | null
   storageGB: number | null
   sortOrder: number | null
+  trialDays: number | null
 }
 
 export type PlanMinAggregateOutputType = {
@@ -52,6 +54,7 @@ export type PlanMinAggregateOutputType = {
   isPopular: boolean | null
   sortOrder: number | null
   isEarlyBird: boolean | null
+  trialDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +71,7 @@ export type PlanMaxAggregateOutputType = {
   isPopular: boolean | null
   sortOrder: number | null
   isEarlyBird: boolean | null
+  trialDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -84,6 +88,7 @@ export type PlanCountAggregateOutputType = {
   isPopular: number
   sortOrder: number
   isEarlyBird: number
+  trialDays: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -95,6 +100,7 @@ export type PlanAvgAggregateInputType = {
   maxMembers?: true
   storageGB?: true
   sortOrder?: true
+  trialDays?: true
 }
 
 export type PlanSumAggregateInputType = {
@@ -102,6 +108,7 @@ export type PlanSumAggregateInputType = {
   maxMembers?: true
   storageGB?: true
   sortOrder?: true
+  trialDays?: true
 }
 
 export type PlanMinAggregateInputType = {
@@ -116,6 +123,7 @@ export type PlanMinAggregateInputType = {
   isPopular?: true
   sortOrder?: true
   isEarlyBird?: true
+  trialDays?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -132,6 +140,7 @@ export type PlanMaxAggregateInputType = {
   isPopular?: true
   sortOrder?: true
   isEarlyBird?: true
+  trialDays?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -148,6 +157,7 @@ export type PlanCountAggregateInputType = {
   isPopular?: true
   sortOrder?: true
   isEarlyBird?: true
+  trialDays?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -251,6 +261,7 @@ export type PlanGroupByOutputType = {
   isPopular: boolean
   sortOrder: number
   isEarlyBird: boolean
+  trialDays: number | null
   createdAt: Date
   updatedAt: Date
   _count: PlanCountAggregateOutputType | null
@@ -290,6 +301,7 @@ export type PlanWhereInput = {
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
   sortOrder?: Prisma.IntFilter<"Plan"> | number
   isEarlyBird?: Prisma.BoolFilter<"Plan"> | boolean
+  trialDays?: Prisma.IntNullableFilter<"Plan"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   prices?: Prisma.PlanPriceListRelationFilter
@@ -309,6 +321,7 @@ export type PlanOrderByWithRelationInput = {
   isPopular?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   prices?: Prisma.PlanPriceOrderByRelationAggregateInput
@@ -331,6 +344,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   isPopular?: Prisma.BoolFilter<"Plan"> | boolean
   sortOrder?: Prisma.IntFilter<"Plan"> | number
   isEarlyBird?: Prisma.BoolFilter<"Plan"> | boolean
+  trialDays?: Prisma.IntNullableFilter<"Plan"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   prices?: Prisma.PlanPriceListRelationFilter
@@ -350,6 +364,7 @@ export type PlanOrderByWithAggregationInput = {
   isPopular?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanCountOrderByAggregateInput
@@ -374,6 +389,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   isPopular?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   sortOrder?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   isEarlyBird?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
+  trialDays?: Prisma.IntNullableWithAggregatesFilter<"Plan"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
 }
@@ -390,6 +406,7 @@ export type PlanCreateInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceCreateNestedManyWithoutPlanInput
@@ -409,6 +426,7 @@ export type PlanUncheckedCreateInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceUncheckedCreateNestedManyWithoutPlanInput
@@ -428,6 +446,7 @@ export type PlanUpdateInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUpdateManyWithoutPlanNestedInput
@@ -447,6 +466,7 @@ export type PlanUncheckedUpdateInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUncheckedUpdateManyWithoutPlanNestedInput
@@ -466,6 +486,7 @@ export type PlanCreateManyInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -482,6 +503,7 @@ export type PlanUpdateManyMutationInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -498,6 +520,7 @@ export type PlanUncheckedUpdateManyInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -514,6 +537,7 @@ export type PlanCountOrderByAggregateInput = {
   isPopular?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -523,6 +547,7 @@ export type PlanAvgOrderByAggregateInput = {
   maxMembers?: Prisma.SortOrder
   storageGB?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrder
 }
 
 export type PlanMaxOrderByAggregateInput = {
@@ -537,6 +562,7 @@ export type PlanMaxOrderByAggregateInput = {
   isPopular?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -553,6 +579,7 @@ export type PlanMinOrderByAggregateInput = {
   isPopular?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   isEarlyBird?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -562,6 +589,7 @@ export type PlanSumOrderByAggregateInput = {
   maxMembers?: Prisma.SortOrder
   storageGB?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  trialDays?: Prisma.SortOrder
 }
 
 export type PlanScalarRelationFilter = {
@@ -638,6 +666,7 @@ export type PlanCreateWithoutPricesInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   features?: Prisma.PlanFeatureCreateNestedManyWithoutPlanInput
@@ -656,6 +685,7 @@ export type PlanUncheckedCreateWithoutPricesInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   features?: Prisma.PlanFeatureUncheckedCreateNestedManyWithoutPlanInput
@@ -690,6 +720,7 @@ export type PlanUpdateWithoutPricesInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   features?: Prisma.PlanFeatureUpdateManyWithoutPlanNestedInput
@@ -708,6 +739,7 @@ export type PlanUncheckedUpdateWithoutPricesInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   features?: Prisma.PlanFeatureUncheckedUpdateManyWithoutPlanNestedInput
@@ -726,6 +758,7 @@ export type PlanCreateWithoutFeaturesInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceCreateNestedManyWithoutPlanInput
@@ -744,6 +777,7 @@ export type PlanUncheckedCreateWithoutFeaturesInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceUncheckedCreateNestedManyWithoutPlanInput
@@ -778,6 +812,7 @@ export type PlanUpdateWithoutFeaturesInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUpdateManyWithoutPlanNestedInput
@@ -796,6 +831,7 @@ export type PlanUncheckedUpdateWithoutFeaturesInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUncheckedUpdateManyWithoutPlanNestedInput
@@ -814,6 +850,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceCreateNestedManyWithoutPlanInput
@@ -832,6 +869,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   isPopular?: boolean
   sortOrder?: number
   isEarlyBird?: boolean
+  trialDays?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   prices?: Prisma.PlanPriceUncheckedCreateNestedManyWithoutPlanInput
@@ -866,6 +904,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUpdateManyWithoutPlanNestedInput
@@ -884,6 +923,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   isPopular?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   isEarlyBird?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trialDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   prices?: Prisma.PlanPriceUncheckedUpdateManyWithoutPlanNestedInput
@@ -951,6 +991,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isPopular?: boolean
   sortOrder?: boolean
   isEarlyBird?: boolean
+  trialDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   prices?: boolean | Prisma.Plan$pricesArgs<ExtArgs>
@@ -971,6 +1012,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isPopular?: boolean
   sortOrder?: boolean
   isEarlyBird?: boolean
+  trialDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -987,6 +1029,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isPopular?: boolean
   sortOrder?: boolean
   isEarlyBird?: boolean
+  trialDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -1003,11 +1046,12 @@ export type PlanSelectScalar = {
   isPopular?: boolean
   sortOrder?: boolean
   isEarlyBird?: boolean
+  trialDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "description" | "maxActiveProjects" | "maxMembers" | "storageGB" | "isActive" | "isPopular" | "sortOrder" | "isEarlyBird" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "name" | "description" | "maxActiveProjects" | "maxMembers" | "storageGB" | "isActive" | "isPopular" | "sortOrder" | "isEarlyBird" | "trialDays" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   prices?: boolean | Prisma.Plan$pricesArgs<ExtArgs>
   features?: boolean | Prisma.Plan$featuresArgs<ExtArgs>
@@ -1036,6 +1080,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isPopular: boolean
     sortOrder: number
     isEarlyBird: boolean
+    trialDays: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["plan"]>
@@ -1475,6 +1520,7 @@ export interface PlanFieldRefs {
   readonly isPopular: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly sortOrder: Prisma.FieldRef<"Plan", 'Int'>
   readonly isEarlyBird: Prisma.FieldRef<"Plan", 'Boolean'>
+  readonly trialDays: Prisma.FieldRef<"Plan", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>
 }

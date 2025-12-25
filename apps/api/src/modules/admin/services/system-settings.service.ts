@@ -540,6 +540,15 @@ export class SystemSettingsService {
         defaultValue: 'support@prorab.space',
         isRequired: true,
       },
+      {
+        key: 'payment.primary_provider',
+        category: 'PAYMENT' as SettingCategory,
+        name: 'Primary Payment Provider',
+        description: 'Default payment provider for new subscriptions',
+        valueType: 'STRING' as SettingValueType,
+        defaultValue: 'yookassa',
+        isRequired: true,
+      },
 
       // SMS Settings (Twilio)
       {

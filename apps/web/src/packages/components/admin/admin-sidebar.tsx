@@ -105,18 +105,6 @@ const navItems: NavItem[] = [
 		permission: 'support_tickets:view',
 	},
 	{
-		label: 'Admin Roles',
-		href: '/admin/roles',
-		icon: Shield,
-		permission: 'admin_roles:view',
-	},
-	{
-		label: 'Audit Logs',
-		href: '/admin/logs',
-		icon: FileText,
-		permission: 'audit_logs:view',
-	},
-	{
 		label: 'Team Audit',
 		href: '/admin/audit',
 		icon: ScrollText,

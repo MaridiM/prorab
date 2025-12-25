@@ -472,6 +472,59 @@ export class AuthService {
 		return true
 	}
 
+	// ==================== Email Change ====================
+
+	async initiateEmailChange(
+		userId: string,
+		newEmail: string,
+		twoFactorCode?: string,
+	): Promise<{ success: boolean; pendingVerification: boolean; message: string }> {
+		const user = await this.usersService.findById(userId)
+		if (!user) {
+			throw new BadRequestException('Пользователь не найден')
+		}
+
+		// Check if 2FA is enabled
+		const twoFactorStatus = await this.twoFactorService.getStatus(userId)
+		if (twoFactorStatus.enabled) {
+			// Verify 2FA code if provided
+			if (!twoFactorCode) {
+				throw new BadRequestException('Требуется код двухфакторной аутентификации')
+			}
+
+			const isValid = await this.twoFactorService.verify2FAToken(userId, twoFactorCode)
+			if (!isValid) {
+				throw new UnauthorizedException('Неверный код двухфакторной аутентификации')
+			}
+		}
+
+		// Check if email is a Telegram placeholder (cannot be changed to another placeholder)
+		const { isTelegramPlaceholderEmail } = await import('../../shared/utils/email.utils')
+		if (isTelegramPlaceholderEmail(newEmail)) {
+			throw new BadRequestException(
+				'Нельзя использовать placeholder email адрес. Пожалуйста, используйте реальный email адрес.',
+			)
+		}
+
+		// Use existing UsersService method
+		const { RequestChangeEmailInput } = await import('../users/dto/request-change-email.input')
+		const input = new RequestChangeEmailInput()
+		input.newEmail = newEmail
+		input.twoFactorCode = twoFactorCode
+
+		await this.usersService.requestEmailChange(userId, input)
+
+		return {
+			success: true,
+			pendingVerification: true,
+			message: 'Письмо с подтверждением отправлено на новый email адрес',
+		}
+	}
+
+	async verifyEmailChange(token: string): Promise<boolean> {
+		return this.usersService.confirmEmailChange(token)
+	}
+
 	// ==================== Helpers ====================
 
 	private normalizeEmail(email: string): string {

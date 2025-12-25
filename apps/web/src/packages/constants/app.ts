@@ -1,10 +1,9 @@
 /**
  * Application constants
- * Version is read directly from package.json
+ * Version is read directly from package.json via environment variable
+ * This ensures it works in both client and server components
  */
-import { version } from '../../../package.json'
-
-export const APP_VERSION = version
+export const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0'
 
 
 

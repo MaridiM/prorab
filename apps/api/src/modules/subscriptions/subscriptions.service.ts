@@ -44,25 +44,48 @@ export class SubscriptionsService {
       throw new BadRequestException('Subscription already exists');
     }
 
-    // Calculate trial end date
+    // Load plan to get trial days configuration
+    let planData = null;
+    let trialDays = TRIAL_DURATION_DAYS; // Fallback to default constant
+
+    if (input.planId) {
+      planData = await this.prisma.plan.findUnique({
+        where: { id: input.planId },
+      });
+
+      if (!planData) {
+        throw new NotFoundException('Plan not found');
+      }
+
+      // Use trial days from plan if configured
+      if (planData.trialDays !== null && planData.trialDays !== undefined) {
+        trialDays = planData.trialDays;
+      }
+    }
+
+    // Calculate trial end date based on plan configuration
     const now = new Date();
-    const trialEndsAt = new Date(
-      now.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000,
+    const trialEndsAt = trialDays > 0
+      ? new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000)
+      : null; // No trial if trialDays is 0 or null
+
+    const currentPeriodEnd = trialEndsAt || new Date(
+      now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
     );
-    const currentPeriodEnd = trialEndsAt;
 
     // Create subscription
     const subscription = await this.prisma.subscription.create({
       data: {
         teamId: input.teamId,
-        plan: input.plan,
-        status: SubscriptionStatus.TRIALING,
+        plan: input.plan, // Keep old enum for backward compatibility
+        planId: input.planId, // NEW: Use planId if provided
+        status: trialEndsAt ? SubscriptionStatus.TRIALING : SubscriptionStatus.ACTIVE,
         currentPeriodStart: now,
         currentPeriodEnd,
         trialEndsAt,
         isEarlyBird: input.useEarlyBird || false,
       },
-      include: { team: true, payments: true },
+      include: { team: true, payments: true, planRef: true },
     });
 
     return subscription;

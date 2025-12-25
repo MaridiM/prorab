@@ -155,6 +155,9 @@ export const SettingCategory = {
   EMAIL: 'EMAIL',
   TELEGRAM: 'TELEGRAM',
   STORAGE: 'STORAGE',
+  SMS: 'SMS',
+  SOCIAL: 'SOCIAL',
+  ANALYTICS: 'ANALYTICS',
   AI: 'AI',
   SECURITY: 'SECURITY',
   GENERAL: 'GENERAL'

@@ -9,6 +9,9 @@ export class CreateSubscriptionInput {
   @Field(() => String)
   plan: SubscriptionPlan;
 
+  @Field({ nullable: true, description: 'Plan ID from database (new Plan model)' })
+  planId?: string;
+
   @Field({ nullable: true })
   useEarlyBird?: boolean;
 }

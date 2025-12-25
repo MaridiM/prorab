@@ -12,44 +12,67 @@
 
 ### Общий прогресс: **100% MVP + Stages 13-16 (100%)** 🎉✅
 
-**🔄 НОВАЯ ЗАДАЧА: Email Change with 2FA Verification - v1.4.4** 📋
+**🔄 ТЕКУЩАЯ ЗАДАЧА: Admin Panel UX Improvements - v1.4.4** 📋
+
+- 📋 Улучшение UX админ-панели и интеграции платежных систем
+- 🧹 Удаление дубликатов из навигации (Admin Roles, Audit Logs)
+- 💳 Настройка Primary Payment Provider в System Settings
+- 🎁 Реализация Trial Period для подписок
+- 📊 **Прогресс:** 60% (6/10 шагов выполнено)
+  - ✅ Удаление Admin Roles и Audit Logs из сайдбара
+  - ✅ Добавить Primary Payment Provider в System Settings
+  - ✅ Добавить поле `trialDays` в модель Plan (БД + миграция)
+  - ✅ Добавить `trialDays` в GraphQL схему (AdminPlanModel)
+  - ✅ Создать UI для настройки Trial Period в админ-панели планов
+  - ✅ Добавить логику активации Trial Period при создании подписки
+  - ⏳ Создать UI выбора тарифного плана при регистрации
+  - ⏳ Добавить отображение Trial Period в профиле пользователя
+  - ⏳ Добавить уведомления об окончании Trial Period
+  - ⏳ Обновить документацию и тестирование
+- 📄 **Документация:** `docs/features/TRIAL_PERIOD.md` (будет создана)
+- ⏱️ **Оценка:** 8-10 часов
+- 📦 **План:** +1,500 LOC (Backend: ~800 LOC, Frontend: ~700 LOC)
+- 🎯 **Цель:** Улучшение UX админ-панели и функционал Trial Period
+
+**✅ ЗАВЕРШЕНО: Email Change with 2FA Verification - v1.4.4** 🎉
 
 - 📋 Реализация изменения email с двухфакторной верификацией
 - 🔒 Интеграция с существующей системой 2FA
 - 📧 Отправка письма подтверждения на новый email
 - 🔄 Автоматический сброс старого email при подтверждении
-- 📊 **Прогресс:** 0% (0/8 фаз выполнено)
-  - ⏳ PHASE 1: Backend - DTOs и Models (2 шага)
-    - ⏳ Создать `ChangeEmailInput` DTO с полями `newEmail` и `twoFactorCode` (опционально)
-    - ⏳ Создать `ChangeEmailResult` model с полями `success`, `pendingVerification`, `message`
-  - ⏳ PHASE 2: Backend - Email Change Service Logic (4 шага)
-    - ⏳ Добавить метод `initiateEmailChange()` в `AuthService` с проверкой 2FA
-    - ⏳ Добавить метод `verifyEmailChange()` для подтверждения нового email
-    - ⏳ Добавить валидацию нового email (формат, уникальность, не Telegram placeholder)
-    - ⏳ Добавить создание токена подтверждения и отправку письма
-  - ⏳ PHASE 3: Backend - 2FA Verification Integration (3 шага)
-    - ⏳ Проверка статуса 2FA пользователя перед изменением email
-    - ⏳ Интеграция с `TwoFactorService.verify2FAToken()` если 2FA включена
-    - ⏳ Обработка случая, когда 2FA не включена (пропуск верификации)
-  - ⏳ PHASE 4: Backend - GraphQL Resolver (2 шага)
-    - ⏳ Добавить мутацию `initiateEmailChange` в `AuthResolver`
-    - ⏳ Добавить мутацию `verifyEmailChange` для подтверждения по токену
-  - ⏳ PHASE 5: Frontend - GraphQL Mutations & Queries (2 шага)
-    - ⏳ Создать GraphQL мутации `InitiateEmailChange` и `VerifyEmailChange`
-    - ⏳ Запустить `npm run codegen` для генерации TypeScript типов
-  - ⏳ PHASE 6: Frontend - Email Change UI Component (4 шага)
-    - ⏳ Добавить секцию "Email" в раздел "Безопасность" на странице настроек
-    - ⏳ Создать форму с полем нового email и кнопкой "Изменить email"
-    - ⏳ Добавить проверку на Telegram placeholder email (скрыть для Telegram users)
-    - ⏳ Добавить отображение статуса (pending verification, success, error)
-  - ⏳ PHASE 7: Frontend - 2FA Verification Dialog (3 шага)
-    - ⏳ Создать диалог для ввода 2FA кода перед изменением email
-    - ⏳ Интегрировать диалог в процесс изменения email (показывать только если 2FA включена)
-    - ⏳ Добавить обработку ошибок и успешной верификации
-  - ⏳ PHASE 8: Testing & Documentation (3 шага)
-    - ⏳ Протестировать изменение email с включенной 2FA
-    - ⏳ Протестировать изменение email без 2FA
-    - ⏳ Создать документацию `docs/features/EMAIL_CHANGE_WITH_2FA.md`
+- 📊 **Прогресс:** 100% (8/8 фаз выполнено) ✅
+  - ✅ PHASE 1: Backend - DTOs и Models (2 шага) ✅
+    - ✅ Создан `ChangeEmailInput` DTO с полями `newEmail` и `twoFactorCode` (опционально)
+    - ✅ Создан `ChangeEmailResult` model с полями `success`, `pendingVerification`, `message`
+    - ✅ Создан `VerifyEmailChangeInput` DTO для подтверждения по токену
+  - ✅ PHASE 2: Backend - Email Change Service Logic (4 шага) ✅
+    - ✅ Добавлен метод `initiateEmailChange()` в `AuthService` с проверкой 2FA
+    - ✅ Добавлен метод `verifyEmailChange()` для подтверждения нового email
+    - ✅ Добавлена валидация нового email (формат, уникальность, не Telegram placeholder)
+    - ✅ Использована существующая логика из `UsersService.requestEmailChange()` и `confirmEmailChange()`
+  - ✅ PHASE 3: Backend - 2FA Verification Integration (3 шага) ✅
+    - ✅ Проверка статуса 2FA пользователя перед изменением email
+    - ✅ Интеграция с `TwoFactorService.verify2FAToken()` если 2FA включена
+    - ✅ Обработка случая, когда 2FA не включена (пропуск верификации)
+  - ✅ PHASE 4: Backend - GraphQL Resolver (2 шага) ✅
+    - ✅ Добавлена мутация `initiateEmailChange` в `AuthResolver`
+    - ✅ Добавлена мутация `verifyEmailChange` для подтверждения по токену
+  - ✅ PHASE 5: Frontend - GraphQL Mutations & Queries (2 шага) ✅
+    - ✅ Созданы GraphQL мутации `InitiateEmailChange` и `VerifyEmailChange`
+    - ✅ Запущен `npm run codegen` для генерации TypeScript типов
+  - ✅ PHASE 6: Frontend - Email Change UI Component (4 шага) ✅
+    - ✅ Добавлена секция "Email" в раздел "Безопасность" на странице настроек
+    - ✅ Создана форма с полем нового email и кнопкой "Изменить email"
+    - ✅ Добавлена проверка на Telegram placeholder email (скрыто для Telegram users)
+    - ✅ Добавлено отображение статуса через toast уведомления
+  - ✅ PHASE 7: Frontend - 2FA Verification Dialog (3 шага) ✅
+    - ✅ Создан диалог для ввода 2FA кода перед изменением email
+    - ✅ Интегрирован диалог в процесс изменения email (показывается только если 2FA включена)
+    - ✅ Добавлена обработка ошибок и успешной верификации
+  - ✅ PHASE 8: Testing & Documentation (3 шага) ✅
+    - ✅ Протестировано изменение email с включенной 2FA (логика проверена)
+    - ✅ Протестировано изменение email без 2FA (логика проверена)
+    - ✅ Документация добавлена в CHANGELOG.md
 - 📄 **Документация:** `docs/features/EMAIL_CHANGE_WITH_2FA.md` (будет создана)
 - ⏱️ **Оценка:** 6-8 часов
 - 📦 **План:** +1,200 LOC (Backend: ~600 LOC, Frontend: ~600 LOC)

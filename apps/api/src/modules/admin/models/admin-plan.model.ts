@@ -39,6 +39,9 @@ export class AdminPlanModel {
   @Field(() => Boolean, { description: 'Whether early bird pricing is available' })
   isEarlyBird: boolean;
 
+  @Field(() => Int, { nullable: true, description: 'Number of trial days for new subscriptions (null = no trial)' })
+  trialDays?: number;
+
   @Field(() => [AdminPlanPriceModel], { description: 'Prices in different currencies' })
   prices: AdminPlanPriceModel[];
 
@@ -191,6 +194,9 @@ export class AdminCreatePlanInput {
   @Field(() => Int, { nullable: true, defaultValue: 0, description: 'Sort order for display' })
   sortOrder?: number;
 
+  @Field(() => Int, { nullable: true, description: 'Number of trial days for new subscriptions (null = no trial)' })
+  trialDays?: number;
+
   @Field(() => [AdminPlanPriceInput], { description: 'Prices in different currencies (at least one required)' })
   prices: AdminPlanPriceInput[];
 
@@ -226,6 +232,9 @@ export class AdminUpdatePlanInput {
 
   @Field(() => Boolean, { nullable: true, description: 'Whether the plan is active' })
   isActive?: boolean;
+
+  @Field(() => Int, { nullable: true, description: 'Number of trial days for new subscriptions (null = no trial)' })
+  trialDays?: number;
 
   @Field(() => [AdminPlanPriceInput], { nullable: true, description: 'Update all prices (replaces existing)' })
   prices?: AdminPlanPriceInput[];

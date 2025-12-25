@@ -74,6 +74,8 @@ import {
   RevokeAllSessionsDocument,
   ChangePasswordDocument,
   ResendVerificationEmailDocument,
+  InitiateEmailChangeDocument,
+  TwoFactorStatusDocument,
 } from '@/packages/api/graphql/__generated__/output'
 import { useAuth } from '@/packages/libs/auth'
 import { useToast } from '@/packages/hooks'
@@ -100,6 +102,12 @@ import {
 	NotificationPreferences,
 	DeleteAccountDialog,
 	Switch,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 } from '@/packages/components'
 import { cn, isTelegramPlaceholderEmail, isTelegramUser, getTelegramEmailMessage } from '@/packages/utils'
 
@@ -134,8 +142,14 @@ const passwordSchema = z
 		path: ['confirmPassword'],
 	})
 
+const emailChangeSchema = z.object({
+	newEmail: z.string().email('Некорректный email адрес'),
+	twoFactorCode: z.string().length(6, 'Код должен содержать 6 символов').optional(),
+})
+
 type ProfileForm = z.infer<typeof profileSchema>
 type PasswordForm = z.infer<typeof passwordSchema>
+type EmailChangeForm = z.infer<typeof emailChangeSchema>
 
 // Animations
 const fadeIn = {
@@ -196,6 +210,9 @@ export default function SettingsPage() {
 	}, [router, searchParams])
 
 	const [showPasswordForm, setShowPasswordForm] = useState(false)
+	const [showEmailForm, setShowEmailForm] = useState(false)
+	const [show2FADialog, setShow2FADialog] = useState(false)
+	const [pendingNewEmail, setPendingNewEmail] = useState<string | null>(null)
 	const [emailCooldown, setEmailCooldown] = useState(0)
 
 	// Queries
@@ -285,6 +302,40 @@ export default function SettingsPage() {
 		},
 	})
 
+	const { data: twoFactorData } = useQuery(TwoFactorStatusDocument)
+	const is2FAEnabled = twoFactorData?.twoFactorStatus?.enabled || false
+
+	const [initiateEmailChange, { loading: changingEmail }] = useMutation(
+		InitiateEmailChangeDocument,
+		{
+			onCompleted: (data) => {
+				if (data.initiateEmailChange.success) {
+					showToast({
+						title: 'Письмо отправлено',
+						description: data.initiateEmailChange.message,
+						type: 'success',
+					})
+					setShowEmailForm(false)
+					emailChangeForm.reset()
+					setPendingNewEmail(null)
+					refetchMe()
+				}
+			},
+			onError: (error) => {
+				// Check if error is about missing 2FA code
+				if (error.message.includes('двухфакторной аутентификации')) {
+					// Don't show error, just open 2FA dialog
+					return
+				}
+				showToast({
+					title: 'Ошибка',
+					description: error.message,
+					type: 'error',
+				})
+			},
+		}
+	)
+
 	const [revokeAllSessions, { loading: revokingAll }] = useMutation(RevokeAllSessionsDocument, {
 		onCompleted: () => {
 			showToast({
@@ -358,6 +409,14 @@ export default function SettingsPage() {
 		},
 	})
 
+	const emailChangeForm = useForm<EmailChangeForm>({
+		resolver: zodResolver(emailChangeSchema),
+		defaultValues: {
+			newEmail: '',
+			twoFactorCode: '',
+		},
+	})
+
 	// Set default values when user loads
 	useEffect(() => {
 		if (me) {
@@ -388,6 +447,43 @@ export default function SettingsPage() {
 				},
 			},
 		})
+	}
+
+	const onEmailChangeSubmit = async (data: EmailChangeForm) => {
+		// Submit email change (2FA code is optional in form, backend will check if required)
+		try {
+			await initiateEmailChange({
+				variables: {
+					input: {
+						newEmail: data.newEmail,
+						twoFactorCode: data.twoFactorCode,
+					},
+				},
+			})
+		} catch (error: any) {
+			// If error is about missing 2FA code, show dialog
+			if (error.message?.includes('двухфакторной аутентификации') && !data.twoFactorCode) {
+				setPendingNewEmail(data.newEmail)
+				setShow2FADialog(true)
+			}
+			// Otherwise error will be handled by mutation onError
+		}
+	}
+
+	const handle2FAConfirm = async (code: string) => {
+		if (!pendingNewEmail) return
+
+		await initiateEmailChange({
+			variables: {
+				input: {
+					newEmail: pendingNewEmail,
+					twoFactorCode: code,
+				},
+			},
+		})
+
+		setShow2FADialog(false)
+		setPendingNewEmail(null)
 	}
 
 	const handleResendEmail = async () => {
@@ -908,6 +1004,128 @@ export default function SettingsPage() {
 											</div>
 										)}
 									</motion.section>
+
+									{/* Email Section */}
+									{!isTelegramPlaceholderEmail(me?.email || '') && (
+										<motion.section
+											variants={fadeIn}
+											className="rounded-2xl border border-border/50 bg-card overflow-hidden"
+										>
+											<div className="p-6 border-b border-border/30 flex items-center justify-between">
+												<div className="flex items-center gap-3">
+													<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+														<Mail className="w-5 h-5 text-primary" />
+													</div>
+													<div>
+														<h2 className="font-semibold">Email адрес</h2>
+														<p className="text-sm text-muted-foreground">
+															Изменить email адрес аккаунта
+														</p>
+													</div>
+												</div>
+												{!showEmailForm && (
+													<Button
+														variant="outline"
+														onClick={() => setShowEmailForm(true)}
+														className="rounded-xl"
+													>
+														Изменить
+													</Button>
+												)}
+											</div>
+
+											{showEmailForm && (
+												<div className="p-6">
+													<Form {...emailChangeForm}>
+														<form
+															onSubmit={emailChangeForm.handleSubmit(onEmailChangeSubmit)}
+															className="space-y-4"
+														>
+															<FormField
+																control={emailChangeForm.control}
+																name="newEmail"
+																render={({ field }) => (
+																	<FormItem>
+																		<FormLabel>Новый email адрес</FormLabel>
+																		<FormControl>
+																			<Input
+																				{...field}
+																				type="email"
+																				placeholder="example@email.com"
+																				className="h-12 rounded-xl"
+																			/>
+																		</FormControl>
+																		<FormMessage />
+																		<FormDescription>
+																			На новый email будет отправлено письмо для подтверждения
+																		</FormDescription>
+																	</FormItem>
+																)}
+															/>
+
+															{is2FAEnabled && (
+																<FormField
+																	control={emailChangeForm.control}
+																	name="twoFactorCode"
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Код двухфакторной аутентификации</FormLabel>
+																			<FormControl>
+																				<Input
+																					{...field}
+																					type="text"
+																					placeholder="000000"
+																					maxLength={6}
+																					className="h-12 rounded-xl text-center text-lg tracking-widest font-mono"
+																					onChange={(e) => {
+																						const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+																						field.onChange(value)
+																					}}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																			<FormDescription>
+																				Введите 6-значный код из приложения аутентификации
+																			</FormDescription>
+																		</FormItem>
+																	)}
+																/>
+															)}
+
+															<div className="flex flex-col sm:flex-row gap-3 pt-2">
+																<Button
+																	type="button"
+																	variant="outline"
+																	onClick={() => {
+																		setShowEmailForm(false)
+																		emailChangeForm.reset()
+																		setPendingNewEmail(null)
+																	}}
+																	className="h-12 rounded-xl sm:flex-1"
+																>
+																	Отмена
+																</Button>
+																<Button
+																	type="submit"
+																	disabled={changingEmail}
+																	className="h-12 rounded-xl sm:flex-1"
+																>
+																	{changingEmail ? (
+																		<>
+																			<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+																			Отправка...
+																		</>
+																	) : (
+																		'Изменить email'
+																	)}
+																</Button>
+															</div>
+														</form>
+													</Form>
+												</div>
+											)}
+										</motion.section>
+									)}
 
 									{/* Two-Factor Authentication */}
 									<TwoFactorAuth />
@@ -1605,6 +1823,50 @@ export default function SettingsPage() {
 						</main>
 					</div>
 				</div>
+
+				{/* 2FA Verification Dialog for Email Change */}
+				{show2FADialog && (
+					<Dialog open={show2FADialog} onOpenChange={setShow2FADialog}>
+						<DialogContent className="max-w-md">
+							<DialogHeader>
+								<DialogTitle>Подтверждение двухфакторной аутентификации</DialogTitle>
+								<DialogDescription>
+									Для изменения email адреса требуется подтверждение через двухфакторную аутентификацию.
+									Введите 6-значный код из вашего приложения аутентификации.
+								</DialogDescription>
+							</DialogHeader>
+							<div className="space-y-4 py-4">
+								<Input
+									type="text"
+									placeholder="000000"
+									maxLength={6}
+									className="text-center text-2xl tracking-widest font-mono h-14"
+									onChange={(e) => {
+										const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+										if (value.length === 6) {
+											handle2FAConfirm(value)
+										}
+									}}
+									autoFocus
+								/>
+								<p className="text-sm text-muted-foreground text-center">
+									Введите код из приложения аутентификации
+								</p>
+							</div>
+							<DialogFooter>
+								<Button
+									variant="outline"
+									onClick={() => {
+										setShow2FADialog(false)
+										setPendingNewEmail(null)
+									}}
+								>
+									Отмена
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+				)}
 			</div>
-	)
-}
+		)
+	}

@@ -87,6 +87,18 @@ mutation ChangePassword($input: ChangePasswordInput!) {
   changePassword(input: $input)
 }
 
+mutation InitiateEmailChange($input: ChangeEmailInput!) {
+  initiateEmailChange(input: $input) {
+    success
+    pendingVerification
+    message
+  }
+}
+
+mutation VerifyEmailChange($input: VerifyEmailChangeInput!) {
+  verifyEmailChange(input: $input)
+}
+
 mutation UpdateProfile($input: UpdateProfileInput!) {
   updateProfile(input: $input) {
     id
