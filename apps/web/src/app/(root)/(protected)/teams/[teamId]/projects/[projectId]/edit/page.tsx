@@ -99,12 +99,12 @@ export default function EditProjectPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/80">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
-				<div className="container mx-auto p-6 max-w-4xl">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-6">
 					<Skeleton className="h-[600px] rounded-2xl" />
 				</div>
 			</div>
@@ -139,7 +139,7 @@ export default function EditProjectPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-center justify-between gap-4">
 						<div className="flex items-center gap-4">
 							{/* Back Button */}
@@ -179,7 +179,7 @@ export default function EditProjectPage() {
 			</motion.header>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6 max-w-4xl">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<motion.div
 					initial="hidden"
 					animate="visible"

@@ -66,7 +66,7 @@ const PLANS_DATA: PlanData[] = [
     sortOrder: 1,
     prices: [
       { currency: 'RUB', price: 490, earlyBirdPrice: 290 },
-      { currency: 'USD', price: 7, earlyBirdPrice: 4 },
+      { currency: 'USD', price: 8, earlyBirdPrice: 5 },
       { currency: 'EUR', price: 7, earlyBirdPrice: 4 },
     ],
     features: [
@@ -90,7 +90,7 @@ const PLANS_DATA: PlanData[] = [
     sortOrder: 2,
     prices: [
       { currency: 'RUB', price: 990, earlyBirdPrice: 690 },
-      { currency: 'USD', price: 15, earlyBirdPrice: 10 },
+      { currency: 'USD', price: 16, earlyBirdPrice: 10 },
       { currency: 'EUR', price: 15, earlyBirdPrice: 10 },
     ],
     features: [
@@ -144,15 +144,15 @@ interface ProviderData {
 
 const PROVIDERS_DATA: ProviderData[] = [
   {
-    type: PaymentProviderType.YOOKASSA,
-    name: 'Yookassa',
+    type: PaymentProviderType.STRIPE,
+    name: 'Stripe',
     isActive: true, // Active by default (already integrated)
     isPrimary: true, // Primary provider
   },
   {
-    type: PaymentProviderType.STRIPE,
-    name: 'Stripe',
-    isActive: false, // Inactive until configured
+    type: PaymentProviderType.YOOKASSA,
+    name: 'Yookassa',
+    isActive: true, // Active for CIS countries
     isPrimary: false,
   },
 ]

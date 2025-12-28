@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ConflictException,
 	Injectable,
 	Logger,
 	UnauthorizedException,
@@ -12,6 +13,10 @@ import { RedisService } from '../../core/redis/redis.service'
 import { MailService } from '../../core/mail/mail.service'
 import { UsersService } from '../users/users.service'
 import { TwoFactorService } from './two-factor.service'
+import { TelegramAuthService } from '../telegram/telegram-auth.service'
+import { PrismaService } from '../../core/prisma/prisma.service'
+import * as geoip from 'geoip-lite'
+import { UAParser } from 'ua-parser-js'
 
 import { LoginInput } from './dto/login.input'
 import { RegisterInput } from './dto/register.input'
@@ -20,6 +25,11 @@ export interface SessionData {
 	userId: string
 	userAgent?: string
 	ip?: string
+	city?: string
+	country?: string
+	device?: string
+	browser?: string
+	os?: string
 	createdAt: number
 }
 
@@ -47,6 +57,8 @@ export class AuthService {
 		private readonly mailService: MailService,
 		private readonly configService: ConfigService,
 		private readonly twoFactorService: TwoFactorService,
+		private readonly telegramAuthService: TelegramAuthService, // Injected dependency
+		private readonly prisma: PrismaService,
 	) {
 		this.sessionTtl = this.configService.get('auth.sessionTtl')!
 		this.refreshTokenTtl = this.configService.get('auth.refreshTokenTtl')!
@@ -237,10 +249,39 @@ export class AuthService {
 		const sessionToken = this.generateToken()
 		const refreshToken = this.generateToken()
 
+		// Parse User Agent
+		let device = 'Unknown'
+		let browser = 'Unknown'
+		let os = 'Unknown'
+
+		if (userAgent) {
+			const parser = new UAParser(userAgent)
+			const result = parser.getResult()
+			device = result.device.model || result.device.type || 'Desktop'
+			browser = result.browser.name || 'Unknown'
+			os = result.os.name || 'Unknown'
+		}
+
+		// Resolve GeoIP
+		let city = 'Unknown'
+		let country = 'Unknown'
+		if (ip && ip !== '::1' && ip !== '127.0.0.1') {
+			const geo = geoip.lookup(ip)
+			if (geo) {
+				city = geo.city || 'Unknown'
+				country = geo.country || 'Unknown'
+			}
+		}
+
 		const sessionData: SessionData = {
 			userId,
 			userAgent,
 			ip,
+			city,
+			country,
+			device,
+			browser,
+			os,
 			createdAt: Date.now(),
 		}
 
@@ -250,6 +291,22 @@ export class AuthService {
 			{ userId, sessionToken },
 			this.refreshTokenTtl,
 		)
+
+		// Log to LoginHistory (Async, fire-and-forget to not block login)
+		this.prisma.loginHistory.create({
+			data: {
+				userId,
+				ip: ip || 'unknown',
+				userAgent,
+				city,
+				country,
+				device,
+				browser,
+				os,
+			}
+		}).catch(err => {
+			this.logger.error(`Failed to log login history for user ${userId}: ${err.message}`, err.stack)
+		})
 
 		return { sessionToken, refreshToken }
 	}
@@ -532,13 +589,84 @@ export class AuthService {
 
 		// Remove dots and everything after + for Gmail
 		let normalized = localPart
-		if (domain === 'gmail.com' || domain === 'googlemail.com') {
-			normalized = localPart.replace(/\./g, '').split('+')[0]
-		} else {
-			normalized = localPart.split('+')[0]
+		if (domain === 'gmail.com') {
+			normalized = localPart.split('+')[0].replace(/\./g, '')
 		}
 
 		return `${normalized}@${domain}`
+	}
+
+	// ==================== Telegram Integration ====================
+
+	/**
+	 * Link Telegram account to existing user
+	 */
+	async linkTelegramAccount(
+		userId: string,
+		telegramAuthToken: string,
+	): Promise<{ success: boolean; message: string }> {
+		// 1. Check auth token status
+		const { completed, chatId, telegramUser } = await this.telegramAuthService.checkAuthToken(
+			telegramAuthToken,
+		)
+
+		if (!completed || !chatId || !telegramUser) {
+			throw new BadRequestException('Недействительный или неиспользованный токен авторизации')
+		}
+
+		// 2. Check if this Telegram account is already linked to ANY user
+		const existingUser = await this.prisma.user.findFirst({
+			where: {
+				OR: [
+					{ telegramChatId: chatId },
+					{ oauthProvider: 'telegram', oauthProviderId: telegramUser.id.toString() },
+				],
+			},
+		})
+
+		// 3. If linked to CURRENT user -> Update info and return success
+		if (existingUser && existingUser.id === userId) {
+			await this.prisma.user.update({
+				where: { id: userId },
+				data: {
+					telegramChatId: chatId,
+					telegramFirstName: telegramUser.first_name,
+					telegramLastName: telegramUser.last_name,
+					telegramUsername: telegramUser.username,
+					telegramPhotoUrl: telegramUser.photo_url,
+				},
+			})
+			return { success: true, message: 'Telegram аккаунт успешно обновлен' }
+		}
+
+		// 4. If linked to ANOTHER user -> Throw error
+		if (existingUser && existingUser.id !== userId) {
+			throw new ConflictException(
+				'Этот Telegram аккаунт уже привязан к другому пользователю. Пожалуйста, используйте другой аккаунт или обратитесь в поддержку.',
+			)
+		}
+
+		// 5. Link to current user
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				telegramChatId: chatId,
+				telegramFirstName: telegramUser.first_name,
+				telegramLastName: telegramUser.last_name,
+				telegramUsername: telegramUser.username,
+				telegramPhotoUrl: telegramUser.photo_url,
+				// Do NOT change oauthProvider if already set (e.g. email user linking telegram)
+			},
+		})
+
+		return { success: true, message: 'Telegram аккаунт успешно привязан' }
+	}
+	async getLoginHistory(userId: string) {
+		return this.prisma.loginHistory.findMany({
+			where: { userId },
+			orderBy: { createdAt: 'desc' },
+			take: 20, // Limit to last 20 logins
+		})
 	}
 }
 

@@ -5,3 +5,9 @@ ADD COLUMN IF NOT EXISTS "telegram_last_name" TEXT,
 ADD COLUMN IF NOT EXISTS "telegram_username" TEXT,
 ADD COLUMN IF NOT EXISTS "telegram_photo_url" TEXT;
 
+
+
+
+
+
+

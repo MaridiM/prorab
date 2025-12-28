@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType, Int } from '@nestjs/graphql';
 import { LogoType } from './logo-type.enum';
 import { User } from '../../users/models/user.model';
+import { SubscriptionModel } from '../../subscriptions/models/subscription.model';
 
 @ObjectType()
 export class TeamCounts {
@@ -49,4 +50,7 @@ export class Team {
 
   @Field(() => TeamCounts, { nullable: true, description: 'Team counts (resolved field)' })
   _count?: TeamCounts;
+
+  @Field(() => SubscriptionModel, { nullable: true, description: 'Подписка команды' })
+  subscription?: SubscriptionModel;
 }

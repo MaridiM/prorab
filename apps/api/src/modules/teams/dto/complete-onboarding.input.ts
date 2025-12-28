@@ -65,4 +65,13 @@ export class CompleteOnboardingInput {
   @IsString()
   @MaxLength(2000)
   projectDescription?: string;
+
+  // ===== Step 4: Plan Selection =====
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID выбранного тарифного плана из таблицы Plan',
+  })
+  @IsOptional()
+  @IsString()
+  planId?: string;
 }

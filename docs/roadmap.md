@@ -4,34 +4,189 @@
 
 ---
 
-## 📊 Текущее состояние проекта (Обновлено: 2025-12-25)
+## 📊 Текущее состояние проекта (Обновлено: 2025-12-28)
 
 **Версии приложений:**
-- API: v1.4.3 (в разработке)
-- Web: v1.4.3 (в разработке)
+- API: v1.6.3 (текущая) | v1.6.0 (стабильная - Full Subscription System)
+- Web: v1.6.3 (текущая) | v1.6.0 (стабильная)
 
 ### Общий прогресс: **100% MVP + Stages 13-16 (100%)** 🎉✅
 
-**🔄 ТЕКУЩАЯ ЗАДАЧА: Admin Panel UX Improvements - v1.4.4** 📋
+**🔄 ТЕКУЩАЯ ЗАДАЧА: Full Subscription System with Multi-Provider Payments - v1.6.0** 💳
+- 📋 Отображение всех планов из БД (с ценами, features, trial)
+- 💳 Multi-provider payments (Yookassa + Stripe)
+- 🔒 Полный enforcement лимитов (Projects, Members, Storage)
+- 🆙 Upgrade кнопки в navbar, dashboard, sidebar
+- 🛡️ Защита от downgrade при превышении лимитов
+- 📊 **Прогресс:** 67% (2/3 фаз завершено) 🚧
+  - ✅ **ФАЗА 1: Subscription UI & Plan Selection (100%)**
+    - ✅ ФАЗА 1.1: Backend - SubscriptionsResolver queries (+69 LOC)
+    - ✅ ФАЗА 1.2: Frontend - GraphQL queries для планов (+60 LOC)
+    - ✅ ФАЗА 1.3: Исправление schema и codegen (+7 LOC)
+    - ✅ ФАЗА 1.4-1.6: SubscriptionManagement обновлён (+45 LOC refactor)
+  - ✅ **ФАЗА 2: Enforcement of Limits Everywhere (100%)**
+    - ✅ ФАЗА 2.1-2.2: Backend - CheckStorageLimitGuard (+139 LOC)
+    - ✅ ФАЗА 2.3: Backend - CheckMemberLimitGuard везде (+35 LOC)
+    - ✅ ФАЗА 2.4-2.5: Frontend - Apollo Error Link (+102 LOC)
+  - ⏳ **ФАЗА 3: Multi-Provider Payments & Upgrade Flow (0%)**
+    - ⏳ Multi-provider payment selection
+    - ⏳ Upgrade кнопки в navbar, dashboard, sidebar
+    - ⏳ Downgrade protection
+- 📄 **План:** `C:\Users\User\.claude\plans\elegant-doodling-orbit.md`
+- ⏱️ **Оценка:** ~1,390 LOC, 4-6 дней (**457 LOC completed** = 33%)
+- 🎯 **Цель:** Полная система подписок с multi-provider payments
+
+**✅ ЗАВЕРШЕНО: Dashboard Projects UI Improvements - v1.6.3** 📊
+- 📑 Рефакторинг отображения проектов на дашборде
+  - ✅ Замена двух секций (Активные объекты и Архив) на табы в одном ряду
+  - ✅ Скрытие вкладки "Архив" если нет архивных данных
+  - ✅ Улучшенная сортировка проектов:
+    - Сначала активные и невыполненные задачи, незавершенные проекты
+    - В конце завершенные проекты
+  - ✅ Добавление функционала дополнительной сортировки (по дате, названию, статусу)
+- 📊 **Прогресс:** 100% (Completed) ✅
+  - ✅ Задача 1: Реализация табов вместо двух секций
+  - ✅ Задача 2: Условное отображение вкладки "Архив"
+  - ✅ Задача 3: Реализация умной сортировки проектов
+  - ✅ Задача 4: Добавление дополнительной сортировки
+- 📄 **Версия:** v1.6.3
+
+**✅ ЗАВЕРШЕНО: Subscription Plans UI Improvements & Admin Panel Enhancements - v1.6.2** 🎨
+- 🎨 Улучшения UI карточек планов подписки
+  - Раскрывающийся список возможностей (accordion) для каждого плана
+  - Фиксированная высота карточек, не сдвигаются при раскрытии
+  - Выравнивание бейджей "Early Bird" и "Популярный" с названием плана
+  - Оптимизированный размер и центрирование карточек
+  - Убрана кнопка "Подробнее", добавлена кнопка "Показать все возможности"
+  - Независимое открытие планов (не закрываются автоматически)
+- 🎨 Улучшения админ панели
+  - Выпадающее меню пользователя в сайдбаре
+  - Пункты меню: "Дашборд", "Настройки", "Выход"
+  - Меню открывается вверх с плавной анимацией
+  - Убран фон у кнопки и пункта "Выход"
+  - Добавлена поддержка side="top" в DropdownMenu компонент
+- 📊 **Прогресс:** 100% (Completed) ✅
+- 📄 **Версия:** v1.6.2
+
+**✅ ЗАВЕРШЕНО: User Subscription UI & Limits - v0.7.3+** 💳
+- 📋 Реализация подгрузки планов из БД для пользователя
+- 🔒 Применение лимитов из БД (Projects, Members)
+- 🆙 Кнопка Upgrade и процесс смены плана
+- 📊 **Прогресс:** 100% (Completed) ✅
+  - ✅ Step 1: Backend - Enforce DB Limits
+  - ✅ Step 2: Frontend - Plan Display & Selection
+  - ✅ Step 3: Frontend - Upgrade Flow & Polish
+- 📄 **Документация:** `docs/roadmaps/TASK_SUBSCRIPTION_USER_UI.md`
+
+**✅ ЗАВЕРШЕНО: Multi-Bot Telegram Management - v1.5.0** 🎉
+- 🤖 Система управления множественными Telegram ботами
+- 💾 Отдельная таблица TelegramBot с UI как у PaymentProviders
+- 🔐 Динамическое добавление ботов (имя, токен, описание, webhook, аватар, статус)
+- 🔄 Поддержка env переменных + database (fallback к env)
+- 🖼️ Загрузка аватарки для каждого бота
+- 📊 **Прогресс:** 100% (6/6 фаз выполнено) ✅
+  - ✅ Phase 1: Database & Core Services (100%)
+    - ✅ Создана модель TelegramBot в Prisma schema
+    - ✅ Миграция выполнена (20251227_create_telegram_bots)
+    - ✅ TelegramApiClient service реализован (+185 LOC)
+    - ✅ TelegramBotConfigService реализован (+465 LOC)
+    - ✅ SharedModule создан для EncryptionService (+10 LOC)
+  - ✅ Phase 2: Admin API Layer (100%)
+    - ✅ AdminTelegramBotModel GraphQL types созданы (+136 LOC)
+    - ✅ DTOs для Create/Update/Test созданы (+101 LOC)
+    - ✅ AdminTelegramBotsService реализован (+362 LOC)
+    - ✅ AdminTelegramBotsResolver реализован (+163 LOC)
+    - ✅ Интеграция в AdminModule завершена (+4 LOC)
+  - ✅ Phase 3: Dynamic Bot Loading (100%)
+    - ✅ TelegramBotRegistry service реализован (+189 LOC)
+    - ✅ TelegramWebhookController реализован (+43 LOC)
+    - ✅ TelegramModule обновлен для динамической загрузки (+25 LOC)
+    - ✅ Hot reload functionality реализован
+    - ✅ Автоматическая загрузка активных ботов при старте
+    - ✅ Graceful webhook error handling (+8 LOC)
+    - ✅ Permission fixes (SETTINGS_TELEGRAM) (+15 LOC)
+  - ✅ Phase 4: Admin UI (Frontend) (100%) 🎉
+    - ✅ GraphQL operations файл создан (+158 LOC)
+    - ✅ TypeScript codegen завершен (types generated)
+    - ✅ TelegramBotsPanel компонент (+380 LOC)
+    - ✅ TelegramBotsTable компонент (+240 LOC)
+    - ✅ BotConfigDialog компонент (+315 LOC)
+    - ✅ SystemSettingsTabs интеграция (+5 LOC)
+  - ✅ Phase 5: Avatar & Advanced Features (100%) 🎉
+    - ✅ uploadBotAvatarFromTelegram метод (+75 LOC)
+    - ✅ FileType.BOT_AVATAR добавлен в storage (+5 LOC)
+    - ✅ syncBotInfo обновлен для автозагрузки аватаров
+    - ✅ R2 storage интеграция через StorageService
+    - ✅ Sharp image processing (512x512, WebP)
+  - ✅ Phase 6: Testing & Documentation (100%) 🎉
+    - ✅ Feature documentation создана (+450 LOC)
+    - ✅ MULTI_BOT_TELEGRAM.md со всеми деталями
+    - ✅ Backend changelog финализирован
+    - ✅ Frontend changelog финализирован
+- 📄 **Документация:**
+  - ✅ `docs/changelog.backend.md` (полностью обновлен)
+  - ✅ `docs/changelog.frontend.md` (полностью обновлен)
+  - ✅ `docs/features/MULTI_BOT_TELEGRAM.md` (создана) 🎉
+- ⏱️ **Оценка:** 12-16 часов | **Факт:** ~13 часов ✅
+- 📦 **План:** +2,500 LOC | **Факт:** +3,379 LOC (Backend: 1,828 LOC, Frontend: 1,101 LOC, Docs: 450 LOC)
+- 🎯 **Цель:** Гибкое управление множественными Telegram ботами через админ-панель
+
+**✅ ЗАВЕРШЕНО: Project Limits Handling - v1.4.7** 🎉
+- 📋 Обработка лимитов создания проектов
+- 🚦 Отображение UpgradePrompt при достижении лимита
+- 🔗 Редирект на страницу биллинга
+- 📊 **Прогресс:** 100% (Completed) ✅
+- 📄 **Документация:** `docs/changelog.frontend.md`
+
+**✅ ЗАВЕРШЕНО: Active Sessions & History - v1.4.6** 🎉
+- 📋 Реализация истории сессий и активных сессий
+- 🌍 Определение геолокации (City, Country) по IP
+- 📱 Определение устройства (Device, OS, Browser)
+- 📊 **Прогресс:** 100% (4/4 шага выполнено) ✅
+  - ✅ Backend: LoginHistory model & service
+  - ✅ Backend: GeoIP & UA Parser integration
+  - ✅ Frontend: Active Sessions UI with detailed info
+  - ✅ Frontend: Session History list
+- 📄 **Документация:** `docs/changelog.md`
+- ⏱️ **Оценка:** 4-6 часов
+- 📦 **План:** +800 LOC
+- 🎯 **Цель:** Повышение безопасности аккаунтов
+
+**✅ ЗАВЕРШЕНО: Telegram Integration for Email Users - v1.4.5** 🎉
+- 📋 Возможность привязать Telegram аккаунт к существующему Email профилю
+- 🔐 Вход через Telegram для привязанных аккаунтов
+- 🔗 Синхронизация данных (аватар, имя) при привязке
+- 📊 **Прогресс:** 100% (5/5 шагов выполнено) ✅
+  - ✅ PHASE 1: Backend - Link Account Logic
+  - ✅ PHASE 2: Backend - API Mutation
+  - ✅ PHASE 3: Frontend - Connect Button Logic
+  - ✅ PHASE 4: Frontend - Polling & Linking
+  - ✅ PHASE 5: Verification
+- 📄 **Документация:** `docs/features/TELEGRAM_INTEGRATION.md` (будет создана)
+- ⏱️ **Оценка:** 4-6 часов
+- 📦 **План:** +500 LOC
+- 🎯 **Цель:** Удобный вход и уведомления для всех пользователей
+
+**🚧 IN PROGRESS: Admin Panel UX Improvements - v1.4.4** 📋
 
 - 📋 Улучшение UX админ-панели и интеграции платежных систем
 - 🧹 Удаление дубликатов из навигации (Admin Roles, Audit Logs)
 - 💳 Настройка Primary Payment Provider в System Settings
 - 🎁 Реализация Trial Period для подписок
-- 📊 **Прогресс:** 60% (6/10 шагов выполнено)
+- 📊 **Прогресс:** 70% (7/10 шагов выполнено)
   - ✅ Удаление Admin Roles и Audit Logs из сайдбара
   - ✅ Добавить Primary Payment Provider в System Settings
   - ✅ Добавить поле `trialDays` в модель Plan (БД + миграция)
   - ✅ Добавить `trialDays` в GraphQL схему (AdminPlanModel)
   - ✅ Создать UI для настройки Trial Period в админ-панели планов
   - ✅ Добавить логику активации Trial Period при создании подписки
-  - ⏳ Создать UI выбора тарифного плана при регистрации
+  - ✅ Создать UI выбора тарифного плана при регистрации (Step 4 в onboarding)
   - ⏳ Добавить отображение Trial Period в профиле пользователя
   - ⏳ Добавить уведомления об окончании Trial Period
   - ⏳ Обновить документацию и тестирование
-- 📄 **Документация:** `docs/features/TRIAL_PERIOD.md` (будет создана)
+- 📄 **Документация:** `docs/features/TRIAL_PERIOD.md` (создана)
 - ⏱️ **Оценка:** 8-10 часов
-- 📦 **План:** +1,500 LOC (Backend: ~800 LOC, Frontend: ~700 LOC)
+- 📦 **План:** +1,900 LOC (Backend: ~900 LOC, Frontend: ~1,000 LOC)
 - 🎯 **Цель:** Улучшение UX админ-панели и функционал Trial Period
 
 **✅ ЗАВЕРШЕНО: Email Change with 2FA Verification - v1.4.4** 🎉

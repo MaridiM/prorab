@@ -208,7 +208,7 @@ export default function TasksPage({ params }: TasksPageProps) {
 				backHref={`/teams/${teamId}/projects/${projectId}`}
 			/>
 			
-			<div className="container mx-auto px-4 py-6">
+			<div className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<div className="flex items-center justify-end mb-6">
 					<Button onClick={() => handleAddTask('TODO' as TaskStatus)}>
 						Создать задачу

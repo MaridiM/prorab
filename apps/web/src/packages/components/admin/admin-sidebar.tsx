@@ -21,9 +21,21 @@ import {
 	Bell,
 	Merge,
 	ScrollText,
+	LogOut,
+	ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/packages/utils'
 import { useAuth } from '@/packages/libs/auth'
+import { useRouter } from 'next/navigation'
+import * as React from 'react'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/packages/components/ui/dropdown-menu'
+import { UserAvatar } from '@/packages/components/ui/avatar'
 
 interface NavItem {
 	label: string
@@ -120,11 +132,29 @@ const navItems: NavItem[] = [
 
 export function AdminSidebar() {
 	const pathname = usePathname()
-	const { user } = useAuth()
+	const router = useRouter()
+	const { user, logout } = useAuth()
+	const [open, setOpen] = React.useState(false)
 
 	// Show all nav items - permissions are checked at page level
 	// This allows users to see all available admin pages
 	const visibleItems = navItems
+
+	const handleLogout = async () => {
+		try {
+			await logout()
+			router.push('/auth/login')
+		} catch (error) {
+			console.error('Logout failed:', error)
+		}
+	}
+
+	const handleNavigate = (path: string) => {
+		router.push(path)
+		setOpen(false)
+	}
+
+	if (!user) return null
 
 	return (
 		<aside className="w-64 border-r bg-card shrink-0 sticky top-0 h-screen flex flex-col">
@@ -166,16 +196,64 @@ export function AdminSidebar() {
 				})}
 			</nav>
 
-			<div className="border-t bg-card p-4 shrink-0">
-				<div className="flex items-center gap-3">
-					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-						{user?.fullName?.charAt(0) || 'A'}
-					</div>
-					<div className="flex-1 overflow-hidden">
-						<p className="text-sm font-medium truncate">{user?.fullName || 'Admin'}</p>
-						<p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-					</div>
-				</div>
+			<div className="border-t bg-card p-4 shrink-0 relative">
+				<DropdownMenu open={open} onOpenChange={setOpen}>
+					<DropdownMenuTrigger asChild>
+						<button
+							type="button"
+							className={cn(
+								"flex items-center gap-3 w-full rounded-lg p-2 transition-all cursor-pointer",
+								"focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+							)}
+						>
+							<UserAvatar user={user} size="sm" />
+							<div className="flex-1 overflow-hidden text-left min-w-0">
+								<p className="text-sm font-medium truncate">{user?.fullName || 'Admin'}</p>
+								<p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+							</div>
+							<ChevronDown
+								className={cn(
+									"h-4 w-4 text-muted-foreground shrink-0 transition-transform",
+									open && "rotate-180"
+								)}
+							/>
+						</button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-56 z-50" side="top" sideOffset={8}>
+						{/* User Info */}
+						<div className="px-3 py-2">
+							<p className="text-sm font-medium truncate">
+								{user?.fullName || 'Admin'}
+							</p>
+							<p className="text-xs text-muted-foreground truncate">
+								{user?.email}
+							</p>
+						</div>
+						
+						<DropdownMenuSeparator />
+						
+						{/* Menu Items */}
+						<DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
+							<LayoutDashboard className="w-4 h-4 mr-2" />
+							Дашборд
+						</DropdownMenuItem>
+						
+						<DropdownMenuItem onClick={() => handleNavigate('/settings')}>
+							<Settings className="w-4 h-4 mr-2" />
+							Настройки
+						</DropdownMenuItem>
+						
+						<DropdownMenuSeparator />
+						
+						<DropdownMenuItem 
+							onClick={handleLogout} 
+							className="text-destructive focus:text-destructive hover:bg-transparent focus:bg-transparent"
+						>
+							<LogOut className="w-4 h-4 mr-2" />
+							Выход
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		</aside>
 	)

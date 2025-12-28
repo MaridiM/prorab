@@ -3,6 +3,7 @@ import { PrismaService } from '../../core/prisma/prisma.service';
 import { EncryptionService } from '../../shared/services/encryption.service';
 import { AuthModule } from '../auth/auth.module';
 import { StorageModule } from '../../core/storage/storage.module';
+import { TelegramModule } from '../telegram/telegram.module';
 import { PaymentProviderFactory } from '../../core/payments/factories/payment-provider.factory';
 import { SystemSettingsService } from './services/system-settings.service';
 import { AdminActionLogService } from './services/admin-action-log.service';
@@ -17,6 +18,7 @@ import { AdminProjectsService } from './services/admin-projects.service';
 import { AdminSupportService } from './services/admin-support.service';
 import { AdminPlansService } from './services/admin-plans.service';
 import { AdminPaymentProvidersService } from './services/admin-payment-providers.service';
+import { AdminTelegramBotsService } from './services/admin-telegram-bots.service';
 import { AdminTeamAnalyticsService } from './services/admin-team-analytics.service';
 import { AdminRoleBuilderService } from './services/admin-role-builder.service';
 import { AdminTeamMembersService } from './services/admin-team-members.service';
@@ -36,6 +38,7 @@ import { AdminProjectsResolver } from './resolvers/admin-projects.resolver';
 import { AdminSupportResolver } from './resolvers/admin-support.resolver';
 import { AdminPlansResolver } from './resolvers/admin-plans.resolver';
 import { AdminPaymentProvidersResolver } from './resolvers/admin-payment-providers.resolver';
+import { AdminTelegramBotsResolver } from './resolvers/admin-telegram-bots.resolver';
 import { AdminTeamAnalyticsResolver } from './resolvers/admin-team-analytics.resolver';
 import { AdminRoleBuilderResolver } from './resolvers/admin-role-builder.resolver';
 import { AdminTeamMembersResolver } from './resolvers/admin-team-members.resolver';
@@ -44,7 +47,7 @@ import { AdminTeamOperationsResolver } from './resolvers/admin-team-operations.r
 import { AdminAuditResolver } from './resolvers/admin-audit.resolver';
 
 @Module({
-  imports: [AuthModule, StorageModule],
+  imports: [AuthModule, StorageModule, TelegramModule],
   providers: [
     // Core Services
     PrismaService,
@@ -65,6 +68,7 @@ import { AdminAuditResolver } from './resolvers/admin-audit.resolver';
     AdminSupportService,
     AdminPlansService,
     AdminPaymentProvidersService,
+    AdminTelegramBotsService,
     AdminTeamAnalyticsService,
     AdminRoleBuilderService,
     AdminTeamMembersService,
@@ -86,6 +90,7 @@ import { AdminAuditResolver } from './resolvers/admin-audit.resolver';
     AdminSupportResolver,
     AdminPlansResolver,
     AdminPaymentProvidersResolver,
+    AdminTelegramBotsResolver,
     AdminTeamAnalyticsResolver,
     AdminRoleBuilderResolver,
     AdminTeamMembersResolver,

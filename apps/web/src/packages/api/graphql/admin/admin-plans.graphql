@@ -17,6 +17,7 @@ query GetAdminPlans(
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name
@@ -64,6 +65,7 @@ query GetAdminPlansPaginated(
       isPopular
       sortOrder
       isEarlyBird
+      trialDays
       features {
         id
         name
@@ -106,6 +108,7 @@ query GetAdminPlan($id: String!) {
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name
@@ -140,6 +143,7 @@ query GetAdminPlanBySlug($slug: String!) {
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name
@@ -174,6 +178,7 @@ query GetAvailablePlans($currency: String) {
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name
@@ -207,6 +212,7 @@ mutation CreateAdminPlan($input: AdminCreatePlanInput!) {
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name
@@ -240,6 +246,7 @@ mutation UpdateAdminPlan($id: String!, $input: AdminUpdatePlanInput!) {
     isPopular
     sortOrder
     isEarlyBird
+    trialDays
     features {
       id
       name

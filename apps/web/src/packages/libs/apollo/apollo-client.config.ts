@@ -7,6 +7,7 @@ import { createClient as createWsClient } from 'graphql-ws';
 
 import { SERVER_URL, WEBSOCKET_URL } from '@/packages/constants/url';
 import { isAuthError, handleAuthError } from '@/packages/utils';
+import { extractLimitError, handleLimitError } from '@/packages/utils/limit-error-handler';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -111,6 +112,14 @@ const errorLink = onError((errorResponse) => {
         const operationName = operation?.operationName || '';
 
         graphQLErrors.forEach(({ message, locations, path, extensions }: any) => {
+            // Check for subscription limit errors first (before auth errors)
+            const limitError = extractLimitError(extensions);
+            if (limitError && isBrowser) {
+                handleLimitError(limitError);
+                // Don't continue processing this error - limit error handled
+                return;
+            }
+
             // For project-related queries, don't redirect - these might be permission errors
             // Only redirect for queries that require global authentication (like 'me', 'myTeams')
             if (operationName.includes('project') || operationName.includes('Project')) {

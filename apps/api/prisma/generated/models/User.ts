@@ -39,6 +39,8 @@ export type UserMinAggregateOutputType = {
   oauthProvider: string | null
   oauthProviderId: string | null
   telegramChatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
   telegramUsername: string | null
   telegramPhotoUrl: string | null
   twoFactorEnabled: boolean | null
@@ -67,6 +69,8 @@ export type UserMaxAggregateOutputType = {
   oauthProvider: string | null
   oauthProviderId: string | null
   telegramChatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
   telegramUsername: string | null
   telegramPhotoUrl: string | null
   twoFactorEnabled: boolean | null
@@ -95,6 +99,8 @@ export type UserCountAggregateOutputType = {
   oauthProvider: number
   oauthProviderId: number
   telegramChatId: number
+  telegramFirstName: number
+  telegramLastName: number
   telegramUsername: number
   telegramPhotoUrl: number
   twoFactorEnabled: number
@@ -126,6 +132,8 @@ export type UserMinAggregateInputType = {
   oauthProvider?: true
   oauthProviderId?: true
   telegramChatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
   telegramUsername?: true
   telegramPhotoUrl?: true
   twoFactorEnabled?: true
@@ -154,6 +162,8 @@ export type UserMaxAggregateInputType = {
   oauthProvider?: true
   oauthProviderId?: true
   telegramChatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
   telegramUsername?: true
   telegramPhotoUrl?: true
   twoFactorEnabled?: true
@@ -182,6 +192,8 @@ export type UserCountAggregateInputType = {
   oauthProvider?: true
   oauthProviderId?: true
   telegramChatId?: true
+  telegramFirstName?: true
+  telegramLastName?: true
   telegramUsername?: true
   telegramPhotoUrl?: true
   twoFactorEnabled?: true
@@ -284,6 +296,8 @@ export type UserGroupByOutputType = {
   oauthProvider: string | null
   oauthProviderId: string | null
   telegramChatId: string | null
+  telegramFirstName: string | null
+  telegramLastName: string | null
   telegramUsername: string | null
   telegramPhotoUrl: string | null
   twoFactorEnabled: boolean
@@ -334,6 +348,8 @@ export type UserWhereInput = {
   oauthProvider?: Prisma.StringNullableFilter<"User"> | string | null
   oauthProviderId?: Prisma.StringNullableFilter<"User"> | string | null
   telegramChatId?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramFirstName?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramLastName?: Prisma.StringNullableFilter<"User"> | string | null
   telegramUsername?: Prisma.StringNullableFilter<"User"> | string | null
   telegramPhotoUrl?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
@@ -358,6 +374,7 @@ export type UserWhereInput = {
   adminRole?: Prisma.XOR<Prisma.AdminRoleNullableScalarRelationFilter, Prisma.AdminRoleWhereInput> | null
   adminActionLogs?: Prisma.AdminActionLogListRelationFilter
   createdTemplates?: Prisma.TeamTemplateListRelationFilter
+  loginHistory?: Prisma.LoginHistoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -375,6 +392,8 @@ export type UserOrderByWithRelationInput = {
   oauthProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   oauthProviderId?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramChatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramPhotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
@@ -399,6 +418,7 @@ export type UserOrderByWithRelationInput = {
   adminRole?: Prisma.AdminRoleOrderByWithRelationInput
   adminActionLogs?: Prisma.AdminActionLogOrderByRelationAggregateInput
   createdTemplates?: Prisma.TeamTemplateOrderByRelationAggregateInput
+  loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -419,6 +439,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   currentTeamId?: Prisma.StringNullableFilter<"User"> | string | null
   oauthProvider?: Prisma.StringNullableFilter<"User"> | string | null
   oauthProviderId?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramFirstName?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramLastName?: Prisma.StringNullableFilter<"User"> | string | null
   telegramUsername?: Prisma.StringNullableFilter<"User"> | string | null
   telegramPhotoUrl?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
@@ -443,6 +465,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   adminRole?: Prisma.XOR<Prisma.AdminRoleNullableScalarRelationFilter, Prisma.AdminRoleWhereInput> | null
   adminActionLogs?: Prisma.AdminActionLogListRelationFilter
   createdTemplates?: Prisma.TeamTemplateListRelationFilter
+  loginHistory?: Prisma.LoginHistoryListRelationFilter
 }, "id" | "email" | "emailNormalized" | "telegramChatId">
 
 export type UserOrderByWithAggregationInput = {
@@ -460,6 +483,8 @@ export type UserOrderByWithAggregationInput = {
   oauthProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   oauthProviderId?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramChatId?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramUsername?: Prisma.SortOrderInput | Prisma.SortOrder
   telegramPhotoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
@@ -495,6 +520,8 @@ export type UserScalarWhereWithAggregatesInput = {
   oauthProvider?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   oauthProviderId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   telegramChatId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  telegramFirstName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  telegramLastName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   telegramUsername?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   telegramPhotoUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -523,6 +550,8 @@ export type UserCreateInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -547,6 +576,7 @@ export type UserCreateInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -564,6 +594,8 @@ export type UserUncheckedCreateInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -587,6 +619,7 @@ export type UserUncheckedCreateInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -603,6 +636,8 @@ export type UserUpdateInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -627,6 +662,7 @@ export type UserUpdateInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -644,6 +680,8 @@ export type UserUncheckedUpdateInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -667,6 +705,7 @@ export type UserUncheckedUpdateInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -684,6 +723,8 @@ export type UserCreateManyInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -712,6 +753,8 @@ export type UserUpdateManyMutationInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -741,6 +784,8 @@ export type UserUncheckedUpdateManyInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -778,6 +823,8 @@ export type UserCountOrderByAggregateInput = {
   oauthProvider?: Prisma.SortOrder
   oauthProviderId?: Prisma.SortOrder
   telegramChatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
   telegramUsername?: Prisma.SortOrder
   telegramPhotoUrl?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
@@ -807,6 +854,8 @@ export type UserMaxOrderByAggregateInput = {
   oauthProvider?: Prisma.SortOrder
   oauthProviderId?: Prisma.SortOrder
   telegramChatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
   telegramUsername?: Prisma.SortOrder
   telegramPhotoUrl?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
@@ -835,6 +884,8 @@ export type UserMinOrderByAggregateInput = {
   oauthProvider?: Prisma.SortOrder
   oauthProviderId?: Prisma.SortOrder
   telegramChatId?: Prisma.SortOrder
+  telegramFirstName?: Prisma.SortOrder
+  telegramLastName?: Prisma.SortOrder
   telegramUsername?: Prisma.SortOrder
   telegramPhotoUrl?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
@@ -940,6 +991,20 @@ export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
   upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserCreateNestedOneWithoutLoginHistoryInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginHistoryInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLoginHistoryNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginHistoryInput
+  upsert?: Prisma.UserUpsertWithoutLoginHistoryInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLoginHistoryInput, Prisma.UserUpdateWithoutLoginHistoryInput>, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
 }
 
 export type UserCreateNestedOneWithoutOwnedTeamsInput = {
@@ -1110,6 +1175,8 @@ export type UserCreateWithoutNotificationSettingsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1133,6 +1200,7 @@ export type UserCreateWithoutNotificationSettingsInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationSettingsInput = {
@@ -1150,6 +1218,8 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1172,6 +1242,7 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationSettingsInput = {
@@ -1204,6 +1275,8 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1227,6 +1300,7 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
@@ -1244,6 +1318,8 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1266,6 +1342,7 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVerificationTokensInput = {
@@ -1282,6 +1359,8 @@ export type UserCreateWithoutVerificationTokensInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1305,6 +1384,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -1322,6 +1402,8 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1344,6 +1426,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -1376,6 +1459,8 @@ export type UserUpdateWithoutVerificationTokensInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1399,6 +1484,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -1416,6 +1502,8 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1438,6 +1526,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1454,6 +1543,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1477,6 +1568,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1494,6 +1586,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1516,6 +1610,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1548,6 +1643,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1571,6 +1668,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1588,6 +1686,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1601,6 +1701,191 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
+  createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLoginHistoryInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
+  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
+  createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutLoginHistoryInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  currentTeamId?: string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
+  createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutLoginHistoryInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+}
+
+export type UserUpsertWithoutLoginHistoryInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLoginHistoryInput, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLoginHistoryInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLoginHistoryInput, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
+}
+
+export type UserUpdateWithoutLoginHistoryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
+  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
+  createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLoginHistoryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
   ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
   teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1626,6 +1911,8 @@ export type UserCreateWithoutOwnedTeamsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1649,6 +1936,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedTeamsInput = {
@@ -1666,6 +1954,8 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1688,6 +1978,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedTeamsInput = {
@@ -1709,6 +2000,8 @@ export type UserCreateWithoutCurrentTeamInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1732,6 +2025,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCurrentTeamInput = {
@@ -1748,6 +2042,8 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1771,6 +2067,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCurrentTeamInput = {
@@ -1808,6 +2105,8 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1831,6 +2130,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
@@ -1848,6 +2148,8 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1870,6 +2172,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutCurrentTeamInput = {
@@ -1906,6 +2209,8 @@ export type UserScalarWhereInput = {
   oauthProvider?: Prisma.StringNullableFilter<"User"> | string | null
   oauthProviderId?: Prisma.StringNullableFilter<"User"> | string | null
   telegramChatId?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramFirstName?: Prisma.StringNullableFilter<"User"> | string | null
+  telegramLastName?: Prisma.StringNullableFilter<"User"> | string | null
   telegramUsername?: Prisma.StringNullableFilter<"User"> | string | null
   telegramPhotoUrl?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
@@ -1934,6 +2239,8 @@ export type UserCreateWithoutTeamMembershipsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1957,6 +2264,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -1974,6 +2282,8 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -1996,6 +2306,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -2028,6 +2339,8 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2051,6 +2364,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -2068,6 +2382,8 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2090,6 +2406,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSalaryChangesInput = {
@@ -2106,6 +2423,8 @@ export type UserCreateWithoutSalaryChangesInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2129,6 +2448,7 @@ export type UserCreateWithoutSalaryChangesInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSalaryChangesInput = {
@@ -2146,6 +2466,8 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2168,6 +2490,7 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSalaryChangesInput = {
@@ -2200,6 +2523,8 @@ export type UserUpdateWithoutSalaryChangesInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2223,6 +2548,7 @@ export type UserUpdateWithoutSalaryChangesInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryChangesInput = {
@@ -2240,6 +2566,8 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2262,6 +2590,7 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTasksInput = {
@@ -2278,6 +2607,8 @@ export type UserCreateWithoutCreatedTasksInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2301,6 +2632,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTasksInput = {
@@ -2318,6 +2650,8 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2340,6 +2674,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTasksInput = {
@@ -2372,6 +2707,8 @@ export type UserUpdateWithoutCreatedTasksInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2395,6 +2732,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTasksInput = {
@@ -2412,6 +2750,8 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2434,6 +2774,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -2450,6 +2791,8 @@ export type UserCreateWithoutSupportTicketsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2473,6 +2816,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -2490,6 +2834,8 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2512,6 +2858,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -2544,6 +2891,8 @@ export type UserUpdateWithoutSupportTicketsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2567,6 +2916,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -2584,6 +2934,8 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2606,6 +2958,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminRoleInput = {
@@ -2622,6 +2975,8 @@ export type UserCreateWithoutAdminRoleInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2645,6 +3000,7 @@ export type UserCreateWithoutAdminRoleInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminRoleInput = {
@@ -2662,6 +3018,8 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2684,6 +3042,7 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminRoleInput = {
@@ -2716,6 +3075,8 @@ export type UserUpdateWithoutAdminRoleInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2739,6 +3100,7 @@ export type UserUpdateWithoutAdminRoleInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminRoleInput = {
@@ -2756,6 +3118,8 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2778,6 +3142,7 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminActionLogsInput = {
@@ -2794,6 +3159,8 @@ export type UserCreateWithoutAdminActionLogsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2817,6 +3184,7 @@ export type UserCreateWithoutAdminActionLogsInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminActionLogsInput = {
@@ -2834,6 +3202,8 @@ export type UserUncheckedCreateWithoutAdminActionLogsInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2856,6 +3226,7 @@ export type UserUncheckedCreateWithoutAdminActionLogsInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminActionLogsInput = {
@@ -2888,6 +3259,8 @@ export type UserUpdateWithoutAdminActionLogsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2911,6 +3284,7 @@ export type UserUpdateWithoutAdminActionLogsInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
@@ -2928,6 +3302,8 @@ export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2950,6 +3326,7 @@ export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTemplatesInput = {
@@ -2966,6 +3343,8 @@ export type UserCreateWithoutCreatedTemplatesInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -2989,6 +3368,7 @@ export type UserCreateWithoutCreatedTemplatesInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
@@ -3006,6 +3386,8 @@ export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -3028,6 +3410,7 @@ export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
   adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTemplatesInput = {
@@ -3060,6 +3443,8 @@ export type UserUpdateWithoutCreatedTemplatesInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3083,6 +3468,7 @@ export type UserUpdateWithoutCreatedTemplatesInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
@@ -3100,6 +3486,8 @@ export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3122,6 +3510,7 @@ export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyCurrentTeamInput = {
@@ -3138,6 +3527,8 @@ export type UserCreateManyCurrentTeamInput = {
   oauthProvider?: string | null
   oauthProviderId?: string | null
   telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
   telegramUsername?: string | null
   telegramPhotoUrl?: string | null
   twoFactorEnabled?: boolean
@@ -3166,6 +3557,8 @@ export type UserUpdateWithoutCurrentTeamInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3189,6 +3582,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCurrentTeamInput = {
@@ -3205,6 +3599,8 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3228,6 +3624,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
@@ -3244,6 +3641,8 @@ export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
   oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3273,6 +3672,7 @@ export type UserCountOutputType = {
   salaryChanges: number
   adminActionLogs: number
   createdTemplates: number
+  loginHistory: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3285,6 +3685,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   salaryChanges?: boolean | UserCountOutputTypeCountSalaryChangesArgs
   adminActionLogs?: boolean | UserCountOutputTypeCountAdminActionLogsArgs
   createdTemplates?: boolean | UserCountOutputTypeCountCreatedTemplatesArgs
+  loginHistory?: boolean | UserCountOutputTypeCountLoginHistoryArgs
 }
 
 /**
@@ -3360,6 +3761,13 @@ export type UserCountOutputTypeCountCreatedTemplatesArgs<ExtArgs extends runtime
   where?: Prisma.TeamTemplateWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLoginHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoginHistoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3376,6 +3784,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   oauthProvider?: boolean
   oauthProviderId?: boolean
   telegramChatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
   telegramUsername?: boolean
   telegramPhotoUrl?: boolean
   twoFactorEnabled?: boolean
@@ -3400,6 +3810,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   adminRole?: boolean | Prisma.User$adminRoleArgs<ExtArgs>
   adminActionLogs?: boolean | Prisma.User$adminActionLogsArgs<ExtArgs>
   createdTemplates?: boolean | Prisma.User$createdTemplatesArgs<ExtArgs>
+  loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3418,6 +3829,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   oauthProvider?: boolean
   oauthProviderId?: boolean
   telegramChatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
   telegramUsername?: boolean
   telegramPhotoUrl?: boolean
   twoFactorEnabled?: boolean
@@ -3448,6 +3861,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   oauthProvider?: boolean
   oauthProviderId?: boolean
   telegramChatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
   telegramUsername?: boolean
   telegramPhotoUrl?: boolean
   twoFactorEnabled?: boolean
@@ -3478,6 +3893,8 @@ export type UserSelectScalar = {
   oauthProvider?: boolean
   oauthProviderId?: boolean
   telegramChatId?: boolean
+  telegramFirstName?: boolean
+  telegramLastName?: boolean
   telegramUsername?: boolean
   telegramPhotoUrl?: boolean
   twoFactorEnabled?: boolean
@@ -3492,7 +3909,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "businessRole" | "businessRoleAssignedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramFirstName" | "telegramLastName" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "businessRole" | "businessRoleAssignedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -3506,6 +3923,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   adminRole?: boolean | Prisma.User$adminRoleArgs<ExtArgs>
   adminActionLogs?: boolean | Prisma.User$adminActionLogsArgs<ExtArgs>
   createdTemplates?: boolean | Prisma.User$createdTemplatesArgs<ExtArgs>
+  loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3530,6 +3948,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     adminRole: Prisma.$AdminRolePayload<ExtArgs> | null
     adminActionLogs: Prisma.$AdminActionLogPayload<ExtArgs>[]
     createdTemplates: Prisma.$TeamTemplatePayload<ExtArgs>[]
+    loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3546,6 +3965,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     oauthProvider: string | null
     oauthProviderId: string | null
     telegramChatId: string | null
+    telegramFirstName: string | null
+    telegramLastName: string | null
     telegramUsername: string | null
     telegramPhotoUrl: string | null
     twoFactorEnabled: boolean
@@ -3964,6 +4385,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   adminRole<T extends Prisma.User$adminRoleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminRoleArgs<ExtArgs>>): Prisma.Prisma__AdminRoleClient<runtime.Types.Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   adminActionLogs<T extends Prisma.User$adminActionLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminActionLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminActionLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdTemplates<T extends Prisma.User$createdTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loginHistory<T extends Prisma.User$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4007,6 +4429,8 @@ export interface UserFieldRefs {
   readonly oauthProvider: Prisma.FieldRef<"User", 'String'>
   readonly oauthProviderId: Prisma.FieldRef<"User", 'String'>
   readonly telegramChatId: Prisma.FieldRef<"User", 'String'>
+  readonly telegramFirstName: Prisma.FieldRef<"User", 'String'>
+  readonly telegramLastName: Prisma.FieldRef<"User", 'String'>
   readonly telegramUsername: Prisma.FieldRef<"User", 'String'>
   readonly telegramPhotoUrl: Prisma.FieldRef<"User", 'String'>
   readonly twoFactorEnabled: Prisma.FieldRef<"User", 'Boolean'>
@@ -4685,6 +5109,30 @@ export type User$createdTemplatesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.TeamTemplateScalarFieldEnum | Prisma.TeamTemplateScalarFieldEnum[]
+}
+
+/**
+ * User.loginHistory
+ */
+export type User$loginHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginHistory
+   */
+  select?: Prisma.LoginHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginHistory
+   */
+  omit?: Prisma.LoginHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginHistoryInclude<ExtArgs> | null
+  where?: Prisma.LoginHistoryWhereInput
+  orderBy?: Prisma.LoginHistoryOrderByWithRelationInput | Prisma.LoginHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.LoginHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoginHistoryScalarFieldEnum | Prisma.LoginHistoryScalarFieldEnum[]
 }
 
 /**

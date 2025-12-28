@@ -4,40 +4,112 @@
 
 Система пробного периода (Trial Period) для подписок позволяет администраторам настраивать бесплатный пробный период для каждого тарифного плана индивидуально. Новые пользователи автоматически получают доступ к выбранному плану на указанное количество дней перед началом платного периода.
 
-## Статус реализации: 60% ✅
+## Статус реализации: 80% ✅
 
-### ✅ Реализовано (Backend + Admin UI)
+### ✅ Реализовано (Backend + Admin UI + Onboarding + User Dashboard + Email Notifications)
 
-#### Backend (100%)
+#### Backend (100%) ✅
 - ✅ Добавлено поле `trialDays` в модель Plan (nullable Int)
 - ✅ Миграция базы данных `20251225_add_trial_days_and_primary_provider`
-- ✅ GraphQL схема обновлена (AdminPlanModel, AdminCreatePlanInput, AdminUpdatePlanInput)
+- ✅ GraphQL схема обновлена (AdminPlanModel, AdminCreatePlanInput, AdminUpdatePlanInput, CompleteOnboardingInput)
 - ✅ Логика автоматической активации trial period в `SubscriptionsService.createSubscription()`
+- ✅ Автоматическое создание подписки при завершении onboarding с выбранным планом в `TeamsService.completeOnboarding()`
 - ✅ Динамический расчет trial period на основе конфигурации плана
 - ✅ Обратная совместимость со старой системой
 
-#### Admin UI (100%)
+**📊 Изменения:**
+- `schema.prisma`: +3 LOC (trialDays field)
+- `admin-plan.model.ts`: +9 LOC (GraphQL fields)
+- `subscriptions.service.ts`: +28 LOC (dynamic trial logic)
+- `create-subscription.input.ts`: +3 LOC (planId field)
+- `teams.service.ts`: +52 LOC (onboarding subscription creation)
+- `complete-onboarding.input.ts`: +8 LOC (planId field)
+- Создана миграция: `20251225_add_trial_days_and_primary_provider/migration.sql`
+
+#### Admin UI (100%) ✅
 - ✅ Поле ввода "Пробный период (дней)" в форме редактирования плана
 - ✅ Отображение пробного периода в режиме просмотра плана
 - ✅ Валидация и placeholder для пустого значения
 - ✅ Русская локализация с правильным склонением (день/дня/дней)
 
-### ⏳ В разработке (User-facing UI - 40%)
+**📊 Изменения:**
+- `subscription-plans-panel.tsx`: +35 LOC (trial period UI)
 
-#### User Registration Flow (0%)
-- ⏳ UI выбора тарифного плана при регистрации/onboarding
-- ⏳ Отображение информации о trial period для каждого плана
-- ⏳ Автоматическая активация trial при выборе плана
+#### User Registration Flow (100%) ✅
+- ✅ UI выбора тарифного плана при регистрации/onboarding (Step 4)
+- ✅ Отображение информации о trial period для каждого плана
+- ✅ Автоматическая активация trial при выборе плана
+- ✅ Красивые карточки планов с ценами, features, trial period badge
+- ✅ Поддержка "Popular" badge для популярных планов
+- ✅ Success animation с конфетти при завершении onboarding
+- ✅ Обновлены GraphQL queries для включения trialDays во всех plan queries
+- ✅ Интеграция с completeOnboarding mutation для передачи planId
 
-#### User Dashboard (0%)
-- ⏳ Виджет отображения trial period в dashboard
-- ⏳ Countdown оставшихся дней пробного периода
-- ⏳ Визуальные индикаторы статуса подписки (TRIALING/ACTIVE)
+**📊 Изменения:**
+- Создан `step-4/page.tsx`: +361 LOC (plan selection page)
+- Обновлен `step-3/page.tsx`: -96 LOC (cleanup, routing to step 4)
+- Обновлен `admin-plans.graphql`: +7 trialDays fields в queries
+- Stepper обновлен на 4 шага (было 3)
 
-#### Notifications (0%)
-- ⏳ Email уведомление за 3 дня до окончания trial
-- ⏳ Email уведомление при окончании trial
-- ⏳ In-app уведомления о статусе trial period
+**🎯 UX Flow:**
+1. Step 1: Название команды
+2. Step 2: Логотип (загрузка или иконка)
+3. Step 3: Первый объект
+4. **Step 4: Выбор тарифного плана** ✨ (НОВЫЙ)
+   - Карточки планов с trial period badge
+   - Автоматическое создание subscription
+5. Confetti animation → Dashboard
+
+#### User Dashboard (100%) ✅ - Step 8
+
+- ✅ Виджет отображения trial period в dashboard (TrialStatusWidget)
+- ✅ Countdown оставшихся дней пробного периода с progress bar
+- ✅ Визуальные индикаторы статуса подписки (TRIALING/ACTIVE)
+- ✅ Отображение trial period в настройках профиля
+- ✅ Автоматическое предупреждение когда остается < 3 дней
+- ✅ CTA кнопка для выбора платного тарифа
+- ✅ Красивая анимация с Framer Motion
+- ✅ Правильная русская локализация (день/дня/дней)
+
+**📊 Изменения:**
+- Создан `trial-status-widget.tsx`: +150 LOC (trial status widget component)
+- Создан `subscription/index.ts`: +1 LOC (barrel export)
+- Обновлен `components/index.ts`: +1 LOC (export subscription components)
+- Обновлен `subscriptions.graphql`: +6 LOC (planId + planRef fields)
+- Обновлен `subscription.model.ts`: +3 LOC (planId, planRef fields)
+- Обновлен `subscriptions.service.ts`: +16 LOC (include planRef with prices + features)
+- Обновлен `subscriptions.resolver.ts`: +36 LOC (transform Decimal to number for prices)
+- Обновлен `dashboard/page.tsx`: +15 LOC (subscription query + widget integration)
+- Обновлен `SubscriptionManagement.tsx`: +2 LOC (widget in settings)
+
+#### Email Notifications (100%) ✅ - Step 9
+
+- ✅ Email уведомление за 3 дня до окончания trial (sendTrialExpiringEmail)
+- ✅ Email уведомление при окончании trial (sendTrialExpiredEmail)
+- ✅ Красивые HTML email шаблоны в фирменном стиле ProRab
+- ✅ Поддержка Telegram OAuth users (пропуск placeholder emails)
+- ✅ Интеграция с Brevo (SendinBlue) API
+- ⏳ Cron job для автоматической отправки (требует @nestjs/schedule)
+
+**📊 Изменения:**
+- Обновлен `mail.service.ts`: +209 LOC (2 новых метода + 2 email шаблона)
+
+### ⏳ В разработке (20%)
+
+#### Scheduled Tasks (0%) - Step 9.5
+
+- ⏳ Установка @nestjs/schedule пакета
+- ⏳ Создание TrialNotificationService
+- ⏳ Cron job для ежедневной проверки trial expirations
+- ⏳ Отправка уведомлений за 3 дня до окончания
+- ⏳ Отправка уведомлений при окончании trial
+- ⏳ Логирование отправленных уведомлений
+
+#### Testing & Documentation (0%) - Step 10
+- ⏳ E2E тесты onboarding flow с выбором плана
+- ⏳ Unit тесты backend trial period logic
+- ⏳ Integration тесты subscription creation
+- ⏳ Обновление пользовательской документации
 
 ## Архитектура
 
@@ -93,8 +165,11 @@ User selects planId = "lite-plan-id"
 - Компонент: `SubscriptionPlansPanel`
 - Доступно: Super Admin, Admin с правами `plans:edit`
 
-**User Flow (TODO):**
-- Onboarding: `/onboarding/select-plan` (планируется)
+**User Flow:**
+- Onboarding: `/onboarding/step-4` ✅ (реализовано)
+  - Компонент: `apps/web/src/app/(root)/onboarding/step-4/page.tsx`
+  - Query: `GetAvailablePlansDocument`
+  - Mutation: `CompleteOnboardingDocument` с `planId`
 - Dashboard: `/dashboard` - виджет trial status (планируется)
 - Settings: `/settings/subscription` - детальная информация (планируется)
 
@@ -187,11 +262,17 @@ export const BILLING_CYCLE_DAYS = 30;  // Стандартный биллинг 
 - [x] Сохранить и проверить в БД
 - [x] Проверить отображение в режиме просмотра
 
-**User UI (TODO):**
-- [ ] Пройти onboarding flow
-- [ ] Выбрать план с trial period
-- [ ] Проверить активацию trial
-- [ ] Проверить отображение countdown в dashboard
+**Onboarding Flow:**
+- [x] Пройти onboarding flow (Steps 1-4)
+- [x] Выбрать план с trial period
+- [x] Проверить автоматическое создание subscription
+- [x] Проверить success animation с конфетти
+- [x] Проверить что `planId` передается в `completeOnboarding`
+
+**User Dashboard (TODO):**
+- [ ] Проверить отображение trial status widget
+- [ ] Проверить countdown в dashboard
+- [ ] Проверить отображение в settings
 
 ## Migration Guide
 

@@ -1,15 +1,23 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentGraphQLModel } from './models/payment.model';
 import { PaymentUrlModel } from './models/payment-url.model';
+import { PaymentProviderModel } from './models/payment-provider.model';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { User } from '@prisma/generated/client';
+import { User, PaymentProviderType } from '@prisma/generated/client';
+import { PaymentProviderFactory } from '../../core/payments/factories/payment-provider.factory';
+import { PrismaService } from '../../core/prisma/prisma.service';
+import { getRealIP } from './utils/geo-provider.util';
 
 @Resolver(() => PaymentGraphQLModel)
 export class PaymentsResolver {
-  constructor(private paymentsService: PaymentsService) {}
+  constructor(
+    private paymentsService: PaymentsService,
+    private paymentProviderFactory: PaymentProviderFactory,
+    private prisma: PrismaService,
+  ) {}
 
   @Query(() => [PaymentGraphQLModel])
   @UseGuards(AuthGuard)
@@ -23,12 +31,53 @@ export class PaymentsResolver {
     })) as PaymentGraphQLModel[];
   }
 
-  @Mutation(() => PaymentUrlModel)
+  /**
+   * Get available payment providers
+   * Public query - returns active payment providers for user selection
+   */
+  @Query(() => [PaymentProviderModel], {
+    description: 'Получить доступные платёжные провайдеры (Yookassa, Stripe)',
+  })
+  async availablePaymentProviders(): Promise<PaymentProviderModel[]> {
+    const providers = await this.prisma.paymentProvider.findMany({
+      where: { isActive: true },
+      orderBy: { isPrimary: 'desc' }, // Primary provider first
+    });
+
+    return providers.map((p) => ({
+      id: p.id,
+      type: p.type,
+      name: p.name,
+      isActive: p.isActive,
+      isPrimary: p.isPrimary,
+    }));
+  }
+
+  /**
+   * Initialize payment with automatic provider selection based on IP geolocation
+   * Provider can be manually specified via providerType argument (optional)
+   * Auto-selection rules:
+   * - Russia, Belarus, CIS → YooKassa
+   * - Ukraine, Europe, USA → Stripe
+   */
+  @Mutation(() => PaymentUrlModel, {
+    description: 'Инициализировать платёж с автоматическим выбором провайдера по геолокации',
+  })
   @UseGuards(AuthGuard)
   async initializePayment(
     @Args('subscriptionId') subscriptionId: string,
+    @Args('providerType', { nullable: true }) providerType: PaymentProviderType,
     @CurrentUser() user: User,
+    @Context() context: any,
   ): Promise<PaymentUrlModel> {
-    return this.paymentsService.initializePayment(subscriptionId, user.id);
+    // Get user's real IP from request
+    const userIP = getRealIP(context.req);
+
+    return this.paymentsService.initializePayment(
+      subscriptionId,
+      user.id,
+      providerType,
+      userIP,
+    );
   }
 }

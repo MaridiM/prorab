@@ -18,5 +18,6 @@ export interface YooKassaWebhookDto {
       party: string;
       reason: string;
     };
+    payment_id?: string; // For refund events - ID of original payment
   };
 }

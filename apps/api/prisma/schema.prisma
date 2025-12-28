@@ -27,6 +27,8 @@ model User {
   oauthProvider    String? @map("oauth_provider") // "telegram", "google", etc.
   oauthProviderId  String? @map("oauth_provider_id") // Provider's user ID
   telegramChatId   String? @unique @map("telegram_chat_id")
+  telegramFirstName String? @map("telegram_first_name")
+  telegramLastName  String? @map("telegram_last_name")
   telegramUsername String? @map("telegram_username")
   telegramPhotoUrl String? @map("telegram_photo_url")
 
@@ -59,6 +61,7 @@ model User {
   adminRole            AdminRole?
   adminActionLogs      AdminActionLog[]          @relation("AdminActionLogs")
   createdTemplates     TeamTemplate[]            @relation("TeamTemplateCreator")
+  loginHistory         LoginHistory[]
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -161,6 +164,26 @@ model TelegramAuthToken {
   @@index([token])
   @@index([expiresAt])
   @@map("telegram_auth_tokens")
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  ip        String
+  userAgent String?  @map("user_agent")
+  city      String?
+  country   String?
+  device    String?  // Parsed device name (e.g. "iPhone", "Mac")
+  browser   String?  // Parsed browser (e.g. "Chrome", "Safari")
+  os        String?  // Parsed OS (e.g. "iOS", "Windows")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("login_history")
 }
 
 // ==================== BUSINESS ====================
@@ -651,6 +674,37 @@ model PaymentProvider {
 enum PaymentProviderType {
   YOOKASSA
   STRIPE
+}
+
+// Telegram Bot - Configuration for multiple Telegram bots
+model TelegramBot {
+  id          String   @id @default(uuid())
+  botName     String   @unique @db.VarChar(50) // Unique identifier: "oauth", "support", etc.
+  token       String   @db.Text // Encrypted bot token
+  username    String   @unique @db.VarChar(50) // @botname
+  displayName String   @db.VarChar(100) // Human-readable name
+  description String?  @db.Text
+
+  isActive  Boolean @default(true) @map("is_active") // Bot is enabled
+  isPrimary Boolean @default(false) @map("is_primary") // Primary OAuth bot
+  webhookUrl String? @map("webhook_url") // Individual webhook URL for this bot
+
+  // Bot Info (fetched from Telegram API)
+  avatarUrl             String?  @map("avatar_url")
+  firstName             String?  @map("first_name")
+  canJoinGroups         Boolean  @default(false) @map("can_join_groups")
+  canReadMessages       Boolean  @default(false) @map("can_read_messages")
+  supportsInlineQueries Boolean  @default(false) @map("supports_inline_queries")
+
+  // Metadata
+  createdBy  String?   @map("created_by") // Admin user ID
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  lastSyncAt DateTime? @map("last_sync_at") // Last time bot info was synced from Telegram
+
+  @@index([botName])
+  @@index([isActive])
+  @@map("telegram_bots")
 }
 
 model Subscription {

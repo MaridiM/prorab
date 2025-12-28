@@ -41,22 +41,18 @@ export class StripeProvider implements IPaymentProvider {
 
   /**
    * Initialize Stripe client
-   * Priority: SystemSettings → Environment variables
+   * Priority: Environment variables (sync) first, SystemSettings (async) can be loaded later
    */
-  private async initializeClient() {
+  private initializeClient() {
     try {
-      // Try to get credentials from SystemSettings first
-      this.secretKey =
-        (await this.systemSettings.getSettingValue('payment.stripe.secret_key')) ||
-        this.configService.get<string>('STRIPE_SECRET_KEY')
-
-      this.webhookSecret =
-        (await this.systemSettings.getSettingValue('payment.stripe.webhook_secret')) ||
-        this.configService.get<string>('STRIPE_WEBHOOK_SECRET')
+      // Get credentials from environment variables first (synchronous)
+      // SystemSettings will be checked lazily when first payment is created
+      this.secretKey = this.configService.get<string>('STRIPE_SECRET_KEY')
+      this.webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET')
 
       if (!this.secretKey) {
         this.logger.warn(
-          'Stripe secret key not configured. Provider will not be available.',
+          'Stripe secret key not configured in environment variables. Provider will try to load from SystemSettings on first use.',
         )
         return
       }
@@ -66,9 +62,49 @@ export class StripeProvider implements IPaymentProvider {
         typescript: true,
       })
 
-      this.logger.log('Stripe provider initialized successfully')
+      this.logger.log('Stripe provider initialized successfully from environment variables')
     } catch (error) {
       this.logger.error('Failed to initialize Stripe provider:', error)
+    }
+  }
+
+  /**
+   * Ensure client is initialized (lazy loading from SystemSettings if needed)
+   */
+  private async ensureInitialized() {
+    // If already initialized from env vars, return
+    if (this.stripe) {
+      return
+    }
+
+    // Try to load from SystemSettings
+    try {
+      this.secretKey = await this.systemSettings.getSettingValue('payment.stripe.secret_key')
+      this.webhookSecret = await this.systemSettings.getSettingValue('payment.stripe.webhook_secret')
+
+      if (!this.secretKey) {
+        // Development mode: Create a mock Stripe client to allow testing UI flow
+        const isDevelopment = this.configService.get('NODE_ENV') !== 'production'
+
+        if (isDevelopment) {
+          this.logger.warn('⚠️  Stripe running in DEVELOPMENT mode - using mock implementation')
+          this.logger.warn('⚠️  Set STRIPE_SECRET_KEY in .env for real payment processing')
+          // Don't throw error in development - will be handled in createPayment
+          return
+        }
+
+        throw new Error('Stripe secret key not configured in SystemSettings or environment variables')
+      }
+
+      this.stripe = new Stripe(this.secretKey, {
+        apiVersion: '2025-12-15.clover',
+        typescript: true,
+      })
+
+      this.logger.log('Stripe provider initialized successfully from SystemSettings')
+    } catch (error) {
+      this.logger.error('Failed to initialize Stripe provider from SystemSettings:', error)
+      throw new Error('Stripe provider not initialized: ' + error.message)
     }
   }
 
@@ -76,8 +112,17 @@ export class StripeProvider implements IPaymentProvider {
    * Create payment using Stripe Checkout
    */
   async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    await this.ensureInitialized()
+
+    // Development mode mock
     if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
+      this.logger.warn('🧪 Stripe MOCK: Creating fake payment session for development')
+      return {
+        paymentId: `mock_stripe_${Date.now()}`,
+        confirmationUrl: `${params.returnUrl}?mock=true&provider=stripe&amount=${params.amount}`,
+        status: 'pending' as any,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+      }
     }
 
     this.logger.debug(`Creating Stripe Checkout Session: ${JSON.stringify(params)}`)
@@ -118,9 +163,7 @@ export class StripeProvider implements IPaymentProvider {
    * For Stripe, we need to get the Checkout Session first, then the Payment Intent
    */
   async getPayment(paymentId: string): Promise<PaymentDetails> {
-    if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
-    }
+    await this.ensureInitialized()
 
     // Check if it's a Checkout Session or Payment Intent
     if (paymentId.startsWith('cs_')) {
@@ -168,9 +211,7 @@ export class StripeProvider implements IPaymentProvider {
    * Cancel payment
    */
   async cancelPayment(paymentId: string): Promise<void> {
-    if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
-    }
+    await this.ensureInitialized()
 
     // Get the session to find payment intent
     if (paymentId.startsWith('cs_')) {
@@ -189,9 +230,7 @@ export class StripeProvider implements IPaymentProvider {
    * Refund payment
    */
   async refundPayment(paymentId: string, amount?: number): Promise<RefundResult> {
-    if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
-    }
+    await this.ensureInitialized()
 
     // Get payment intent ID if we have a session ID
     let paymentIntentId = paymentId
@@ -251,13 +290,7 @@ export class StripeProvider implements IPaymentProvider {
    */
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.stripe) {
-        await this.initializeClient()
-      }
-
-      if (!this.stripe) {
-        return false
-      }
+      await this.ensureInitialized()
 
       // Retrieve account information to test credentials
       await this.stripe.accounts.retrieve()
@@ -273,9 +306,7 @@ export class StripeProvider implements IPaymentProvider {
    * Create subscription (recurring payments)
    */
   async createSubscription(params: CreateSubscriptionParams): Promise<SubscriptionResult> {
-    if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
-    }
+    await this.ensureInitialized()
 
     // Create Checkout Session for subscription
     const session = await this.stripe.checkout.sessions.create({
@@ -306,9 +337,7 @@ export class StripeProvider implements IPaymentProvider {
    * Cancel subscription
    */
   async cancelSubscription(subscriptionId: string): Promise<void> {
-    if (!this.stripe) {
-      throw new Error('Stripe provider not initialized')
-    }
+    await this.ensureInitialized()
 
     await this.stripe.subscriptions.cancel(subscriptionId)
     this.logger.log(`Stripe subscription ${subscriptionId} cancelled`)

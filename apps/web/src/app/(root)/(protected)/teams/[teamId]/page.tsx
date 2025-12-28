@@ -268,14 +268,14 @@ export default function TeamDashboardPage() {
 			<div className="min-h-screen bg-background">
 				{/* Header Skeleton */}
 				<div className="border-b border-border/30 bg-card/50">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
 
 				{/* Content Skeleton */}
-				<div className="container mx-auto px-4 py-8">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-8">
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 						<Skeleton className="h-32 rounded-2xl" />
 						<Skeleton className="h-32 rounded-2xl" />
@@ -317,7 +317,7 @@ export default function TeamDashboardPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
 							{/* Back Button */}
@@ -381,7 +381,7 @@ export default function TeamDashboardPage() {
 
             {/* Tabs Navigation */}
             <div className="border-b border-border/30 bg-card/50">
-				<div className="container mx-auto px-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4">
 					<div className="flex gap-1 overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('projects')}
@@ -412,7 +412,7 @@ export default function TeamDashboardPage() {
 			</div>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
                 {activeTab === 'projects' ? (
 				<div>
 					{/* Financial Summary (только для владельца) */}

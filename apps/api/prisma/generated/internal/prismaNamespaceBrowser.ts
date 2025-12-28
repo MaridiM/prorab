@@ -56,6 +56,7 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   PasswordResetToken: 'PasswordResetToken',
   TelegramAuthToken: 'TelegramAuthToken',
+  LoginHistory: 'LoginHistory',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
@@ -73,6 +74,7 @@ export const ModelName = {
   PlanPrice: 'PlanPrice',
   PlanFeature: 'PlanFeature',
   PaymentProvider: 'PaymentProvider',
+  TelegramBot: 'TelegramBot',
   Subscription: 'Subscription',
   Payment: 'Payment',
   SupportTicket: 'SupportTicket',
@@ -123,6 +125,8 @@ export const UserScalarFieldEnum = {
   oauthProvider: 'oauthProvider',
   oauthProviderId: 'oauthProviderId',
   telegramChatId: 'telegramChatId',
+  telegramFirstName: 'telegramFirstName',
+  telegramLastName: 'telegramLastName',
   telegramUsername: 'telegramUsername',
   telegramPhotoUrl: 'telegramPhotoUrl',
   twoFactorEnabled: 'twoFactorEnabled',
@@ -212,6 +216,22 @@ export const TelegramAuthTokenScalarFieldEnum = {
 } as const
 
 export type TelegramAuthTokenScalarFieldEnum = (typeof TelegramAuthTokenScalarFieldEnum)[keyof typeof TelegramAuthTokenScalarFieldEnum]
+
+
+export const LoginHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  city: 'city',
+  country: 'country',
+  device: 'device',
+  browser: 'browser',
+  os: 'os',
+  createdAt: 'createdAt'
+} as const
+
+export type LoginHistoryScalarFieldEnum = (typeof LoginHistoryScalarFieldEnum)[keyof typeof LoginHistoryScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {
@@ -497,6 +517,30 @@ export const PaymentProviderScalarFieldEnum = {
 } as const
 
 export type PaymentProviderScalarFieldEnum = (typeof PaymentProviderScalarFieldEnum)[keyof typeof PaymentProviderScalarFieldEnum]
+
+
+export const TelegramBotScalarFieldEnum = {
+  id: 'id',
+  botName: 'botName',
+  token: 'token',
+  username: 'username',
+  displayName: 'displayName',
+  description: 'description',
+  isActive: 'isActive',
+  isPrimary: 'isPrimary',
+  webhookUrl: 'webhookUrl',
+  avatarUrl: 'avatarUrl',
+  firstName: 'firstName',
+  canJoinGroups: 'canJoinGroups',
+  canReadMessages: 'canReadMessages',
+  supportsInlineQueries: 'supportsInlineQueries',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  lastSyncAt: 'lastSyncAt'
+} as const
+
+export type TelegramBotScalarFieldEnum = (typeof TelegramBotScalarFieldEnum)[keyof typeof TelegramBotScalarFieldEnum]
 
 
 export const SubscriptionScalarFieldEnum = {

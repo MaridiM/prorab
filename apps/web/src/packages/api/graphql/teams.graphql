@@ -15,6 +15,9 @@ query MyTeams {
     ownerId
     createdAt
     updatedAt
+    subscription {
+      plan
+    }
   }
 }
 

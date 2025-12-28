@@ -184,7 +184,19 @@
       "Bash(if not exist settings mkdir settings)",
       "Bash(if not exist settingsintegrations mkdir settingsintegrations)",
       "Bash(if not exist settingspayment-providers mkdir settingspayment-providers)",
-      "Bash(npm run generate:*)"
+      "Bash(npm run generate:*)",
+      "Bash(exit 0)",
+      "Bash(npx prisma migrate deploy)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(pnpm run start:dev:*)",
+      "Bash(npm run schema:generate:*)",
+      "Bash(git tag:*)",
+      "Bash(pnpm prisma:seed:providers:*)",
+      "Bash(pnpm prisma:generate:*)",
+      "Bash(docker compose:*)",
+      "Bash(netsh interface ipv4 show excludedportrange:*)",
+      "Bash(pnpm prisma studio:*)",
+      "Bash(dir \"g:\\\\Projects\\\\prorab\\\\v-1\"\" | findstr /I \"README \")"
     ],
     "deny": [],
     "ask": []

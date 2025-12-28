@@ -6,6 +6,7 @@ import {
   Subscription as PrismaSubscription,
 } from '@prisma/generated/client';
 import { PlanLimitsModel } from './plan-limits.model';
+import { AdminPlanModel } from '../../admin/models/admin-plan.model';
 
 registerEnumType(SubscriptionPlan, {
   name: 'SubscriptionPlan',
@@ -25,6 +26,9 @@ export class SubscriptionModel implements Partial<PrismaSubscription> {
 
   @Field(() => SubscriptionPlan)
   plan: SubscriptionPlan;
+
+  @Field({ nullable: true, description: 'Plan ID from database (new Plan model)' })
+  planId?: string;
 
   @Field(() => SubscriptionStatus)
   status: SubscriptionStatus;
@@ -49,6 +53,9 @@ export class SubscriptionModel implements Partial<PrismaSubscription> {
 
   @Field()
   isEarlyBird: boolean;
+
+  @Field(() => AdminPlanModel, { nullable: true, description: 'Plan reference from database' })
+  planRef?: AdminPlanModel;
 
   @Field(() => PlanLimitsModel)
   limits: PlanLimitsModel;

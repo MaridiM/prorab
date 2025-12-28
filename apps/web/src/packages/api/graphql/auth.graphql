@@ -110,11 +110,29 @@ mutation UpdateProfile($input: UpdateProfileInput!) {
 
 mutation UpdateNotificationSettings($input: UpdateNotificationSettingsInput!) {
   updateNotificationSettings(input: $input) {
+    id
     appPush
     appEmail
     appSms
     marketingPush
     marketingEmail
+    notifyProjectCreated
+    notifyProjectCompleted
+    notifyExpenseAdded
+    notifyPayoutCalculated
+    notifyPayoutPaid
+    notifyMemberInvited
+    notifyMemberJoined
+    notifyMemberRemoved
+    notifyTaskAssigned
+    notifyTaskCompleted
+    notifyPhotoReportCreated
+    notifySubscriptionExpiring
+    emailFrequency
+    pushFrequency
+    quietHoursEnabled
+    quietHoursStart
+    quietHoursEnd
   }
 }
 
@@ -160,6 +178,10 @@ mutation CheckTelegramAuth($input: CheckTelegramAuthInput!) {
   }
 }
 
+mutation LinkTelegramAccount($token: String!) {
+  linkTelegramAccount(token: $token)
+}
+
 # ==================== Queries ====================
 
 query Me {
@@ -175,11 +197,29 @@ query Me {
     businessRoleAssignedAt
     createdAt
     notificationSettings {
+      id
       appPush
       appEmail
       appSms
       marketingPush
       marketingEmail
+      notifyProjectCreated
+      notifyProjectCompleted
+      notifyExpenseAdded
+      notifyPayoutCalculated
+      notifyPayoutPaid
+      notifyMemberInvited
+      notifyMemberJoined
+      notifyMemberRemoved
+      notifyTaskAssigned
+      notifyTaskCompleted
+      notifyPhotoReportCreated
+      notifySubscriptionExpiring
+      emailFrequency
+      pushFrequency
+      quietHoursEnabled
+      quietHoursStart
+      quietHoursEnd
     }
     adminRole {
       id
@@ -194,8 +234,27 @@ query Sessions {
     id
     userAgent
     ip
+    city
+    country
+    device
+    browser
+    os
     createdAt
     current
+  }
+}
+
+query LoginHistory {
+  loginHistory {
+    id
+    ip
+    userAgent
+    city
+    country
+    device
+    browser
+    os
+    createdAt
   }
 }
 

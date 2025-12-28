@@ -41,26 +41,18 @@ export class YookassaProvider implements IPaymentProvider {
 
   /**
    * Initialize Yookassa client
-   * Priority: SystemSettings → Environment variables
+   * Priority: Environment variables (sync) first, SystemSettings (async) can be loaded later
    */
-  private async initializeClient() {
+  private initializeClient() {
     try {
-      // Try to get credentials from SystemSettings first
-      this.shopId =
-        (await this.systemSettings.getSettingValue('payment.yookassa.shop_id')) ||
-        this.configService.get<string>('YOOKASSA_SHOP_ID')
-
-      this.secretKey =
-        (await this.systemSettings.getSettingValue('payment.yookassa.secret_key')) ||
-        this.configService.get<string>('YOOKASSA_SECRET_KEY')
-
-      this.webhookSecret =
-        (await this.systemSettings.getSettingValue('payment.yookassa.webhook_secret')) ||
-        this.configService.get<string>('YOOKASSA_WEBHOOK_SECRET')
+      // Get credentials from environment variables first (synchronous)
+      this.shopId = this.configService.get<string>('YOOKASSA_SHOP_ID')
+      this.secretKey = this.configService.get<string>('YOOKASSA_SECRET_KEY')
+      this.webhookSecret = this.configService.get<string>('YOOKASSA_WEBHOOK_SECRET')
 
       if (!this.shopId || !this.secretKey) {
         this.logger.warn(
-          'Yookassa credentials not configured. Provider will not be available.',
+          'Yookassa credentials not configured in environment variables. Provider will try to load from SystemSettings on first use.',
         )
         return
       }
@@ -70,9 +62,50 @@ export class YookassaProvider implements IPaymentProvider {
         secretKey: this.secretKey,
       })
 
-      this.logger.log('Yookassa provider initialized successfully')
+      this.logger.log('Yookassa provider initialized successfully from environment variables')
     } catch (error) {
       this.logger.error('Failed to initialize Yookassa provider:', error)
+    }
+  }
+
+  /**
+   * Ensure client is initialized (lazy loading from SystemSettings if needed)
+   */
+  private async ensureInitialized() {
+    // If already initialized from env vars, return
+    if (this.client) {
+      return
+    }
+
+    // Try to load from SystemSettings
+    try {
+      this.shopId = await this.systemSettings.getSettingValue('payment.yookassa.shop_id')
+      this.secretKey = await this.systemSettings.getSettingValue('payment.yookassa.secret_key')
+      this.webhookSecret = await this.systemSettings.getSettingValue('payment.yookassa.webhook_secret')
+
+      if (!this.shopId || !this.secretKey) {
+        // Development mode: Create a mock Yookassa client to allow testing UI flow
+        const isDevelopment = this.configService.get('NODE_ENV') !== 'production'
+
+        if (isDevelopment) {
+          this.logger.warn('⚠️  Yookassa running in DEVELOPMENT mode - using mock implementation')
+          this.logger.warn('⚠️  Set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY in .env for real payment processing')
+          // Don't throw error in development - will be handled in createPayment
+          return
+        }
+
+        throw new Error('Yookassa credentials not configured in SystemSettings or environment variables')
+      }
+
+      this.client = new YooCheckout({
+        shopId: this.shopId,
+        secretKey: this.secretKey,
+      })
+
+      this.logger.log('Yookassa provider initialized successfully from SystemSettings')
+    } catch (error) {
+      this.logger.error('Failed to initialize Yookassa provider from SystemSettings:', error)
+      throw new Error('Yookassa provider not initialized: ' + error.message)
     }
   }
 
@@ -80,8 +113,17 @@ export class YookassaProvider implements IPaymentProvider {
    * Create payment
    */
   async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
+    await this.ensureInitialized()
+
+    // Development mode mock
     if (!this.client) {
-      throw new Error('Yookassa provider not initialized')
+      this.logger.warn('🧪 Yookassa MOCK: Creating fake payment session for development')
+      return {
+        paymentId: `mock_yookassa_${Date.now()}`,
+        confirmationUrl: `${params.returnUrl}?mock=true&provider=yookassa&amount=${params.amount}`,
+        status: 'pending' as any,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+      }
     }
 
     const paymentData: ICreatePayment = {
@@ -121,9 +163,7 @@ export class YookassaProvider implements IPaymentProvider {
    * Get payment details
    */
   async getPayment(paymentId: string): Promise<PaymentDetails> {
-    if (!this.client) {
-      throw new Error('Yookassa provider not initialized')
-    }
+    await this.ensureInitialized()
 
     const payment = await this.client.getPayment(paymentId)
 
@@ -147,9 +187,7 @@ export class YookassaProvider implements IPaymentProvider {
    * Cancel payment
    */
   async cancelPayment(paymentId: string): Promise<void> {
-    if (!this.client) {
-      throw new Error('Yookassa provider not initialized')
-    }
+    await this.ensureInitialized()
 
     await this.client.cancelPayment(paymentId)
     this.logger.log(`Payment ${paymentId} cancelled`)
@@ -159,9 +197,7 @@ export class YookassaProvider implements IPaymentProvider {
    * Refund payment
    */
   async refundPayment(paymentId: string, amount?: number): Promise<RefundResult> {
-    if (!this.client) {
-      throw new Error('Yookassa provider not initialized')
-    }
+    await this.ensureInitialized()
 
     // Get payment to determine amount if not provided
     if (!amount) {
@@ -207,13 +243,7 @@ export class YookassaProvider implements IPaymentProvider {
    */
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.client) {
-        await this.initializeClient()
-      }
-
-      if (!this.client) {
-        return false
-      }
+      await this.ensureInitialized()
 
       // Try to get payment list to verify credentials
       // Yookassa doesn't have a dedicated test endpoint

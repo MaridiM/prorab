@@ -1,0 +1,141 @@
+# Queries
+query GetAdminTelegramBots($includeInactive: Boolean) {
+  adminTelegramBots(includeInactive: $includeInactive) {
+    id
+    botName
+    username
+    displayName
+    description
+    isActive
+    isPrimary
+    webhookUrl
+    avatarUrl
+    firstName
+    canJoinGroups
+    canReadMessages
+    supportsInlineQueries
+    configStatus {
+      hasToken
+      hasWebhook
+      isRegistered
+    }
+    createdAt
+    updatedAt
+    lastSyncAt
+  }
+}
+
+query GetAdminTelegramBot($id: ID, $botName: String) {
+  adminTelegramBot(id: $id, botName: $botName) {
+    id
+    botName
+    username
+    displayName
+    description
+    isActive
+    isPrimary
+    webhookUrl
+    avatarUrl
+    firstName
+    canJoinGroups
+    canReadMessages
+    supportsInlineQueries
+    configStatus {
+      hasToken
+      hasWebhook
+      isRegistered
+    }
+    createdAt
+    updatedAt
+    lastSyncAt
+  }
+}
+
+# Mutations
+mutation AdminCreateTelegramBot($input: CreateTelegramBotInput!) {
+  adminCreateTelegramBot(input: $input) {
+    id
+    botName
+    username
+    displayName
+    description
+    isActive
+    isPrimary
+    webhookUrl
+    avatarUrl
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AdminUpdateTelegramBot($botId: ID!, $input: UpdateTelegramBotInput!) {
+  adminUpdateTelegramBot(botId: $botId, input: $input) {
+    id
+    botName
+    username
+    displayName
+    description
+    isActive
+    isPrimary
+    webhookUrl
+    avatarUrl
+    updatedAt
+  }
+}
+
+mutation AdminDeleteTelegramBot($botId: ID!) {
+  adminDeleteTelegramBot(botId: $botId)
+}
+
+mutation AdminSyncTelegramBot($botId: ID!) {
+  adminSyncTelegramBot(botId: $botId) {
+    id
+    username
+    displayName
+    firstName
+    avatarUrl
+    canJoinGroups
+    canReadMessages
+    supportsInlineQueries
+    lastSyncAt
+  }
+}
+
+mutation AdminTestTelegramBot($input: TestBotTokenInput!) {
+  adminTestTelegramBot(input: $input) {
+    valid
+    botInfo {
+      id
+      username
+      firstName
+      canJoinGroups
+      canReadMessages
+      supportsInlineQueries
+    }
+    error
+  }
+}
+
+mutation AdminSetTelegramWebhook($input: SetWebhookInput!) {
+  adminSetTelegramWebhook(input: $input)
+}
+
+mutation AdminDeleteTelegramWebhook($botId: ID!) {
+  adminDeleteTelegramWebhook(botId: $botId)
+}
+
+mutation AdminReloadTelegramBot($botId: ID!) {
+  adminReloadTelegramBot(botId: $botId)
+}
+
+query AdminTelegramBotWebhookInfo($botId: ID!) {
+  adminTelegramBotWebhookInfo(botId: $botId) {
+    url
+    hasCustomCertificate
+    pendingUpdateCount
+    lastErrorDate
+    lastErrorMessage
+    maxConnections
+    allowedUpdates
+  }
+}

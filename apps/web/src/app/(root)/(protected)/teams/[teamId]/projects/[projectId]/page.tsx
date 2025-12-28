@@ -614,12 +614,12 @@ export default function ProjectDetailsPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/80">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
-				<div className="container mx-auto p-6 max-w-6xl">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-6">
 					<div className="space-y-6">
 						<Skeleton className="h-64 w-full rounded-2xl" />
 						<Skeleton className="h-96 w-full rounded-2xl" />
@@ -678,7 +678,7 @@ export default function ProjectDetailsPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-start justify-between">
 						<div className="flex items-start gap-4">
 							{/* Back Button */}
@@ -746,7 +746,7 @@ export default function ProjectDetailsPage() {
 
 			{/* Tabs */}
 			<div className="border-b border-border/30 bg-card/50">
-				<div className="container mx-auto px-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4">
 					<div className="flex gap-1 overflow-x-auto">
 						{tabs.map(tab => (
 							<button
@@ -773,7 +773,7 @@ export default function ProjectDetailsPage() {
 			</div>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6 max-w-6xl">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<AnimatePresence mode="wait">
 					{/* Info Tab */}
 					{activeTab === 'info' && (

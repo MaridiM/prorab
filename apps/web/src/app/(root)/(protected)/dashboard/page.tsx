@@ -39,9 +39,13 @@ import {
 	ProjectStatsDocument,
 	ExpensesByProjectDocument,
 	ProjectPhotoReportsDocument,
+	MySubscriptionDocument,
 } from '@/packages/api/graphql'
 import { useAuth } from '@/packages/libs/auth'
-import { Button, Skeleton, Badge, ProgressBar, UserMenu } from '@/packages/components'
+import { Button, Skeleton, Badge, ProgressBar, UserMenu, TrialStatusWidget } from '@/packages/components'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/packages/components/ui/tabs'
+import { UpgradeWidget } from '@/packages/components/subscription/upgrade-widget'
+import { UpgradeButton } from '@/packages/components/subscription/upgrade-button'
 import { ProjectStatus } from '@/packages/schemas'
 import { useToast } from '@/packages/hooks'
 import { cn, isAuthError, handleAuthError } from '@/packages/utils'
@@ -974,7 +978,8 @@ export default function DashboardPage() {
 	// State
 	const [currentTeamId, setCurrentTeamId] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
-	const [showArchived, setShowArchived] = useState(false)
+	const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
+	const [sortBy, setSortBy] = useState<'default' | 'name' | 'date' | 'status'>('default')
 	const [teamDropdownOpen, setTeamDropdownOpen] = useState(false)
 	const [projectStatsMap, setProjectStatsMap] = useState<Map<string, any>>(new Map())
 	const [projectPickerTab, setProjectPickerTab] = useState<'expenses' | 'reports' | null>(null)
@@ -1042,6 +1047,16 @@ export default function DashboardPage() {
 	const currentTeam = teams.find(t => t.id === currentTeamId)
 	const isOwner = currentTeam?.ownerId === user?.id
 
+	// Load subscription
+	const {
+		data: subscriptionData,
+		loading: subscriptionLoading,
+	} = useQuery(MySubscriptionDocument, {
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const subscription = subscriptionData?.mySubscription || null
+
 	// Load projects
 	const {
 		data: projectsData,
@@ -1067,12 +1082,54 @@ export default function DashboardPage() {
 	}, [allProjects, searchQuery])
 
 	// Separate active and archived
-	const activeProjects = filteredProjects.filter(
+	const allActiveProjects = filteredProjects.filter(
 		p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
 	)
 	const archivedProjects = filteredProjects.filter(
 		p => p?.status === ProjectStatus.ARCHIVED
 	)
+
+	// Smart sorting: active/incomplete first, then completed
+	const activeProjects = useMemo(() => {
+		const sorted = [...allActiveProjects].sort((a, b) => {
+			// First sort by status: ACTIVE first, then COMPLETED
+			if (a.status === ProjectStatus.ACTIVE && b.status === ProjectStatus.COMPLETED) return -1
+			if (a.status === ProjectStatus.COMPLETED && b.status === ProjectStatus.ACTIVE) return 1
+			
+			// Then apply additional sorting if specified
+			if (sortBy === 'name') {
+				return (a.name || '').localeCompare(b.name || '', 'ru')
+			}
+			if (sortBy === 'date') {
+				const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
+				const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
+				return dateB - dateA // Newest first
+			}
+			if (sortBy === 'status') {
+				return (a.status || '').localeCompare(b.status || '', 'ru')
+			}
+			
+			// Default: keep original order (already sorted by status above)
+			return 0
+		})
+		return sorted
+	}, [allActiveProjects, sortBy])
+
+	// Sort archived projects
+	const sortedArchivedProjects = useMemo(() => {
+		const sorted = [...archivedProjects].sort((a, b) => {
+			if (sortBy === 'name') {
+				return (a.name || '').localeCompare(b.name || '', 'ru')
+			}
+			if (sortBy === 'date') {
+				const dateA = a.archivedAt ? new Date(a.archivedAt).getTime() : (a.updatedAt ? new Date(a.updatedAt).getTime() : 0)
+				const dateB = b.archivedAt ? new Date(b.archivedAt).getTime() : (b.updatedAt ? new Date(b.updatedAt).getTime() : 0)
+				return dateB - dateA // Newest first
+			}
+			return 0
+		})
+		return sorted
+	}, [archivedProjects, sortBy])
 
 	// Track loaded projects for loading state
 	const [loadedProjects, setLoadedProjects] = useState<Set<string>>(new Set())
@@ -1409,7 +1466,7 @@ export default function DashboardPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-3">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-3">
 					<div className="flex items-center justify-between">
 						{/* Logo + Team Switcher */}
 						<div className="flex items-center gap-4">
@@ -1502,6 +1559,9 @@ export default function DashboardPage() {
 
 						{/* Actions */}
 						<div className="flex items-center gap-3">
+							{/* Upgrade Button */}
+							<UpgradeButton />
+
 							{user?.adminRole && (
 								<Button
 									variant="outline"
@@ -1530,10 +1590,32 @@ export default function DashboardPage() {
 			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<motion.div initial="hidden" animate="visible" variants={stagger}>
 					{/* Welcome Header */}
-					<WelcomeHeader 
-						userName={user?.fullName?.split(' ')[0] || 'Прораб'} 
+					<WelcomeHeader
+						userName={user?.fullName?.split(' ')[0] || 'Прораб'}
 						greeting={greeting}
 					/>
+
+					{/* Trial Status Widget */}
+					{subscription && (
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.5, delay: 0.1 }}
+							className="mb-6"
+						>
+							<TrialStatusWidget subscription={subscription} />
+						</motion.div>
+					)}
+
+					{/* Upgrade Widget (shows when usage > 70%) */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: 0.15 }}
+						className="mb-6"
+					>
+						<UpgradeWidget />
+					</motion.div>
 
 					{/* Financial Stats (only for owner with projects) */}
 					{isOwner && stats.totalBudget > 0 && (
@@ -1614,108 +1696,75 @@ export default function DashboardPage() {
 								</div>
 							</motion.div>
 
-							{/* Active Projects */}
+							{/* Projects Tabs */}
 							<motion.section
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.5, delay: 0.2 }}
 								className="mb-8"
 							>
-								<div className="flex items-center justify-between mb-4">
-									<h2 className="text-lg font-semibold flex items-center gap-2">
-										<span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-										Активные объекты
-										{activeProjects.length > 0 && (
-											<span className="text-sm font-normal text-muted-foreground">
-												({activeProjects.length})
-											</span>
-										)}
-									</h2>
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={handleCreateProject}
-										className="text-primary hover:text-primary/80"
-									>
-										<Plus className="w-4 h-4 mr-1" />
-										Добавить
-									</Button>
-								</div>
-
-								{projectsLoading && !projectsData ? (
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-										{[1, 2, 3, 4].map(i => (
-											<Skeleton key={i} className="h-56 rounded-2xl" />
-										))}
-									</div>
-								) : activeProjects.length > 0 ? (
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-										{activeProjects.map(project => {
-											if (!project?.id) return null
-											return (
-												<ProjectCardWithStats
-													key={project.id}
-													project={project}
-													teamId={currentTeamId || ''}
-													isOwner={isOwner}
-													showFinancials={isOwner}
-												/>
-											)
-										})}
-									</div>
-								) : (
-									<EmptyState
-										icon={FolderKanban}
-										title={searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
-										description={searchQuery 
-											? 'Попробуйте изменить поисковый запрос'
-											: 'Создайте свой первый строительный объект и начните вести учёт'
-										}
-										action={!searchQuery ? { label: 'Создать объект', onClick: handleCreateProject } : undefined}
-									/>
-								)}
-							</motion.section>
-
-							{/* Archived Projects */}
-							{archivedProjects.length > 0 && (
-								<motion.section
-									initial={{ opacity: 0, y: 20 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.3 }}
-								>
-									<button
-										onClick={() => setShowArchived(!showArchived)}
-										className={cn(
-											'w-full flex items-center justify-between p-4 rounded-2xl',
-											'bg-secondary/30 border border-border/30',
-											'hover:bg-secondary/50 transition-colors mb-4'
-										)}
-									>
-										<div className="flex items-center gap-2">
-											<span className="w-2 h-2 rounded-full bg-muted-foreground" />
-											<span className="font-medium">Архив</span>
-											<span className="text-sm text-muted-foreground">
-												({archivedProjects.length})
-											</span>
-										</div>
-										<motion.div
-											animate={{ rotate: showArchived ? 180 : 0 }}
-											transition={{ duration: 0.2 }}
-										>
-											<ChevronDown className="w-5 h-5 text-muted-foreground" />
-										</motion.div>
-									</button>
-
-									<AnimatePresence>
-										{showArchived && (
-											<motion.div
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: 'auto' }}
-												exit={{ opacity: 0, height: 0 }}
-												transition={{ duration: 0.3 }}
+								<Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'archived')} className="w-full">
+									<div className="flex items-center justify-between mb-4">
+										<TabsList className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+											<TabsTrigger 
+												value="active" 
+												className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
 											>
+												<span className="w-2 h-2 rounded-full bg-emerald-500 mr-2" />
+												Активные объекты
+												{activeProjects.length > 0 && (
+													<span className="ml-2 text-xs text-muted-foreground">
+														({activeProjects.length})
+													</span>
+												)}
+											</TabsTrigger>
+											{archivedProjects.length > 0 && (
+												<TabsTrigger 
+													value="archived"
+													className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+												>
+													<span className="w-2 h-2 rounded-full bg-muted-foreground mr-2" />
+													Архив
+													<span className="ml-2 text-xs text-muted-foreground">
+														({archivedProjects.length})
+													</span>
+												</TabsTrigger>
+											)}
+										</TabsList>
+										<div className="flex items-center gap-2">
+											{/* Sort dropdown */}
+											<select
+												value={sortBy}
+												onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+												className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+											>
+												<option value="default">По умолчанию</option>
+												<option value="name">По названию</option>
+												<option value="date">По дате</option>
+												<option value="status">По статусу</option>
+											</select>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={handleCreateProject}
+												className="text-primary hover:text-primary/80"
+											>
+												<Plus className="w-4 h-4 mr-1" />
+												Добавить
+											</Button>
+										</div>
+									</div>
+
+										<TabsContent value="active" className="mt-4">
+											{projectsLoading && !projectsData ? (
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-													{archivedProjects.map(project => {
+													{[1, 2, 3, 4].map(i => (
+														<Skeleton key={i} className="h-56 rounded-2xl" />
+													))}
+												</div>
+											) : activeProjects.length > 0 ? (
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													{activeProjects.map(project => {
 														if (!project?.id) return null
 														return (
 															<ProjectCardWithStats
@@ -1728,11 +1777,47 @@ export default function DashboardPage() {
 														)
 													})}
 												</div>
-											</motion.div>
-										)}
-									</AnimatePresence>
-								</motion.section>
-							)}
+											) : (
+												<EmptyState
+													icon={FolderKanban}
+													title={searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
+													description={searchQuery 
+														? 'Попробуйте изменить поисковый запрос'
+														: 'Создайте свой первый строительный объект и начните вести учёт'
+													}
+													action={!searchQuery ? { label: 'Создать объект', onClick: handleCreateProject } : undefined}
+												/>
+											)}
+										</TabsContent>
+
+									{archivedProjects.length > 0 && (
+										<TabsContent value="archived" className="mt-4">
+											{sortedArchivedProjects.length > 0 ? (
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													{sortedArchivedProjects.map(project => {
+														if (!project?.id) return null
+														return (
+															<ProjectCardWithStats
+																key={project.id}
+																project={project}
+																teamId={currentTeamId || ''}
+																isOwner={isOwner}
+																showFinancials={isOwner}
+															/>
+														)
+													})}
+												</div>
+											) : (
+												<EmptyState
+													icon={FolderKanban}
+													title="Нет архивных объектов"
+													description="Архивные объекты будут отображаться здесь"
+												/>
+											)}
+										</TabsContent>
+									)}
+								</Tabs>
+							</motion.section>
 						</div>
 
 						{/* Sidebar: Recent Activity */}

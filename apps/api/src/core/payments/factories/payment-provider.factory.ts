@@ -33,7 +33,7 @@ export class PaymentProviderFactory {
    * Selection logic:
    * 1. If type is specified → return that provider
    * 2. If type is not specified → get primary active provider from DB
-   * 3. Fallback → YOOKASSA (for backward compatibility)
+   * 3. Fallback → STRIPE (primary provider)
    *
    * @param type - Specific provider type (optional)
    * @returns Payment provider instance
@@ -61,9 +61,9 @@ export class PaymentProviderFactory {
       this.logger.error('Failed to fetch primary provider from DB:', error)
     }
 
-    // 3. Fallback: YOOKASSA (for backward compatibility)
-    this.logger.warn('No primary provider found, falling back to YOOKASSA')
-    return this.getProviderInstance(PaymentProviderType.YOOKASSA)
+    // 3. Fallback: STRIPE (primary provider)
+    this.logger.warn('No primary provider found, falling back to STRIPE')
+    return this.getProviderInstance(PaymentProviderType.STRIPE)
   }
 
   /**
@@ -121,8 +121,8 @@ export class PaymentProviderFactory {
       return activeProviders.map((p: PaymentProvider) => this.getProviderInstance(p.type))
     } catch (error) {
       this.logger.error('Failed to fetch active providers:', error)
-      // Fallback: return only YOOKASSA
-      return [this.getProviderInstance(PaymentProviderType.YOOKASSA)]
+      // Fallback: return only STRIPE
+      return [this.getProviderInstance(PaymentProviderType.STRIPE)]
     }
   }
 

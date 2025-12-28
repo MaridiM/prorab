@@ -8,8 +8,9 @@ import { PaymentProvidersPanel } from './payment-providers/payment-providers-pan
 import { SubscriptionPlansPanel } from './subscription-plans'
 import { AdminRolesPanel } from './admin-roles'
 import { AuditLogsPanel } from './audit-logs'
+import { TelegramBotsPanel } from './telegram-bots'
 
-type MainTab = 'integrations' | 'providers' | 'plans' | 'roles' | 'logs'
+type MainTab = 'integrations' | 'providers' | 'plans' | 'telegram-bots' | 'roles' | 'logs'
 
 export function SystemSettingsTabs() {
 	const router = useRouter()
@@ -73,10 +74,11 @@ export function SystemSettingsTabs() {
 
 	return (
 		<Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-			<TabsList className="grid w-full max-w-4xl grid-cols-5">
+			<TabsList className="grid w-full max-w-4xl grid-cols-6">
 				<TabsTrigger value="integrations">System Integrations</TabsTrigger>
 				<TabsTrigger value="providers">Payment Providers</TabsTrigger>
 				<TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+				<TabsTrigger value="telegram-bots">Telegram Bots</TabsTrigger>
 				<TabsTrigger value="roles">Admin Roles</TabsTrigger>
 				<TabsTrigger value="logs">Audit Logs</TabsTrigger>
 			</TabsList>
@@ -91,6 +93,10 @@ export function SystemSettingsTabs() {
 
 			<TabsContent value="plans" className="mt-6">
 				<SubscriptionPlansPanel />
+			</TabsContent>
+
+			<TabsContent value="telegram-bots" className="mt-6">
+				<TelegramBotsPanel />
 			</TabsContent>
 
 			<TabsContent value="roles" className="mt-6">

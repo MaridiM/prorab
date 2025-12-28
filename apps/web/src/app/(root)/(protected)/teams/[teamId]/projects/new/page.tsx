@@ -10,6 +10,7 @@ import {
 	MyTeamsDocument,
 } from '@/packages/api/graphql'
 import { ProjectForm } from '@/packages/components/projects'
+import { UpgradePrompt } from '@/packages/components/subscriptions/upgrade-prompt'
 import { Card, CardContent, CardHeader, CardTitle, Skeleton, UserMenu } from '@/packages/components/ui'
 import { useToast } from '@/packages/hooks'
 import { ArrowLeft, FolderPlus, Users } from 'lucide-react'
@@ -31,6 +32,7 @@ export default function NewProjectPage() {
 	const teamId = params.teamId as string
 
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [isLimitError, setIsLimitError] = useState(false)
 
 	// Загрузка команды
 	const { data: teamsData, loading: teamsLoading } = useQuery(MyTeamsDocument)
@@ -75,6 +77,12 @@ export default function NewProjectPage() {
 			}
 		} catch (error: any) {
 			console.error('Error creating project:', error)
+
+			if (error.message.includes('Достигнут лимит активных проектов')) {
+				setIsLimitError(true)
+				return
+			}
+
 			showToast({
 				type: 'error',
 				message: error.message || 'Не удалось создать проект',
@@ -93,12 +101,12 @@ export default function NewProjectPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/80">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
-				<div className="container mx-auto p-6 max-w-4xl">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-6">
 					<Skeleton className="h-[600px] rounded-2xl" />
 				</div>
 			</div>
@@ -114,7 +122,7 @@ export default function NewProjectPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-center justify-between gap-4">
 						<div className="flex items-center gap-4">
 							{/* Back Button */}
@@ -154,7 +162,7 @@ export default function NewProjectPage() {
 			</motion.header>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6 max-w-4xl">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<motion.div
 					initial="hidden"
 					animate="visible"
@@ -175,13 +183,31 @@ export default function NewProjectPage() {
 							</div>
 						</CardHeader>
 						<CardContent className="pt-6">
-							<ProjectForm
-								mode="create"
-								teamId={teamId}
-								onSubmit={handleSubmit}
-								onCancel={handleCancel}
-								isSubmitting={isSubmitting}
-							/>
+							{isLimitError && team?.subscription?.plan ? (
+								<div className="space-y-6">
+									<UpgradePrompt
+										limitType="projects"
+										currentPlan={team.subscription.plan}
+										onUpgrade={() => router.push(`/teams/${teamId}/settings/billing`)}
+									/>
+									<div className="flex justify-end">
+										<button
+											onClick={() => setIsLimitError(false)}
+											className="text-sm text-muted-foreground hover:text-foreground"
+										>
+											Назад к созданию
+										</button>
+									</div>
+								</div>
+							) : (
+								<ProjectForm
+									mode="create"
+									teamId={teamId}
+									onSubmit={handleSubmit}
+									onCancel={handleCancel}
+									isSubmitting={isSubmitting}
+								/>
+							)}
 						</CardContent>
 					</Card>
 				</motion.div>

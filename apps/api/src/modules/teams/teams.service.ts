@@ -152,7 +152,59 @@ export class TeamsService extends CoreService {
 
       this.logger.log(`Completed onboarding for user ${userId}`);
 
-      return { team, project };
+      // 6. Create subscription if planId is provided
+      let subscription = null;
+      if (input.planId) {
+        this.logger.log(`Creating subscription with plan ${input.planId} for team ${team.id}`);
+
+        // Load plan to get enum value
+        const plan = await tx.plan.findUnique({
+          where: { id: input.planId },
+        });
+
+        if (!plan) {
+          throw new BadRequestException('Выбранный тарифный план не найден');
+        }
+
+        // Map plan slug to SubscriptionPlan enum
+        const planEnumMap: Record<string, string> = {
+          'lite': 'LITE',
+          'foreman': 'FOREMAN',
+          'pro': 'PRO',
+          'premium': 'PREMIUM'
+        };
+
+        const planEnum = planEnumMap[plan.slug] || 'LITE';
+
+        // Calculate trial period
+        const now = new Date();
+        const trialDays = plan.trialDays ?? 0;
+        const trialEndsAt = trialDays > 0
+          ? new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000)
+          : null;
+
+        const billingCycleDays = 30; // Default billing cycle
+        const currentPeriodEnd = trialEndsAt || new Date(
+          now.getTime() + billingCycleDays * 24 * 60 * 60 * 1000,
+        );
+
+        subscription = await tx.subscription.create({
+          data: {
+            teamId: team.id,
+            plan: planEnum as any,
+            planId: input.planId,
+            status: trialEndsAt ? 'TRIALING' : 'ACTIVE',
+            currentPeriodStart: now,
+            currentPeriodEnd,
+            trialEndsAt,
+            isEarlyBird: false,
+          },
+        });
+
+        this.logger.log(`Created subscription ${subscription.id} for team ${team.id}`);
+      }
+
+      return { team, project, subscription };
     });
 
     // Возвращаем результат

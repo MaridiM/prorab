@@ -118,6 +118,8 @@ export interface ThumbnailOptions {
  *
  * Structure:
  * prorab-space/
+ * ├── system/
+ * │   └── bot-avatars/
  * └── user-{userId}/
  *     ├── avatars/
  *     └── team-{teamId}/
@@ -138,6 +140,9 @@ export enum FileType {
 
   /** Expense receipts: prorab-space/user-{userId}/team-{teamId}/project-{projectId}/expense-photos/ */
   EXPENSE_PHOTO = 'expense-photos',
+
+  /** Bot avatars: prorab-space/system/bot-avatars/ */
+  BOT_AVATAR = 'bot-avatars',
 }
 
 /**

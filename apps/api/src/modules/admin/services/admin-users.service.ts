@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../../../core/prisma/prisma.service'
 import { AdminActionLogService } from './admin-action-log.service'
+import { AuthService } from '../../auth/auth.service'
 import type { User } from '@prisma/generated/client'
 
 export interface AdminUserFilters {
@@ -36,7 +37,6 @@ export interface AdminUserDetails {
 	_count: {
 		ownedTeams: number
 		teamMemberships: number
-		payments: number
 	}
 }
 
@@ -66,6 +66,7 @@ export class AdminUsersService {
 	constructor(
 		private prisma: PrismaService,
 		private auditService: AdminActionLogService,
+		private authService: AuthService,
 	) {}
 
 	/**
@@ -175,7 +176,16 @@ export class AdminUsersService {
 				adminRole: true,
 				ownedTeams: {
 					include: {
-						subscription: true,
+						subscription: {
+							include: {
+								payments: {
+									orderBy: {
+										createdAt: 'desc',
+									},
+									take: 10, // Last 10 payments
+								},
+							},
+						},
 						_count: {
 							select: {
 								members: true,
@@ -188,7 +198,16 @@ export class AdminUsersService {
 					include: {
 						team: {
 							include: {
-								subscription: true,
+								subscription: {
+									include: {
+										payments: {
+											orderBy: {
+												createdAt: 'desc',
+											},
+											take: 10, // Last 10 payments
+										},
+									},
+								},
 							},
 						},
 					},
@@ -197,7 +216,6 @@ export class AdminUsersService {
 					select: {
 						ownedTeams: true,
 						teamMemberships: true,
-						// payments: true, // TODO: Add when Payment relation exists
 					},
 				},
 			},
@@ -211,7 +229,7 @@ export class AdminUsersService {
 			user,
 			ownedTeams: user.ownedTeams || [],
 			teamMemberships: user.teamMemberships || [],
-			_count: { ...user._count, payments: 0 },
+			_count: user._count,
 		}
 	}
 
@@ -267,8 +285,23 @@ export class AdminUsersService {
 			throw new NotFoundException(`User with ID ${userId} not found`)
 		}
 
-		// TODO: Implement session tracking if needed
-		return []
+		// Get login history (last 50 sessions) as session tracking
+		const loginHistory = await this.prisma.loginHistory.findMany({
+			where: { userId },
+			orderBy: { createdAt: 'desc' },
+			take: 50,
+		})
+
+		// Map LoginHistory to UserSession format
+		return loginHistory.map((login) => ({
+			id: login.id,
+			userId: login.userId,
+			token: 'redacted', // Token not stored in LoginHistory
+			expiresAt: new Date(login.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000), // Assume 30 days
+			createdAt: login.createdAt,
+			ipAddress: login.ip,
+			userAgent: login.userAgent,
+		}))
 	}
 
 	/**
@@ -345,7 +378,8 @@ export class AdminUsersService {
 			throw new NotFoundException(`User with ID ${userId} not found`)
 		}
 
-		// TODO: Integrate with email service to send password reset link
+		// Send password reset email using AuthService
+		await this.authService.forgotPassword(user.email)
 
 		// Log action
 		await this.auditService.logAction({
@@ -355,7 +389,7 @@ export class AdminUsersService {
 			resourceId: userId,
 		})
 
-		this.logger.log(`Password reset email would be sent to ${user.email}`)
+		this.logger.log(`Password reset email sent to ${user.email}`)
 
 		return true
 	}

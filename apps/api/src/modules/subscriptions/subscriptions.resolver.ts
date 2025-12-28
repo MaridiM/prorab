@@ -10,10 +10,15 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '@prisma/generated/client';
 import { PLAN_LIMITS } from './constants/plans.constants';
+import { AdminPlansService } from '../admin/services/admin-plans.service';
+import { AdminPlanModel } from '../admin/models/admin-plan.model';
 
 @Resolver(() => SubscriptionModel)
 export class SubscriptionsResolver {
-  constructor(private subscriptionsService: SubscriptionsService) {}
+  constructor(
+    private subscriptionsService: SubscriptionsService,
+    private adminPlansService: AdminPlansService,
+  ) {}
 
   @Query(() => SubscriptionModel, { nullable: true })
   @UseGuards(AuthGuard)
@@ -26,11 +31,19 @@ export class SubscriptionsResolver {
       return null;
     }
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,
       limits,
+      planRef: subscription.planRef ? {
+        ...subscription.planRef,
+        prices: subscription.planRef.prices.map(p => ({
+          ...p,
+          price: Number(p.price),
+          earlyBirdPrice: Number(p.earlyBirdPrice),
+        })),
+      } : undefined,
     };
   }
 
@@ -45,24 +58,72 @@ export class SubscriptionsResolver {
       user.id,
     );
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,
       limits,
+      planRef: subscription.planRef ? {
+        ...subscription.planRef,
+        prices: subscription.planRef.prices.map(p => ({
+          ...p,
+          price: Number(p.price),
+          earlyBirdPrice: Number(p.earlyBirdPrice),
+        })),
+      } : undefined,
     };
   }
 
   @Query(() => [PlanLimitsModel])
   async availablePlans(): Promise<PlanLimitsModel[]> {
-    return Object.values(PLAN_LIMITS).map((limits) => ({
-      name: limits.name,
-      price: limits.price,
-      maxActiveProjects: limits.maxActiveProjects,
-      maxMembers: limits.maxMembers,
-      storageGB: limits.storageGB,
-      features: limits.features,
+    return this.subscriptionsService.getAvailablePlans();
+  }
+
+  /**
+   * Get all available plans from database with full details (prices, features)
+   * Public query - no authentication required
+   */
+  @Query(() => [AdminPlanModel])
+  async availablePlansDetailed(): Promise<AdminPlanModel[]> {
+    const plans = await this.adminPlansService.getAvailablePlans();
+
+    // Transform to match AdminPlanModel format (convert Decimal to number)
+    return plans.map(plan => ({
+      ...plan,
+      prices: plan.prices.map(p => ({
+        ...p,
+        price: Number(p.price),
+        earlyBirdPrice: Number(p.earlyBirdPrice),
+      })),
+      subscriptionsCount: (plan as any)._count?.subscriptions,
     }));
+  }
+
+  /**
+   * Get a plan by slug from database
+   * Public query - no authentication required
+   */
+  @Query(() => AdminPlanModel, { nullable: true })
+  async planBySlug(
+    @Args('slug') slug: string,
+  ): Promise<AdminPlanModel | null> {
+    try {
+      const plan = await this.adminPlansService.findBySlug(slug);
+
+      // Transform to match AdminPlanModel format (convert Decimal to number)
+      return {
+        ...plan,
+        prices: plan.prices.map(p => ({
+          ...p,
+          price: Number(p.price),
+          earlyBirdPrice: Number(p.earlyBirdPrice),
+        })),
+        subscriptionsCount: (plan as any)._count?.subscriptions,
+      };
+    } catch (error) {
+      // Return null if plan not found instead of throwing error
+      return null;
+    }
   }
 
   @Query(() => PlanLimitsModel)
@@ -100,11 +161,19 @@ export class SubscriptionsResolver {
       user.id,
     );
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,
       limits,
+      planRef: subscription.planRef ? {
+        ...subscription.planRef,
+        prices: subscription.planRef.prices.map(p => ({
+          ...p,
+          price: Number(p.price),
+          earlyBirdPrice: Number(p.earlyBirdPrice),
+        })),
+      } : undefined,
     };
   }
 
@@ -119,7 +188,7 @@ export class SubscriptionsResolver {
       user.id,
     );
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,
@@ -138,7 +207,7 @@ export class SubscriptionsResolver {
       user.id,
     );
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,
@@ -158,7 +227,7 @@ export class SubscriptionsResolver {
         user.id,
       );
 
-    const limits = this.subscriptionsService.getPlanLimits(subscription.plan);
+    const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
     return {
       ...subscription,

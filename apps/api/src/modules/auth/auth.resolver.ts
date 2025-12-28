@@ -20,7 +20,7 @@ import {
 	ClientIp,
 	UserAgent,
 } from '../../shared/decorators/current-user.decorator'
-import { AuthPayload, Session } from './models/auth.model'
+import { AuthPayload, Session, LoginHistory } from './models/auth.model'
 import { TelegramAuthService } from '../telegram/telegram-auth.service'
 import {
 	TelegramAuthPayload,
@@ -185,6 +185,11 @@ export class AuthResolver {
 			id: s.userId, // This is actually the token
 			userAgent: s.userAgent,
 			ip: s.ip,
+			city: s.city,
+			country: s.country,
+			device: s.device,
+			browser: s.browser,
+			os: s.os,
 			createdAt: new Date(s.createdAt),
 			current: s.userId === currentSessionToken,
 		}))
@@ -353,6 +358,24 @@ export class AuthResolver {
 	private clearAuthCookies(res: Response): void {
 		res.clearCookie('session_token', COOKIE_OPTIONS)
 		res.clearCookie('refresh_token', COOKIE_OPTIONS)
+	}
+	// ==================== Telegram Integration Updates ====================
+
+	@UseGuards(AuthGuard)
+	@Mutation(() => Boolean, {
+		description: 'Привязать Telegram аккаунт к текущему пользователю',
+	})
+	async linkTelegramAccount(
+		@Args('token') token: string,
+		@CurrentUser() user: CurrentUserData,
+	): Promise<boolean> {
+		const result = await this.authService.linkTelegramAccount(user.id, token)
+		return result.success
+	}
+	@UseGuards(AuthGuard)
+	@Query(() => [LoginHistory])
+	async loginHistory(@CurrentUser() user: CurrentUserData): Promise<LoginHistory[]> {
+		return this.authService.getLoginHistory(user.id)
 	}
 }
 

@@ -4,6 +4,7 @@ fragment SubscriptionFields on Subscription {
   id
   teamId
   plan
+  planId
   status
   currentPeriodStart
   currentPeriodEnd
@@ -11,6 +12,11 @@ fragment SubscriptionFields on Subscription {
   cancelAtPeriodEnd
   cancelledAt
   isEarlyBird
+  planRef {
+    id
+    name
+    trialDays
+  }
   limits {
     name
     price
@@ -24,6 +30,8 @@ fragment SubscriptionFields on Subscription {
 }
 
 fragment PlanLimitsFields on PlanLimits {
+  id
+  slug
   name
   price
   maxActiveProjects
@@ -45,6 +53,50 @@ fragment PaymentFields on Payment {
   failureReason
   paidAt
   refundedAt
+  createdAt
+  updatedAt
+}
+
+fragment PlanPriceFields on AdminPlanPriceModel {
+  id
+  planId
+  currency
+  price
+  earlyBirdPrice
+  billingCycleDays
+  createdAt
+  updatedAt
+}
+
+fragment PlanFeatureFields on AdminPlanFeatureModel {
+  id
+  planId
+  name
+  description
+  isIncluded
+  sortOrder
+}
+
+fragment AdminPlanFields on AdminPlanModel {
+  id
+  slug
+  name
+  description
+  maxActiveProjects
+  maxMembers
+  storageGB
+  isActive
+  isPopular
+  sortOrder
+  isEarlyBird
+  trialDays
+  prices {
+    ...PlanPriceFields
+  }
+  features {
+    ...PlanFeatureFields
+  }
+  subscriptionsCount
   createdAt
   updatedAt
 }
@@ -90,6 +142,24 @@ query PaymentsBySubscription($subscriptionId: String!) {
   }
 }
 
+query AvailablePlans {
+  availablePlans {
+    ...AdminPlanFields
+  }
+}
+
+query AvailablePlansDetailed {
+  availablePlansDetailed {
+    ...AdminPlanFields
+  }
+}
+
+query PlanBySlug($slug: String!) {
+  planBySlug(slug: $slug) {
+    ...AdminPlanFields
+  }
+}
+
 # ============ MUTATIONS ============
 
 mutation CreateSubscription($input: CreateSubscriptionInput!) {
@@ -116,8 +186,22 @@ mutation ReactivateSubscription($subscriptionId: String!) {
   }
 }
 
-mutation InitializePayment($subscriptionId: String!) {
-  initializePayment(subscriptionId: $subscriptionId) {
+fragment PaymentProviderFields on PaymentProviderModel {
+  id
+  type
+  name
+  isActive
+  isPrimary
+}
+
+query AvailablePaymentProviders {
+  availablePaymentProviders {
+    ...PaymentProviderFields
+  }
+}
+
+mutation InitializePayment($subscriptionId: String!, $providerType: String) {
+  initializePayment(subscriptionId: $subscriptionId, providerType: $providerType) {
     url
     paymentId
   }

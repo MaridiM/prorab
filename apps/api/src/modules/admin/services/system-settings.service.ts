@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { EncryptionService } from '../../../shared/services/encryption.service';
+import { S3Client, HeadBucketCommand } from '@aws-sdk/client-s3';
 import type { SettingCategory, SettingValueType, SystemSettings } from '@prisma/generated/client';
 
 
@@ -78,6 +79,17 @@ export class SystemSettingsService {
     }
 
     return setting.value || setting.defaultValue || null;
+  }
+
+  /**
+   * Get setting value from settings array (helper for test methods)
+   */
+  private getSettingValueFromArray(settings: SystemSettings[], key: string): string | null {
+    const setting = settings.find((s) => s.key === key);
+    if (!setting) {
+      return null;
+    }
+    return this.getDecryptedValue(setting) || setting.defaultValue || null;
   }
 
   /**
@@ -356,35 +368,206 @@ export class SystemSettingsService {
   }
 
   private async testYookassaConnection(settings: SystemSettings[]): Promise<any> {
-    // TODO: Implement Yookassa API test
-    return {
-      success: true,
-      message: 'Yookassa connection test not implemented yet',
-    };
+    try {
+      const shopId = this.getSettingValueFromArray(settings, 'payment.yookassa.shop_id');
+      const secretKey = this.getSettingValueFromArray(settings, 'payment.yookassa.secret_key');
+
+      if (!shopId || !secretKey) {
+        return {
+          success: false,
+          message: 'Yookassa Shop ID or Secret Key not configured',
+        };
+      }
+
+      // Test Yookassa API by getting shop info
+      const auth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');
+      const response = await fetch('https://api.yookassa.ru/v3/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          message: `Yookassa API error: ${response.status} - ${errorText}`,
+        };
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        message: `Connected to Yookassa account: ${data.account_id || shopId}`,
+        details: {
+          accountId: data.account_id,
+          status: data.status,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Yookassa connection test failed:', error);
+      return {
+        success: false,
+        message: `Connection failed: ${error.message}`,
+      };
+    }
   }
 
   private async testBrevoConnection(settings: SystemSettings[]): Promise<any> {
-    // TODO: Implement Brevo API test
-    return {
-      success: true,
-      message: 'Brevo connection test not implemented yet',
-    };
+    try {
+      const apiKey = this.getSettingValueFromArray(settings, 'email.brevo.api_key');
+
+      if (!apiKey) {
+        return {
+          success: false,
+          message: 'Brevo API Key not configured',
+        };
+      }
+
+      // Test Brevo API by getting account info
+      const response = await fetch('https://api.brevo.com/v3/account', {
+        method: 'GET',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          message: `Brevo API error: ${response.status} - ${errorText}`,
+        };
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        message: `Connected to Brevo account: ${data.email || 'Account verified'}`,
+        details: {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          companyName: data.companyName,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Brevo connection test failed:', error);
+      return {
+        success: false,
+        message: `Connection failed: ${error.message}`,
+      };
+    }
   }
 
   private async testTelegramConnection(settings: SystemSettings[]): Promise<any> {
-    // TODO: Implement Telegram Bot API test
-    return {
-      success: true,
-      message: 'Telegram connection test not implemented yet',
-    };
+    try {
+      const botToken = this.getSettingValueFromArray(settings, 'telegram.bot_token');
+
+      if (!botToken) {
+        return {
+          success: false,
+          message: 'Telegram Bot Token not configured',
+        };
+      }
+
+      // Test Telegram Bot API by getting bot info
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/getMe`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          message: `Telegram API error: ${response.status} - ${errorText}`,
+        };
+      }
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        return {
+          success: false,
+          message: `Telegram API error: ${data.description || 'Unknown error'}`,
+        };
+      }
+
+      const botInfo = data.result;
+      return {
+        success: true,
+        message: `Connected to Telegram bot: @${botInfo.username}`,
+        details: {
+          id: botInfo.id,
+          firstName: botInfo.first_name,
+          username: botInfo.username,
+          canJoinGroups: botInfo.can_join_groups,
+          canReadAllGroupMessages: botInfo.can_read_all_group_messages,
+          supportsInlineQueries: botInfo.supports_inline_queries,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Telegram connection test failed:', error);
+      return {
+        success: false,
+        message: `Connection failed: ${error.message}`,
+      };
+    }
   }
 
   private async testR2Connection(settings: SystemSettings[]): Promise<any> {
-    // TODO: Implement R2 connection test
-    return {
-      success: true,
-      message: 'R2 connection test not implemented yet',
-    };
+    try {
+      const accessKeyId = this.getSettingValueFromArray(settings, 'storage.r2.access_key_id');
+      const secretAccessKey = this.getSettingValueFromArray(settings, 'storage.r2.secret_access_key');
+      const bucketName = this.getSettingValueFromArray(settings, 'storage.r2.bucket_name');
+      const endpoint = this.getSettingValueFromArray(settings, 'storage.r2.endpoint');
+
+      if (!accessKeyId || !secretAccessKey || !bucketName || !endpoint) {
+        return {
+          success: false,
+          message: 'R2 credentials not fully configured',
+        };
+      }
+
+      // Test R2 connection by checking bucket access
+      const s3Client = new S3Client({
+        region: 'auto',
+        endpoint: endpoint,
+        credentials: {
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        },
+      });
+
+      const command = new HeadBucketCommand({ Bucket: bucketName });
+      await s3Client.send(command);
+
+      return {
+        success: true,
+        message: `Successfully connected to R2 bucket: ${bucketName}`,
+        details: {
+          bucketName: bucketName,
+          endpoint: endpoint,
+        },
+      };
+    } catch (error) {
+      this.logger.error('R2 connection test failed:', error);
+
+      let message = `Connection failed: ${error.message}`;
+      if (error.name === 'NotFound') {
+        message = `Bucket not found or access denied`;
+      } else if (error.name === 'Forbidden') {
+        message = `Access denied - check credentials`;
+      }
+
+      return {
+        success: false,
+        message: message,
+      };
+    }
   }
 
   private getDefaultSettings(): any[] {
@@ -546,7 +729,7 @@ export class SystemSettingsService {
         name: 'Primary Payment Provider',
         description: 'Default payment provider for new subscriptions',
         valueType: 'STRING' as SettingValueType,
-        defaultValue: 'yookassa',
+        defaultValue: 'stripe',
         isRequired: true,
       },
 

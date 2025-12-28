@@ -28,10 +28,55 @@ export class Session {
 	@Field({ nullable: true })
 	ip?: string
 
+	@Field({ nullable: true })
+	city?: string
+
+	@Field({ nullable: true })
+	country?: string
+
+	@Field({ nullable: true })
+	device?: string
+
+	@Field({ nullable: true })
+	browser?: string
+
+	@Field({ nullable: true })
+	os?: string
+
 	@Field()
 	createdAt: Date
 
 	@Field()
 	current: boolean
+}
+
+@ObjectType()
+export class LoginHistory {
+	@Field()
+	id: string
+
+	@Field()
+	ip: string
+
+	@Field({ nullable: true })
+	userAgent?: string
+
+	@Field({ nullable: true })
+	city?: string
+
+	@Field({ nullable: true })
+	country?: string
+
+	@Field({ nullable: true })
+	device?: string
+
+	@Field({ nullable: true })
+	browser?: string
+
+	@Field({ nullable: true })
+	os?: string
+
+	@Field()
+	createdAt: Date
 }
 

@@ -54,7 +54,7 @@ export default function TeamsPage() {
 			<div className="min-h-screen bg-background">
 				{/* Header Skeleton */}
 				<div className="border-b border-border/30 bg-card/80 backdrop-blur-xl">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<div className="flex items-center gap-4">
 							<Skeleton className="h-10 w-10 rounded-xl" />
 							<div>
@@ -66,7 +66,7 @@ export default function TeamsPage() {
 				</div>
 
 				{/* Content Skeleton */}
-				<div className="container mx-auto px-4 py-8">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-8">
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{[1, 2, 3].map(i => (
 							<Skeleton key={i} className="h-64 rounded-2xl" />
@@ -102,7 +102,7 @@ export default function TeamsPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
 							{/* Back Button */}
@@ -144,7 +144,7 @@ export default function TeamsPage() {
 			</motion.header>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-8">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-8">
 				<motion.div initial="hidden" animate="visible" variants={stagger}>
 					{teams.length === 0 ? (
 						// Empty state

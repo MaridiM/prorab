@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useQuery, useMutation } from '@apollo/client/react'
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
 import { AdminPageSkeleton } from '@/packages/components/ui/admin-page-skeleton'
 import {
 	GetStorageSettingsDocument,
@@ -69,19 +69,22 @@ export default function StorageSettingsPage() {
 		},
 	})
 
-	const [testAllProviders, { loading: testingAll }] = useMutation(TestStorageProvidersDocument, {
-		onCompleted: (data) => {
+	const [testAllProviders, { loading: testingAll }] = useLazyQuery(TestStorageProvidersDocument)
+
+	const handleTestAllProviders = async () => {
+		const result = await testAllProviders()
+		if (result.data?.testStorageProviders) {
 			const results: Record<string, { success: boolean; message: string; latency?: number }> = {}
-			data.testStorageProviders.forEach((result) => {
-				results[result.provider] = {
-					success: result.success,
-					message: result.message,
-					latency: result.latency || undefined,
+			result.data.testStorageProviders.forEach((testResult) => {
+				results[testResult.provider] = {
+					success: testResult.success,
+					message: testResult.message,
+					latency: testResult.latency || undefined,
 				}
 			})
 			setTestResults(results)
-		},
-	})
+		}
+	}
 
 	const [testProvider, { loading: testingSingle }] = useMutation(TestStorageProviderDocument)
 
@@ -560,7 +563,7 @@ export default function StorageSettingsPage() {
 							<CardDescription>Test connection to all configured storage providers</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<Button onClick={() => testAllProviders()} disabled={testingAll} className="w-full">
+							<Button onClick={handleTestAllProviders} disabled={testingAll} className="w-full">
 								{testingAll ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />

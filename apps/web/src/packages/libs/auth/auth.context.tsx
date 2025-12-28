@@ -217,11 +217,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } else {
       // If user is not authenticated and on protected pages - redirect to login
       // But don't redirect if already on auth pages or public pages
+      const isProtectedRoute = 
+        pathname.startsWith('/dashboard') || 
+        pathname.startsWith('/teams') || 
+        pathname.startsWith('/onboarding') ||
+        pathname.startsWith('/settings') ||
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/payment')
+      
       if (
         !pathname.startsWith('/auth') &&
         !pathname.startsWith('/api') &&
         pathname !== '/' &&
-        (pathname.startsWith('/dashboard') || pathname.startsWith('/teams') || pathname.startsWith('/onboarding'))
+        isProtectedRoute
       ) {
         // Only redirect if not already redirecting
         if (!isRedirectingRef.current) {

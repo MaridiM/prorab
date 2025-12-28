@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client/react'
-import { gql } from '@apollo/client'
 import { motion } from 'framer-motion'
+import { MeDocument, UpdateNotificationSettingsDocument } from '@/packages/api/graphql/__generated__/output'
 import {
 	Bell,
 	BellOff,
@@ -41,31 +41,6 @@ import {
 } from '@/packages/ui'
 import { useToast } from '@/packages/hooks/use-toast'
 
-const UPDATE_NOTIFICATION_SETTINGS = gql`
-	mutation UpdateNotificationSettings($input: UpdateNotificationSettingsInput!) {
-		updateNotificationSettings(input: $input) {
-			id
-			notifyProjectCreated
-			notifyProjectCompleted
-			notifyExpenseAdded
-			notifyPayoutCalculated
-			notifyPayoutPaid
-			notifyMemberInvited
-			notifyMemberJoined
-			notifyMemberRemoved
-			notifyTaskAssigned
-			notifyTaskCompleted
-			notifyPhotoReportCreated
-			notifySubscriptionExpiring
-			emailFrequency
-			pushFrequency
-			quietHoursEnabled
-			quietHoursStart
-			quietHoursEnd
-		}
-	}
-`
-
 interface NotificationPreferencesProps {
 	settings: {
 		notifyProjectCreated?: boolean
@@ -94,7 +69,33 @@ export function NotificationPreferences({ settings, onUpdate }: NotificationPref
 	const [localSettings, setLocalSettings] = useState(settings)
 	const [hasChanges, setHasChanges] = useState(false)
 
-	const [updateSettings, { loading: updating }] = useMutation(UPDATE_NOTIFICATION_SETTINGS, {
+	// Sync localSettings with settings prop when it changes
+	useEffect(() => {
+		setLocalSettings(settings)
+		setHasChanges(false)
+	}, [settings])
+
+	const [updateSettings, { loading: updating }] = useMutation(UpdateNotificationSettingsDocument, {
+		update: (cache, { data }) => {
+			if (data?.updateNotificationSettings) {
+				// Update Apollo cache directly without refetching
+				cache.updateQuery({ query: MeDocument }, (existingData) => {
+					if (existingData?.me) {
+						return {
+							...existingData,
+							me: {
+								...existingData.me,
+								notificationSettings: {
+									...existingData.me.notificationSettings,
+									...data.updateNotificationSettings,
+								},
+							},
+						}
+					}
+					return existingData
+				})
+			}
+		},
 		onCompleted: () => {
 			toast('Настройки уведомлений обновлены', 'success')
 			setHasChanges(false)

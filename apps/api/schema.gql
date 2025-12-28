@@ -551,6 +551,57 @@ type AdminTeamsConnection {
   totalCount: Int!
 }
 
+"""Admin view of Telegram bot"""
+type AdminTelegramBotModel {
+  """Avatar URL from Telegram or R2"""
+  avatarUrl: String
+
+  """Unique bot identifier (e.g., "oauth", "support")"""
+  botName: String!
+
+  """Can the bot join groups"""
+  canJoinGroups: Boolean!
+
+  """Can the bot read all group messages"""
+  canReadMessages: Boolean!
+
+  """Configuration status"""
+  configStatus: TelegramBotConfigStatus
+  createdAt: DateTime!
+
+  """ID of admin who created this bot"""
+  createdBy: String
+
+  """Bot description/purpose"""
+  description: String
+
+  """Display name for admin panel"""
+  displayName: String!
+
+  """Bot first name from Telegram"""
+  firstName: String
+  id: ID!
+
+  """Whether the bot is currently active"""
+  isActive: Boolean!
+
+  """Whether this is the primary OAuth bot"""
+  isPrimary: Boolean!
+
+  """Last time bot info was synced from Telegram"""
+  lastSyncAt: DateTime
+
+  """Does the bot support inline queries"""
+  supportsInlineQueries: Boolean!
+  updatedAt: DateTime!
+
+  """Bot username (e.g., "ProRabSpaceBot")"""
+  username: String!
+
+  """Webhook URL for this bot"""
+  webhookUrl: String
+}
+
 """Input for updating an existing plan"""
 input AdminUpdatePlanInput {
   """Description of the plan"""
@@ -818,6 +869,27 @@ type BackupCodesResponse {
   backupCodes: [String!]!
 }
 
+"""Bot information from Telegram API"""
+type BotInfoModel {
+  """Can the bot join groups"""
+  canJoinGroups: Boolean!
+
+  """Can the bot read all group messages"""
+  canReadMessages: Boolean!
+
+  """Bot first name"""
+  firstName: String!
+
+  """Telegram bot user ID"""
+  id: Float!
+
+  """Does the bot support inline queries"""
+  supportsInlineQueries: Boolean!
+
+  """Bot username without @"""
+  username: String!
+}
+
 """Input for bulk role assignment"""
 input BulkAssignRoleInput {
   """Custom role ID (null to clear custom roles)"""
@@ -947,7 +1019,8 @@ input ChangePasswordInput {
 
 input ChangePlanInput {
   immediate: Boolean! = false
-  newPlan: String!
+  newPlan: String
+  newPlanId: String
   subscriptionId: String!
 }
 
@@ -989,6 +1062,9 @@ input CompleteOnboardingInput {
 
   """Загруженный файл логотипа"""
   logoFile: Upload
+
+  """ID выбранного тарифного плана из таблицы Plan"""
+  planId: String
 
   """Адрес проекта (необязательно)"""
   projectAddress: String
@@ -1161,7 +1237,7 @@ input CreateRetentionPolicyInput {
 }
 
 input CreateSubscriptionInput {
-  plan: String!
+  plan: String
 
   """Plan ID from database (new Plan model)"""
   planId: String
@@ -1217,6 +1293,27 @@ input CreateTeamTemplateInput {
   projectSetup: JSON
   roles: JSON!
   settings: JSON!
+}
+
+"""Input for creating a new Telegram bot"""
+input CreateTelegramBotInput {
+  """Unique bot identifier (e.g., "oauth", "support", "notifications")"""
+  botName: String!
+
+  """Description of bot purpose"""
+  description: String
+
+  """Display name for admin panel (e.g., "OAuth Bot", "Support Bot")"""
+  displayName: String!
+
+  """Whether the bot should be active"""
+  isActive: Boolean = true
+
+  """Whether this is the primary OAuth bot"""
+  isPrimary: Boolean = false
+
+  """Bot token from @BotFather"""
+  token: String!
 }
 
 input CreateWorkLogInput {
@@ -1584,6 +1681,18 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+type LoginHistory {
+  browser: String
+  city: String
+  country: String
+  createdAt: DateTime!
+  device: String
+  id: String!
+  ip: String!
+  os: String
+  userAgent: String
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -1882,6 +1991,9 @@ type Mutation {
   adminCreateRetentionPolicy(input: CreateRetentionPolicyInput!): DataRetentionPolicy!
   adminCreateTeamFromTemplate(input: CreateTeamFromTemplateInput!): CloneResult!
   adminCreateTeamTemplate(input: CreateTeamTemplateInput!): TeamTemplate!
+
+  """Create a new Telegram bot - Admin only"""
+  adminCreateTelegramBot(input: CreateTelegramBotInput!): AdminTelegramBotModel!
   adminDeleteAnnouncement(id: String!): Boolean!
 
   """Delete a custom role"""
@@ -1907,6 +2019,12 @@ type Mutation {
   adminDeleteTeam(id: String!): Boolean!
   adminDeleteTeamTemplate(id: String!): Boolean!
 
+  """Delete a Telegram bot - Admin only"""
+  adminDeleteTelegramBot(botId: ID!): Boolean!
+
+  """Delete webhook for a bot - Admin only"""
+  adminDeleteTelegramWebhook(botId: ID!): Boolean!
+
   """Delete a user account (Admin only)"""
   adminDeleteUser(id: String!): Boolean!
   adminMarkAnnouncementAsRead(announcementId: String!): Boolean!
@@ -1919,6 +2037,9 @@ type Mutation {
   """Issue refund for payment (Admin only)"""
   adminRefundPayment(id: String!, input: RefundPaymentInput!): AdminPayment!
 
+  """Reload a bot (hot reload without restart) - Admin only"""
+  adminReloadTelegramBot(botId: ID!): Boolean!
+
   """Remove a member from a team (Admin only)"""
   adminRemoveTeamMember(memberId: String!, teamId: String!): Boolean!
 
@@ -1928,8 +2049,17 @@ type Mutation {
   """Send message in support ticket (admin only)"""
   adminSendSupportMessage(input: AdminSendMessageInput!): SupportMessage!
 
+  """Set webhook for a bot - Admin only"""
+  adminSetTelegramWebhook(input: SetWebhookInput!): Boolean!
+
+  """Sync bot information from Telegram API - Admin only"""
+  adminSyncTelegramBot(botId: ID!): AdminTelegramBotModel!
+
   """Test payment provider connection - Admin only"""
   adminTestPaymentProvider(type: PaymentProviderType!): TestConnectionResult!
+
+  """Test a bot token without saving it - Admin only"""
+  adminTestTelegramBot(input: TestBotTokenInput!): TestBotResult!
 
   """Transfer member to another team"""
   adminTransferMember(input: TransferMemberInput!): TeamMemberExtended!
@@ -1961,6 +2091,9 @@ type Mutation {
   """Update team information (Admin only)"""
   adminUpdateTeam(id: String!, input: AdminUpdateTeamInput!): Team!
   adminUpdateTeamTemplate(input: UpdateTeamTemplateInput!): TeamTemplate!
+
+  """Update an existing Telegram bot - Admin only"""
+  adminUpdateTelegramBot(botId: ID!, input: UpdateTelegramBotInput!): AdminTelegramBotModel!
 
   """Update user information (Admin only)"""
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
@@ -2057,13 +2190,20 @@ type Mutation {
 
   """Initialize default system settings (super admin only)"""
   initializeDefaultSettings: Boolean!
-  initializePayment(subscriptionId: String!): PaymentUrl!
+
+  """
+  Инициализировать платёж с автоматическим выбором провайдера по геолокации
+  """
+  initializePayment(providerType: String, subscriptionId: String!): PaymentUrl!
 
   """Инициировать изменение email адреса (требуется 2FA, если включена)"""
   initiateEmailChange(input: ChangeEmailInput!): ChangeEmailResult!
 
   """Присоединение к команде по коду приглашения"""
   joinTeamByInvite(code: String!): TeamMember!
+
+  """Привязать Telegram аккаунт к текущему пользователю"""
+  linkTelegramAccount(token: String!): Boolean!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
 
@@ -2167,14 +2307,37 @@ type Mutation {
   verifyTwoFactorLogin(code: String!, twoFactorToken: String!): AuthPayload!
 }
 
+enum NotificationFrequency {
+  DAILY
+  INSTANT
+  WEEKLY
+}
+
 type NotificationSettings {
   appEmail: Boolean!
   appPush: Boolean!
   appSms: Boolean!
   createdAt: DateTime!
+  emailFrequency: NotificationFrequency!
   id: String!
   marketingEmail: Boolean!
   marketingPush: Boolean!
+  notifyExpenseAdded: Boolean!
+  notifyMemberInvited: Boolean!
+  notifyMemberJoined: Boolean!
+  notifyMemberRemoved: Boolean!
+  notifyPayoutCalculated: Boolean!
+  notifyPayoutPaid: Boolean!
+  notifyPhotoReportCreated: Boolean!
+  notifyProjectCompleted: Boolean!
+  notifyProjectCreated: Boolean!
+  notifySubscriptionExpiring: Boolean!
+  notifyTaskAssigned: Boolean!
+  notifyTaskCompleted: Boolean!
+  pushFrequency: NotificationFrequency!
+  quietHoursEnabled: Boolean!
+  quietHoursEnd: String
+  quietHoursStart: String
   updatedAt: DateTime!
   userId: String!
 }
@@ -2290,6 +2453,15 @@ type PaymentProviderConfigStatus {
 
   """Whether webhook secret is configured"""
   hasWebhookSecret: Boolean!
+}
+
+"""Payment provider for user selection"""
+type PaymentProviderModel {
+  id: String!
+  isActive: Boolean!
+  isPrimary: Boolean!
+  name: String!
+  type: PaymentProviderType!
 }
 
 """Payment provider types"""
@@ -2434,10 +2606,12 @@ type PhotoReport {
 
 type PlanLimits {
   features: [String!]!
+  id: String!
   maxActiveProjects: Float
   maxMembers: Float!
   name: String!
   price: Float!
+  slug: String!
   storageGB: Float!
 }
 
@@ -2863,6 +3037,30 @@ type Query {
   """Get paginated list of teams with filters (Admin only)"""
   adminTeams(filters: AdminTeamFilters, pagination: PaginationInput!): AdminTeamsConnection!
 
+  """Get specific Telegram bot by ID - Admin only"""
+  adminTelegramBot(
+    """Base URL for webhook URL"""
+    baseUrl: String
+
+    """Bot name (e.g., "oauth", "support")"""
+    botName: String
+
+    """Bot ID"""
+    id: ID
+  ): AdminTelegramBotModel
+
+  """Get webhook information for a bot from Telegram API - Admin only"""
+  adminTelegramBotWebhookInfo(botId: ID!): WebhookInfoModel!
+
+  """Get all Telegram bots - Admin only"""
+  adminTelegramBots(
+    """Base URL for webhook URLs"""
+    baseUrl: String
+
+    """Include inactive bots"""
+    includeInactive: Boolean = false
+  ): [AdminTelegramBotModel!]!
+
   """Get detailed information about a specific user (Admin only)"""
   adminUser(id: String!): AdminUserDetails!
 
@@ -2878,11 +3076,15 @@ type Query {
   """Get paginated list of users with filters (Admin only)"""
   adminUsers(filters: AdminUserFilters, pagination: PaginationInput!): AdminUsersConnection!
 
+  """Получить доступные платёжные провайдеры (Yookassa, Stripe)"""
+  availablePaymentProviders: [PaymentProviderModel!]!
+
   """Get available plans for public (active plans only)"""
   availablePlans(
     """Filter prices by currency (RUB, USD, EUR)"""
     currency: String
   ): [AdminPlanModel!]!
+  availablePlansDetailed: [AdminPlanModel!]!
 
   """Получить доступные варианты хранилища"""
   availableStorageProviders: [StorageProviderOption!]!
@@ -2906,6 +3108,7 @@ type Query {
 
   """Simple health check"""
   health: String!
+  loginHistory: [LoginHistory!]!
   me: User
 
   """Get all payouts for a team member (owner or member themselves)"""
@@ -2939,6 +3142,7 @@ type Query {
 
   """Получить фотоотчёт по ID"""
   photoReport(id: String!): PhotoReport!
+  planBySlug(slug: String!): AdminPlanModel
 
   """Получить проект по ID"""
   project(id: ID!): Project!
@@ -3177,11 +3381,25 @@ type SendInviteResult {
 }
 
 type Session {
+  browser: String
+  city: String
+  country: String
   createdAt: DateTime!
   current: Boolean!
+  device: String
   id: String!
   ip: String
+  os: String
   userAgent: String
+}
+
+"""Input for setting webhook"""
+input SetWebhookInput {
+  """Bot ID"""
+  botId: String!
+
+  """Custom webhook URL (optional, uses default if not provided)"""
+  webhookUrl: String
 }
 
 """System setting categories"""
@@ -3313,6 +3531,12 @@ type Subscription {
   isEarlyBird: Boolean!
   limits: PlanLimits!
   plan: SubscriptionPlan!
+
+  """Plan ID from database (new Plan model)"""
+  planId: String
+
+  """Plan reference from database"""
+  planRef: AdminPlanModel
   status: SubscriptionStatus!
 
   """Team with owner and members details"""
@@ -3523,6 +3747,9 @@ type Team {
 
   """ID владельца команды"""
   ownerId: ID!
+
+  """Подписка команды"""
+  subscription: Subscription
 
   """Дата последнего обновления"""
   updatedAt: DateTime!
@@ -3963,6 +4190,36 @@ type TelegramAuthStatusPayload {
   user: User
 }
 
+"""Telegram bot configuration status"""
+type TelegramBotConfigStatus {
+  """Whether bot token is configured"""
+  hasToken: Boolean!
+
+  """Whether webhook is configured"""
+  hasWebhook: Boolean!
+
+  """Whether bot is registered and active"""
+  isRegistered: Boolean!
+}
+
+"""Test bot token result"""
+type TestBotResult {
+  """Bot information if token is valid"""
+  botInfo: BotInfoModel
+
+  """Error message if token is invalid"""
+  error: String
+
+  """Whether the token is valid"""
+  valid: Boolean!
+}
+
+"""Input for testing a bot token"""
+input TestBotTokenInput {
+  """Bot token to test"""
+  token: String!
+}
+
 """Test connection result"""
 type TestConnectionResult {
   """Error message if failed"""
@@ -4131,8 +4388,25 @@ input UpdateNotificationSettingsInput {
   appEmail: Boolean
   appPush: Boolean
   appSms: Boolean
+  emailFrequency: NotificationFrequency
   marketingEmail: Boolean
   marketingPush: Boolean
+  notifyExpenseAdded: Boolean
+  notifyMemberInvited: Boolean
+  notifyMemberJoined: Boolean
+  notifyMemberRemoved: Boolean
+  notifyPayoutCalculated: Boolean
+  notifyPayoutPaid: Boolean
+  notifyPhotoReportCreated: Boolean
+  notifyProjectCompleted: Boolean
+  notifyProjectCreated: Boolean
+  notifySubscriptionExpiring: Boolean
+  notifyTaskAssigned: Boolean
+  notifyTaskCompleted: Boolean
+  pushFrequency: NotificationFrequency
+  quietHoursEnabled: Boolean
+  quietHoursEnd: String
+  quietHoursStart: String
 }
 
 """Input for updating payment provider settings"""
@@ -4286,6 +4560,30 @@ input UpdateTeamTemplateInput {
   settings: JSON
 }
 
+"""Input for updating an existing Telegram bot"""
+input UpdateTelegramBotInput {
+  """Avatar URL (usually auto-fetched from Telegram)"""
+  avatarUrl: String
+
+  """Updated description"""
+  description: String
+
+  """Updated display name"""
+  displayName: String
+
+  """Whether the bot should be active"""
+  isActive: Boolean
+
+  """Whether this is the primary OAuth bot"""
+  isPrimary: Boolean
+
+  """New bot token (only if changing)"""
+  token: String
+
+  """Custom webhook URL (advanced)"""
+  webhookUrl: String
+}
+
 input UpdateTwoFactorInput {
   enforced: Boolean!
   roleId: String!
@@ -4426,6 +4724,30 @@ type UsersByBusinessRole {
 input VerifyEmailChangeInput {
   """Токен подтверждения изменения email"""
   token: String!
+}
+
+"""Webhook information from Telegram"""
+type WebhookInfoModel {
+  """Allowed update types"""
+  allowedUpdates: [String!]
+
+  """Whether a custom certificate is used"""
+  hasCustomCertificate: Boolean!
+
+  """Unix timestamp of last error"""
+  lastErrorDate: Float
+
+  """Last error message"""
+  lastErrorMessage: String
+
+  """Maximum allowed connections"""
+  maxConnections: Float
+
+  """Number of pending updates"""
+  pendingUpdateCount: Float!
+
+  """Current webhook URL"""
+  url: String!
 }
 
 type WorkLog {

@@ -66,6 +66,24 @@ async function bootstrap() {
 	const graphqlPath = config.get<string>('graphqlPath') ?? '/graphql'
 	app.use(graphqlPath, graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }))
 
+	// ✅ Raw body middleware for webhooks (must be before JSON parser)
+	app.use('/webhooks', (req: any, res: any, next: any) => {
+		if (req.is('application/json')) {
+			let data = ''
+			req.setEncoding('utf8')
+			req.on('data', (chunk: string) => {
+				data += chunk
+			})
+			req.on('end', () => {
+				req.rawBody = data
+				req.body = JSON.parse(data)
+				next()
+			})
+		} else {
+			next()
+		}
+	})
+
 	// ✅ Body parsers (Manually added after upload middleware)
 	app.use(json({ limit: '10mb' }))
 	app.use(urlencoded({ extended: true, limit: '10mb' }))

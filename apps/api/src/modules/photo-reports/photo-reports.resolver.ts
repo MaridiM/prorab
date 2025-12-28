@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CheckStorageLimitGuard } from '../subscriptions/guards/check-storage-limit.guard';
 import { PhotoReportsService } from './photo-reports.service';
 import { PhotoReport } from './models/photo-report.model';
 import { ReportPhoto } from './models/report-photo.model';
@@ -69,7 +70,7 @@ export class PhotoReportsResolver {
   }
 
   @Mutation(() => ReportPhoto, { description: 'Загрузить фото в фотоотчёт (с обработкой)' })
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CheckStorageLimitGuard)
   async uploadPhotoToReport(
     @CurrentUser() user: { id: string },
     @Args('input') input: UploadPhotoInput,

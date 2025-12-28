@@ -117,12 +117,12 @@ export default function TeamSettingsPage() {
 		return (
 			<div className="min-h-screen bg-background">
 				<div className="border-b border-border/30 bg-card/50">
-					<div className="container mx-auto px-4 py-4">
+					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
 						<Skeleton className="h-5 w-64" />
 					</div>
 				</div>
-				<div className="container mx-auto px-4 py-8">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-8">
 					<div className="max-w-2xl mx-auto space-y-6">
 						<Skeleton className="h-40 rounded-2xl" />
 						<Skeleton className="h-64 rounded-2xl" />
@@ -179,7 +179,7 @@ export default function TeamSettingsPage() {
 				transition={{ duration: 0.5 }}
 				className="sticky top-0 z-40 border-b border-border/30 bg-card/80 backdrop-blur-xl"
 			>
-				<div className="container mx-auto px-4 py-4">
+				<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
 							<button
@@ -204,7 +204,7 @@ export default function TeamSettingsPage() {
 			</motion.header>
 
 			{/* Main Content */}
-			<main className="container mx-auto px-4 py-6">
+			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
 				<motion.div
 					initial="hidden"
 					animate="visible"

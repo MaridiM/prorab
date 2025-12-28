@@ -101,31 +101,55 @@ interface DropdownMenuContentProps extends Omit<
   | 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration'
 > {
   align?: "start" | "center" | "end"
+  side?: "top" | "bottom" | "left" | "right"
   sideOffset?: number
 }
 
 const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContentProps>(
-  ({ className, align = "end", sideOffset = 4, children, ...props }, ref) => {
+  ({ className, align = "end", side = "bottom", sideOffset = 4, children, ...props }, ref) => {
     const { open, setOpen, triggerRef } = useDropdownMenu()
     const contentRef = React.useRef<HTMLDivElement>(null)
     const [position, setPosition] = React.useState({ top: 0, left: 0 })
 
     // Calculate position based on trigger
     React.useEffect(() => {
-      if (!open || !triggerRef.current) return
+      if (!open || !triggerRef.current || !contentRef.current) return
 
       const updatePosition = () => {
-        if (triggerRef.current) {
+        if (triggerRef.current && contentRef.current) {
           const rect = triggerRef.current.getBoundingClientRect()
+          const contentHeight = contentRef.current.offsetHeight || 200 // fallback height
+          const contentWidth = contentRef.current.offsetWidth || 224 // fallback width
 
           let left = rect.left
-          const top = rect.bottom + sideOffset
+          let top = 0
+
+          // Calculate position based on side
+          if (side === "top") {
+            top = rect.top - contentHeight - sideOffset
+          } else if (side === "bottom") {
+            top = rect.bottom + sideOffset
+          } else if (side === "left") {
+            top = rect.top
+            left = rect.left - contentWidth - sideOffset
+          } else if (side === "right") {
+            top = rect.top
+            left = rect.right + sideOffset
+          }
 
           // Adjust for alignment
-          if (align === "end") {
-            left = rect.right
-          } else if (align === "center") {
-            left = rect.left + rect.width / 2
+          if (side === "top" || side === "bottom") {
+            if (align === "end") {
+              left = rect.right
+            } else if (align === "center") {
+              left = rect.left + rect.width / 2
+            }
+          } else {
+            if (align === "end") {
+              top = rect.bottom
+            } else if (align === "center") {
+              top = rect.top + rect.height / 2
+            }
           }
 
           setPosition({ top, left })
@@ -135,23 +159,45 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
       // Small delay to ensure DOM is ready
       const timeoutId = setTimeout(updatePosition, 0)
       return () => clearTimeout(timeoutId)
-    }, [open, align, sideOffset, triggerRef])
+    }, [open, align, side, sideOffset, triggerRef])
 
     // Update position on scroll/resize
     React.useEffect(() => {
-      if (!open || !triggerRef.current) return
+      if (!open || !triggerRef.current || !contentRef.current) return
 
       const updatePosition = () => {
-        if (triggerRef.current) {
+        if (triggerRef.current && contentRef.current) {
           const rect = triggerRef.current.getBoundingClientRect()
+          const contentHeight = contentRef.current.offsetHeight || 200
+          const contentWidth = contentRef.current.offsetWidth || 224
 
           let left = rect.left
-          const top = rect.bottom + sideOffset
+          let top = 0
 
-          if (align === "end") {
-            left = rect.right
-          } else if (align === "center") {
-            left = rect.left + rect.width / 2
+          if (side === "top") {
+            top = rect.top - contentHeight - sideOffset
+          } else if (side === "bottom") {
+            top = rect.bottom + sideOffset
+          } else if (side === "left") {
+            top = rect.top
+            left = rect.left - contentWidth - sideOffset
+          } else if (side === "right") {
+            top = rect.top
+            left = rect.right + sideOffset
+          }
+
+          if (side === "top" || side === "bottom") {
+            if (align === "end") {
+              left = rect.right
+            } else if (align === "center") {
+              left = rect.left + rect.width / 2
+            }
+          } else {
+            if (align === "end") {
+              top = rect.bottom
+            } else if (align === "center") {
+              top = rect.top + rect.height / 2
+            }
           }
 
           setPosition({ top, left })
@@ -164,7 +210,7 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
         window.removeEventListener("scroll", updatePosition, true)
         window.removeEventListener("resize", updatePosition)
       }
-    }, [open, align, sideOffset, triggerRef])
+    }, [open, align, side, sideOffset, triggerRef])
 
     // Close on click outside
     React.useEffect(() => {
@@ -197,14 +243,24 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
       end: "-translate-x-full",
     }
 
+    const getAnimationDirection = () => {
+      if (side === "top") return { y: 8 } // появляется снизу вверх
+      if (side === "bottom") return { y: -8 } // появляется сверху вниз
+      if (side === "left") return { x: 8 } // появляется справа налево
+      if (side === "right") return { x: -8 } // появляется слева направо
+      return { y: -8 } // default
+    }
+
+    const animationDir = getAnimationDirection()
+
     const content = (
       <AnimatePresence>
         {open && (
           <motion.div
             ref={contentRef}
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+            initial={{ opacity: 0, ...animationDir, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+            exit={{ opacity: 0, ...animationDir, scale: 0.96 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
               "fixed z-[9999] min-w-[180px] overflow-hidden rounded-xl border border-border/50 bg-card p-1.5 shadow-lg",

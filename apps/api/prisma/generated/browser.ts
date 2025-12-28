@@ -43,6 +43,11 @@ export type PasswordResetToken = Prisma.PasswordResetTokenModel
  */
 export type TelegramAuthToken = Prisma.TelegramAuthTokenModel
 /**
+ * Model LoginHistory
+ * 
+ */
+export type LoginHistory = Prisma.LoginHistoryModel
+/**
  * Model Team
  * 
  */
@@ -127,6 +132,11 @@ export type PlanFeature = Prisma.PlanFeatureModel
  * 
  */
 export type PaymentProvider = Prisma.PaymentProviderModel
+/**
+ * Model TelegramBot
+ * 
+ */
+export type TelegramBot = Prisma.TelegramBotModel
 /**
  * Model Subscription
  * 

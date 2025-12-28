@@ -18,6 +18,7 @@ import { TeamMemberSalaryHistory } from './models/salary-history.model';
 import { TeamStats } from './models/team-stats.model';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
+import { CheckMemberLimitGuard } from '../subscriptions/guards/check-member-limit.guard';
 
 /**
  * GraphQL Resolver для работы с командами
@@ -147,7 +148,7 @@ export class TeamsResolver {
   @Mutation(() => SendInviteResult, {
     description: 'Отправка приглашения в команду по email',
   })
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CheckMemberLimitGuard)
   async sendInviteByEmail(
     @Args('input') input: SendInviteByEmailInput,
     @CurrentUser() user: { id: string },
@@ -166,7 +167,7 @@ export class TeamsResolver {
   @Mutation(() => TeamMember, {
     description: 'Присоединение к команде по коду приглашения',
   })
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CheckMemberLimitGuard)
   async joinTeamByInvite(
     @Args('code') code: string,
     @CurrentUser() user: { id: string },

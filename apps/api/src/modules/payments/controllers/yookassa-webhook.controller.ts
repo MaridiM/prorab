@@ -67,8 +67,12 @@ export class YooKassaWebhookController {
           break;
 
         case 'refund.succeeded':
-          // TODO: Handle refund
-          this.logger.log(`Refund succeeded: ${object.id}`);
+          if (!object.payment_id) {
+            this.logger.warn(`Refund ${object.id} missing payment_id`);
+            break;
+          }
+          await this.paymentsService.handleRefundSucceeded(object.id, object.payment_id);
+          this.logger.log(`Refund succeeded: ${object.id} for payment: ${object.payment_id}`);
           break;
 
         default:
