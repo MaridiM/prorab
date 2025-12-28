@@ -1,6 +1,7 @@
 export { AvatarUpload } from './AvatarUpload'
 export { TelegramIntegration } from './TelegramIntegration'
 export { SubscriptionManagement } from './SubscriptionManagement'
+export { SubscriptionHistory } from './subscription-history'
 export { TwoFactorAuth } from './TwoFactorAuth'
 export { NotificationPreferences } from './NotificationPreferences'
 export { DeleteAccountDialog } from './DeleteAccountDialog'

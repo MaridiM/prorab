@@ -196,7 +196,8 @@
       "Bash(docker compose:*)",
       "Bash(netsh interface ipv4 show excludedportrange:*)",
       "Bash(pnpm prisma studio:*)",
-      "Bash(dir \"g:\\\\Projects\\\\prorab\\\\v-1\"\" | findstr /I \"README \")"
+      "Bash(dir \"g:\\\\Projects\\\\prorab\\\\v-1\"\" | findstr /I \"README \")",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

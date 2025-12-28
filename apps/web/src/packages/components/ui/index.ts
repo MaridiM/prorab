@@ -23,6 +23,7 @@ export * from "./spinner";
 export * from "./stepper";
 export * from "./switch";
 export * from "./table";
+export * from "./tabs";
 export * from "./team-logo";
 export * from "./textarea";
 export * from "./toast";

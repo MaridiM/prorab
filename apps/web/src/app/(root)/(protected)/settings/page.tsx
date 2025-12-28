@@ -100,6 +100,7 @@ import {
 	AvatarUpload,
 	TelegramIntegration,
 	SubscriptionManagement,
+	SubscriptionHistory,
 	TwoFactorAuth,
 	NotificationPreferences,
 	DeleteAccountDialog,
@@ -1583,17 +1584,23 @@ export default function SettingsPage() {
 									exit="exit"
 									variants={fadeIn}
 								>
-									<motion.section variants={fadeIn}>
-										<SubscriptionManagement
-											onUpgrade={() => {
-												showToast({
-													title: 'В разработке',
-													description: 'Смена тарифа будет доступна после подключения эквайринга',
-													type: 'info',
-												})
-											}}
-										/>
-									</motion.section>
+									<motion.div variants={stagger} className="space-y-6">
+										<motion.section variants={fadeIn}>
+											<SubscriptionManagement
+												onUpgrade={() => {
+													showToast({
+														title: 'В разработке',
+														description: 'Смена тарифа будет доступна после подключения эквайринга',
+														type: 'info',
+													})
+												}}
+											/>
+										</motion.section>
+
+										<motion.section variants={fadeIn}>
+											<SubscriptionHistory />
+										</motion.section>
+									</motion.div>
 								</motion.div>
 							)}
 

@@ -4,12 +4,13 @@ import * as React from "react"
 
 import { cn } from "@/packages/utils"
 
-export interface ProgressBarProps {
+export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
 	value: number // 0-100
 	showLabel?: boolean
 	size?: "sm" | "md" | "lg"
 	variant?: "default" | "success" | "warning" | "danger"
 	className?: string
+	indicatorClassName?: string // Custom className for the progress indicator
 }
 
 const variantStyles = {
@@ -33,6 +34,7 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
 			size = "md",
 			variant = "default",
 			className,
+			indicatorClassName,
 			...props
 		},
 		ref
@@ -69,7 +71,8 @@ const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
 					<div
 						className={cn(
 							"h-full transition-all duration-300 ease-in-out rounded-full",
-							variantStyles[autoVariant]
+							variantStyles[autoVariant],
+							indicatorClassName
 						)}
 						style={{ width: `${clampedValue}%` }}
 					/>

@@ -5,6 +5,82 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2025-12-28 - Subscription UX Improvements & History
+
+### Added
+- **Upgrade Button in Header**:
+  - Новая кнопка "Апгрейд" в header на всех страницах
+  - Фиолетовый градиент (purple-600 to pink-600)
+  - Показывает текущий план для активных подписок
+  - Responsive дизайн (иконки на мобильных)
+
+- **Subscription History Component**:
+  - Новый компонент `SubscriptionHistory` для отображения истории подписок
+  - GraphQL query `MySubscriptionHistory`
+  - Красивые карточки со статусами и датами
+  - Статусы с цветовой кодировкой:
+    - 🟢 ACTIVE - "Активна"
+    - 🔵 TRIALING - "Пробный период"
+    - ⚪ CANCELLED - "Отменена"
+    - 🟠 PAST_DUE - "Просрочена"
+    - 🔴 EXPIRED - "Истекла"
+  - Кнопка "Продлить план" для активных подписок
+  - Timeline с датами создания, trial, expiration
+
+### Changed
+- **Current Plan Display**:
+  - Убрана кнопка "Выбрать план" для текущего плана
+  - Показывается статус "Текущий план" с датой окончания
+  - Улучшенный визуальный дизайн с border и background
+
+- **Upgrade Button** (`upgrade-button.tsx`):
+  - Изменен текст с "Начать" на "Апгрейд"
+  - Добавлен `fetchPolicy: 'cache-and-network'` для актуальных данных
+  - Улучшен responsive дизайн
+
+### Technical
+- **New Files**:
+  - `apps/web/src/packages/components/settings/subscription-history.tsx` - История подписок
+  - `SUBSCRIPTION_UX_IMPROVEMENTS.md` - Документация изменений
+
+- **Modified Files**:
+  - `apps/web/src/packages/components/subscription/upgrade-button.tsx` - Новый стиль и текст
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Статус вместо кнопки
+  - `apps/web/src/packages/api/graphql/subscriptions.graphql` - Новый query
+  - `apps/web/src/app/(root)/(protected)/settings/page.tsx` - Интеграция истории
+
+- **Statistics**: +220 LOC frontend
+
+## [1.6.5] - 2025-12-28 - Subscription Plan Selection Fix
+
+### Fixed
+- **Subscription Management**:
+  - Исправлена проблема, когда все кнопки планов показывали состояние загрузки одновременно
+  - Теперь только выбранный план показывает состояние "Обработка..."
+  - Остальные планы остаются активными и не дублируют состояние загрузки
+  - Добавлено индивидуальное состояние обработки для каждого плана (`processingPlanId`)
+
+### Changed
+- Обновлена версия Web с `1.6.4` на `1.6.5`
+
+## [1.6.4] - 2025-12-28 - Team Projects Page Improvements & Settings Fixes
+
+### Added
+- **Team Projects Page**:
+  - Добавлены табы для переключения между активными и архивными проектами (как на дашборде)
+  - Добавлена сортировка проектов (по умолчанию, по названию, по дате, по статусу)
+  - Добавлена кнопка для показа/скрытия завершенных проектов (по умолчанию скрыты)
+  - Улучшена навигация и UX страницы проектов команды
+
+### Fixed
+- Исправлена ошибка импорта компонентов Tabs в странице проектов команды
+- Исправлена проблема с перезагрузкой страницы при сохранении настроек профиля
+- Настройки профиля и уведомлений теперь обновляются без перезагрузки страницы через Apollo Cache
+
+### Changed
+- Обновлена версия Web с `1.6.3` на `1.6.4`
+- Страница проектов команды теперь использует ту же логику отображения, что и главный дашборд
+
 ## [1.6.3] - 2025-12-28 - Dashboard Projects UI Improvements
 
 ### Changed

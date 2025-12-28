@@ -3126,6 +3126,7 @@ type Query {
   """Получить настройки хранилища пользователя"""
   myStoragePreference: UserStoragePreference!
   mySubscription: Subscription
+  mySubscriptionHistory: [Subscription!]!
 
   """Получить все задачи пользователя (созданные или назначенные)"""
   myTasks: [Task!]!

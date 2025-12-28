@@ -47,6 +47,32 @@ export class SubscriptionsResolver {
     };
   }
 
+  @Query(() => [SubscriptionModel])
+  @UseGuards(AuthGuard)
+  async mySubscriptionHistory(
+    @CurrentUser() user: User,
+  ): Promise<SubscriptionModel[]> {
+    const subscriptions = await this.subscriptionsService.findAllByUserId(user.id);
+
+    return Promise.all(
+      subscriptions.map(async (subscription) => {
+        const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
+        return {
+          ...subscription,
+          limits,
+          planRef: subscription.planRef ? {
+            ...subscription.planRef,
+            prices: subscription.planRef.prices.map(p => ({
+              ...p,
+              price: Number(p.price),
+              earlyBirdPrice: Number(p.earlyBirdPrice),
+            })),
+          } : undefined,
+        };
+      })
+    );
+  }
+
   @Query(() => SubscriptionModel)
   @UseGuards(AuthGuard)
   async subscription(

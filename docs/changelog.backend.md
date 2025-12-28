@@ -5,6 +5,40 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2025-12-28 - Subscription History & GraphQL Enhancements
+
+### Added
+- **Subscription History Query**:
+  - Новый GraphQL query `mySubscriptionHistory`
+  - Возвращает все подписки пользователя (от новых к старым)
+  - Resolver метод `SubscriptionsResolver.mySubscriptionHistory()`
+  - Service метод `SubscriptionsService.findAllByUserId()`
+
+### Changed
+- **SubscriptionsService**:
+  - Добавлен метод `findAllByUserId()` для получения всех подписок пользователя
+  - Подписки сортируются по дате создания (новые первыми)
+  - Получает подписки из всех команд, где пользователь owner
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` - Новый query (строки 50-74)
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Новый метод (строки 135-166)
+
+- **Statistics**: +180 LOC backend
+
+## [1.6.5] - 2025-12-28 - Version Update
+
+### Changed
+- Обновлена версия API с `1.6.4` на `1.6.5`
+- Совместимость с frontend исправлениями в выборе планов подписки
+
+## [1.6.4] - 2025-12-28 - Version Update
+
+### Changed
+- Обновлена версия API с `1.6.3` на `1.6.4`
+- Совместимость с frontend изменениями в странице проектов команды
+
 ## [1.6.3] - 2025-12-28 - Version Update
 
 ### Changed

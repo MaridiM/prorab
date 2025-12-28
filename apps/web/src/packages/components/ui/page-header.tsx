@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 
 import { UserMenu } from './user-menu'
+import { UpgradeButton } from '@/packages/components/subscription/upgrade-button'
 import { cn } from '@/packages/utils'
 
 interface PageHeaderProps {
@@ -87,6 +88,7 @@ export function PageHeader({
 					<div className="flex items-center gap-3 flex-shrink-0">
 						{actions}
 						{children}
+						<UpgradeButton />
 						{showUserMenu && <UserMenu avatarSize="sm" />}
 					</div>
 				</div>

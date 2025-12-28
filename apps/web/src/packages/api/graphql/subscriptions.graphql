@@ -109,6 +109,12 @@ query MySubscription {
   }
 }
 
+query MySubscriptionHistory {
+  mySubscriptionHistory {
+    ...SubscriptionFields
+  }
+}
+
 query GetSubscription($id: String!) {
   subscription(id: $id) {
     ...SubscriptionFields

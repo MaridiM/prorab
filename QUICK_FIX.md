@@ -1,123 +1,132 @@
-# Быстрое исправление v1.6.2
+# Quick Fix: Upgrade Button in Header ✅
 
-## Проблема
-- "Stripe provider not configured"
-- "Subscription already exists"
+## What Was Done
 
-## Решение
+Added an **UpgradeButton** component to the page header that displays the user's current subscription plan and provides quick access to upgrade.
 
-### ⚠️ Сначала запустите базу данных
+---
 
-```bash
-# Запустите Docker Desktop, затем выполните:
-docker compose up -d postgres
+## Files Modified
 
-# Подождите 5-10 секунд, чтобы база данных запустилась
+### 1. [upgrade-button.tsx](apps/web/src/packages/components/subscription/upgrade-button.tsx)
+
+**Enhanced component** to show different states:
+
+- **No subscription**: Shows "Начать" button with gradient
+- **BRIGADE plan (top tier)**: Shows crown icon + plan name badge
+- **LITE/FOREMAN plans**: Shows upgrade button with current plan name + "Апгрейд"
+- **Inactive subscriptions**: Hidden (only shows for ACTIVE/TRIALING status)
+
+**Features:**
+- Responsive design (hides text on mobile, shows icons only)
+- All buttons link to `/settings?tab=billing`
+- Uses GraphQL `MySubscriptionDocument` query
+- Beautiful gradient styling for upgrade button
+
+### 2. [page-header.tsx](apps/web/src/packages/components/ui/page-header.tsx)
+
+**Added** `<UpgradeButton />` to header's right side (line 91):
+
+```tsx
+<div className="flex items-center gap-3 flex-shrink-0">
+  {actions}
+  {children}
+  <UpgradeButton />  // ← Added here
+  {showUserMenu && <UserMenu avatarSize="sm" />}
+</div>
 ```
 
-### Вариант 1: Через pnpm seed (Самый простой)
+---
 
-```bash
-cd apps/api
-pnpm prisma:seed:providers
+## How It Looks
+
+### For User with LITE Plan (Your Current State):
+```
+[⚡ Лайт → ✨ Апгрейд]  [👤 UserMenu]
 ```
 
-Этот скрипт автоматически:
-
-- ✅ Создаст или обновит Yookassa (Primary)
-- ✅ Создаст или обновит Stripe (Secondary)
-- ✅ Покажет статус провайдеров
-
-### Вариант 2: Через SQL файлы
-
-Если у вас установлен `psql`, выполните готовые SQL скрипты:
-
-```bash
-# Настройка провайдеров
-psql -h localhost -p 54320 -U prorab -d prorab -f apps/api/prisma/setup-payment-providers.sql
-
-# Очистка дубликатов подписок
-psql -h localhost -p 54320 -U prorab -d prorab -f apps/api/prisma/cleanup-duplicate-subscriptions.sql
+On mobile:
+```
+[⚡ ↑]  [👤]
 ```
 
-Пароль: `prorab`
-
-### Вариант 3: Через SQL напрямую
-
-```bash
-# Подключитесь к базе данных
-psql -h localhost -p 54320 -U prorab -d prorab
-
-# Выполните:
-INSERT INTO "PaymentProvider" (id, type, name, "isActive", "isPrimary", "createdAt", "updatedAt")
-VALUES
-  (gen_random_uuid(), 'YOOKASSA', 'ЮKassa', true, true, NOW(), NOW()),
-  (gen_random_uuid(), 'STRIPE', 'Stripe', true, false, NOW(), NOW())
-ON CONFLICT (type) DO UPDATE SET "isActive" = true;
-
-# Удалить дубликат подписки:
-DELETE FROM "Subscription"
-WHERE status = 'TRIALING'
-  AND "createdAt" > NOW() - INTERVAL '1 hour'
-  AND id NOT IN (SELECT DISTINCT "subscriptionId" FROM "Payment" WHERE status = 'SUCCEEDED');
+### For User with No Subscription:
+```
+[✨ Начать]  [👤 UserMenu]
 ```
 
-### Вариант 4: Через Prisma Studio
+### For User with BRIGADE Plan (Top Tier):
+```
+[👑 Бригада]  [👤 UserMenu]
+```
 
-1. Откройте Prisma Studio:
+---
+
+## Testing Instructions
+
+1. **Restart dev server** (if running):
    ```bash
-   cd apps/api
-   pnpm prisma studio
+   # Stop current server (Ctrl+C)
+   pnpm dev
    ```
 
-2. Откройте таблицу `PaymentProvider`
+2. **Open app** in browser:
+   ```
+   http://localhost:3000
+   ```
 
-3. Добавьте 2 записи:
-   - **Yookassa:**
-     - type: `YOOKASSA`
-     - name: `ЮKassa`
-     - isActive: `true`
-     - isPrimary: `true`
+3. **Expected behavior**:
+   - ✅ You should see upgrade button in header on all pages
+   - ✅ Button should show "Лайт → Апгрейд" (since you have LITE plan)
+   - ✅ Clicking button should navigate to Settings → Billing tab
+   - ✅ You should be able to select FOREMAN or BRIGADE plan
 
-   - **Stripe:**
-     - type: `STRIPE`
-     - name: `Stripe`
-     - isActive: `true`
-     - isPrimary: `false`
+---
 
-4. Откройте таблицу `Subscription`
+## User Requirements (All Completed ✅)
 
-5. Найдите подписку со status `TRIALING` созданную недавно
+- ✅ **"пользователь видел, какой план у него подключен"** → Shows "Лайт" in button
+- ✅ **"чтобы он мог изменить его"** → Clicking button goes to billing settings
+- ✅ **"На любой странице добавьте кнопку для апгрейда в хедере"** → Added to PageHeader component
 
-6. Удалите её
+---
 
-### Вариант 5: Через очистку дубликатов подписок
+## Next Steps
 
-Если у вас остались дублирующиеся подписки после настройки провайдеров:
+1. **Test the upgrade button** in your browser
+2. If you still see "Не удалось создать подписку" error when selecting a plan:
+   - Check API server console logs
+   - Send me the error logs from backend
+   - We'll debug the subscription creation/change logic
 
-```bash
-cd apps/api
-psql -h localhost -p 54320 -U prorab -d prorab -f prisma/cleanup-duplicate-subscriptions.sql
+---
+
+## Technical Details
+
+**Component Logic:**
+```typescript
+1. Fetch subscription via GraphQL: useQuery(MySubscriptionDocument)
+2. If loading → show nothing
+3. If no subscription → "Начать" button
+4. If subscription.status not in [ACTIVE, TRIALING] → hide
+5. If plan === BRIGADE → show crown badge
+6. Else → show upgrade button with current plan name
 ```
 
-Или вручную в Prisma Studio:
+**Responsive Breakpoints:**
+- Mobile (`< sm`): Shows only icons (⚡ ↑)
+- Tablet (`sm`): Shows plan name (⚡ Лайт ↑)
+- Desktop (`md+`): Shows full text (⚡ Лайт → ✨ Апгрейд)
 
-1. Откройте таблицу `Subscription`
-2. Найдите подписки со status `TRIALING` без связанных успешных платежей
-3. Удалите дублирующиеся записи
+---
 
-## После исправления
+## Version Info
 
-1. ✅ Обновите страницу
-2. ✅ Нажмите "Выбрать план" снова
-3. ✅ Должно работать!
+- **Version**: v1.6.2 (patch)
+- **Component**: UpgradeButton
+- **Location**: Header (all pages using PageHeader)
+- **Commit**: Ready for commit
 
-## Проверка
+---
 
-```sql
--- Должно вернуть 2 провайдера:
-SELECT * FROM "PaymentProvider";
-
--- Не должно быть дублей:
-SELECT COUNT(*) FROM "Subscription" WHERE status = 'TRIALING';
-```
+**Need help?** Just restart the dev server and check the header! 🚀

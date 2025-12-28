@@ -8,7 +8,7 @@
 
 ## Version History
 
-### v1.6.2 (2025-12-28) - Payment Provider Auto-Selection & Bug Fixes
+### v1.6.2 (2025-12-28) - Payment Provider Auto-Selection & Subscription UX Improvements
 
 **Bug Fixes:**
 
@@ -29,6 +29,10 @@
 - 📦 Added `pnpm prisma:seed:providers` script for easy setup
 - 📝 Comprehensive fix documentation in [QUICK_FIX.md](QUICK_FIX.md)
 - 🔧 Lazy initialization pattern for payment providers
+- 🎨 **NEW:** Enhanced subscription UX with better visual feedback
+- 🔄 **NEW:** Subscription history with detailed status tracking
+- 🔔 **NEW:** Upgrade button in header showing current plan
+- 💳 **NEW:** "Renew" button for current subscription plan
 
 **New Features:**
 
@@ -39,29 +43,62 @@
   - Warning logs indicate when running in mock mode
   - Production mode still requires real credentials
 
+- **Subscription History**
+  - New `mySubscriptionHistory` GraphQL query
+  - Beautiful UI showing all past and current subscriptions
+  - Status badges with color coding (Active, Trial, Cancelled, Expired)
+  - Timeline with creation dates, trial periods, expiration dates
+  - "Current" badge for active subscription
+
+- **Upgrade Button in Header**
+  - Shows current plan name on all pages
+  - "Начать" button for users without subscription
+  - "Лайт/Прораб → Апгрейд" for upgradeable plans
+  - "👑 Бригада" badge for top-tier plan
+  - Responsive design (mobile shows icons only)
+  - Direct link to billing settings
+
+- **Improved Current Plan Display**
+  - Changed disabled "Current Plan" button to active "Renew" button
+  - Clicking renew creates new payment for subscription extension
+  - Visual distinction for current plan card with border/background
+  - "Текущий" badge on plan card
+
 **New Files:**
 
 - `apps/api/src/modules/payments/utils/geo-provider.util.ts` - IP-based provider detection
 - `apps/api/prisma/seed-payment-providers.ts` - Provider setup script
 - `apps/api/prisma/setup-payment-providers.sql` - SQL provider setup
 - `apps/api/prisma/cleanup-duplicate-subscriptions.sql` - Cleanup script
+- `apps/web/src/packages/components/settings/subscription-history.tsx` - History component
 - `QUICK_FIX.md` - Manual fix instructions
 - `TESTING_v1.6.2.md` - Complete testing guide
 
 **Modified Files:**
 
+Backend:
+
 - `apps/api/src/core/payments/providers/stripe.provider.ts` - Added lazy init + mock mode
 - `apps/api/src/core/payments/providers/yookassa.provider.ts` - Added lazy init + mock mode
 - `apps/api/src/modules/payments/payments.service.ts` - Auto-provider selection
 - `apps/api/src/modules/payments/payments.resolver.ts` - IP extraction
-- `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Plan enum mapping
-- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Team ID resolution + payment init
+- `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Plan enum mapping + history query
+- `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` - Added mySubscriptionHistory query
+
+Frontend:
+
+- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Renew button + team ID resolution
+- `apps/web/src/packages/components/subscription/upgrade-button.tsx` - Enhanced display + debug logging
+- `apps/web/src/packages/components/ui/page-header.tsx` - Added UpgradeButton
+- `apps/web/src/packages/components/settings/index.ts` - Added SubscriptionHistory export
+- `apps/web/src/packages/api/graphql/subscriptions.graphql` - Added MySubscriptionHistory query
+- `apps/web/src/app/(root)/(protected)/settings/page.tsx` - Integrated SubscriptionHistory
 
 **Statistics:**
 
-- Backend: +120 LOC (geolocation utilities, provider seeding, mock implementations)
-- Frontend: +15 LOC (MyTeams query, teamId resolution)
-- Documentation: 2 comprehensive guides (QUICK_FIX.md, TESTING_v1.6.2.md)
+- Backend: +180 LOC (geolocation utilities, provider seeding, mock implementations, subscription history)
+- Frontend: +220 LOC (subscription history UI, upgrade button enhancements, renew functionality)
+- Documentation: 3 comprehensive guides (QUICK_FIX.md, TESTING_v1.6.2.md, VERSION.md updates)
 
 **Breaking Changes:** None
 

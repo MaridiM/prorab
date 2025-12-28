@@ -129,7 +129,46 @@ export class SubscriptionsService {
       },
     });
 
-    return user?.ownedTeams[0]?.subscription || null;
+    // Find active subscription from any team
+    const activeSubscription = user?.ownedTeams
+      ?.map(team => team.subscription)
+      .filter(sub => sub !== null)
+      .find(sub => sub.status === 'ACTIVE' || sub.status === 'TRIALING');
+
+    return activeSubscription || null;
+  }
+
+  async findAllByUserId(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        ownedTeams: {
+          include: {
+            subscription: {
+              include: {
+                payments: true,
+                planRef: {
+                  include: {
+                    prices: true,
+                    features: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Get all subscriptions from all owned teams
+    const subscriptions = user?.ownedTeams
+      .map(team => team.subscription)
+      .filter(sub => sub !== null) || [];
+
+    // Sort by creation date (newest first)
+    return subscriptions.sort((a, b) =>
+      b.createdAt.getTime() - a.createdAt.getTime()
+    );
   }
 
   async findByIdWithAuth(subscriptionId: string, userId: string) {

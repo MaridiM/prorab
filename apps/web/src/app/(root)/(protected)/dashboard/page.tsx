@@ -28,6 +28,7 @@ import {
 	ImageIcon,
 	MoreHorizontal,
 	Eye,
+	EyeOff,
 	AlertCircle,
 	CheckCircle2,
 	Shield,
@@ -980,6 +981,7 @@ export default function DashboardPage() {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active')
 	const [sortBy, setSortBy] = useState<'default' | 'name' | 'date' | 'status'>('default')
+	const [showCompleted, setShowCompleted] = useState(false) // По умолчанию скрываем завершенные проекты
 	const [teamDropdownOpen, setTeamDropdownOpen] = useState(false)
 	const [projectStatsMap, setProjectStatsMap] = useState<Map<string, any>>(new Map())
 	const [projectPickerTab, setProjectPickerTab] = useState<'expenses' | 'reports' | null>(null)
@@ -1082,8 +1084,13 @@ export default function DashboardPage() {
 	}, [allProjects, searchQuery])
 
 	// Separate active and archived
+	// Filter completed projects based on showCompleted state
 	const allActiveProjects = filteredProjects.filter(
-		p => p?.status === ProjectStatus.ACTIVE || p?.status === ProjectStatus.COMPLETED
+		p => {
+			if (p?.status === ProjectStatus.ACTIVE) return true
+			if (p?.status === ProjectStatus.COMPLETED) return showCompleted
+			return false
+		}
 	)
 	const archivedProjects = filteredProjects.filter(
 		p => p?.status === ProjectStatus.ARCHIVED
@@ -1113,7 +1120,7 @@ export default function DashboardPage() {
 			return 0
 		})
 		return sorted
-	}, [allActiveProjects, sortBy])
+	}, [allActiveProjects, sortBy, showCompleted])
 
 	// Sort archived projects
 	const sortedArchivedProjects = useMemo(() => {
@@ -1732,6 +1739,28 @@ export default function DashboardPage() {
 											)}
 										</TabsList>
 										<div className="flex items-center gap-2">
+											{/* Toggle completed projects */}
+											{activeTab === 'active' && (
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => setShowCompleted(!showCompleted)}
+													className="text-muted-foreground hover:text-foreground"
+													title={showCompleted ? 'Скрыть завершенные проекты' : 'Показать завершенные проекты'}
+												>
+													{showCompleted ? (
+														<>
+															<EyeOff className="w-4 h-4 mr-1" />
+															Скрыть завершенные
+														</>
+													) : (
+														<>
+															<Eye className="w-4 h-4 mr-1" />
+															Показать завершенные
+														</>
+													)}
+												</Button>
+											)}
 											{/* Sort dropdown */}
 											<select
 												value={sortBy}
