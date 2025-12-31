@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsResolver } from './subscriptions.resolver';
+import { PublicStatsController } from './controllers/public-stats.controller';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { AdminPlansService } from '../admin/services/admin-plans.service';
@@ -14,6 +15,7 @@ import { AdminActionLogService } from '../admin/services/admin-action-log.servic
     AdminPlansService,
     AdminActionLogService, // Required by AdminPlansService
   ],
+  controllers: [PublicStatsController],
   exports: [SubscriptionsService],
 })
 export class SubscriptionsModule {}

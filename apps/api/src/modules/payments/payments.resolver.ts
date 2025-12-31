@@ -66,18 +66,38 @@ export class PaymentsResolver {
   @UseGuards(AuthGuard)
   async initializePayment(
     @Args('subscriptionId') subscriptionId: string,
-    @Args('providerType', { nullable: true }) providerType: PaymentProviderType,
     @CurrentUser() user: User,
-    @Context() context: any,
+    @Args('providerType', { nullable: true }) providerType?: PaymentProviderType,
+    @Args('targetPlanId', { nullable: true }) targetPlanId?: string,
+    @Args('targetPlan', { nullable: true }) targetPlan?: string,
+    @Context() context?: any,
   ): Promise<PaymentUrlModel> {
     // Get user's real IP from request
-    const userIP = getRealIP(context.req);
+    const userIP = context ? getRealIP(context.req) : undefined;
 
     return this.paymentsService.initializePayment(
       subscriptionId,
       user.id,
       providerType,
       userIP,
+      targetPlanId,
+      targetPlan,
     );
+  }
+
+  /**
+   * Confirm mock payment (for development/testing)
+   * This mutation is called when user completes payment in mock checkout page
+   */
+  @Mutation(() => Boolean, {
+    description: 'Подтвердить mock платёж (для разработки/тестирования)',
+  })
+  @UseGuards(AuthGuard)
+  async confirmMockPayment(
+    @Args('paymentId') paymentId: string,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    await this.paymentsService.confirmMockPayment(paymentId);
+    return true;
   }
 }

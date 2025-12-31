@@ -118,13 +118,24 @@ export class YookassaProvider implements IPaymentProvider {
     // Development mode mock
     if (!this.client) {
       this.logger.warn('🧪 Yookassa MOCK: Creating fake payment session for development')
+      // Extract base URL from returnUrl (remove query params and path after /payment)
+      const baseUrl = params.returnUrl.split('/payment')[0]
+      // Extract plan name from description (format: "Оплата подписки "Plan Name" за месяц")
+      // Remove technical JSON metadata if present (everything after "|")
+      const cleanDescription = params.description?.split(' | ')[0] || params.description || ''
+      const planMatch = cleanDescription.match(/"([^"]+)"/)
+      const planName = planMatch ? planMatch[1] : 'Unknown Plan'
       return {
         paymentId: `mock_yookassa_${Date.now()}`,
-        confirmationUrl: `${params.returnUrl}?mock=true&provider=yookassa&amount=${params.amount}`,
+        // Redirect to mock checkout page instead of directly to success
+        confirmationUrl: `${baseUrl}/payment/checkout?mock=true&provider=yookassa&amount=${params.amount}&plan=${encodeURIComponent(planName)}&return_url=${encodeURIComponent(params.returnUrl)}`,
         status: 'pending' as any,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
       }
     }
+
+    // Clean description - remove any technical JSON metadata (everything after "|")
+    const cleanDescription = params.description?.split(' | ')[0] || params.description || 'Оплата подписки'
 
     const paymentData: ICreatePayment = {
       amount: {
@@ -136,7 +147,7 @@ export class YookassaProvider implements IPaymentProvider {
         return_url: params.returnUrl,
       },
       capture: true, // Auto-capture
-      description: params.description,
+      description: cleanDescription, // Use cleaned description without JSON
       metadata: params.metadata,
       save_payment_method: true, // For recurring payments
     }

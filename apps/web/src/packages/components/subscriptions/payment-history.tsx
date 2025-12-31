@@ -26,6 +26,14 @@ export interface PaymentHistoryProps {
 	emptyMessage?: string
 }
 
+// Helper function to clean payment description (remove technical JSON metadata)
+function cleanPaymentDescription(description?: string): string {
+	if (!description) return 'Оплата подписки';
+	// Remove technical JSON metadata (everything after "|")
+	const cleanDescription = description.split(' | ')[0];
+	return cleanDescription || 'Оплата подписки';
+}
+
 const STATUS_CONFIG = {
 	PENDING: {
 		label: 'Ожидание',
@@ -110,7 +118,7 @@ export function PaymentHistory({
 										{format(new Date(displayDate), 'd MMM yyyy', { locale: ru })}
 									</td>
 									<td className="p-4 text-sm">
-										{payment.description || 'Оплата подписки'}
+										{cleanPaymentDescription(payment.description)}
 										{payment.failureReason && (
 											<p className="text-xs text-red-500 mt-1">{payment.failureReason}</p>
 										)}
@@ -156,7 +164,7 @@ export function PaymentHistory({
 							<div className="flex items-start justify-between">
 								<div>
 									<p className="font-medium">
-										{payment.description || 'Оплата подписки'}
+										{cleanPaymentDescription(payment.description)}
 									</p>
 									<p className="text-sm text-muted-foreground">
 										{format(new Date(displayDate), 'd MMMM yyyy', { locale: ru })}

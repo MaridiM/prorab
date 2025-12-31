@@ -5,6 +5,319 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.13] - 2025-12-31 - Payment Flow & Plan Update Critical Fixes
+
+### Fixed
+- **Plan Not Updating After Payment**: Исправлен критический баг, когда план оставался прежним после апгрейда
+  - Добавлена логика обновления плана в `handlePaymentSucceededByPaymentId` webhook handler
+  - Проверка payment metadata на наличие `targetPlanId` и `targetPlan`
+  - Автоматическое обновление `subscription.planId` и `subscription.plan` после успешной оплаты
+  - Маппинг plan slug → SubscriptionPlan enum (lite/light → LITE, foreman → FOREMAN, brigade → BRIGADE)
+  - Детальное логирование всех изменений плана для отладки
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/payments/payments.service.ts` (строки 424-460)
+    - Добавлена проверка `metadata?.targetPlanId !== subscription.planId`
+    - Логика обновления `planId` и `plan` enum
+    - Fallback на автоматическое определение enum из plan slug
+    - Подробные логи: "Plan change detected", "Updating plan enum", "Plan will be updated"
+
+### Impact
+- **Plan Upgrades Now Work**: Пользователи видят обновленный план сразу после оплаты
+- **Downgrades Fixed**: Переход на младший план также работает корректно
+- **Better Debugging**: Детальные логи помогают отследить весь процесс смены плана
+- **Backward Compatible**: Если metadata нет, план не обновляется (как раньше)
+
+### Example Flow
+1. User: Прораб → выбирает Бригада
+2. Frontend: `initializePayment(targetPlanId: "brigade-id", targetPlan: "BRIGADE")`
+3. Payment metadata: `{ targetPlanId: "brigade-id", targetPlan: "BRIGADE" }`
+4. Webhook: `handlePaymentSucceeded` → обнаруживает изменение
+5. Database: `subscription.planId` = "brigade-id", `subscription.plan` = "BRIGADE"
+6. User: Видит "Бригада" в UI
+
+---
+
+## [1.6.12] - 2025-12-31 - Early Bird UI Indicators & Landing Page Integration
+
+### Added
+- **Early Bird Stats API**: Создан полноценный API для отслеживания статистики Early Bird программы
+  - Новая модель `EarlyBirdStatsModel` с полями: used, limit, remaining, isAvailable, totalTeams
+  - Новый метод `getEarlyBirdStats()` в SubscriptionsService
+  - GraphQL query `earlyBirdStats` (публичный, без аутентификации)
+  - REST API endpoint `GET /api/public/stats/early-bird` для интеграции с лендингом
+  - Новый контроллер `PublicStatsController` для публичных REST API
+
+- **Social Proof Integration**: Добавлен подсчет активных команд
+  - Поле `totalTeams` показывает количество активных и триальных подписок
+  - Используется для социального доказательства на UI ("Уже N команд присоединились")
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` - метод getEarlyBirdStats()
+  - `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` - публичный query
+  - `apps/api/src/modules/subscriptions/subscriptions.module.ts` - регистрация контроллера
+
+- Созданные файлы:
+  - `apps/api/src/modules/subscriptions/models/early-bird-stats.model.ts` (+20 LOC)
+  - `apps/api/src/modules/subscriptions/controllers/public-stats.controller.ts` (+34 LOC)
+
+### Impact
+- **Landing Page Integration**: Теперь лендинг может отображать реальные данные из БД
+- **Urgency Marketing**: Счетчик "Осталось X из 500" усиливает FOMO эффект
+- **Social Proof**: Показ количества активных команд повышает доверие
+- **No Authentication**: Публичный API не требует авторизации для лендинга
+
+---
+
+## [1.6.11] - 2025-12-31 - Early Bird & Trial Period Implementation
+
+### Added
+- **Early Bird Limit Validation**: Добавлена валидация лимита Early Bird подписок (500)
+  - Новый метод `getEarlyBirdCount()` подсчитывает активные Early Bird подписки
+  - Валидация происходит при создании подписки, до сохранения в БД
+  - При превышении лимита выбрасывается понятная ошибка на русском языке
+  - Учитываются только активные подписки (ACTIVE, TRIALING, PENDING_PAYMENT)
+
+- **Trial Uniqueness Tracking**: Реализовано отслеживание использования trial периодов
+  - Добавлено поле `trialedPlanIds` в модель User для хранения ID планов, на которых был trial
+  - Новый метод `hasUsedTrial()` проверяет, использовал ли пользователь trial для конкретного плана
+  - Новый метод `markTrialAsUsed()` отмечает trial как использованный
+  - Trial автоматически отключается, если пользователь уже использовал его на данном плане
+  - Пользователь может получить trial на каждом плане только один раз
+
+- **Database Migration**: Миграция `20251231_add_trial_tracking`
+  - Добавлен столбец `trialed_plan_ids` (TEXT[]) в таблицу users
+  - Автоматическая backfill существующей истории trial из subscriptions
+  - Использует COALESCE для корректной обработки пустых результатов
+
+### Changed
+- **Trial Calculation Logic**: Обновлена логика расчета trial периода в `createSubscription()`
+  - Проверка `hasUsedTrial()` происходит до создания подписки
+  - Trial дни устанавливаются в 0, если пользователь уже использовал trial
+  - Логирование в консоль для отладки (когда trial отключен/использован)
+
+- **Early Bird Validation**: Добавлена проверка соответствия плана Early Bird программе
+  - Проверяется флаг `Plan.isEarlyBird` перед применением скидки
+  - Выбрасывается ошибка, если план не участвует в программе, но запрошен `useEarlyBird`
+
+- **Import Constants**: Добавлен импорт `EARLY_BIRD_LIMIT` из `plans.constants.ts`
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/prisma/schema.prisma` - добавлено поле trialedPlanIds
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` - логика trial и Early Bird
+  - `apps/api/src/modules/subscriptions/constants/plans.constants.ts` - экспорт EARLY_BIRD_LIMIT
+  - `apps/api/prisma/migrations/20251231_add_trial_tracking/migration.sql` - SQL миграция
+
+### Impact
+- **Trial Abuse Prevention**: Пользователи больше не могут получать trial многократно
+- **Early Bird Compliance**: Программа Early Bird теперь соблюдает лимит 500 подписок
+- **Data Integrity**: Существующие данные сохранены через backfill миграцию
+
+---
+
+## [1.6.10] - 2025-12-31 - Early Bird Pricing Structure Analysis
+
+### Documentation
+- **Early Bird Pricing Analysis**: Проведен полный анализ структуры Early Bird pricing
+  - Документирована структура хранения данных в БД (Plan.isEarlyBird, PlanPrice.earlyBirdPrice, Subscription.isEarlyBird)
+  - Описана логика применения Early Bird цен при создании подписки и расчете платежей
+  - Выявлены текущие ограничения: отсутствие автоматической проверки лимита EARLY_BIRD_LIMIT (500)
+  - Определены текущие цены для всех планов:
+    - LITE: 490₽ (обычная) / 290₽ (Early Bird) - скидка 41%
+    - FOREMAN: 990₽ (обычная) / 690₽ (Early Bird) - скидка 30%
+    - BRIGADE: 1990₽ (обычная) / 1490₽ (Early Bird) - скидка 25%
+  - Предоставлены рекомендации по улучшению системы Early Bird
+
+## [1.6.9] - 2025-12-31 - Plan Name in Checkout URL Fix
+
+### Fixed
+- **Plan Name in Checkout URL**: Исправлена проблема, когда в mock режиме URL для checkout формировался без информации о плане
+  - В mock режиме Stripe и YooKassa провайдеры не передавали название плана в URL
+  - Теперь название плана извлекается из description (формат: "Оплата подписки "Plan Name" за месяц")
+  - Название плана передается в URL параметре `plan` для checkout страницы
+  - При выборе плана "light" вместо "прораб" в checkout отображается правильное название
+
+### Changed
+- **StripeProvider**:
+  - Добавлено извлечение названия плана из description
+  - Добавлен параметр `plan` в URL для mock checkout страницы
+
+- **YookassaProvider**:
+  - Добавлено извлечение названия плана из description
+  - Добавлен параметр `plan` в URL для mock checkout страницы
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/core/payments/providers/stripe.provider.ts`
+    - Строки 117-129: Добавлено извлечение названия плана и передача в URL
+  - `apps/api/src/core/payments/providers/yookassa.provider.ts`
+    - Строки 118-130: Добавлено извлечение названия плана и передача в URL
+
+## [1.6.8] - 2025-12-31 - Correct Plan Data in Checkout Fix
+
+### Fixed
+- **Checkout Plan Data**: Исправлена проблема, когда в checkout отображались данные текущего плана вместо выбранного
+  - При выборе плана ниже текущего (например, "light" вместо "прораб") в checkout отображались данные прораба
+  - Теперь при инициализации платежа используется желаемый план (`targetPlanId`) для расчета суммы и названия
+  - Если передан `targetPlanId`, загружается план из БД и используется для расчета цены
+  - Название плана в описании платежа теперь соответствует выбранному плану
+
+### Changed
+- **initializePayment Method**:
+  - Добавлена логика определения плана для расчета платежа
+  - Если передан `targetPlanId` и он отличается от текущего плана подписки, загружается целевой план из БД
+  - Цена и название плана рассчитываются на основе целевого плана, а не текущего
+  - Metadata платежа обновлена для хранения правильного `targetPlanId` и `targetPlan`
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Строки 66-114: Добавлена логика определения плана для расчета платежа
+    - Строки 72-90: Загрузка целевого плана из БД при наличии `targetPlanId`
+    - Строки 218-222: Обновление metadata для хранения правильного целевого плана
+
+## [1.6.7] - 2025-12-31 - Plan Activation After Payment Fix
+
+### Fixed
+- **Plan Activation Timing**: Исправлена проблема, когда план считался подключенным сразу при нажатии "выбрать план"
+  - План теперь активируется только после успешной оплаты через webhook
+  - При инициализации платежа желаемый план сохраняется в metadata
+  - План обновляется в подписке только после подтверждения оплаты в webhook
+  - Убраны преждевременные обновления плана до оплаты
+
+### Changed
+- **initializePayment Method**:
+  - Добавлены опциональные параметры `targetPlanId` и `targetPlan`
+  - Параметры сохраняются в metadata платежа для последующего использования
+  - Metadata передается в платежный провайдер (Stripe/YooKassa)
+
+- **handlePaymentSucceededByPaymentId Method**:
+  - Добавлена логика обновления плана подписки на основе metadata из платежа
+  - Если `targetPlanId` отличается от текущего плана, план обновляется после успешной оплаты
+  - План enum определяется из `targetPlan` или находится по `targetPlanId`
+
+- **handlePaymentSucceeded Methods**:
+  - Обновлены для поддержки metadata из webhook
+  - Metadata извлекается из Stripe/YooKassa webhook и передается в обработчик
+  - Обеспечивает обновление плана после успешной оплаты
+
+- **PaymentsResolver**:
+  - Добавлены опциональные параметры `targetPlanId` и `targetPlan` в мутацию `initializePayment`
+  - Параметры передаются в `paymentsService.initializePayment`
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Строки 33-38: Добавлены параметры `targetPlanId` и `targetPlan` в `initializePayment`
+    - Строки 181-186: Сохранение `targetPlanId` и `targetPlan` в metadata платежа
+    - Строки 384-470: Добавлена логика обновления плана в `handlePaymentSucceededByPaymentId`
+    - Строки 215-302: Обновлен `handlePaymentSucceeded` для поддержки metadata
+  - `apps/api/src/modules/payments/payments.resolver.ts`
+    - Строки 67-86: Добавлены опциональные параметры `targetPlanId` и `targetPlan`
+  - `apps/api/src/modules/payments/controllers/stripe-webhook.controller.ts`
+    - Строки 117-143: Извлечение metadata из Stripe webhook
+  - `apps/api/src/modules/payments/controllers/yookassa-webhook.controller.ts`
+    - Строки 52-54: Извлечение metadata из YooKassa webhook
+
+## [1.6.6] - 2025-12-31 - Payment Flow & Subscription Management Fixes
+
+### Fixed
+- **Payment Creation Unique Constraint**: Исправлена ошибка "Unique constraint failed on the fields: (`provider_payment_id`)"
+  - Используется уникальный UUID для `providerPaymentId` вместо фиксированного `'pending'`
+  - Формат: `pending-${randomUUID()}` для предотвращения конфликтов
+  - Позволяет создавать множественные платежи одновременно без ошибок
+
+- **Existing Payment Handling**: Улучшена обработка существующих pending платежей
+  - При обнаружении существующего pending платежа старый отменяется через провайдера
+  - Создается новый платеж с корректным checkout URL
+  - Предотвращает возврат URL на success страницу вместо checkout
+
+- **Plan Renewal Logic**: Исправлена логика продления того же плана
+  - При продлении того же плана (`subscription.planId === newPlanId`) возвращается подписка без изменений
+  - Проверка "Already on this plan" выполняется только для `immediate=true`
+  - Позволяет продлевать подписку на тот же план без ошибок
+
+- **Downgrade Limit Check**: Исправлена проверка лимитов при изменении плана
+  - Проверка лимитов выполняется только при реальном downgrade (`newPlan.sortOrder < currentPlan.sortOrder`)
+  - При продлении того же плана проверка не выполняется
+  - При upgrade проверка лимитов не выполняется
+
+### Changed
+- **initializePayment Method**:
+  - Добавлена проверка существующих pending платежей перед созданием нового
+  - При обнаружении старого платежа он отменяется и создается новый
+  - Гарантирует корректный checkout URL для каждого нового платежа
+
+- **changePlan Method**:
+  - Разрешено продление того же плана (`immediate=false`)
+  - Возвращает подписку без изменений при продлении
+  - Проверка лимитов только для реальных downgrade
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Строки 101-139: Логика обработки существующих платежей
+    - Строка 144: Использование уникального UUID для `providerPaymentId`
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts`
+    - Строки 228-235: Исправлена логика продления того же плана
+    - Строки 253-290: Проверка лимитов только для downgrade
+
+- **Statistics**: Backend ~80 LOC changed
+
+---
+
+## [1.6.5] - 2025-12-31 - Critical Payment Security Fix
+
+### Fixed - CRITICAL SECURITY
+- **Subscription Activation без оплаты**: Исправлена критическая уязвимость активации подписок
+  - Подписки больше НЕ активируются автоматически при создании
+  - Добавлен статус `PENDING_PAYMENT` для новых подписок
+  - Активация происходит ТОЛЬКО после подтверждения оплаты через webhook
+  - Пользователи больше НЕ могут получить доступ без оплаты
+
+- **Payment Creation**: Исправлена ошибка "Unique constraint failed on yookassa_payment_id"
+  - Изменено значение `yookassaPaymentId` с `'pending'` на `null` при создании платежа
+  - Поле `yookassaPaymentId` является DEPRECATED и устанавливается только для YooKassa
+  - Теперь пользователи могут создавать множественные платежи без конфликтов
+
+### Added
+- **PENDING_PAYMENT Status**: Новый статус подписки для ожидания оплаты
+  - Добавлен в enum `SubscriptionStatus` в Prisma schema
+  - Создана миграция `20251231_add_pending_payment_status`
+  - Подписки создаются со статусом `PENDING_PAYMENT`
+  - mySubscription query возвращает только `ACTIVE` и `TRIALING`
+
+### Changed
+- **createSubscription**: Новая логика создания подписок
+  - Статус: `PENDING_PAYMENT` вместо `TRIALING`/`ACTIVE`
+  - Активация откладывается до получения webhook
+
+- **handlePaymentSucceeded**: Улучшенная логика активации
+  - Проверка наличия пробного периода
+  - Правильная установка статуса: `TRIALING` или `ACTIVE`
+  - Различная обработка первого платежа и продления
+
+### Technical
+- **Modified Files**:
+  - `apps/api/prisma/schema.prisma` - Добавлен `PENDING_PAYMENT` в enum
+  - `apps/api/prisma/migrations/20251231_add_pending_payment_status/migration.sql` - Миграция
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` (строка 90)
+    - Изменен статус с `TRIALING`/`ACTIVE` на `PENDING_PAYMENT`
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Строка 113: `yookassaPaymentId: null`
+    - Строки 231-268: Улучшенная логика активации (оба webhook метода)
+
+- **Security Impact**:
+  - **BEFORE**: Пользователи получали доступ сразу при создании подписки
+  - **AFTER**: Доступ предоставляется только после подтверждения оплаты
+
+- **Statistics**: Backend ~100 LOC changed
+
+---
+
 ## [1.6.3] - 2025-12-29 - Active Subscription Detection Fix
 
 ### Fixed

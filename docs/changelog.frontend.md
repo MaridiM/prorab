@@ -5,6 +5,268 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.13] - 2025-12-31 - Payment Success Page Critical Fix
+
+### Fixed
+- **Success Page Instant Redirect**: Исправлена проблема мгновенного исчезновения страницы успешной оплаты
+  - Удалена слишком строгая проверка на параметр `fromCheckout`
+  - Страница теперь корректно отображается в течение 5 секунд с таймером обратного отсчета
+  - Пользователи видят подтверждение оплаты перед автоматическим редиректом
+  - Кнопка ручного перехода "Перейти в дашборд" работает как раньше
+
+### Changed
+- **Payment Success Page Validation**:
+  - Убрана проверка `fromCheckout === 'true'` (строка 41)
+  - Теперь требуется только `success === 'true'` и наличие `paymentId`
+  - Упрощенная логика валидации предотвращает случайные редиректы
+  - Countdown timer 5 секунд работает корректно
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/app/(root)/payment/success/page.tsx` (строки 24-43)
+    - Удален параметр `fromCheckout` из useEffect
+    - Упрощена условная логика редиректа
+    - Сохранены все защиты от случайного попадания на страницу
+
+### UX Improvements
+- **Better Payment Confirmation**: Пользователи видят success экран на полные 5 секунд
+- **Clear Feedback**: Таймер обратного отсчета показывает время до автоматического редиректа
+- **Manual Control**: Пользователь может перейти в дашборд немедленно, не дожидаясь таймера
+
+---
+
+## [1.6.12] - 2025-12-31 - Early Bird UI Indicators & Landing Page Integration
+
+### Added
+- **Early Bird Stats Banner**: Добавлен красивый баннер со статистикой Early Bird программы
+  - Отображается в верхней части SubscriptionManagement компонента
+  - Показывает оставшиеся слоты из 500 (например, "Осталось 373 из 500 мест")
+  - Status badge: "Активно" (зеленый) или "Завершено" (серый)
+  - Gradient дизайн: amber-50 → orange-50 с amber-200 border
+  - Иконка Sparkles в градиентном круге (amber-400 → orange-500)
+  - Framer Motion анимации для плавного появления
+
+- **Social Proof Counter**: Добавлен счетчик активных команд
+  - Показывает "Уже N команд присоединились"
+  - Иконка Users из lucide-react
+  - Отображается рядом со счетчиком Early Bird слотов
+  - Автоматически скрывается, если команд нет
+
+- **GraphQL Integration**: Добавлен новый query для статистики
+  - `EarlyBirdStatsDocument` query в subscriptions.graphql
+  - Автоматическая генерация TypeScript types
+  - Использование `useQuery` hook с кешированием
+
+### Changed
+- **SubscriptionManagement Component**:
+  - Добавлен `useQuery(EarlyBirdStatsDocument)` для получения статистики
+  - Баннер отображается перед CardContent, если данные доступны
+  - Responsive layout: flex-wrap для мобильных устройств
+  - Условное отображение social proof счетчика
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` (+65 LOC)
+    - Импорт: EarlyBirdStatsDocument, Sparkles, Users icons
+    - Query hook для статистики
+    - JSX баннер с motion.div анимацией
+  - `apps/web/src/packages/api/graphql/subscriptions.graphql` (+10 LOC)
+    - Новый query: EarlyBirdStats с фрагментом полей
+
+- **Statistics**: Frontend +65 LOC
+
+### UX Improvements
+- **Urgency Marketing**: Визуальный счетчик создает FOMO эффект
+- **Social Proof**: Показ активных команд повышает доверие к продукту
+- **Visual Polish**: Gradient дизайн и иконки делают UI более привлекательным
+- **Real-time Data**: Данные загружаются с backend в реальном времени
+
+---
+
+## [1.6.11] - 2025-12-31 - Early Bird & Trial Period Implementation
+
+### Fixed
+- **Early Bird Flag Transmission**: Подтверждено, что `useEarlyBird` флаг корректно передается с frontend
+  - `SubscriptionManagement.tsx` (строка 249) уже содержит правильную логику
+  - `useEarlyBird: selectedPlan?.isEarlyBird || false` передается в createSubscription mutation
+  - Баг был исправлен в предыдущей версии (v1.6.10)
+
+### Impact
+- **Early Bird Pricing**: Frontend теперь работает корректно с backend валидацией
+  - Пользователи, выбирающие Early Bird планы, получат скидку при оплате
+  - UI корректно отображает Early Bird badges и зачеркнутые цены
+  - Интеграция frontend-backend для Early Bird полностью функциональна
+
+### Technical Notes
+- Изменений в frontend коде в этой версии НЕ требовалось
+- Все необходимые исправления уже были в v1.6.10
+- Версия обновлена для синхронизации с backend (v1.6.11)
+
+---
+
+## [1.6.10] - 2025-12-31 - Early Bird Pricing Structure Analysis
+
+### Documentation
+- **Early Bird Pricing Analysis**: Проведен анализ отображения Early Bird pricing в UI
+  - Документировано отображение бейджа "Early Bird" в карточках планов
+  - Описана логика выбора цены (Early Bird или обычная) в компоненте SubscriptionManagement
+  - Выявлены места отображения Early Bird цен и экономии для пользователей
+
+## [1.6.9] - 2025-12-31 - Plan Name Display in Checkout Fix
+
+### Fixed
+- **Plan Name in Checkout**: Исправлена проблема, когда в checkout не отображалось название выбранного плана
+  - В mock режиме URL для checkout формировался без информации о плане
+  - Теперь название плана извлекается из description и передается в URL параметрах
+  - Checkout страница теперь отображает название выбранного плана
+  - При выборе плана "light" вместо "прораб" в checkout отображается правильное название
+
+### Changed
+- **PaymentCheckoutPage**:
+  - Добавлен параметр `plan` из URL параметров
+  - Добавлено отображение названия плана в деталях платежа
+  - Название плана отображается перед суммой платежа
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/app/(root)/payment/checkout/page.tsx`
+    - Добавлен параметр `plan` из searchParams
+    - Добавлено отображение названия плана в секции "Детали платежа"
+
+## [1.6.8] - 2025-12-31 - Correct Plan Data in Checkout Fix
+
+### Fixed
+- **Checkout Plan Data**: Исправлена проблема, когда в checkout отображались данные текущего плана вместо выбранного
+  - При выборе плана ниже текущего (например, "light" вместо "прораб") в checkout отображались данные прораба
+  - Backend теперь использует желаемый план (`targetPlanId`) для расчета суммы и названия в checkout
+  - Название плана и цена в checkout теперь соответствуют выбранному плану
+
+## [1.6.7] - 2025-12-31 - Plan Activation After Payment Fix
+
+### Fixed
+- **Plan Activation Timing**: Исправлена проблема, когда план считался подключенным сразу при нажатии "выбрать план"
+  - План теперь активируется только после успешной оплаты через webhook
+  - При нажатии "выбрать план" только инициализируется платеж с желаемым планом в metadata
+  - План обновляется в подписке только после подтверждения оплаты
+  - Убраны вызовы `changePlan` до оплаты - используется только `initializePayment` с `targetPlanId` и `targetPlan`
+
+### Changed
+- **SubscriptionManagement Component**:
+  - Убраны вызовы `changePlan` до оплаты для существующих подписок
+  - При выборе плана передается `targetPlanId` и `targetPlan` в `initializePayment`
+  - План обновляется автоматически после успешной оплаты через webhook
+  - Упрощена логика обработки выбора плана - нет необходимости вызывать `changePlan` заранее
+
+- **GraphQL Schema**:
+  - Добавлены опциональные параметры `targetPlanId` и `targetPlan` в мутацию `initializePayment`
+  - Параметры передаются в metadata платежа для последующего обновления плана
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx`
+    - Убраны вызовы `changePlan` до оплаты
+    - Добавлена передача `targetPlanId` и `targetPlan` в `initializePayment`
+  - `apps/web/src/packages/api/graphql/subscriptions.graphql`
+    - Добавлены опциональные параметры `targetPlanId` и `targetPlan` в мутацию `initializePayment`
+
+## [1.6.6] - 2025-12-31 - Payment Flow & UI Fixes
+
+### Fixed
+- **ProgressBar Component**: Исправлена ошибка "React does not recognize the `indicatorClassName` prop"
+  - Добавлен `indicatorClassName` в интерфейс `ProgressBarProps`
+  - Проп правильно извлекается из `props` перед распространением на DOM элемент
+  - Применяется к индикатору прогресса вместо внешнего контейнера
+
+- **White Screen on Dashboard**: Исправлен белый экран на странице дашборда
+  - Упрощен интерфейс `ProgressBarProps` для избежания конфликтов с `React.HTMLAttributes`
+  - Убрано расширение через `React.HTMLAttributes` для предотвращения ошибок типизации
+
+- **TrialStatusWidget Button**: Исправлена ошибка "React.Children.only expected to receive a single React element child"
+  - Убран `asChild` prop из `Button`, который требовал только один дочерний элемент
+  - Добавлен обработчик `onClick` для прокрутки к секции планов
+  - Кнопка теперь работает как обычная кнопка с несколькими дочерними элементами
+
+- **Plan Cards Layout**: Исправлено перекрытие элементов в карточках планов подписки
+  - Удален бейдж "Текущий" из верхнего левого угла (информация уже есть внизу)
+  - Убран лишний отступ `pt-10`, который был добавлен для бейджа
+  - Элементы карточки больше не перекрываются
+
+- **Payment Redirect**: Исправлен редирект на страницу success вместо checkout
+  - Добавлена проверка, что URL не ведет на `/payment/success`
+  - При получении неправильного URL показывается ошибка
+  - Обеспечен корректный редирект на страницу checkout провайдера
+
+- **Data Refresh on Return**: Добавлено автоматическое обновление данных при возврате со страницы оплаты
+  - `useEffect` проверяет параметры URL (`paymentId`, `success`)
+  - Автоматически вызывается `refetch()` для обновления данных подписки
+  - Использован `fetchPolicy: 'cache-and-network'` для актуальных данных
+
+- **Plan Renewal Logic**: Исправлена логика продления плана
+  - При продлении того же плана не вызывается `changePlan`
+  - Используется существующий `subscriptionId` для инициализации платежа
+  - Добавлены обязательные поля `plan` и `useEarlyBird` в `CreateSubscriptionInput`
+  - Добавлено поле `newPlan` в `ChangePlanInput` для корректной типизации
+
+- **Payment Success Page**: Исправлена ошибка "Cannot update a component while rendering a different component"
+  - `router.push()` обернут в `setTimeout` для асинхронного выполнения
+  - Предотвращено обновление Router во время рендеринга компонента
+
+### Changed
+- **SubscriptionManagement Component**:
+  - Улучшена обработка ошибок при инициализации платежа
+  - Добавлена проверка корректности URL перед редиректом
+  - Улучшена типизация для всех GraphQL мутаций
+
+- **Payment Flow**:
+  - При возврате со страницы оплаты автоматически обновляются данные
+  - Улучшена обработка существующих платежей на backend
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/ui/progress-bar.tsx` - Исправлен интерфейс и обработка `indicatorClassName`
+  - `apps/web/src/packages/components/subscription/trial-status-widget.tsx` - Убран `asChild`, добавлен `onClick`
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Множественные исправления логики платежей
+  - `apps/web/src/app/(root)/payment/success/page.tsx` - Исправлен редирект с `setTimeout`
+  - `apps/web/src/app/(root)/(protected)/dashboard/page.tsx` - Исправлен белый экран
+
+- **Statistics**: Frontend ~150 LOC changed
+
+---
+
+## [1.6.5] - 2025-12-31 - Subscription Plan Renewal Enhancement
+
+### Added
+- **Plan Renewal Button**: Добавлена кнопка "Продлить план" для текущего активного плана
+  - Кнопка отображается под блоком "Текущий план" в карточке подписки
+  - Использует иконку `RefreshCcw` для визуальной ясности
+  - Вызывает `handleSelectPlan` для продления подписки на следующий период
+
+### Changed
+- **Current Plan Card Layout**: Обновлен дизайн карточки текущего плана
+  - Информационный блок "Текущий план" с датой окончания
+  - Ниже кнопка "Продлить план" с outline стилем
+  - Добавлен контейнер `space-y-2` для правильного расстояния
+  - Motion анимации при hover/tap для лучшего UX
+
+- **Payment Success Page**: Улучшена логика автоматического редиректа
+  - Сокращен таймер обратного отсчета с 10 до 5 секунд
+  - Добавлена защита от множественных редиректов с флагом `hasRedirected`
+  - Кнопка "Перейти в дашборд" теперь использует onClick вместо Link
+  - Все кнопки редиректа устанавливают флаг `hasRedirected`
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx`
+    - Добавлен импорт `RefreshCcw` из lucide-react
+    - Изменена структура блока `isCurrent` (строки 793-830)
+    - Добавлена кнопка продления с variant="outline"
+  - `apps/web/src/app/(root)/payment/success/page.tsx`
+    - Добавлен state `hasRedirected` для предотвращения множественных редиректов
+    - Уменьшен начальный countdown с 10 до 5 секунд
+    - Обновлены все кнопки редиректа для использования onClick с флагом
+
+---
+
 ## [1.6.4] - 2025-12-29 - Subscription Buttons Navigation Fix
 
 ### Fixed

@@ -117,6 +117,9 @@ export class StripeWebhookController {
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
     this.logger.log(`Checkout session completed: ${session.id}`);
     
+    // Extract metadata from session (contains targetPlanId and targetPlan if plan change was requested)
+    const metadata = session.metadata || {};
+    
     // Get payment intent ID from session
     const paymentIntentId = 
       typeof session.payment_intent === 'string' 
@@ -124,13 +127,14 @@ export class StripeWebhookController {
         : (session.payment_intent as Stripe.PaymentIntent)?.id;
 
     if (paymentIntentId) {
-      // Use the payment intent handler
+      // Use the payment intent handler with metadata
       await this.handlePaymentIntentSucceeded({
         id: paymentIntentId,
+        metadata: metadata,
       } as Stripe.PaymentIntent);
     } else {
-      // Fallback: try to find payment by session ID
-      await this.paymentsService.handleStripePaymentSucceeded(session.id);
+      // Fallback: try to find payment by session ID with metadata
+      await this.paymentsService.handleStripePaymentSucceeded(session.id, metadata as Record<string, string>);
     }
   }
 
@@ -139,7 +143,9 @@ export class StripeWebhookController {
    */
   private async handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     this.logger.log(`Payment intent succeeded: ${paymentIntent.id}`);
-    await this.paymentsService.handleStripePaymentSucceeded(paymentIntent.id);
+    // Extract metadata from payment intent (contains targetPlanId and targetPlan if plan change was requested)
+    const metadata = paymentIntent.metadata || {};
+    await this.paymentsService.handleStripePaymentSucceeded(paymentIntent.id, metadata as Record<string, string>);
   }
 
   /**

@@ -166,6 +166,16 @@ query PlanBySlug($slug: String!) {
   }
 }
 
+query EarlyBirdStats {
+  earlyBirdStats {
+    used
+    limit
+    remaining
+    isAvailable
+    totalTeams
+  }
+}
+
 # ============ MUTATIONS ============
 
 mutation CreateSubscription($input: CreateSubscriptionInput!) {
@@ -206,9 +216,13 @@ query AvailablePaymentProviders {
   }
 }
 
-mutation InitializePayment($subscriptionId: String!, $providerType: String) {
-  initializePayment(subscriptionId: $subscriptionId, providerType: $providerType) {
+mutation InitializePayment($subscriptionId: String!, $providerType: String, $targetPlanId: String, $targetPlan: String) {
+  initializePayment(subscriptionId: $subscriptionId, providerType: $providerType, targetPlanId: $targetPlanId, targetPlan: $targetPlan) {
     url
     paymentId
   }
+}
+
+mutation ConfirmMockPayment($paymentId: String!) {
+  confirmMockPayment(paymentId: $paymentId)
 }

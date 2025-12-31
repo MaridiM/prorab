@@ -197,7 +197,9 @@
       "Bash(netsh interface ipv4 show excludedportrange:*)",
       "Bash(pnpm prisma studio:*)",
       "Bash(dir \"g:\\\\Projects\\\\prorab\\\\v-1\"\" | findstr /I \"README \")",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(pnpm prisma migrate dev:*)",
+      "Bash(pnpm prisma migrate deploy:*)"
     ],
     "deny": [],
     "ask": []

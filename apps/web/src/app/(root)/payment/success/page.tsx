@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Alert, AlertDescription } from '@/packages/components/ui/alert'
@@ -10,22 +10,97 @@ import { CheckCircle2, Download, ArrowRight, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 import Link from 'next/link'
-import { MySubscriptionDocument } from '@/packages/api/graphql'
+import { MySubscriptionDocument, ConfirmMockPaymentDocument } from '@/packages/api/graphql'
 
 export default function PaymentSuccessPage() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const [countdown, setCountdown] = useState(10)
+	const [countdown, setCountdown] = useState(5)
+	const [hasRedirected, setHasRedirected] = useState(false)
+	const [isValid, setIsValid] = useState(false) // Track if page should be shown
 
-	const { data: subscriptionData, loading: subscriptionLoading } = useQuery(MySubscriptionDocument)
+	const { data: subscriptionData, loading: subscriptionLoading, refetch: refetchSubscription } = useQuery(MySubscriptionDocument)
+	const [confirmMockPayment] = useMutation(ConfirmMockPaymentDocument)
+
+	// Check if payment was cancelled or if user navigated here accidentally
+	useEffect(() => {
+		const cancelled = searchParams.get('cancelled')
+		const cancel = searchParams.get('cancel')
+		const success = searchParams.get('success')
+		const paymentId = searchParams.get('paymentId')
+
+		// If payment was cancelled, redirect back to settings
+		if (cancelled === 'true' || cancel === 'true') {
+			router.replace('/settings?tab=subscription')
+			return
+		}
+
+		// Only show success page if we have paymentId (success=true is optional but preferred)
+		// This prevents showing success page when user accidentally lands here
+		// But allows showing page if paymentId is present (from real payment providers)
+		if (!paymentId) {
+			// Missing paymentId - redirect back to settings
+			router.replace('/settings?tab=subscription')
+			return
+		}
+
+		// If we reach here, parameters are valid - allow page to show
+		setIsValid(true)
+		
+		// Try to confirm payment if it's still pending
+		// This handles both mock payments and real payments where webhook hasn't been called yet
+		if (paymentId && !paymentId.startsWith('mock-')) {
+			// Only confirm real paymentIds (not mock timestamps)
+			confirmMockPayment({ variables: { paymentId } })
+				.then(() => {
+					// Refetch subscription to get updated plan
+					refetchSubscription()
+				})
+				.catch((error: any) => {
+					// Payment might already be confirmed or not found - that's okay
+					console.log('Payment confirmation result:', error?.message || error)
+					// Still refetch subscription in case payment was already confirmed
+					refetchSubscription()
+				})
+		} else {
+			// For mock payments or if paymentId is missing, just refetch subscription
+			refetchSubscription()
+		}
+	}, [searchParams, router, confirmMockPayment, refetchSubscription])
+
+	// Prevent back navigation from success page to checkout
+	useEffect(() => {
+		// Replace current history entry to prevent back navigation to checkout
+		// This ensures checkout page is not in history
+		window.history.replaceState({ fromSuccess: true }, '', window.location.href)
+		
+		// Handle browser back button - redirect to dashboard instead of going back
+		const handlePopState = () => {
+			// Immediately redirect to dashboard when back button is pressed
+			window.location.replace('/dashboard')
+		}
+		
+		window.addEventListener('popstate', handlePopState)
+		
+		return () => {
+			window.removeEventListener('popstate', handlePopState)
+		}
+	}, [])
 
 	useEffect(() => {
+		// Only start countdown if page is valid and not already redirected
+		if (!isValid || hasRedirected) return
+
 		// Countdown timer for auto-redirect
 		const timer = setInterval(() => {
 			setCountdown((prev) => {
 				if (prev <= 1) {
 					clearInterval(timer)
-					router.push('/dashboard')
+					setHasRedirected(true)
+					// Use setTimeout to defer router.push outside of state update
+					setTimeout(() => {
+						router.push('/dashboard')
+					}, 0)
 					return 0
 				}
 				return prev - 1
@@ -33,11 +108,20 @@ export default function PaymentSuccessPage() {
 		}, 1000)
 
 		return () => clearInterval(timer)
-	}, [router])
+	}, [router, hasRedirected, isValid])
 
 	const handleDownloadReceipt = () => {
 		// TODO: Implement receipt download
 		alert('Загрузка чека скоро будет доступна')
+	}
+
+	// Don't render anything if page is not valid (will redirect)
+	if (!isValid) {
+		return (
+			<div className="flex items-center justify-center min-h-screen">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+			</div>
+		)
 	}
 
 	if (subscriptionLoading) {
@@ -134,27 +218,36 @@ export default function PaymentSuccessPage() {
 						<Download className="h-4 w-4 mr-2" />
 						Скачать чек
 					</Button>
-					<Button asChild className="flex-1">
-						<Link href="/dashboard">
-							<ArrowRight className="h-4 w-4 mr-2" />
-							Перейти в дашборд
-						</Link>
+					<Button
+						className="flex-1"
+						onClick={() => {
+							setHasRedirected(true)
+							router.push('/dashboard')
+						}}
+					>
+						<ArrowRight className="h-4 w-4 mr-2" />
+						Перейти в дашборд
 					</Button>
 				</div>
 
 				{/* Auto-redirect Notice */}
-				<div className="text-center text-sm text-muted-foreground pt-4 border-t">
-					Автоматический переход на дашборд через {countdown} сек...
-					<br />
-					<Button
-						variant="link"
-						size="sm"
-						onClick={() => router.push('/dashboard')}
-						className="mt-2"
-					>
-						Перейти сейчас
-					</Button>
-				</div>
+				{!hasRedirected && (
+					<div className="text-center text-sm text-muted-foreground pt-4 border-t">
+						Автоматический переход на дашборд через {countdown} сек...
+						<br />
+						<Button
+							variant="link"
+							size="sm"
+							onClick={() => {
+								setHasRedirected(true)
+								router.push('/dashboard')
+							}}
+							className="mt-2"
+						>
+							Перейти сейчас
+						</Button>
+					</div>
+				)}
 			</Card>
 		</div>
 	)

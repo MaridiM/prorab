@@ -46,6 +46,9 @@ model User {
   businessRole           BusinessRole? @map("business_role")
   businessRoleAssignedAt DateTime?     @map("business_role_assigned_at")
 
+  // Trial Period Tracking - Store plan IDs that user has already trialed
+  trialedPlanIds String[] @default([]) @map("trialed_plan_ids")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -744,6 +747,7 @@ enum SubscriptionPlan {
 }
 
 enum SubscriptionStatus {
+  PENDING_PAYMENT // Waiting for payment to be completed
   TRIALING
   ACTIVE
   PAST_DUE

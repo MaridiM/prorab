@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { YooKassaClient } from './clients/yookassa.client';
-import { PaymentStatus, SubscriptionStatus, PaymentProviderType } from '@prisma/generated/client';
+import { PaymentStatus, SubscriptionStatus, PaymentProviderType, SubscriptionPlan } from '@prisma/generated/client';
 import { BILLING_CYCLE_DAYS } from '../subscriptions/constants/plans.constants';
 import { MailService } from '../../core/mail/mail.service';
 import { PaymentProviderFactory } from '../../core/payments/factories/payment-provider.factory';
@@ -35,6 +35,8 @@ export class PaymentsService {
     userId: string,
     providerType?: PaymentProviderType,
     userIP?: string,
+    targetPlanId?: string,
+    targetPlan?: string,
   ) {
     // Verify subscription ownership
     const subscription = await this.prisma.subscription.findUnique({
@@ -61,26 +63,62 @@ export class PaymentsService {
       throw new Error('Access denied');
     }
 
+    // Determine which plan to use for payment calculation
+    // If targetPlanId is provided, use the target plan; otherwise use current subscription plan
+    let planToUse = subscription.planRef;
+    let planIdToUse = subscription.planId;
+    let isEarlyBird = subscription.isEarlyBird;
+
+    if (targetPlanId && targetPlanId !== subscription.planId) {
+      // Load target plan from database
+      const targetPlan = await this.prisma.plan.findUnique({
+        where: { id: targetPlanId },
+        include: {
+          prices: true,
+        },
+      });
+
+      if (targetPlan) {
+        planToUse = targetPlan;
+        planIdToUse = targetPlanId;
+        // Check if target plan has early bird pricing
+        // For now, we'll use the early bird status from subscription
+        // In the future, this could be determined based on target plan's early bird availability
+      } else {
+        this.logger.warn(`Target plan not found: ${targetPlanId}, using current subscription plan`);
+      }
+    }
+
     // Get plan price from DB or fallback to constants
     let amount: number;
     let planName: string;
 
-    if (subscription.planRef) {
-      const rubPrice = subscription.planRef.prices?.find((p: { currency: string }) => p.currency === 'RUB');
-      amount = subscription.isEarlyBird && rubPrice?.earlyBirdPrice
+    if (planToUse) {
+      const rubPrice = planToUse.prices?.find((p: { currency: string }) => p.currency === 'RUB');
+      amount = isEarlyBird && rubPrice?.earlyBirdPrice
         ? Number(rubPrice.earlyBirdPrice)
         : Number(rubPrice?.price || 0);
-      planName = subscription.planRef.name;
+      planName = planToUse.name;
     } else {
       // Fallback to constants (for legacy subscriptions)
       const { PLAN_LIMITS } = await import(
         '../subscriptions/constants/plans.constants'
       );
-      const limits = PLAN_LIMITS[subscription.plan];
-      amount = subscription.isEarlyBird
-        ? limits.earlyBirdPrice
-        : limits.price;
-      planName = limits.name;
+      // Use targetPlan enum if provided, otherwise use subscription plan
+      const planEnum = (targetPlan as SubscriptionPlan) || subscription.plan;
+      // Type guard to ensure planEnum is a valid SubscriptionPlan key
+      if (planEnum && planEnum in PLAN_LIMITS) {
+        const limits = PLAN_LIMITS[planEnum as SubscriptionPlan];
+        amount = isEarlyBird
+          ? limits.earlyBirdPrice
+          : limits.price;
+        planName = limits.name;
+      } else {
+        // Final fallback
+        this.logger.warn(`Plan limits not found for ${planEnum}, using default`);
+        amount = 0;
+        planName = 'Unknown Plan';
+      }
     }
 
     // Determine payment provider
@@ -98,7 +136,76 @@ export class PaymentsService {
     const provider = await this.paymentProviderFactory.getProvider(selectedProviderType);
     this.logger.log(`Initializing payment with provider: ${provider.type}`);
 
-    // Create payment record
+    // Check if there's already an active pending payment for this subscription
+    // Only check payments that have been fully initialized (not just created with 'pending' ID)
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: {
+        subscriptionId: subscription.id,
+        status: PaymentStatus.PENDING,
+        providerPaymentId: {
+          not: {
+            startsWith: 'pending-', // Exclude temporary pending IDs
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // If there's an existing pending payment that was already initialized with provider, try to get checkout URL
+    if (existingPayment && existingPayment.providerPaymentId && !existingPayment.providerPaymentId.startsWith('pending-')) {
+      this.logger.log(`Found existing pending payment: ${existingPayment.id}, attempting to get checkout URL from provider`);
+      
+      // Try to get payment details from provider to retrieve the checkout URL
+      try {
+        const paymentDetails = await provider.getPayment(existingPayment.providerPaymentId);
+        if (paymentDetails && paymentDetails.status === 'pending') {
+          // For Stripe, we need to get the Checkout Session URL
+          // For YooKassa, we need to get the confirmation URL
+          // Since PaymentDetails doesn't include URL, we'll need to cancel the old payment and create a new one
+          // OR: Store the checkout URL in payment metadata when creating
+          // For now, cancel the old payment and create a new one to ensure we have a valid checkout URL
+          this.logger.log(`Cancelling old pending payment ${existingPayment.id} and creating new one`);
+          try {
+            await provider.cancelPayment(existingPayment.providerPaymentId);
+          } catch (cancelError) {
+            this.logger.warn(`Could not cancel old payment: ${cancelError.message}`);
+          }
+          // Update payment status to cancelled
+          await this.prisma.payment.update({
+            where: { id: existingPayment.id },
+            data: { status: PaymentStatus.CANCELLED },
+          });
+          // Continue to create new payment below
+        } else {
+          // Payment is not pending anymore, create new one
+          this.logger.log(`Existing payment ${existingPayment.id} is no longer pending, creating new payment`);
+        }
+      } catch (error) {
+        this.logger.warn(`Could not get payment details from provider: ${error.message}, will create new payment`);
+        // If we can't get payment details, continue to create a new payment
+      }
+    }
+
+    // Create payment record with unique providerPaymentId to avoid conflicts
+    // Use UUID to ensure uniqueness even if multiple payments are created simultaneously
+    const { randomUUID } = await import('crypto');
+    const uniquePendingId = `pending-${randomUUID()}`;
+    
+    // Store targetPlanId and targetPlan for later use (will be passed in metadata to provider)
+    // We don't store JSON in description to avoid showing it to users
+    // For mock payments, we'll store targetPlanId in failureReason field temporarily
+    // (failureReason is only used for failed payments, so it's safe to use for metadata)
+    const targetPlanIdToStore = targetPlanId || planIdToUse;
+    const targetPlanToStore = targetPlan || (planToUse?.slug?.toUpperCase() || subscription.plan);
+    
+    // Store metadata in failureReason for mock payments (will be cleared after payment succeeds)
+    // Format: "TARGET_PLAN_METADATA:targetPlanId|targetPlan"
+    const metadataForMock = targetPlanIdToStore && targetPlanIdToStore !== planIdToUse 
+      ? `TARGET_PLAN_METADATA:${targetPlanIdToStore}|${targetPlanToStore}`
+      : null;
+    
     const payment = await this.prisma.payment.create({
       data: {
         subscription: {
@@ -109,24 +216,29 @@ export class PaymentsService {
         currency: 'RUB',
         status: PaymentStatus.PENDING,
         providerType: provider.type, // Store which provider is used
-        providerPaymentId: 'pending', // Will be updated after provider creates payment
-        yookassaPaymentId: 'pending', // DEPRECATED: Kept for backward compatibility
-        description: `Оплата подписки "${planName}" за месяц`,
+        providerPaymentId: uniquePendingId, // Unique temporary ID to avoid conflicts
+        yookassaPaymentId: null, // DEPRECATED: Will be set only for YooKassa payments
+        description: `Оплата подписки "${planName}" за месяц`, // Clean description without JSON
+        failureReason: metadataForMock, // Temporarily store metadata here for mock payments
       },
     });
 
     // Create payment through provider
     const returnUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    // Add success=true to return URL to ensure success page is displayed
     const paymentResult = await provider.createPayment({
       amount,
       currency: 'RUB',
       description: payment.description!,
-      returnUrl: `${returnUrl}/payment/success?paymentId=${payment.id}`,
+      returnUrl: `${returnUrl}/payment/success?success=true&paymentId=${payment.id}`,
       metadata: {
         subscriptionId: subscription.id,
         teamId: subscription.teamId,
         paymentId: payment.id,
         plan: subscription.plan,
+        // Store target plan if different from current plan (for plan changes)
+        targetPlanId: targetPlanId || planIdToUse,
+        targetPlan: targetPlan || (planToUse?.slug?.toUpperCase() || subscription.plan),
       },
       customerEmail: subscription.team.owner.email,
     });
@@ -151,9 +263,13 @@ export class PaymentsService {
     };
   }
 
-  async handlePaymentSucceeded(yookassaPaymentId: string) {
+  /**
+   * Confirm mock payment (for development/testing)
+   * This is called when user completes payment in mock checkout page
+   */
+  async confirmMockPayment(paymentId: string): Promise<void> {
     const payment = await this.prisma.payment.findUnique({
-      where: { yookassaPaymentId },
+      where: { id: paymentId },
       include: {
         subscription: {
           include: {
@@ -169,51 +285,72 @@ export class PaymentsService {
     });
 
     if (!payment) {
+      this.logger.warn(`Mock payment not found: ${paymentId}`);
+      throw new Error(`Payment not found: ${paymentId}`);
+    }
+
+    // Only process if payment is still pending
+    if (payment.status !== 'PENDING') {
+      this.logger.log(`Mock payment ${paymentId} already processed with status: ${payment.status}`);
+      return;
+    }
+
+    // For mock payments, metadata was stored in failureReason field temporarily
+    // Extract it from there, then clear the field
+    const subscription = payment.subscription;
+    const metadata: Record<string, string> = {
+      subscriptionId: subscription.id,
+      teamId: subscription.teamId,
+      paymentId: payment.id,
+      plan: subscription.plan,
+    };
+    
+    // Extract targetPlanId and targetPlan from failureReason if present
+    if (payment.failureReason && payment.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
+      const metadataPart = payment.failureReason.replace('TARGET_PLAN_METADATA:', '');
+      const [targetPlanId, targetPlan] = metadataPart.split('|');
+      if (targetPlanId) {
+        metadata.targetPlanId = targetPlanId;
+      }
+      if (targetPlan) {
+        metadata.targetPlan = targetPlan;
+      }
+      
+      // Clear failureReason after extracting metadata
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { failureReason: null },
+      });
+    }
+    
+    // Process the payment with metadata
+    await this.handlePaymentSucceededByPaymentId(paymentId, metadata);
+    
+    this.logger.log(`Mock payment confirmed: ${paymentId}`);
+  }
+
+  async handlePaymentSucceeded(yookassaPaymentId: string, metadata?: Record<string, string>) {
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        providerPaymentId: yookassaPaymentId,
+        providerType: 'YOOKASSA',
+      },
+    });
+
+    if (!payment) {
+      // Fallback to old method for backward compatibility
+      const oldPayment = await this.prisma.payment.findUnique({
+        where: { yookassaPaymentId },
+      });
+      if (oldPayment) {
+        await this.handlePaymentSucceededByPaymentId(oldPayment.id, metadata);
+        return;
+      }
       this.logger.warn(`Payment not found: ${yookassaPaymentId}`);
       return;
     }
 
-    // Update payment status
-    await this.prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: PaymentStatus.SUCCEEDED,
-        paidAt: new Date(),
-      },
-    });
-
-    this.logger.log(`Payment succeeded: ${payment.id}`);
-
-    // Update subscription status
-    const subscription = payment.subscription;
-    const now = new Date();
-    const nextPeriodEnd = new Date(
-      subscription.currentPeriodEnd.getTime() +
-        BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
-    );
-
-    await this.prisma.subscription.update({
-      where: { id: subscription.id },
-      data: {
-        status: SubscriptionStatus.ACTIVE,
-        currentPeriodStart: subscription.currentPeriodEnd,
-        currentPeriodEnd: nextPeriodEnd,
-      },
-    });
-
-    this.logger.log(`Subscription activated: ${subscription.id}`);
-
-    // Send email notification to team owner
-    const owner = subscription.team.owner;
-    const planName = subscription.planRef?.name || subscription.plan;
-
-    await this.mailService.sendPaymentSuccessEmail(
-      owner.email,
-      owner.fullName,
-      payment.amount.toString(),
-      payment.currency,
-      planName,
-    );
+    await this.handlePaymentSucceededByPaymentId(payment.id, metadata);
   }
 
   async handlePaymentFailed(yookassaPaymentId: string, reason?: string) {
@@ -294,8 +431,9 @@ export class PaymentsService {
 
   /**
    * Internal helper: Handle payment succeeded by payment ID
+   * Can optionally receive metadata from payment provider
    */
-  private async handlePaymentSucceededByPaymentId(paymentId: string) {
+  private async handlePaymentSucceededByPaymentId(paymentId: string, metadata?: Record<string, string>) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
@@ -331,21 +469,83 @@ export class PaymentsService {
     // Update subscription status
     const subscription = payment.subscription;
     const now = new Date();
-    const nextPeriodEnd = new Date(
-      subscription.currentPeriodEnd.getTime() +
-        BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
-    );
+
+    // Determine correct status based on trial period
+    let newStatus: SubscriptionStatus;
+    if (subscription.trialEndsAt && subscription.trialEndsAt > now) {
+      // Trial period is active
+      newStatus = SubscriptionStatus.TRIALING;
+    } else {
+      // No trial or trial expired
+      newStatus = SubscriptionStatus.ACTIVE;
+    }
+
+    // Only update period dates if subscription was PENDING_PAYMENT
+    // For renewals of existing active subscriptions, extend the period
+    const updateData: any = {
+      status: newStatus,
+    };
+
+    if (subscription.status === SubscriptionStatus.PENDING_PAYMENT) {
+      // First payment - activate subscription
+      updateData.currentPeriodStart = now;
+      updateData.currentPeriodEnd = subscription.trialEndsAt || new Date(
+        now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
+      );
+    } else {
+      // Renewal - extend period
+      const nextPeriodEnd = new Date(
+        subscription.currentPeriodEnd.getTime() +
+          BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
+      );
+      updateData.currentPeriodStart = subscription.currentPeriodEnd;
+      updateData.currentPeriodEnd = nextPeriodEnd;
+    }
+
+    // Check if payment metadata contains target plan information (plan change)
+    // This happens when user selects a different plan and completes payment
+    if (metadata?.targetPlanId && metadata.targetPlanId !== subscription.planId) {
+      this.logger.log(`Plan change detected in payment metadata: ${subscription.planId} -> ${metadata.targetPlanId}`);
+
+      // Update plan fields
+      updateData.planId = metadata.targetPlanId;
+
+      // If targetPlan enum is provided, update it too
+      if (metadata.targetPlan) {
+        updateData.plan = metadata.targetPlan as SubscriptionPlan;
+        this.logger.log(`Updating plan enum to: ${metadata.targetPlan}`);
+      } else {
+        // Try to determine plan enum from planId
+        const targetPlan = await this.prisma.plan.findUnique({
+          where: { id: metadata.targetPlanId },
+        });
+
+        if (targetPlan) {
+          // Map plan slug to SubscriptionPlan enum
+          const planEnumMap: Record<string, SubscriptionPlan> = {
+            'lite': SubscriptionPlan.LITE,
+            'light': SubscriptionPlan.LITE,
+            'foreman': SubscriptionPlan.FOREMAN,
+            'brigade': SubscriptionPlan.BRIGADE,
+          };
+
+          const planEnum = planEnumMap[targetPlan.slug.toLowerCase()];
+          if (planEnum) {
+            updateData.plan = planEnum;
+            this.logger.log(`Mapped plan slug "${targetPlan.slug}" to enum: ${planEnum}`);
+          }
+        }
+      }
+
+      this.logger.log(`Plan will be updated after payment confirmation`);
+    }
 
     await this.prisma.subscription.update({
       where: { id: subscription.id },
-      data: {
-        status: SubscriptionStatus.ACTIVE,
-        currentPeriodStart: subscription.currentPeriodEnd,
-        currentPeriodEnd: nextPeriodEnd,
-      },
+      data: updateData,
     });
 
-    this.logger.log(`Subscription activated: ${subscription.id}`);
+    this.logger.log(`Subscription activated: ${subscription.id} with status ${newStatus}`);
 
     // Send email notification to team owner
     const owner = subscription.team.owner;
@@ -417,8 +617,9 @@ export class PaymentsService {
   /**
    * Handle Stripe payment succeeded
    * Uses providerPaymentId to find payment (works for both Stripe and YooKassa)
+   * Can optionally receive metadata from Stripe webhook
    */
-  async handleStripePaymentSucceeded(stripePaymentId: string) {
+  async handleStripePaymentSucceeded(stripePaymentId: string, metadata?: Record<string, string>) {
     // Try to find payment by providerPaymentId (works for Stripe)
     const payment = await this.prisma.payment.findFirst({
       where: {
@@ -432,7 +633,7 @@ export class PaymentsService {
       return;
     }
 
-    await this.handlePaymentSucceededByPaymentId(payment.id);
+    await this.handlePaymentSucceededByPaymentId(payment.id, metadata);
   }
 
   /**

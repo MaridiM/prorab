@@ -82,6 +82,7 @@ export type SubscriptionPlan = (typeof SubscriptionPlan)[keyof typeof Subscripti
 
 
 export const SubscriptionStatus = {
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
   TRIALING: 'TRIALING',
   ACTIVE: 'ACTIVE',
   PAST_DUE: 'PAST_DUE',

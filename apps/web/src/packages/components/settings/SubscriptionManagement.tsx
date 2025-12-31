@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive, Sparkles, Zap, Star, Info, X, ChevronDown } from 'lucide-react'
+import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive, Sparkles, Zap, Star, Info, X, ChevronDown, RefreshCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 
@@ -43,12 +43,11 @@ import {
 	CreateSubscriptionDocument,
 	ChangePlanDocument,
 	InitializePaymentDocument,
+	EarlyBirdStatsDocument,
 	PaymentProviderType,
 } from '@/packages/api/graphql/__generated__/output'
 import {
 	TrialStatusWidget,
-	DowngradeErrorModal,
-	type DowngradeError,
 } from '@/packages/components'
 import { cn } from '@/packages/utils'
 
@@ -61,17 +60,32 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const [showCancelDialog, setShowCancelDialog] = useState(false)
 	const [showReactivateDialog, setShowReactivateDialog] = useState(false)
 	const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
-	const [downgradError, setDowngradeError] = useState<DowngradeError | null>(null)
 	const [selectedPlanDetails, setSelectedPlanDetails] = useState<typeof plans[0] | null>(null)
 	const [expandedFeatures, setExpandedFeatures] = useState(false)
 	const [expandedPlanCards, setExpandedPlanCards] = useState<Set<string>>(new Set())
 	const [processingPlanId, setProcessingPlanId] = useState<string | null>(null) // ID плана, который сейчас обрабатывается
 	const { toast } = useToast()
 
-	const { data: subData, loading: subLoading, refetch } = useQuery(MySubscriptionDocument)
+	const { data: subData, loading: subLoading, refetch } = useQuery(MySubscriptionDocument, {
+		fetchPolicy: 'cache-and-network', // Always refetch to get latest data
+	})
 	const { data: plansData, loading: plansLoading } = useQuery(AvailablePlansDetailedDocument)
 	const { data: teamsData } = useQuery(MyTeamsDocument)
+	const { data: earlyBirdData } = useQuery(EarlyBirdStatsDocument, {
+		fetchPolicy: 'cache-and-network', // Always get fresh data
+	})
 	const searchParams = useSearchParams()
+
+	// Refetch subscription data when returning from payment page
+	useEffect(() => {
+		const paymentId = searchParams.get('paymentId')
+		const paymentSuccess = searchParams.get('success')
+		
+		if (paymentId || paymentSuccess) {
+			// User returned from payment page, refetch subscription data
+			refetch()
+		}
+	}, [searchParams, refetch])
 
 	const [isChangingPlan, setIsChangingPlan] = useState(false)
 
@@ -117,25 +131,29 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 		},
 		onError: (error: any) => {
 			setProcessingPlanId(null) // Очищаем состояние обработки при ошибке
-			// Check for downgrade protection error
-			if (error.graphQLErrors?.[0]?.extensions?.code === 'DOWNGRADE_LIMIT_EXCEEDED') {
-				const extensions = error.graphQLErrors[0].extensions
-				setDowngradeError({
-					message: error.message,
-					code: extensions.code,
-					exceeds: extensions.exceeds || [],
-				})
-			} else {
-				toast(error.message || 'Не удалось изменить тариф', 'error')
-			}
+			toast(error.message || 'Не удалось изменить тариф', 'error')
 		},
 	})
 
 	const [initializePayment] = useMutation(InitializePaymentDocument, {
 		onCompleted: (data) => {
-			// Redirect to payment page
+			// Redirect to payment checkout page (not success page)
 			if (data.initializePayment.url) {
-				window.location.href = data.initializePayment.url
+				// Ensure we're redirecting to checkout, not success page
+				const url = data.initializePayment.url
+				if (url.includes('/payment/success')) {
+					// This shouldn't happen, but if it does, log it
+					console.error('Received success URL instead of checkout URL:', url)
+					toast('Ошибка: получен неправильный URL платежа', 'error')
+					setProcessingPlanId(null)
+					return
+				}
+				// Use replace instead of href to prevent adding checkout to history
+				// This ensures that if user was on success page before, it won't be in history
+				window.location.replace(url)
+			} else {
+				toast('Не удалось получить URL для оплаты', 'error')
+				setProcessingPlanId(null)
 			}
 			// Не очищаем processingPlanId здесь, так как происходит редирект
 		},
@@ -170,6 +188,30 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const subscription = subData?.mySubscription
 	const plans = useMemo(() => plansData?.availablePlansDetailed || [], [plansData?.availablePlansDetailed])
 	const teams = useMemo(() => teamsData?.myTeams || [], [teamsData?.myTeams])
+
+	// Calculate maximum Early Bird discount across all plans
+	const maxEarlyBirdDiscount = useMemo(() => {
+		if (!plans || plans.length === 0) return 0
+
+		let maxDiscount = 0
+
+		for (const plan of plans) {
+			// Get RUB price (base currency)
+			const rubPrice = plan.prices?.find((p: any) => p.currency === 'RUB')
+			
+			if (rubPrice && rubPrice.price && rubPrice.earlyBirdPrice) {
+				const regularPrice = Number(rubPrice.price)
+				const earlyBirdPrice = Number(rubPrice.earlyBirdPrice)
+				
+				if (regularPrice > 0 && earlyBirdPrice < regularPrice) {
+					const discount = ((regularPrice - earlyBirdPrice) / regularPrice) * 100
+					maxDiscount = Math.max(maxDiscount, discount)
+				}
+			}
+		}
+
+		return Math.round(maxDiscount)
+	}, [plans])
 
 	// Debug: Log subscription data
 	console.log('[SubscriptionManagement] Subscription data:', {
@@ -210,33 +252,11 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 		try {
 			let subscriptionId: string | undefined
 
-			// Если подписка уже существует, всегда используем changePlan (даже если план тот же - это продление)
+			// Если подписка уже существует, НЕ обновляем план до оплаты
+			// План будет обновлен после успешной оплаты через webhook
 			if (subscription?.id) {
-				// Check if user already has this plan
-				if (subscription.planId === planId) {
-					// Same plan - this is a renewal, use existing subscription ID
-					subscriptionId = subscription.id
-				} else {
-					// Change to different plan
-					const result = await changePlan({
-						variables: {
-							input: {
-								subscriptionId: subscription.id,
-								newPlanId: planId,
-								immediate: false,
-							},
-						},
-					})
-
-					// Use new subscription ID for payment
-					subscriptionId = result.data?.changePlan?.id || subscription.id
-					
-					if (!subscriptionId) {
-						console.error('changePlan returned no subscription ID')
-						setProcessingPlanId(null)
-						return // Error will be handled by mutation onError
-					}
-				}
+				// Use existing subscription ID - plan will be updated after payment
+				subscriptionId = subscription.id
 			} else {
 				// Create new subscription only if no subscription exists
 				// For new subscription, we need teamId
@@ -246,21 +266,23 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 					return
 				}
 
+				// Find plan to get plan enum
+				const selectedPlan = plans.find(p => p.id === planId)
+				
 				const result = await createSubscription({
 					variables: {
 						input: {
 							teamId: effectiveTeamId,
 							planId: planId,
+							plan: selectedPlan?.slug?.toUpperCase() as any,
+							useEarlyBird: selectedPlan?.isEarlyBird || false,
 						},
 					},
 				})
 
 				// Check for errors first (Apollo Client returns errors in result, not as exceptions)
-				if (result.errors || result.error) {
-					const errorMessage = result.errors?.[0]?.message || 
-					                   result.error?.message || 
-					                   result.error?.graphQLErrors?.[0]?.message || 
-					                   ''
+				if (result.error) {
+					const errorMessage = result.error?.message || ''
 					
 					if (errorMessage.includes('Subscription already exists')) {
 						console.log('Subscription already exists, fetching existing subscription and using changePlan')
@@ -271,22 +293,8 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							
 							if (existingSubscription?.id) {
 								// Use changePlan instead
-								if (existingSubscription.planId === planId) {
-									// Same plan - renewal
-									subscriptionId = existingSubscription.id
-								} else {
-									// Different plan - change it
-									const changeResult = await changePlan({
-										variables: {
-											input: {
-												subscriptionId: existingSubscription.id,
-												newPlanId: planId,
-												immediate: false,
-											},
-										},
-									})
-									subscriptionId = changeResult.data?.changePlan?.id || existingSubscription.id
-								}
+								// Use existing subscription ID - plan will be updated after payment
+								subscriptionId = existingSubscription.id
 							} else {
 								setProcessingPlanId(null)
 								toast('Не удалось получить информацию о подписке. Попробуйте обновить страницу.', 'error')
@@ -316,13 +324,18 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 				}
 			}
 
-			// Initialize payment for BOTH new subscriptions AND plan changes
+			// Initialize payment - plan will be updated after successful payment via webhook
 			// Backend auto-selects provider by IP geolocation
 			if (subscriptionId) {
+				// Find plan to get plan enum for metadata
+				const selectedPlan = plans.find(p => p.id === planId)
+				
 				await initializePayment({
 					variables: {
 						subscriptionId: subscriptionId,
-						// providerType not specified - backend will auto-select by IP
+						providerType: null, // null means backend will auto-select by IP
+						targetPlanId: planId, // Desired plan ID - will be applied after payment
+						targetPlan: selectedPlan?.slug?.toUpperCase(), // Desired plan enum - will be applied after payment
 					},
 				})
 			}
@@ -424,6 +437,63 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							</Button>
 						)}
 					</div>
+
+					{/* Early Bird Stats Banner */}
+					{earlyBirdData?.earlyBirdStats && (
+						<motion.div
+							initial={{ opacity: 0, y: -10 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 0.2 }}
+							className="mt-4"
+						>
+							<div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl p-4">
+								<div className="flex items-center justify-between gap-4 flex-wrap">
+									{/* Left Side - Early Bird Info */}
+									<div className="flex items-center gap-3">
+										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+											<Sparkles className="w-5 h-5 text-white" />
+										</div>
+										<div>
+											<h3 className="font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2">
+												Early Bird предложение
+												{earlyBirdData.earlyBirdStats.isAvailable ? (
+													<Badge variant="secondary" className="bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/40">
+														Активно
+													</Badge>
+												) : (
+													<Badge variant="secondary" className="bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/40">
+														Завершено
+													</Badge>
+												)}
+											</h3>
+											<p className="text-sm text-amber-700 dark:text-amber-300">
+												{earlyBirdData.earlyBirdStats.isAvailable ? (
+													<>
+														Осталось <strong className="font-bold">{earlyBirdData.earlyBirdStats.remaining}</strong> из {earlyBirdData.earlyBirdStats.limit} мест со скидкой до {maxEarlyBirdDiscount}%
+													</>
+												) : (
+													<>Все {earlyBirdData.earlyBirdStats.limit} мест заняты. Доступны обычные цены.</>
+												)}
+											</p>
+										</div>
+									</div>
+
+									{/* Right Side - Social Proof */}
+									{earlyBirdData.earlyBirdStats.totalTeams > 0 && (
+										<div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+											<Users className="w-4 h-4" />
+											<span>
+												Уже <strong className="font-semibold">{earlyBirdData.earlyBirdStats.totalTeams}</strong> {' '}
+												{earlyBirdData.earlyBirdStats.totalTeams === 1 ? 'команда присоединилась' :
+												 earlyBirdData.earlyBirdStats.totalTeams < 5 ? 'команды присоединились' :
+												 'команд присоединились'}
+											</span>
+										</div>
+									)}
+								</div>
+							</div>
+						</motion.div>
+					)}
 				</CardHeader>
 
 				<CardContent>
@@ -791,17 +861,42 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 											)}
 
 											{isCurrent ? (
-												<div className="w-full p-3 rounded-lg border border-primary/30 bg-primary/5 text-center">
-													<div className="flex items-center justify-center gap-2 text-primary font-semibold">
-														<Check className="w-5 h-5" />
-														<span>Текущий план</span>
+												<div className="space-y-2">
+													<div className="w-full p-3 rounded-lg border border-primary/30 bg-primary/5 text-center">
+														<div className="flex items-center justify-center gap-2 text-primary font-semibold">
+															<Check className="w-5 h-5" />
+															<span>Текущий план</span>
+														</div>
+														<p className="text-xs text-muted-foreground mt-1">
+															Активна до {subscription?.currentPeriodEnd
+																? format(new Date(subscription.currentPeriodEnd), 'd MMMM yyyy', { locale: ru })
+																: '—'
+															}
+														</p>
 													</div>
-													<p className="text-xs text-muted-foreground mt-1">
-														Активна до {subscription?.currentPeriodEnd
-															? format(new Date(subscription.currentPeriodEnd), 'd MMMM yyyy', { locale: ru })
-															: '—'
-														}
-													</p>
+													<motion.div
+														whileHover={processingPlanId === null ? { scale: 1.02 } : undefined}
+														whileTap={processingPlanId === null ? { scale: 0.98 } : undefined}
+													>
+														<Button
+															onClick={() => handleSelectPlan(plan.id)}
+															disabled={processingPlanId !== null}
+															variant="outline"
+															className="w-full font-semibold h-10 border-primary/50 text-primary hover:bg-primary/5"
+														>
+															{processingPlanId === plan.id ? (
+																<>
+																	<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+																	Обработка...
+																</>
+															) : (
+																<>
+																	<RefreshCcw className="w-4 h-4 mr-2" />
+																	Продлить план
+																</>
+															)}
+														</Button>
+													</motion.div>
 												</div>
 											) : (
 												<motion.div
@@ -1071,13 +1166,6 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 				</CardContent>
 			</Card>
 
-			{/* Downgrade Error Modal */}
-			<DowngradeErrorModal
-				isOpen={!!downgradError}
-				onClose={() => setDowngradeError(null)}
-				error={downgradError}
-				newPlanName={plans.find(p => p.id === selectedPlanId)?.name}
-			/>
 
 			{/* Plan Details Dialog */}
 			<Dialog open={!!selectedPlanDetails} onOpenChange={(open) => {

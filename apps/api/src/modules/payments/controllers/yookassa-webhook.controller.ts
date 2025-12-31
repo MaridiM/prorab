@@ -50,7 +50,9 @@ export class YooKassaWebhookController {
     try {
       switch (event) {
         case 'payment.succeeded':
-          await this.paymentsService.handlePaymentSucceeded(object.id);
+          // Extract metadata from YooKassa payment object (if available)
+          const metadata = object.metadata || {};
+          await this.paymentsService.handlePaymentSucceeded(object.id, metadata as Record<string, string>);
           break;
 
         case 'payment.canceled':

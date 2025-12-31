@@ -1,167 +1,12 @@
 # ProRab Version Information
 
-**Current Version:** v1.6.13
+**Current Version:** v1.6.5
 **Release Date:** 2025-12-31
 **Status:** 🟢 Production Ready
 
 ---
 
 ## Version History
-
-### v1.6.13 (2025-12-31) - Payment Flow & Plan Update Critical Fixes
-
-**CRITICAL FIXES:**
-
-- 🐛 **Success Page Instant Redirect** - Fixed success page disappearing immediately
-  - Removed overly strict `fromCheckout` validation check
-  - Success page now properly displays for 5 seconds with countdown timer
-  - Users can see payment confirmation before auto-redirect to dashboard
-  - Manual redirect button still available
-
-- 🐛 **Plan Not Updating After Payment** - Fixed plan remaining unchanged after upgrade
-  - Added plan update logic in `handlePaymentSucceededByPaymentId` webhook handler
-  - Checks payment metadata for `targetPlanId` and `targetPlan`
-  - Updates `subscription.planId` and `subscription.plan` after successful payment
-  - Automatic mapping of plan slug to SubscriptionPlan enum
-  - Detailed logging for plan changes
-
-**HOW IT WORKS:**
-
-1. User selects new plan (e.g., Brigade while on Foreman)
-2. `initializePayment` stores `targetPlanId` and `targetPlan` in payment metadata
-3. Payment provider webhook calls `handlePaymentSucceeded` with metadata
-4. Webhook handler updates subscription plan after payment confirmation
-5. User sees updated plan immediately after payment
-
-**BACKEND:**
-
-- Updated `handlePaymentSucceededByPaymentId()` in PaymentsService
-- Added plan change detection from metadata
-- Added plan slug → enum mapping logic
-- Enhanced logging for debugging plan updates
-
-**FRONTEND:**
-
-- Removed strict `fromCheckout` check in success page
-- Success page validation now only requires `success=true` and `paymentId`
-
-**FILES MODIFIED:**
-
-Backend:
-- `apps/api/src/modules/payments/payments.service.ts` - Plan update logic in webhook handler
-
-Frontend:
-- `apps/web/src/app/(root)/payment/success/page.tsx` - Removed strict validation
-
-**STATISTICS:**
-
-- Backend: +35 LOC (plan update logic, logging)
-- Frontend: -5 LOC (removed strict check)
-- Total: ~30 LOC net
-
-**BREAKING CHANGES:** None
-
----
-
-### v1.6.12 (2025-12-31) - Early Bird UI Indicators & Landing Page Integration
-
-**NEW FEATURES:**
-
-- ✅ **Early Bird Stats Counter** - Real-time tracking of Early Bird program
-  - Shows remaining slots out of 500 total
-  - Active/Completed status badge
-  - Beautiful amber/orange gradient banner in subscription settings
-  - Framer Motion animations for polish
-
-- ✅ **Social Proof Counter** - "Already N teams joined"
-  - Displays total active teams count
-  - Enhances FOMO marketing effect
-  - Real data from database
-
-- ✅ **Public REST API for Landing Page** - `/api/public/stats/early-bird`
-  - No authentication required
-  - Returns: used, limit, remaining, isAvailable, totalTeams
-  - Designed for landing page integration with real data
-
-**BACKEND:**
-
-- New GraphQL type: `EarlyBirdStatsModel`
-- New GraphQL query: `earlyBirdStats` (public, no auth)
-- New REST endpoint: `GET /api/public/stats/early-bird`
-- New service method: `getEarlyBirdStats()` in SubscriptionsService
-- New controller: `PublicStatsController`
-
-**FRONTEND:**
-
-- Updated `SubscriptionManagement.tsx` with Early Bird banner
-- Added social proof display with Users icon
-- Beautiful gradient design (amber-50 to orange-50)
-- Responsive layout for mobile
-
-**FILES MODIFIED:**
-
-Backend:
-- `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Added getEarlyBirdStats()
-- `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` - Added earlyBirdStats query
-- `apps/api/src/modules/subscriptions/subscriptions.module.ts` - Registered PublicStatsController
-
-Frontend:
-- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Added banner UI
-- `apps/web/src/packages/api/graphql/subscriptions.graphql` - Added EarlyBirdStats query
-
-**FILES CREATED:**
-
-- `apps/api/src/modules/subscriptions/models/early-bird-stats.model.ts` - GraphQL type
-- `apps/api/src/modules/subscriptions/controllers/public-stats.controller.ts` - REST API
-
-**STATISTICS:**
-
-- Backend: +85 LOC (models, service, resolver, controller)
-- Frontend: +65 LOC (UI banner, GraphQL query)
-- Total: ~150 LOC
-
-**BREAKING CHANGES:** None
-
----
-
-### v1.6.11 (2025-12-31) - Early Bird & Trial Period Implementation
-
-**CRITICAL FIXES:**
-
-- 🐛 **Early Bird Not Working** - Fixed critical bug where users always paid full price
-  - Frontend correctly passes `useEarlyBird` flag (already fixed in v1.6.10)
-  - Backend validates Early Bird eligibility and enforces 500-subscription limit
-  - Price calculation now works: users get 290₽/690₽/1490₽ instead of full price
-
-**NEW FEATURES:**
-
-- ✅ **Trial Uniqueness** - Users can only get trial once per plan
-  - Added `trialedPlanIds` field to track trial usage per user
-  - Automatic backfill from existing subscriptions
-  - Users can trial different plans, but only once each
-
-- ✅ **Early Bird Validation** - Enforces 500-subscription limit
-  - Backend counts active Early Bird subscriptions
-  - Rejects requests when limit reached
-  - Clear error messages for users
-
-**DATABASE MIGRATIONS:**
-
-- `20251231_add_trial_tracking` - Added `trialed_plan_ids` column
-- Automatic backfill of trial history
-- Fully backward compatible
-
-**UPGRADE PATH:**
-
-```bash
-cd apps/api
-npx prisma generate
-npx prisma db execute --file "prisma\migrations\20251231_add_trial_tracking\migration.sql"
-```
-
-**BREAKING CHANGES:** None
-
----
 
 ### v1.6.5 (2025-12-31) - CRITICAL SECURITY FIX: Payment Authorization
 
@@ -468,19 +313,19 @@ pnpm dev
 
 ### Monorepo
 - **Package:** `prorab-monorepo`
-- **Version:** `1.6.13`
+- **Version:** `1.6.2`
 - **Location:** `./package.json`
 
 ### Backend API
 - **Package:** `api`
-- **Version:** `1.6.13`
+- **Version:** `1.6.2`
 - **Location:** `./apps/api/package.json`
 - **Framework:** NestJS 11
 - **Database:** PostgreSQL + Prisma
 
 ### Frontend Web
 - **Package:** `web`
-- **Version:** `1.6.13`
+- **Version:** `1.6.2`
 - **Location:** `./apps/web/package.json`
 - **Framework:** Next.js 16
 - **UI:** React 19
@@ -492,7 +337,7 @@ pnpm dev
 ### Frontend (.env)
 ```env
 NEXT_PUBLIC_SERVER_URL=http://localhost:8080/graphql
-NEXT_PUBLIC_APP_VERSION=1.6.13
+NEXT_PUBLIC_APP_VERSION=1.6.2
 ```
 
 ### Backend (.env)

@@ -4,6 +4,7 @@ import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionModel } from './models/subscription.model';
 import { PlanLimitsModel } from './models/plan-limits.model';
 import { UsageStatsModel } from './models/usage-stats.model';
+import { EarlyBirdStatsModel } from './models/early-bird-stats.model';
 import { CreateSubscriptionInput } from './dto/create-subscription.input';
 import { ChangePlanInput } from './dto/change-plan.input';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -103,6 +104,15 @@ export class SubscriptionsResolver {
   @Query(() => [PlanLimitsModel])
   async availablePlans(): Promise<PlanLimitsModel[]> {
     return this.subscriptionsService.getAvailablePlans();
+  }
+
+  /**
+   * Get Early Bird statistics
+   * Public query - shows remaining Early Bird slots and social proof
+   */
+  @Query(() => EarlyBirdStatsModel)
+  async earlyBirdStats(): Promise<EarlyBirdStatsModel> {
+    return this.subscriptionsService.getEarlyBirdStats();
   }
 
   /**

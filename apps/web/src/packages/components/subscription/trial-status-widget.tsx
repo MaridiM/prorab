@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Zap, Crown, ArrowRight, Clock } from 'lucide-react'
+import { Zap, ArrowRight, Clock } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import { Card } from '@/packages/components/ui/card'
 import { Badge } from '@/packages/components/ui/badge'
@@ -98,16 +98,13 @@ export function TrialStatusWidget({ subscription, className }: TrialStatusWidget
 								isExpiringSoon ? 'bg-destructive hover:bg-destructive/90' : 'bg-amber-600 hover:bg-amber-700'
 							)}
 							size="sm"
-							onClick={() => {
-								const plansSection = document.getElementById('plans-section')
-								if (plansSection) {
-									plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-								}
-							}}
+							asChild
 						>
-							<span className="hidden sm:inline">Выбрать тарифный план</span>
-							<span className="inline sm:hidden">Выбрать план</span>
-							<ArrowRight className="ml-2 h-4 w-4" />
+							<Link href="/settings?tab=subscription&showPlans=true">
+								<span className="hidden sm:inline">Выбрать тарифный план</span>
+								<span className="inline sm:hidden">Выбрать план</span>
+								<ArrowRight className="ml-2 h-4 w-4" />
+							</Link>
 						</Button>
 					</div>
 				</div>

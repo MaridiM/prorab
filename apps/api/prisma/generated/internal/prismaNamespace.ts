@@ -3544,6 +3544,7 @@ export const UserScalarFieldEnum = {
   storageMigratedAt: 'storageMigratedAt',
   businessRole: 'businessRole',
   businessRoleAssignedAt: 'businessRoleAssignedAt',
+  trialedPlanIds: 'trialedPlanIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

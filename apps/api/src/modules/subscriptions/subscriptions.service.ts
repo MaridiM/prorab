@@ -16,6 +16,7 @@ import {
   PLAN_LIMITS,
   TRIAL_DURATION_DAYS,
   BILLING_CYCLE_DAYS,
+  EARLY_BIRD_LIMIT,
 } from './constants/plans.constants';
 import { PlanLimitsModel } from './models/plan-limits.model';
 import { UsageStatsModel } from './models/usage-stats.model';
@@ -70,6 +71,23 @@ export class SubscriptionsService {
       }
     }
 
+    // Get team owner (user who is creating the subscription)
+    const teamOwner = team.owner;
+
+    // Check trial eligibility - user can only get trial once per plan
+    let alreadyTrialed = false;
+    if (input.planId && trialDays > 0) {
+      alreadyTrialed = await this.hasUsedTrial(teamOwner.id, input.planId);
+
+      if (alreadyTrialed) {
+        // Disable trial if user already used it for this plan
+        trialDays = 0;
+        console.log(
+          `User ${teamOwner.id} already used trial for plan ${input.planId}. Trial disabled.`
+        );
+      }
+    }
+
     // Calculate trial end date based on plan configuration
     const now = new Date();
     const trialEndsAt = trialDays > 0
@@ -80,13 +98,32 @@ export class SubscriptionsService {
       now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
     );
 
-    // Create subscription
+    // Validate Early Bird eligibility
+    if (input.useEarlyBird) {
+      // Check if plan supports Early Bird
+      if (planData && !planData.isEarlyBird) {
+        throw new BadRequestException(
+          'Этот план не участвует в программе Early Bird.'
+        );
+      }
+
+      // Check Early Bird limit
+      const earlyBirdCount = await this.getEarlyBirdCount();
+      if (earlyBirdCount >= EARLY_BIRD_LIMIT) {
+        throw new BadRequestException(
+          `Программа Early Bird завершена. Достигнут лимит ${EARLY_BIRD_LIMIT} подписок.`
+        );
+      }
+    }
+
+    // Create subscription with PENDING_PAYMENT status
+    // Status will be changed to TRIALING or ACTIVE after successful payment
     const subscription = await this.prisma.subscription.create({
       data: {
         teamId: input.teamId,
         plan: planEnum, // Determined from planData.slug or input.plan
         planId: input.planId, // NEW: Use planId if provided
-        status: trialEndsAt ? SubscriptionStatus.TRIALING : SubscriptionStatus.ACTIVE,
+        status: SubscriptionStatus.PENDING_PAYMENT, // Wait for payment confirmation
         currentPeriodStart: now,
         currentPeriodEnd,
         trialEndsAt,
@@ -103,6 +140,14 @@ export class SubscriptionsService {
         },
       },
     });
+
+    // Mark trial as used if trial was granted
+    if (trialEndsAt && input.planId && !alreadyTrialed) {
+      await this.markTrialAsUsed(teamOwner.id, input.planId);
+      console.log(
+        `Marked trial as used for user ${teamOwner.id} on plan ${input.planId}`
+      );
+    }
 
     return subscription;
   }
@@ -224,8 +269,16 @@ export class SubscriptionsService {
         newPlanEnum = (p?.slug.toUpperCase() as SubscriptionPlan) || SubscriptionPlan.LITE;
     }
 
-    if (subscription.planId === newPlanId) {
+    // Allow same plan for renewal (immediate=false means it's a renewal, not a change)
+    // Only prevent if immediate=true (which is not supported anyway)
+    if (subscription.planId === newPlanId && input.immediate) {
        throw new BadRequestException('Already on this plan');
+    }
+    
+    // If same plan and not immediate, this is a renewal - allow it
+    if (subscription.planId === newPlanId && !input.immediate) {
+      // This is a renewal, return the subscription as-is
+      return subscription;
     }
 
     // For now, only support scheduled changes (not immediate)
@@ -249,44 +302,9 @@ export class SubscriptionsService {
       throw new NotFoundException('Plan not found');
     }
 
-    // Check if this is a downgrade
-    const isDowngrade = this.isDowngrade(currentPlan, newPlan);
-
-    if (isDowngrade) {
-      // Get current usage stats
-      const usage = await this.getUsageStatsInternal(subscription.teamId);
-
-      // Check if usage exceeds new plan limits
-      const exceeds: string[] = [];
-
-      if (
-        newPlan.maxActiveProjects !== null &&
-        usage.activeProjects > newPlan.maxActiveProjects
-      ) {
-        exceeds.push(
-          `Проекты: ${usage.activeProjects} > ${newPlan.maxActiveProjects}`,
-        );
-      }
-
-      if (usage.totalMembers > newPlan.maxMembers) {
-        exceeds.push(`Участники: ${usage.totalMembers} > ${newPlan.maxMembers}`);
-      }
-
-      if (usage.storageUsedGB > newPlan.storageGB) {
-        exceeds.push(
-          `Хранилище: ${usage.storageUsedGB.toFixed(2)} ГБ > ${newPlan.storageGB} ГБ`,
-        );
-      }
-
-      // If there are any exceeded limits, prevent downgrade
-      if (exceeds.length > 0) {
-        throw new ForbiddenException({
-          message: 'Невозможно понизить план. Превышены лимиты нового плана.',
-          code: 'DOWNGRADE_LIMIT_EXCEEDED',
-          exceeds,
-        });
-      }
-    }
+    // Allow downgrade - user can choose to downgrade even if limits are exceeded
+    // The plan change will be scheduled for the next billing cycle
+    // Note: User will need to reduce usage before the change takes effect, or they may lose access to some features
 
     // Schedule change for next billing cycle
     return this.prisma.subscription.update({
@@ -552,6 +570,92 @@ export class SubscriptionsService {
         storageGB: plan.storageGB,
         features: plan.features.map((f) => f.name),
       };
+    });
+  }
+
+  /**
+   * Get count of active Early Bird subscriptions
+   * Used to enforce the EARLY_BIRD_LIMIT (500 subscriptions)
+   */
+  async getEarlyBirdCount(): Promise<number> {
+    return this.prisma.subscription.count({
+      where: {
+        isEarlyBird: true,
+        status: {
+          in: [
+            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.TRIALING,
+            SubscriptionStatus.PENDING_PAYMENT,
+          ],
+        },
+      },
+    });
+  }
+
+  /**
+   * Get Early Bird statistics for UI display
+   * Returns used count, limit, remaining, availability, and total teams
+   */
+  async getEarlyBirdStats() {
+    const used = await this.getEarlyBirdCount();
+    const remaining = Math.max(0, EARLY_BIRD_LIMIT - used);
+    const isAvailable = remaining > 0;
+
+    // Count total active subscriptions (for social proof)
+    const totalTeams = await this.prisma.subscription.count({
+      where: {
+        status: {
+          in: [
+            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.TRIALING,
+          ],
+        },
+      },
+    });
+
+    return {
+      used,
+      limit: EARLY_BIRD_LIMIT,
+      remaining,
+      isAvailable,
+      totalTeams,
+    };
+  }
+
+  /**
+   * Check if user has already used trial for a specific plan
+   * @param userId User ID
+   * @param planId Plan ID
+   * @returns true if user has already trialed this plan
+   */
+  async hasUsedTrial(userId: string, planId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { trialedPlanIds: true },
+    });
+
+    return user?.trialedPlanIds?.includes(planId) || false;
+  }
+
+  /**
+   * Mark trial as used for a specific plan
+   * @param userId User ID
+   * @param planId Plan ID
+   */
+  async markTrialAsUsed(userId: string, planId: string): Promise<void> {
+    // Check if already marked to avoid duplicates
+    const alreadyMarked = await this.hasUsedTrial(userId, planId);
+    if (alreadyMarked) {
+      return;
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        trialedPlanIds: {
+          push: planId,
+        },
+      },
     });
   }
 }

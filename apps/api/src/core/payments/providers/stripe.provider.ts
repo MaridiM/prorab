@@ -117,15 +117,26 @@ export class StripeProvider implements IPaymentProvider {
     // Development mode mock
     if (!this.stripe) {
       this.logger.warn('🧪 Stripe MOCK: Creating fake payment session for development')
+      // Extract base URL from returnUrl (remove query params and path after /payment)
+      const baseUrl = params.returnUrl.split('/payment')[0]
+      // Extract plan name from description (format: "Оплата подписки "Plan Name" за месяц")
+      // Remove technical JSON metadata if present (everything after "|")
+      const cleanDescription = params.description?.split(' | ')[0] || params.description || ''
+      const planMatch = cleanDescription.match(/"([^"]+)"/)
+      const planName = planMatch ? planMatch[1] : 'Unknown Plan'
       return {
         paymentId: `mock_stripe_${Date.now()}`,
-        confirmationUrl: `${params.returnUrl}?mock=true&provider=stripe&amount=${params.amount}`,
+        // Redirect to mock checkout page instead of directly to success
+        confirmationUrl: `${baseUrl}/payment/checkout?mock=true&provider=stripe&amount=${params.amount}&plan=${encodeURIComponent(planName)}&return_url=${encodeURIComponent(params.returnUrl)}`,
         status: 'pending' as any,
         expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
       }
     }
 
     this.logger.debug(`Creating Stripe Checkout Session: ${JSON.stringify(params)}`)
+
+    // Clean description - remove any technical JSON metadata (everything after "|")
+    const cleanDescription = params.description?.split(' | ')[0] || params.description || 'Оплата подписки'
 
     // Create Checkout Session
     const session = await this.stripe.checkout.sessions.create({
@@ -135,7 +146,7 @@ export class StripeProvider implements IPaymentProvider {
           price_data: {
             currency: params.currency.toLowerCase(),
             product_data: {
-              name: params.description,
+              name: cleanDescription, // Use cleaned description without JSON
             },
             unit_amount: Math.round(params.amount * 100), // Convert to cents
           },

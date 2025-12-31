@@ -1589,6 +1589,23 @@ input Disable2FAInput {
   token: String!
 }
 
+type EarlyBirdStatsModel {
+  """Whether Early Bird program is still available"""
+  isAvailable: Boolean!
+
+  """Total Early Bird subscription limit"""
+  limit: Int!
+
+  """Remaining Early Bird subscriptions"""
+  remaining: Int!
+
+  """Total number of active teams/subscriptions"""
+  totalTeams: Int!
+
+  """Number of Early Bird subscriptions used"""
+  used: Int!
+}
+
 input Enable2FAInput {
   secret: String!
   token: String!
@@ -2128,6 +2145,9 @@ type Mutation {
   """Подтвердить изменение email адреса по токену из письма"""
   confirmEmailChange(input: ConfirmEmailChangeInput!): Boolean!
 
+  """Подтвердить mock платёж (для разработки/тестирования)"""
+  confirmMockPayment(paymentId: String!): Boolean!
+
   """Создать расход"""
   createExpense(input: CreateExpenseInput!): Expense!
 
@@ -2194,7 +2214,7 @@ type Mutation {
   """
   Инициализировать платёж с автоматическим выбором провайдера по геолокации
   """
-  initializePayment(providerType: String, subscriptionId: String!): PaymentUrl!
+  initializePayment(providerType: String, subscriptionId: String!, targetPlan: String, targetPlanId: String): PaymentUrl!
 
   """Инициировать изменение email адреса (требуется 2FA, если включена)"""
   initiateEmailChange(input: ChangeEmailInput!): ChangeEmailResult!
@@ -3090,6 +3110,7 @@ type Query {
   availableStorageProviders: [StorageProviderOption!]!
   canAddProject(teamId: String!): Boolean!
   currentPlanLimits(teamId: String!): PlanLimits!
+  earlyBirdStats: EarlyBirdStatsModel!
 
   """Получить расход по ID"""
   expense(id: ID!): Expense!
@@ -3579,6 +3600,7 @@ enum SubscriptionStatus {
   CANCELLED
   EXPIRED
   PAST_DUE
+  PENDING_PAYMENT
   TRIALING
 }
 
