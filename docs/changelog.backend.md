@@ -5,6 +5,23 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.3] - 2025-12-29 - Active Subscription Detection Fix
+
+### Fixed
+- **mySubscription Query**: Исправлен поиск активных подписок
+  - Теперь ищет по всем командам пользователя (не только первой)
+  - Фильтрует только ACTIVE и TRIALING подписки
+  - Игнорирует CANCELLED и EXPIRED подписки
+  - Метод `SubscriptionsService.findByUserId()` полностью переписан
+
+### Technical
+- **Modified Files**:
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Логика поиска активных подписок (строки 110-139)
+
+- **Statistics**: ~10 LOC changed
+
+---
+
 ## [1.6.2] - 2025-12-28 - Subscription History & GraphQL Enhancements
 
 ### Added
@@ -27,35 +44,43 @@
 
 - **Statistics**: +180 LOC backend
 
-## [1.6.5] - 2025-12-28 - Version Update
+---
+
+## [1.6.1] - 2025-12-28 - Payment Provider Auto-Selection
+
+### Added
+- **Automatic Payment Provider Selection**:
+  - IP-based geolocation detection (`geo-provider.util.ts`)
+  - Russia/Belarus/CIS → Yookassa
+  - Europe/Ukraine/International → Stripe
+  - Mock mode for development without credentials
 
 ### Changed
-- Обновлена версия API с `1.6.4` на `1.6.5`
-- Совместимость с frontend исправлениями в выборе планов подписки
+- **Payment Providers**:
+  - Lazy initialization pattern for Stripe and Yookassa
+  - Mock payment URLs in development mode
+  - Payment service auto-selects provider based on user IP
 
-## [1.6.4] - 2025-12-28 - Version Update
+### Technical
+- **New Files**:
+  - `apps/api/src/modules/payments/utils/geo-provider.util.ts`
+  - `apps/api/prisma/seed-payment-providers.ts`
 
-### Changed
-- Обновлена версия API с `1.6.3` на `1.6.4`
-- Совместимость с frontend изменениями в странице проектов команды
+- **Modified Files**:
+  - `apps/api/src/core/payments/providers/stripe.provider.ts`
+  - `apps/api/src/core/payments/providers/yookassa.provider.ts`
+  - `apps/api/src/modules/payments/payments.service.ts`
 
-## [1.6.3] - 2025-12-28 - Version Update
+---
 
-### Changed
-- Обновлена версия API с `1.6.2` на `1.6.3`
-- Совместимость с frontend изменениями в дашборде
+## [1.6.0] - 2025-12-27 - Full Subscription System
 
-## [1.6.2] - 2025-12-28 - Version Update
-
-### Changed
-- Обновлена версия API с `1.6.1` на `1.6.2`
-- Совместимость с frontend изменениями в UI компонентах
-
-## [1.6.1] - 2025-12-28 - UI Improvements & Admin Panel Enhancements
-
-### Changed
-- Обновлена версия API с `1.6.0` на `1.6.1`
-- Совместимость с frontend изменениями в админ панели и карточках планов
+### Added
+- Complete subscription system with Stripe and Yookassa integration
+- Multiple subscription plans (Lite, Foreman, Brigade)
+- Trial periods and early bird pricing
+- Subscription management UI
+- Payment webhooks for both providers
 
 ## [1.4.5] - 2025-12-27 - Bug Fixes & TypeScript Improvements
 
@@ -77,165 +102,6 @@
 
 ### Changed
 - Обновлена версия API с `1.4.4` на `1.4.5`
-
-## [1.6.0] - 2025-12-28 - Full Subscription System with Multi-Provider Payments 🚧
-
-### 🚧 IN PROGRESS - Phase 2: Enforcement of Limits Everywhere (67% complete)
-
-Реализация полноценной системы управления подписками с отображением планов из БД, multi-provider payments и полным enforcement лимитов.
-
-**ФАЗА 1.1: Backend - SubscriptionsResolver Queries** ✅
-
-**Проблема:**
-- Существующий query `availablePlans` возвращает только `PlanLimitsModel[]` с ограниченной информацией
-- Нет возможности получить полные данные плана с ценами, features и metadata из БД
-- Frontend не может отобразить детальную информацию о планах для выбора
-
-**Решение:**
-- ✅ Добавлены новые GraphQL queries для получения полных данных планов из БД
-- ✅ `availablePlansDetailed` - все активные планы с ценами, features, trial days
-- ✅ `planBySlug` - получение плана по slug для детальной страницы
-- ✅ Интеграция `AdminPlansService` в `SubscriptionsResolver`
-- ✅ Трансформация Decimal → Float для GraphQL совместимости
-- ✅ Public queries - авторизация не требуется для просмотра планов
-
-**Изменения:**
-- `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` (+62 LOC):
-  - Импорт `AdminPlansService` и `AdminPlanModel`
-  - Добавлен `AdminPlansService` в constructor
-  - Query `availablePlansDetailed(): AdminPlanModel[]` - полные данные всех планов
-  - Query `planBySlug(slug): AdminPlanModel` - план по slug
-  - Конвертация prices (Decimal → Float) для GraphQL
-  - Try-catch в planBySlug (return null вместо error)
-
-- `apps/api/src/modules/subscriptions/subscriptions.module.ts` (+7 LOC):
-  - Импорт `AdminPlansService` и `AdminActionLogService`
-  - Добавлены в providers для DI
-  - `AdminActionLogService` требуется как dependency для `AdminPlansService`
-
-**Результат:**
-- ✅ Frontend может получить полные данные всех планов из БД
-- ✅ Отображение цен (включая early bird pricing)
-- ✅ Список features для каждого плана
-- ✅ Trial period информация (14 дней бесплатно)
-- ✅ Готовность к Phase 1.2 (Frontend GraphQL queries)
-
-**Статистика:**
-- ✅ 2 файла изменено
-- ✅ +69 LOC (Backend)
-- ✅ 2 новых GraphQL queries (public, без auth)
-- ✅ 0 breaking changes
-
----
-
-**ФАЗА 2.1: Backend - CheckStorageLimitGuard** ✅
-
-**Проблема:**
-- Отсутствует проверка лимитов хранилища при загрузке файлов
-- Пользователи могут превысить лимит storage без предупреждения
-- Нет graceful error handling с детальной информацией о превышении
-
-**Решение:**
-- ✅ Создан `CheckStorageLimitGuard` для проверки storage limits
-- ✅ Guard проверяет текущее использование `team.storageUsedBytes`
-- ✅ Сравнивает с лимитом плана из subscription
-- ✅ Бросает `ForbiddenException` с детальной информацией:
-  - `limitType: 'storage'`
-  - `current` - текущее использование в ГБ
-  - `limit` - максимальный лимит в ГБ
-  - `required` - размер загружаемого файла
-- ✅ Умное извлечение teamId из разных структур input (reportId, projectId)
-- ✅ Skip проверки для личных файлов (avatars)
-
-**Изменения:**
-- `apps/api/src/modules/subscriptions/guards/check-storage-limit.guard.ts` (+135 LOC):
-  - Guard с dependency injection (PrismaService, SubscriptionsService)
-  - Метод `extractTeamId()` для получения teamId из различных args
-  - Conservative estimate для размера файла (10MB max)
-  - Детальная JSDoc документация
-
-**Результат:**
-- ✅ Storage limits enforcement на уровне guard
-- ✅ Пользователь получает понятное сообщение при превышении лимита
-- ✅ Frontend сможет показать UpgradePrompt с деталями
-
----
-
-**ФАЗА 2.2: Backend - Применение CheckStorageLimitGuard** ✅
-
-**Проблема:**
-- Guard создан, но не применен к mutations загрузки файлов
-- Файлы все еще загружаются без проверки лимитов
-
-**Решение:**
-- ✅ Guard применен к `uploadPhotoToReport` mutation
-- ✅ `PhotoReportsModule` импортирует `SubscriptionsModule`
-- ✅ Guard проверяет лимиты ДО загрузки файла
-
-**Изменения:**
-- `apps/api/src/modules/photo-reports/photo-reports.resolver.ts` (+2 LOC):
-  - Импорт `CheckStorageLimitGuard`
-  - `@UseGuards(AuthGuard, CheckStorageLimitGuard)` на uploadPhotoToReport
-
-- `apps/api/src/modules/photo-reports/photo-reports.module.ts` (+2 LOC):
-  - Импорт `SubscriptionsModule`
-  - Добавлен в imports массив
-
-**Результат:**
-- ✅ Загрузка фото блокируется при превышении storage limit
-- ✅ Пользователь видит ошибку ДО попытки загрузки
-- ✅ Готовность к Frontend error handling (Phase 2.4)
-
----
-
-**ФАЗА 2.3: Backend - CheckMemberLimitGuard Везде** ✅
-
-**Проблема:**
-- Существующий `CheckMemberLimitGuard` возвращал простое сообщение
-- Не применен ко всем mutations добавления участников
-- Не работал для `joinTeamByInvite` (только code в args, нет teamId)
-
-**Решение:**
-- ✅ Обновлен guard для соответствия pattern CheckStorageLimitGuard
-- ✅ Добавлена детальная информация в ForbiddenException
-- ✅ Поддержка извлечения teamId из invite code
-- ✅ Применен к `sendInviteByEmail` и `joinTeamByInvite` mutations
-- ✅ `TeamsModule` импортирует `SubscriptionsModule`
-
-**Изменения:**
-- `apps/api/src/modules/subscriptions/guards/check-member-limit.guard.ts` (+30 LOC):
-  - Импорт `PrismaService` для query invite codes
-  - Логика извлечения teamId из args.code
-  - Детальный ForbiddenException:
-    - `limitType: 'members'`
-    - `current` - текущее количество участников
-    - `limit` - максимум по плану
-    - `required: 1`
-  - JSDoc документация
-
-- `apps/api/src/modules/teams/teams.resolver.ts` (+3 LOC):
-  - Импорт `CheckMemberLimitGuard`
-  - `@UseGuards(AuthGuard, CheckMemberLimitGuard)` на sendInviteByEmail
-  - `@UseGuards(AuthGuard, CheckMemberLimitGuard)` на joinTeamByInvite
-
-- `apps/api/src/modules/teams/teams.module.ts` (+2 LOC):
-  - Импорт `SubscriptionsModule`
-  - Добавлен в imports
-
-**Результат:**
-- ✅ Member limits enforcement на всех точках входа
-- ✅ Нельзя отправить приглашение при достижении лимита
-- ✅ Нельзя присоединиться к команде при достижении лимита
-- ✅ Детальная информация для frontend UpgradePrompt
-
-**Статистика Phase 2 (Backend):**
-- ✅ 6 файлов изменено
-- ✅ +174 LOC (Backend)
-- ✅ 2 guards обновлено/создано
-- ✅ 3 mutations защищены
-- ✅ 100% coverage лимитов (Projects, Members, Storage)
-
----
 
 ## [1.5.1] - 2025-12-28 - Critical Bug Fixes & Missing Features ✅
 

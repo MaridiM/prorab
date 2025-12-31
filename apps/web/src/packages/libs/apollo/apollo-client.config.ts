@@ -60,6 +60,9 @@ const transport: ApolloLink = wsLink
     )
   : httpUploadLink;
 
+// Create a reference to store the Apollo client for error handling
+let apolloClientRef: any = null;
+
 const errorLink = onError((errorResponse) => {
     const { graphQLErrors, networkError, operation, forward } = errorResponse as any;
     // Skip logging for cancelled/aborted requests
@@ -120,29 +123,33 @@ const errorLink = onError((errorResponse) => {
                 return;
             }
 
-            // For project-related queries, don't redirect - these might be permission errors
-            // Only redirect for queries that require global authentication (like 'me', 'myTeams')
-            if (operationName.includes('project') || operationName.includes('Project')) {
-                // Don't redirect for project queries - let the component handle the error
-                if (isDevelopment) {
-                    console.log(`[GraphQL error] Project query error (not redirecting): Operation: ${operationName}, Message: ${message}`)
-                }
-                return; // Skip redirect for project queries
-            }
-            
-            // Check if it's an authentication error (not a permission error)
+            // Check if it's an authentication error (UNAUTHENTICATED code or 401 status)
             const isAuth = isAuthErrorLocal(message, extensions);
             
-            // Only redirect for queries that require authentication (like 'me', 'myTeams')
-            // These queries failing means the session is invalid
-            const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
-                operationName === name || operationName.includes(name)
-            );
+            // If it's a clear authentication error (UNAUTHENTICATED code or 401), 
+            // redirect regardless of operation name (except project queries which might be permission errors)
+            const isUnauthenticated = extensions?.code === 'UNAUTHENTICATED' || extensions?.statusCode === 401;
+            const isProjectQuery = operationName.includes('project') || operationName.includes('Project');
             
-            if (requiresAuth && isAuth) {
+            // For UNAUTHENTICATED errors, always redirect (except for project queries)
+            // For other auth errors, only redirect for global auth queries (me, myTeams)
+            if (isUnauthenticated && !isProjectQuery) {
+                // Clear UNAUTHENTICATED error means session is invalid - always redirect
                 shouldRedirect = true;
                 if (isDevelopment) {
-                    console.log(`[Apollo Client] Authentication error detected in ${operationName}, will redirect to login`)
+                    console.log(`[Apollo Client] UNAUTHENTICATED error detected in ${operationName}, will redirect to login`)
+                }
+            } else if (isAuth && !isProjectQuery) {
+                // For other auth errors, only redirect for queries that require global authentication
+                const requiresAuth = ['me', 'MyTeams', 'myTeams', 'Me'].some(name => 
+                    operationName === name || operationName.includes(name)
+                );
+                
+                if (requiresAuth) {
+                    shouldRedirect = true;
+                    if (isDevelopment) {
+                        console.log(`[Apollo Client] Authentication error detected in ${operationName}, will redirect to login`)
+                    }
                 }
             }
             
@@ -155,6 +162,14 @@ const errorLink = onError((errorResponse) => {
         if (shouldRedirect && isBrowser) {
             if (isDevelopment) {
                 console.log(`[Apollo Client] Redirecting to login due to authentication error in operation: ${operationName}`)
+            }
+            // Clear Apollo cache before redirecting
+            try {
+                if (apolloClientRef) {
+                    apolloClientRef.clearStore();
+                }
+            } catch (e) {
+                // Ignore errors when clearing store
             }
             // Use utility function to clear cookies and redirect
             handleAuthError('/auth/login');
@@ -193,6 +208,14 @@ const errorLink = onError((errorResponse) => {
                 });
 
                 if (shouldRedirect && isBrowser) {
+                    // Clear Apollo cache before redirecting
+                    try {
+                        if (apolloClientRef) {
+                            apolloClientRef.clearStore();
+                        }
+                    } catch (e) {
+                        // Ignore errors when clearing store
+                    }
                     // Use utility function to clear cookies and redirect
                     handleAuthError('/auth/login');
                     return;
@@ -218,6 +241,14 @@ const errorLink = onError((errorResponse) => {
                         if (isDevelopment) {
                             console.log(`[Apollo Client] 401 error detected in ${operationName}, will redirect to login`)
                         }
+                        // Clear Apollo cache before redirecting
+                        try {
+                            if (apolloClientRef) {
+                                apolloClientRef.clearStore();
+                            }
+                        } catch (e) {
+                            // Ignore errors when clearing store
+                        }
                         // Use utility function to clear cookies and redirect
                         handleAuthError('/auth/login');
                         return;
@@ -230,6 +261,14 @@ const errorLink = onError((errorResponse) => {
                     if (isBrowser && requiresAuth) {
                         if (isDevelopment) {
                             console.log(`[Apollo Client] Auth error message detected in ${operationName}, will redirect to login`)
+                        }
+                        // Clear Apollo cache before redirecting
+                        try {
+                            if (apolloClientRef) {
+                                apolloClientRef.clearStore();
+                            }
+                        } catch (e) {
+                            // Ignore errors when clearing store
                         }
                         // Use utility function to clear cookies and redirect
                         handleAuthError('/auth/login');
@@ -283,6 +322,9 @@ export const apolloClient = new ApolloClient({
     mutate: { errorPolicy: 'all' },
   },
 });
+
+// Store reference to Apollo client for error handling
+apolloClientRef = apolloClient;
 
 /**
  * Get Apollo Client instance for Server Components

@@ -165,7 +165,7 @@ export function SubscriptionHistory() {
                         asChild
                         className="border-primary/50 hover:bg-primary/10"
                       >
-                        <Link href="/settings?tab=subscription">
+                        <Link href="/settings?tab=subscription&showPlans=true">
                           Продлить план
                           <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                         </Link>

@@ -1,12 +1,99 @@
 # ProRab Version Information
 
-**Current Version:** v1.6.2
-**Release Date:** 2025-12-28
+**Current Version:** v1.6.4
+**Release Date:** 2025-12-29
 **Status:** 🟢 Production Ready
 
 ---
 
 ## Version History
+
+### v1.6.4 (2025-12-29) - Subscription Buttons & Navigation Fix
+
+**Bug Fixes:**
+
+- ✅ Fixed "Выбрать тарифный план" button - now properly shows plans section
+- ✅ Fixed "Продлить план" button - redirects to plans with showPlans parameter
+- ✅ Fixed plans visibility when user has active subscription
+- ✅ Added URL parameter `showPlans=true` for programmatic plans display
+
+**Improvements:**
+
+- 🔗 **URL-based Navigation** - All subscription buttons now use URL parameters
+  - Added `useSearchParams` hook to SubscriptionManagement
+  - Automatic `isChangingPlan=true` when `showPlans=true` in URL
+  - Smooth scroll to plans section after state update
+
+- 🔄 **Unified Button Behavior** - All buttons redirect to `/settings?tab=subscription&showPlans=true`
+  - "Выбрать тарифный план" (trial widget)
+  - "Продлить план" (subscription history)
+  - "Сменить тариф" (current plan card) - uses internal state
+
+**Modified Files:**
+
+Frontend:
+- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Added URL parameter support
+- `apps/web/src/packages/components/subscription/trial-status-widget.tsx` - Changed to Link component
+- `apps/web/src/packages/components/settings/subscription-history.tsx` - Updated href with showPlans
+- `apps/web/src/app/(root)/(protected)/settings/page.tsx` - Removed onUpgrade prop
+
+**Statistics:**
+
+- Frontend: ~30 LOC changed
+- Bug fixes: 3 critical navigation issues resolved
+
+**Breaking Changes:** None
+
+---
+
+### v1.6.3 (2025-12-29) - Subscription UX Polish & Navigation Improvements
+
+**Bug Fixes:**
+
+- ✅ Fixed "Сменить тариф" button - now scrolls to plans section
+- ✅ Fixed current plan detection using `planId` instead of `planRef.id`
+- ✅ Fixed `mySubscription` query to find active subscriptions across all user teams
+- ✅ Removed unused `PaymentProviderSelector` dialog (provider now auto-selected)
+- ✅ Fixed tab navigation from `?tab=billing` to `?tab=subscription`
+
+**UI/UX Improvements:**
+
+- 🎨 **Compact Trial Period Widget** - Redesigned from large card to compact horizontal banner
+  - Reduced padding from p-6 to p-4
+  - Removed progress bar for cleaner look
+  - Made responsive with mobile-friendly text
+  - Added scroll-to-plans functionality on button click
+  - Changed colors: amber theme instead of blue accent
+
+- 🔄 **Better Plan Change Flow** - "Сменить тариф" button now smoothly scrolls to plans
+  - Added `id="plans-section"` to plans card
+  - Smooth scroll animation with `scrollIntoView`
+  - 100ms delay for smooth state transition
+
+- 🔍 **Improved Current Plan Detection** - Status box shows correctly for active plan
+  - Fixed comparison logic to use `subscription.planId`
+  - Added debug logging for troubleshooting
+  - Shows "Текущий план" with expiration date
+
+**Modified Files:**
+
+Frontend:
+- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Added scroll-to-plans, removed provider dialog
+- `apps/web/src/packages/components/subscription/trial-status-widget.tsx` - Compact redesign
+- `apps/web/src/packages/components/subscription/upgrade-button.tsx` - Fixed tab navigation
+
+Backend:
+- `apps/api/src/modules/subscriptions/subscriptions.service.ts` - Fixed `findByUserId` to search all teams
+
+**Statistics:**
+
+- Frontend: ~50 LOC changed (compact widget design, scroll functionality)
+- Backend: ~10 LOC changed (active subscription search logic)
+- Bug fixes: 5 critical UX issues resolved
+
+**Breaking Changes:** None
+
+---
 
 ### v1.6.2 (2025-12-28) - Payment Provider Auto-Selection & Subscription UX Improvements
 

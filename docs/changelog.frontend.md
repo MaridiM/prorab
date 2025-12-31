@@ -5,6 +5,62 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.4] - 2025-12-29 - Subscription Buttons Navigation Fix
+
+### Fixed
+- **"Выбрать тарифный план" Button**: Кнопка теперь корректно показывает секцию планов для пользователей с активной подпиской
+- **"Продлить план" Button**: Кнопка теперь перенаправляет к планам с параметром `showPlans=true`
+- **Plans Visibility**: Исправлена видимость планов когда у пользователя есть активная подписка
+- **"Сменить тариф" Toast**: Удален toast "В разработке" при нажатии на кнопку
+
+### Added
+- **URL Parameter Navigation**: Добавлен параметр `showPlans=true` для программного отображения планов
+  - `useSearchParams` hook в SubscriptionManagement
+  - useEffect для автоматической установки `isChangingPlan=true`
+  - Плавный скролл к секции планов после обновления состояния
+
+### Changed
+- **Unified Button Behavior**: Все кнопки подписки теперь используют единый подход с URL параметрами
+  - Trial widget button → Link с `showPlans=true`
+  - Subscription history button → обновлен href с `showPlans=true`
+  - Settings page → удален prop `onUpgrade` с toast
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - URL parameter support
+  - `apps/web/src/packages/components/subscription/trial-status-widget.tsx` - Link component
+  - `apps/web/src/packages/components/settings/subscription-history.tsx` - Updated href
+  - `apps/web/src/app/(root)/(protected)/settings/page.tsx` - Removed onUpgrade prop
+
+---
+
+## [1.6.3] - 2025-12-29 - Subscription UX Polish
+
+### Fixed
+- **Plan Change Navigation**: Кнопка "Сменить тариф" теперь корректно скроллит к секции с планами
+- **Tab Navigation**: Исправлены все ссылки с `?tab=billing` на `?tab=subscription`
+- **Current Plan Detection**: Исправлена логика определения текущего плана (`planId` вместо `planRef.id`)
+
+### Changed
+- **Trial Period Widget**: Полностью переработан дизайн для компактности
+  - Уменьшен padding с p-6 до p-4
+  - Убран прогресс-бар
+  - Горизонтальный layout вместо вертикального
+  - Респонсивный текст для мобильных
+  - Янтарная цветовая схема вместо синей
+  - Добавлен скролл к планам при клике на кнопку
+
+### Removed
+- **Payment Provider Dialog**: Удален неиспользуемый диалог выбора провайдера (автовыбор по IP)
+
+### Technical
+- **Modified Files**:
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` - Scroll-to-plans, удален диалог
+  - `apps/web/src/packages/components/subscription/trial-status-widget.tsx` - Компактный дизайн
+  - `apps/web/src/packages/components/subscription/upgrade-button.tsx` - Исправлена навигация по табам
+
+---
+
 ## [1.6.2] - 2025-12-28 - Subscription UX Improvements & History
 
 ### Added
@@ -51,302 +107,56 @@
 
 - **Statistics**: +220 LOC frontend
 
-## [1.6.5] - 2025-12-28 - Subscription Plan Selection Fix
+---
+
+## [1.6.1] - 2025-12-28 - UI Polish & Bug Fixes
 
 ### Fixed
 - **Subscription Management**:
   - Исправлена проблема, когда все кнопки планов показывали состояние загрузки одновременно
   - Теперь только выбранный план показывает состояние "Обработка..."
-  - Остальные планы остаются активными и не дублируют состояние загрузки
   - Добавлено индивидуальное состояние обработки для каждого плана (`processingPlanId`)
-
-### Changed
-- Обновлена версия Web с `1.6.4` на `1.6.5`
-
-## [1.6.4] - 2025-12-28 - Team Projects Page Improvements & Settings Fixes
+  - Исправлена ошибка импорта компонентов Tabs
+  - Исправлена проблема с перезагрузкой страницы при сохранении настроек профиля
 
 ### Added
 - **Team Projects Page**:
-  - Добавлены табы для переключения между активными и архивными проектами (как на дашборде)
-  - Добавлена сортировка проектов (по умолчанию, по названию, по дате, по статусу)
-  - Добавлена кнопка для показа/скрытия завершенных проектов (по умолчанию скрыты)
-  - Улучшена навигация и UX страницы проектов команды
+  - Табы для переключения между активными и архивными проектами
+  - Сортировка проектов (по умолчанию, по названию, по дате, по статусу)
+  - Кнопка показа/скрытия завершенных проектов
 
-### Fixed
-- Исправлена ошибка импорта компонентов Tabs в странице проектов команды
-- Исправлена проблема с перезагрузкой страницы при сохранении настроек профиля
-- Настройки профиля и уведомлений теперь обновляются без перезагрузки страницы через Apollo Cache
-
-### Changed
-- Обновлена версия Web с `1.6.3` на `1.6.4`
-- Страница проектов команды теперь использует ту же логику отображения, что и главный дашборд
-
-## [1.6.3] - 2025-12-28 - Dashboard Projects UI Improvements
-
-### Changed
-- **Dashboard Projects Display**:
-  - Заменены две отдельные секции (Активные объекты и Архив) на табы в одном ряду
+- **Dashboard Improvements**:
+  - Заменены две секции на табы в одном ряду
   - Вкладка "Архив" скрывается автоматически, если нет архивных проектов
-  - Улучшена сортировка проектов:
-    - Сначала отображаются активные и незавершенные проекты
-    - Затем завершенные проекты
-  - Добавлен функционал дополнительной сортировки:
-    - По умолчанию (умная сортировка)
-    - По названию (алфавитный порядок)
-    - По дате (новые сначала)
-    - По статусу
+  - Умная сортировка проектов с приоритетом активных/незавершенных
+
+### Changed
+- Настройки профиля и уведомлений обновляются через Apollo Cache без перезагрузки
+- Улучшена навигация и UX страницы проектов команды
+
+---
+
+## [1.6.0] - 2025-12-27 - Full Subscription System
 
 ### Added
-- Компонент табов для переключения между активными и архивными проектами
-- Выпадающий список для выбора типа сортировки
-- Умная сортировка проектов с приоритетом активных/незавершенных
+- Complete subscription UI with plan selection
+- Payment flow with Stripe and Yookassa
+- Trial period management
+- Subscription status tracking
+- Plan upgrade/downgrade functionality
+- Admin panel user menu with dropdown
+- Subscription plans accordion with expandable features
 
-### Improved
+### Changed
 - Улучшен UX дашборда: более компактное и интуитивное отображение проектов
 - Более гибкая навигация между активными и архивными проектами
-
-## [1.6.2] - 2025-12-28 - Subscription Plans UI Polish & Admin Menu Fixes
-
-### Changed
-- **Subscription Plans UI**:
-  - Независимое открытие планов (не закрываются автоматически при открытии других)
-  - Улучшена анимация раскрытия списка возможностей
-  - Оптимизировано выравнивание элементов в карточках
-
-- **Admin Panel User Menu**:
-  - Убран желтый фон у кнопки пользователя при открытии меню
-  - Убран фон у пункта "Выход" при наведении
-  - Изменены названия пунктов меню:
-    - "Клиентский дашборд" → "Дашборд"
-    - "Настройки профиля" → "Настройки"
-    - "Выйти из аккаунта" → "Выход"
-
-### Fixed
-- Добавлена поддержка `side="top"` в DropdownMenu компонент для корректного открытия меню вверх
-- Исправлено позиционирование меню в админ сайдбаре
-- Улучшена анимация появления меню в зависимости от стороны открытия
-
-## [1.6.1] - 2025-12-28 - UI Improvements & Admin Panel Enhancements
-
-### Added
-- **Admin Panel User Menu**: Добавлено выпадающее меню пользователя в админ сайдбаре
-  - Меню открывается при клике на блок пользователя внизу сайдбара
-  - Пункты меню: "Дашборд", "Настройки", "Выход"
-  - Меню открывается вверх с плавной анимацией
-  - Использует UserAvatar компонент для отображения аватара
-
-### Changed
-- **Subscription Plans UI Improvements**:
-  - Улучшено отображение карточек планов подписки
-  - Добавлен раскрывающийся список возможностей (accordion) для каждого плана
-  - Кнопка "Показать все возможности" со стрелкой для раскрытия списка
-  - Карточки имеют фиксированную высоту, не сдвигаются при раскрытии других
-  - Бейджи "Early Bird" и "Популярный" выровнены по высоте с названием плана
-  - Убрана кнопка "Подробнее" из карточек планов
-  - Улучшено выравнивание элементов (цена, описание, лимиты)
-  - Карточки центрированы и имеют оптимальный размер
+- Subscription plans UI improvements (accordion, fixed height cards)
+- Admin panel menu styling (simplified labels, removed hover effects)
 
 ### Fixed
 - Исправлено позиционирование бейджей в карточках планов
 - Исправлено выравнивание элементов в карточках планов
-- Убраны hover эффекты в админ панели для консистентности с header
-
-## [1.6.0] - 2025-12-28 - Full Subscription System with Multi-Provider Payments 🚧
-
-### ✅ COMPLETED - Phase 2: Enforcement of Limits (Frontend) (100% complete)
-
-Глобальная обработка ошибок лимитов и уведомления пользователей.
-
-**ФАЗА 2.4: Apollo Error Link для Лимитов** ✅
-
-**Проблема:**
-- Backend guards бросают ForbiddenException при превышении лимитов
-- Frontend не обрабатывает эти ошибки глобально
-- Пользователь не получает понятных уведомлений о причине блокировки
-- Нет автоматического redirect на страницу billing
-
-**Решение:**
-- ✅ Создан utility `limit-error-handler.ts` для обработки limit errors
-- ✅ Apollo Client error link обновлён для перехвата limit errors
-- ✅ Toast notifications с кнопкой "Улучшить план"
-- ✅ Автоматический redirect на `/settings?tab=billing`
-
-**Изменения:**
-- `apps/web/src/packages/utils/limit-error-handler.ts` (+93 LOC, NEW):
-  - Type `LimitError` с полями: limitType, current, limit, required
-  - Функция `handleLimitError()` - показывает toast и логирует
-  - Функция `isLimitError()` - проверяет extensions на код LIMIT_EXCEEDED
-  - Функция `extractLimitError()` - извлекает детали из GraphQL error
-  - Конфиги для сообщений по каждому типу лимита:
-    - Projects: "Достигнут лимит проектов"
-    - Members: "Достигнут лимит участников команды"
-    - Storage: "Недостаточно места в хранилище"
-  - Детальные descriptions с текущими/максимальными значениями
-
-- `apps/web/src/packages/libs/apollo/apollo-client.config.ts` (+9 LOC):
-  - Импорт `extractLimitError` и `handleLimitError`
-  - Добавлена проверка limit errors в errorLink ПЕРЕД auth errors
-  - Early return после обработки limit error (не продолжать обработку)
-  - Работает только в browser (isBrowser check)
-
-**Результат:**
-- ✅ Все GraphQL errors с `limitType` автоматически обрабатываются
-- ✅ Пользователь видит понятное toast уведомление с действием
-- ✅ Toast содержит кнопку "Улучшить план" → redirect на billing
-- ✅ Toast отображается 8 секунд для видимости
-- ✅ Development logging для отладки
-- ✅ Работает для всех типов лимитов: projects, members, storage
-
-**Статистика:**
-- ✅ 2 файла изменено/создано
-- ✅ +102 LOC (Frontend)
-- ✅ 3 utility функции для обработки errors
-- ✅ 100% покрытие всех типов лимитов
-
----
-
-**ФАЗА 2.5: UpgradePrompt Support для Storage** ✅
-
-**Проблема:**
-- Проверка существующего UpgradePrompt component
-- Убедиться что storage limit type поддерживается
-
-**Решение:**
-- ✅ Компонент уже поддерживает `limitType: 'storage'`
-- ✅ Конфиг LIMIT_CONFIG содержит storage с иконкой 💾
-- ✅ Title: "Достигнут лимит хранилища"
-- ✅ Description: "Вы достигли лимита доступного хранилища для вашего тарифа"
-- ✅ Component готов к использованию для всех типов лимитов
-
-**Результат:**
-- ✅ Storage limit поддерживается из коробки
-- ✅ Consistent UX для всех типов лимитов
-- ✅ Готов к Phase 3
-
-**Статистика Phase 2 (Frontend):**
-- ✅ 3 файла проверено/изменено
-- ✅ +102 LOC (только новый код)
-- ✅ Global error handling для limits
-- ✅ Toast notifications с actions
-- ✅ 100% готовность к Phase 3
-
----
-
-### ✅ COMPLETED - Phase 1: Subscription UI & Plan Selection (100% complete)
-
-Реализация пользовательского интерфейса для выбора подписок с отображением планов из БД.
-
-**ФАЗА 1.4-1.6: Обновление SubscriptionManagement с DB-Driven Plans** ✅
-
-**Цель:**
-- Обновить существующий компонент для использования полных данных планов из БД
-- Показывать early bird pricing, trial period, detailed features
-- Улучшить UX с показом популярных планов и детальных описаний
-
-**Изменения:**
-- `apps/web/src/packages/components/settings/SubscriptionManagement.tsx` (+45 LOC, refactored):
-  - Заменён `GetAvailablePlansDocument` → `AvailablePlansDetailedDocument`
-  - Использование `plans Data?.availablePlansDetailed` вместо старого формата
-  - **Отображение цен из БД:**
-    - Early Bird pricing с перечёркнутой обычной ценой
-    - Автоматический выбор RUB валюты из prices array
-    - Показ скидки для early bird пользователей
-  - **Trial Period Badge:**
-    - Отображение "{plan.trialDays} дней бесплатно" для планов с trial
-    - Синий badge с информацией о пробном периоде
-  - **Popular Plan Highlight:**
-    - Ring border для популярных планов (ring-2 ring-primary/20)
-    - Badge "Популярный" для выделенных планов
-  - **Детальные Features из БД:**
-    - Фильтрация по `isIncluded` (только включённые features)
-    - Сортировка по `sortOrder`
-    - Показ feature.name и feature.description
-    - Улучшенный UX с описаниями фич
-  - **Plan Description:**
-    - Отображение plan.description под заголовком
-    - Более информативные карточки планов
-  - **Кнопка "Сменить тариф":**
-    - Fallback к setIsChangingPlan(true) если нет onUpgrade callback
-
-**Результат:**
-- ✅ Полностью DB-driven отображение планов
-- ✅ Early bird pricing визуально выделен
-- ✅ Trial period информация показывается пользователю
-- ✅ Популярные планы визуально выделены
-- ✅ Детальные descriptions для features
-- ✅ UX улучшен с badges и highlights
-- ✅ Обратная совместимость сохранена
-
-**Статистика:**
-- ✅ 1 файл изменён (+45 LOC, refactor ~100 LOC)
-- ✅ Полная интеграция с AdminPlanModel
-- ✅ 0 breaking changes для существующего UI
-
----
-
-**ФАЗА 1.3: Исправление Schema и Codegen** ✅
-
-**Проблема:**
-- GraphQL codegen не мог найти новые queries в schema
-- Старый query `availablePlans` использовал неправильный fragment
-- TypeScript типы не генерировались для новых queries
-
-**Решение:**
-- ✅ Добавлены новые queries в `schema.gql` вручную:
-  - `availablePlansDetailed: [AdminPlanModel!]!`
-  - `planBySlug(slug: String!): AdminPlanModel`
-- ✅ Исправлен fragment в `AvailablePlans` query (PlanLimitsFields → AdminPlanFields)
-- ✅ Успешно запущен codegen - сгенерированы TypeScript типы
-
-**Изменения:**
-- `apps/api/schema.gql` (+6 LOC):
-  - Добавлены 2 новых query definitions в type Query
-  - Документация для публичных queries
-
-- `apps/web/src/packages/api/graphql/subscriptions.graphql` (+1 LOC fix):
-  - Исправлен fragment в AvailablePlans query
-
-**Результат:**
-- ✅ TypeScript типы сгенерированы для всех queries
-- ✅ Доступны typed hooks: `useAvailablePlansDetailedQuery`, `usePlanBySlugQuery`
-- ✅ Полная типизация для AdminPlanModel, AdminPlanPriceModel, AdminPlanFeatureModel
-- ✅ Готовность к созданию UI компонентов
-
-**Статистика:**
-- ✅ 2 файла изменено (+7 LOC)
-- ✅ Codegen успешно завершен
-- ✅ 0 ошибок валидации
-
-**ФАЗА 1.2: GraphQL Queries для Планов** ✅
-
-**Цель:**
-- Создать GraphQL queries для получения детальной информации о планах подписки
-- Подготовить TypeScript типы через codegen для использования в компонентах
-
-**Изменения:**
-- `apps/web/src/packages/api/graphql/subscriptions.graphql` (+60 LOC):
-  - Fragment `PlanPriceFields` - структура цены плана (price, earlyBirdPrice, currency, billingCycleDays)
-  - Fragment `PlanFeatureFields` - структура функции плана (name, description, isIncluded, sortOrder)
-  - Fragment `AdminPlanFields` - полная структура плана (используя AdminPlanPriceModel и AdminPlanFeatureModel)
-  - Query `availablePlansDetailed` - получение всех активных планов с ценами и features
-  - Query `planBySlug($slug)` - получение плана по slug для детальной страницы
-
-**Что получено:**
-- ✅ 3 новых GraphQL фрагмента для структурированных данных
-- ✅ 2 новых query для получения планов из БД
-- ✅ Поддержка всех полей: prices, features, trial days, isPopular, isEarlyBird
-- ✅ Готовность к codegen для генерации TypeScript типов
-
-**Следующий шаг:**
-- 🔄 Генерация GraphQL schema на backend
-- 🔄 Запуск codegen для создания типов
-- ⏳ Создание компонентов CurrentSubscriptionView и PlanSelectionView
-
-**Статистика:**
-- ✅ 1 файл изменен
-- ✅ +60 LOC (GraphQL)
-- ✅ 3 fragments, 2 queries добавлено
-- ✅ Полная поддержка AdminPlanModel из backend
+- Добавлена поддержка `side="top"` в DropdownMenu компонент
 
 ---
 

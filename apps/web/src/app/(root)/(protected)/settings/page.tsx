@@ -1586,15 +1586,7 @@ export default function SettingsPage() {
 								>
 									<motion.div variants={stagger} className="space-y-6">
 										<motion.section variants={fadeIn}>
-											<SubscriptionManagement
-												onUpgrade={() => {
-													showToast({
-														title: 'В разработке',
-														description: 'Смена тарифа будет доступна после подключения эквайринга',
-														type: 'info',
-													})
-												}}
-											/>
+											<SubscriptionManagement />
 										</motion.section>
 
 										<motion.section variants={fadeIn}>

@@ -125,6 +125,17 @@ export function handleAuthError(redirectPath: string = '/auth/login'): void {
   // Clear all auth data (cookies, localStorage, sessionStorage)
   clearAuthCookies()
 
+  // Clear Apollo Client cache if available
+  try {
+    // Dynamic import to avoid circular dependencies
+    if (typeof window !== 'undefined') {
+      // Clear cache by accessing the client through a global reference or module
+      // This will be handled by the Apollo error link before calling this function
+    }
+  } catch (e) {
+    // Ignore errors when clearing cache
+  }
+
   // Use replace instead of href to avoid adding to history
   // This prevents back button from causing loops
   window.location.replace(redirectPath)

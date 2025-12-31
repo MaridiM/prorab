@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive, Sparkles, Zap, Star, Info, X, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
@@ -70,8 +71,24 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const { data: subData, loading: subLoading, refetch } = useQuery(MySubscriptionDocument)
 	const { data: plansData, loading: plansLoading } = useQuery(AvailablePlansDetailedDocument)
 	const { data: teamsData } = useQuery(MyTeamsDocument)
+	const searchParams = useSearchParams()
 
 	const [isChangingPlan, setIsChangingPlan] = useState(false)
+
+	// Check URL parameter to show plans section
+	useEffect(() => {
+		const showPlans = searchParams.get('showPlans')
+		if (showPlans === 'true') {
+			setIsChangingPlan(true)
+			// Scroll to plans after a short delay
+			setTimeout(() => {
+				const plansSection = document.getElementById('plans-section')
+				if (plansSection) {
+					plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+				}
+			}, 100)
+		}
+	}, [searchParams])
 
 	const [createSubscription, { loading: creating }] = useMutation(CreateSubscriptionDocument, {
 		onCompleted: () => {
@@ -389,7 +406,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 
 	if (!subscription || isChangingPlan) {
 		return (
-			<Card>
+			<Card id="plans-section">
 				<CardHeader>
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
@@ -490,26 +507,6 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 											animate={{ opacity: 1 }}
 											transition={{ duration: 0.5 }}
 										/>
-									)}
-
-
-									{/* Current Plan Badge */}
-									{isCurrent && (
-										<motion.div 
-											className="absolute top-4 left-4 z-10"
-											initial={{ scale: 0 }}
-											animate={{ scale: 1 }}
-											transition={{ 
-												type: "spring",
-												stiffness: 200,
-												damping: 15
-											}}
-										>
-											<Badge className="bg-primary text-primary-foreground shadow-md">
-												<Check className="w-3 h-3 mr-1" />
-												Текущий
-											</Badge>
-										</motion.div>
 									)}
 
 									<CardContent className="p-5 flex flex-col h-full relative z-0 min-h-[600px]">
@@ -985,6 +982,13 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 											onUpgrade()
 										} else {
 											setIsChangingPlan(true)
+											// Scroll to plans section
+											setTimeout(() => {
+												const plansSection = document.getElementById('plans-section')
+												if (plansSection) {
+													plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+												}
+											}, 100)
 										}
 									}}
 									className="flex-1"

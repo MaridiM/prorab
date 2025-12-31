@@ -4,13 +4,19 @@ import * as React from "react"
 
 import { cn } from "@/packages/utils"
 
-export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ProgressBarProps {
 	value: number // 0-100
 	showLabel?: boolean
 	size?: "sm" | "md" | "lg"
 	variant?: "default" | "success" | "warning" | "danger"
 	className?: string
 	indicatorClassName?: string // Custom className for the progress indicator
+	onClick?: React.MouseEventHandler<HTMLDivElement>
+	onMouseEnter?: React.MouseEventHandler<HTMLDivElement>
+	onMouseLeave?: React.MouseEventHandler<HTMLDivElement>
+	style?: React.CSSProperties
+	id?: string
+	'data-testid'?: string
 }
 
 const variantStyles = {
