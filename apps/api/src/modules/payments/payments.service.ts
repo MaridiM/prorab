@@ -218,11 +218,13 @@ export class PaymentsService {
     // (failureReason is only used for failed payments, so it's safe to use for metadata)
     const targetPlanIdToStore = targetPlanId || planIdToUse;
     const targetPlanToStore = targetPlan || (planToUse?.slug?.toUpperCase() || subscription.plan);
-    
+
     // Store metadata in failureReason for mock payments (will be cleared after payment succeeds)
-    // Format: "TARGET_PLAN_METADATA:targetPlanId|targetPlan"
-    const metadataForMock = targetPlanIdToStore && targetPlanIdToStore !== planIdToUse 
-      ? `TARGET_PLAN_METADATA:${targetPlanIdToStore}|${targetPlanToStore}`
+    // Format: "TARGET_PLAN_METADATA:targetPlanId|targetPlan|isEarlyBird"
+    // IMPORTANT: Always store metadata if targetPlanId is provided (even if same as current plan)
+    // This ensures Early Bird status and plan updates work correctly
+    const metadataForMock = targetPlanId
+      ? `TARGET_PLAN_METADATA:${targetPlanIdToStore}|${targetPlanToStore}|${isEarlyBird}`
       : null;
     
     const payment = await this.prisma.payment.create({
@@ -323,18 +325,26 @@ export class PaymentsService {
       paymentId: payment.id,
       plan: subscription.plan,
     };
-    
-    // Extract targetPlanId and targetPlan from failureReason if present
+
+    // Extract targetPlanId, targetPlan, and isEarlyBird from failureReason if present
+    // Format: "TARGET_PLAN_METADATA:targetPlanId|targetPlan|isEarlyBird"
     if (payment.failureReason && payment.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
       const metadataPart = payment.failureReason.replace('TARGET_PLAN_METADATA:', '');
-      const [targetPlanId, targetPlan] = metadataPart.split('|');
+      const [targetPlanId, targetPlan, isEarlyBirdStr] = metadataPart.split('|');
+
       if (targetPlanId) {
         metadata.targetPlanId = targetPlanId;
+        this.logger.log(`Mock payment targetPlanId: ${targetPlanId}`);
       }
       if (targetPlan) {
         metadata.targetPlan = targetPlan;
+        this.logger.log(`Mock payment targetPlan: ${targetPlan}`);
       }
-      
+      if (isEarlyBirdStr !== undefined) {
+        metadata.isEarlyBird = isEarlyBirdStr;
+        this.logger.log(`Mock payment isEarlyBird: ${isEarlyBirdStr}`);
+      }
+
       // Clear failureReason after extracting metadata
       await this.prisma.payment.update({
         where: { id: payment.id },
@@ -474,12 +484,27 @@ export class PaymentsService {
       return;
     }
 
-    // Update payment status
+    // Extract target plan from metadata if available
+    // This will be used to show correct plan in history
+    const targetPlanId = metadata?.targetPlanId;
+    const targetPlan = metadata?.targetPlan;
+    const isEarlyBirdFromMetadata = metadata?.isEarlyBird === 'true';
+
+    // Update payment status and store target plan info in description for history
+    // We'll store it in a format that can be parsed later: "TARGET_PLAN:planId|plan|isEarlyBird"
+    // Only add if not already present (to avoid duplicates)
+    let updatedDescription = payment.description;
+    if (targetPlanId && targetPlan && !payment.description?.includes('TARGET_PLAN:')) {
+      // Store target plan info in description (will be parsed in history resolver)
+      updatedDescription = `${payment.description || ''} | TARGET_PLAN:${targetPlanId}|${targetPlan}|${isEarlyBirdFromMetadata}`;
+    }
+
     await this.prisma.payment.update({
       where: { id: payment.id },
       data: {
         status: PaymentStatus.SUCCEEDED,
         paidAt: new Date(),
+        ...(updatedDescription !== payment.description && { description: updatedDescription }),
       },
     });
 
@@ -523,8 +548,15 @@ export class PaymentsService {
 
     // Check if payment metadata contains target plan information (plan change)
     // This happens when user selects a different plan and completes payment
-    if (metadata?.targetPlanId && metadata.targetPlanId !== subscription.planId) {
-      this.logger.log(`Plan change detected in payment metadata: ${subscription.planId} -> ${metadata.targetPlanId}`);
+    if (metadata?.targetPlanId) {
+      // Update plan even if it's the same (to ensure Early Bird status is updated)
+      const planChanged = metadata.targetPlanId !== subscription.planId;
+
+      if (planChanged) {
+        this.logger.log(`Plan change detected in payment metadata: ${subscription.planId} -> ${metadata.targetPlanId}`);
+      } else {
+        this.logger.log(`Same plan selected, but updating Early Bird status if needed`);
+      }
 
       // Update plan fields
       updateData.planId = metadata.targetPlanId;
@@ -556,7 +588,13 @@ export class PaymentsService {
         }
       }
 
-      this.logger.log(`Plan will be updated after payment confirmation`);
+      // Update Early Bird status if present in metadata
+      if (metadata.isEarlyBird !== undefined) {
+        updateData.isEarlyBird = metadata.isEarlyBird === 'true';
+        this.logger.log(`Updating Early Bird status to: ${updateData.isEarlyBird}`);
+      }
+
+      this.logger.log(`Plan and Early Bird status will be updated after payment confirmation`);
     }
 
     await this.prisma.subscription.update({

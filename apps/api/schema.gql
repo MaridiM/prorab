@@ -3149,6 +3149,7 @@ type Query {
   myStoragePreference: UserStoragePreference!
   mySubscription: Subscription
   mySubscriptionHistory: [Subscription!]!
+  mySubscriptionHistoryFromPayments: [SubscriptionHistoryModel!]!
 
   """Получить все задачи пользователя (созданные или назначенные)"""
   myTasks: [Task!]!
@@ -3568,6 +3569,18 @@ type Subscription {
   trialEndsAt: DateTime
   updatedAt: DateTime!
   yookassaSubscriptionId: String
+}
+
+"""Subscription history entry based on payments"""
+type SubscriptionHistoryModel {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  id: ID!
+  isEarlyBird: Boolean!
+  paidAt: DateTime!
+  planName: String!
+  planSlug: String!
 }
 
 enum SubscriptionPlan {

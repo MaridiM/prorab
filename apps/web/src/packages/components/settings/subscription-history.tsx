@@ -14,7 +14,7 @@ import {
 } from '@/packages/ui';
 import { Badge } from '@/packages/components/ui/badge';
 import { Button } from '@/packages/components/ui/button';
-import { MySubscriptionHistoryDocument } from '@/packages/api/graphql/__generated__/output';
+import { MySubscriptionHistoryFromPaymentsDocument, MySubscriptionDocument } from '@/packages/api/graphql/__generated__/output';
 import Link from 'next/link';
 
 const statusConfig = {
@@ -52,7 +52,13 @@ const planIcons = {
 };
 
 export function SubscriptionHistory() {
-  const { data, loading } = useQuery(MySubscriptionHistoryDocument);
+  // Get both history and current subscription in parallel
+  const { data, loading } = useQuery(MySubscriptionHistoryFromPaymentsDocument, {
+    fetchPolicy: 'cache-and-network',
+  });
+  const { data: currentSubData } = useQuery(MySubscriptionDocument, {
+    fetchPolicy: 'cache-and-network',
+  });
 
   if (loading) {
     return (
@@ -65,11 +71,22 @@ export function SubscriptionHistory() {
     );
   }
 
-  const subscriptions = data?.mySubscriptionHistory || [];
+  const historyEntries = data?.mySubscriptionHistoryFromPayments || [];
+  const currentSubscription = currentSubData?.mySubscription;
 
-  if (subscriptions.length === 0) {
+  if (historyEntries.length === 0) {
     return null;
   }
+
+  // Get current plan slug from subscription
+  const currentPlanSlug = currentSubscription?.plan?.toLowerCase();
+  
+  // Find the most recent payment (first in sorted list) that matches current plan
+  // Only the most recent payment for current plan should be marked as "current"
+  // History is already sorted by paidAt desc (newest first)
+  const mostRecentCurrentEntry = historyEntries.length > 0 && historyEntries[0].planSlug === currentPlanSlug
+    ? historyEntries[0]
+    : null;
 
   return (
     <Card>
@@ -79,43 +96,48 @@ export function SubscriptionHistory() {
           История подписок
         </CardTitle>
         <CardDescription>
-          Все ваши подписки и их статусы
+          История всех ваших покупок планов
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {subscriptions.map((sub, index) => {
-            const config = statusConfig[sub.status as keyof typeof statusConfig];
-            const StatusIcon = config?.icon || Clock;
-            const PlanIcon = planIcons[sub.plan as keyof typeof planIcons] || Zap;
-            const isActive = ['ACTIVE', 'TRIALING'].includes(sub.status);
+          {historyEntries.map((entry, index) => {
+            const PlanIcon = planIcons[entry.planSlug.toUpperCase() as keyof typeof planIcons] || Zap;
+            // Only mark as current if this is the most recent entry AND it matches current plan
+            // This ensures only one entry is marked as "current"
+            const isCurrent = mostRecentCurrentEntry?.id === entry.id && entry.planSlug === currentPlanSlug;
 
             return (
               <motion.div
-                key={sub.id}
+                key={entry.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
                 className={`
                   relative p-4 rounded-lg border
-                  ${isActive ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/30'}
+                  ${isCurrent ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/30'}
                 `}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className={`
                       w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
-                      ${isActive ? 'bg-primary/10' : 'bg-muted'}
+                      ${isCurrent ? 'bg-primary/10' : 'bg-muted'}
                     `}>
-                      <PlanIcon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <PlanIcon className={`w-5 h-5 ${isCurrent ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold">{sub.planRef?.name || sub.plan}</h4>
-                        {isActive && (
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h4 className="font-semibold">{entry.planName}</h4>
+                        {isCurrent && (
                           <Badge variant="default" className="text-xs">
                             Текущая
+                          </Badge>
+                        )}
+                        {entry.isEarlyBird && (
+                          <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-700 border-amber-500/20">
+                            Early Bird
                           </Badge>
                         )}
                       </div>
@@ -124,27 +146,14 @@ export function SubscriptionHistory() {
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>
-                            Создана: {format(new Date(sub.createdAt), 'd MMM yyyy', { locale: ru })}
+                            Оплачено: {format(new Date(entry.paidAt), 'd MMM yyyy, HH:mm', { locale: ru })}
                           </span>
                         </div>
-
-                        {sub.trialEndsAt && (
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>
-                              Пробный период до: {format(new Date(sub.trialEndsAt), 'd MMM yyyy', { locale: ru })}
-                            </span>
-                          </div>
-                        )}
-
-                        {sub.currentPeriodEnd && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5" />
-                            <span>
-                              Действует до: {format(new Date(sub.currentPeriodEnd), 'd MMM yyyy', { locale: ru })}
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">
+                            {entry.amount} {entry.currency}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -152,13 +161,13 @@ export function SubscriptionHistory() {
                   <div className="flex flex-col items-end gap-2">
                     <Badge
                       variant="outline"
-                      className={`${config?.color} flex items-center gap-1 whitespace-nowrap`}
+                      className={`${isCurrent ? 'bg-green-500/10 text-green-700 border-green-500/20' : 'bg-gray-500/10 text-gray-700 border-gray-500/20'} flex items-center gap-1 whitespace-nowrap`}
                     >
-                      <StatusIcon className="w-3 h-3" />
-                      {config?.label || sub.status}
+                      <Check className="w-3 h-3" />
+                      Оплачено
                     </Badge>
 
-                    {isActive && (
+                    {isCurrent && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -166,19 +175,13 @@ export function SubscriptionHistory() {
                         className="border-primary/50 hover:bg-primary/10"
                       >
                         <Link href="/settings?tab=subscription&showPlans=true">
-                          Продлить план
+                          Изменить план
                           <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                         </Link>
                       </Button>
                     )}
                   </div>
                 </div>
-
-                {sub.cancelledAt && (
-                  <div className="mt-2 pt-2 border-t border-border/50 text-xs text-muted-foreground">
-                    Отменена: {format(new Date(sub.cancelledAt), 'd MMM yyyy, HH:mm', { locale: ru })}
-                  </div>
-                )}
               </motion.div>
             );
           })}

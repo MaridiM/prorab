@@ -5,6 +5,7 @@ import { SubscriptionModel } from './models/subscription.model';
 import { PlanLimitsModel } from './models/plan-limits.model';
 import { UsageStatsModel } from './models/usage-stats.model';
 import { EarlyBirdStatsModel } from './models/early-bird-stats.model';
+import { SubscriptionHistoryModel } from './models/subscription-history.model';
 import { CreateSubscriptionInput } from './dto/create-subscription.input';
 import { ChangePlanInput } from './dto/change-plan.input';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -53,6 +54,8 @@ export class SubscriptionsResolver {
   async mySubscriptionHistory(
     @CurrentUser() user: User,
   ): Promise<SubscriptionModel[]> {
+    // For now, return current subscription only
+    // True history is available via mySubscriptionHistoryFromPayments
     const subscriptions = await this.subscriptionsService.findAllByUserId(user.id);
 
     return Promise.all(
@@ -126,6 +129,122 @@ export class SubscriptionsResolver {
     @CurrentUser() user: User,
   ): Promise<boolean> {
     return this.subscriptionsService.isEarlyBirdAvailableForUser(user.id);
+  }
+
+  /**
+   * Get subscription history based on successful payments
+   * Shows all successful payments as subscription history entries
+   * This provides true history of plan changes over time
+   */
+  @Query(() => [SubscriptionHistoryModel])
+  @UseGuards(AuthGuard)
+  async mySubscriptionHistoryFromPayments(
+    @CurrentUser() user: User,
+  ): Promise<SubscriptionHistoryModel[]> {
+    const payments = await this.subscriptionsService.getSubscriptionHistoryFromPayments(user.id);
+
+    return payments.map(payment => {
+      // Try to extract plan info from payment metadata
+      // Sources: failureReason (mock payments) or description (real payments)
+      // Format: "TARGET_PLAN_METADATA:targetPlanId|targetPlan|isEarlyBird" or "TARGET_PLAN:targetPlanId|targetPlan|isEarlyBird"
+      let planName = 'Unknown';
+      let planSlug = 'unknown';
+      let isEarlyBird = false;
+      let metadataFound = false;
+
+      // Try to extract from failureReason (mock payments)
+      if (payment.failureReason && payment.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
+        const metadataPart = payment.failureReason.replace('TARGET_PLAN_METADATA:', '');
+        const [targetPlanId, targetPlan, isEarlyBirdStr] = metadataPart.split('|');
+        
+        if (targetPlan) {
+          const planEnum = targetPlan.toUpperCase();
+          planSlug = planEnum.toLowerCase();
+          
+          const planNameMap: Record<string, string> = {
+            'LITE': 'Лайт',
+            'FOREMAN': 'Прораб',
+            'BRIGADE': 'Бригада',
+          };
+          planName = planNameMap[planEnum] || planEnum;
+          metadataFound = true;
+        }
+        
+        if (isEarlyBirdStr !== undefined) {
+          isEarlyBird = isEarlyBirdStr === 'true';
+        }
+      }
+      // Try to extract from description (real payments)
+      else if (payment.description && payment.description.includes('TARGET_PLAN:')) {
+        const targetPlanMatch = payment.description.match(/TARGET_PLAN:([^|]+)\|([^|]+)\|([^|]+)/);
+        if (targetPlanMatch) {
+          const [, targetPlanId, targetPlan, isEarlyBirdStr] = targetPlanMatch;
+          
+          if (targetPlan) {
+            const planEnum = targetPlan.toUpperCase();
+            planSlug = planEnum.toLowerCase();
+            
+            const planNameMap: Record<string, string> = {
+              'LITE': 'Лайт',
+              'FOREMAN': 'Прораб',
+              'BRIGADE': 'Бригада',
+            };
+            planName = planNameMap[planEnum] || planEnum;
+            metadataFound = true;
+          }
+          
+          if (isEarlyBirdStr !== undefined) {
+            isEarlyBird = isEarlyBirdStr === 'true';
+          }
+        }
+      }
+
+      // Fallback: If metadata not found, try to determine plan from payment amount
+      // This is a fallback for old payments that don't have metadata
+      if (!metadataFound) {
+        const amount = Number(payment.amount);
+        
+        // Plan prices (RUB, Early Bird):
+        // LITE: 290 (Early Bird), 490 (Regular)
+        // FOREMAN: 690 (Early Bird), 990 (Regular)
+        // BRIGADE: 1490 (Early Bird), 1990 (Regular)
+        
+        if (amount === 290 || amount === 490) {
+          planName = 'Лайт';
+          planSlug = 'lite';
+          isEarlyBird = amount === 290;
+          metadataFound = true;
+        } else if (amount === 690 || amount === 990) {
+          planName = 'Прораб';
+          planSlug = 'foreman';
+          isEarlyBird = amount === 690;
+          metadataFound = true;
+        } else if (amount === 1490 || amount === 1990) {
+          planName = 'Бригада';
+          planSlug = 'brigade';
+          isEarlyBird = amount === 1490;
+          metadataFound = true;
+        }
+      }
+
+      // Final fallback: Use current subscription plan (least reliable)
+      if (!metadataFound) {
+        planName = payment.subscription?.planRef?.name || payment.subscription?.plan || 'Unknown';
+        planSlug = payment.subscription?.planRef?.slug || payment.subscription?.plan?.toLowerCase() || 'unknown';
+        isEarlyBird = payment.subscription?.isEarlyBird || false;
+      }
+
+      return {
+        id: payment.id,
+        planName,
+        planSlug,
+        amount: Number(payment.amount),
+        currency: payment.currency,
+        isEarlyBird,
+        paidAt: payment.paidAt || payment.createdAt,
+        createdAt: payment.createdAt,
+      };
+    });
   }
 
   /**

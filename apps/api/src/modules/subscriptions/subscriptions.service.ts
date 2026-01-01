@@ -216,6 +216,72 @@ export class SubscriptionsService {
     );
   }
 
+  /**
+   * Get subscription history based on successful payments
+   * Each successful payment represents a subscription period
+   * This gives true history of plan changes
+   */
+  async getSubscriptionHistoryFromPayments(userId: string) {
+    // Get all teams owned by user
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        ownedTeams: {
+          include: {
+            subscription: {
+              include: {
+                payments: {
+                  where: {
+                    status: 'SUCCEEDED',
+                  },
+                  orderBy: {
+                    paidAt: 'desc',
+                  },
+                  include: {
+                    subscription: {
+                      include: {
+                        planRef: {
+                          include: {
+                            prices: true,
+                            features: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                planRef: {
+                  include: {
+                    prices: true,
+                    features: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Collect all successful payments from all teams
+    const allPayments: any[] = [];
+    user?.ownedTeams.forEach(team => {
+      if (team.subscription?.payments) {
+        team.subscription.payments.forEach(payment => {
+          allPayments.push({
+            ...payment,
+            subscription: team.subscription,
+          });
+        });
+      }
+    });
+
+    // Sort by paid date (newest first)
+    return allPayments.sort((a, b) =>
+      new Date(b.paidAt || b.createdAt).getTime() - new Date(a.paidAt || a.createdAt).getTime()
+    );
+  }
+
   async findByIdWithAuth(subscriptionId: string, userId: string) {
     const subscription = await this.prisma.subscription.findUnique({
       where: { id: subscriptionId },

@@ -15,5 +15,7 @@ export const graphqlConfig: ApolloDriverConfig | GqlModuleOptions = {
 	csrfPrevention: false, // 👈 Required for graphql-upload to work without header issues
 	resolvers: {
 		JSON: GraphQLJSON,
+		// DateTime is automatically created by NestJS GraphQL for @Field(() => Date)
+		// No need to register it explicitly
 	},
 }

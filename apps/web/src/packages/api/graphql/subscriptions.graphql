@@ -115,6 +115,19 @@ query MySubscriptionHistory {
   }
 }
 
+query MySubscriptionHistoryFromPayments {
+  mySubscriptionHistoryFromPayments {
+    id
+    planName
+    planSlug
+    amount
+    currency
+    isEarlyBird
+    paidAt
+    createdAt
+  }
+}
+
 query GetSubscription($id: String!) {
   subscription(id: $id) {
     ...SubscriptionFields
