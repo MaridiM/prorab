@@ -16,3 +16,4 @@ ADD COLUMN IF NOT EXISTS "telegram_photo_url" TEXT;
 
 
 
+

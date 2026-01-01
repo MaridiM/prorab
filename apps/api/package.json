@@ -21,6 +21,7 @@
     "prisma:seed:plans": "tsx prisma/seed-plans.ts",
     "prisma:seed:providers": "tsx prisma/seed-payment-providers.ts",
     "stripe:create-products": "tsx scripts/create-stripe-products.ts",
+    "yookassa:create-config": "tsx scripts/create-yookassa-config.ts",
     "db:seed": "pnpm prisma:seed",
     "test": "jest",
     "test:watch": "jest --watch",
