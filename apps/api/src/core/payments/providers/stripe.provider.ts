@@ -138,6 +138,12 @@ export class StripeProvider implements IPaymentProvider {
     // Clean description - remove any technical JSON metadata (everything after "|")
     const cleanDescription = params.description?.split(' | ')[0] || params.description || 'Оплата подписки'
 
+    // Extract base URL from returnUrl for cancel redirect
+    // returnUrl format: http://localhost:3000/payment/success?success=true&paymentId=...
+    // We want to redirect to: http://localhost:3000/settings?tab=subscription
+    const baseUrl = params.returnUrl.split('/payment')[0]
+    const cancelUrl = `${baseUrl}/settings?tab=subscription`
+
     // Create Checkout Session
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -155,7 +161,7 @@ export class StripeProvider implements IPaymentProvider {
       ],
       mode: 'payment',
       success_url: params.returnUrl + '?success=true',
-      cancel_url: params.returnUrl + '?cancelled=true',
+      cancel_url: cancelUrl, // Redirect to settings on cancel instead of success page
       customer_email: params.customerEmail,
       metadata: params.metadata,
       client_reference_id: params.metadata.subscriptionId,
@@ -319,6 +325,10 @@ export class StripeProvider implements IPaymentProvider {
   async createSubscription(params: CreateSubscriptionParams): Promise<SubscriptionResult> {
     await this.ensureInitialized()
 
+    // Extract base URL from returnUrl for cancel redirect
+    const baseUrl = params.returnUrl.split('/payment')[0]
+    const cancelUrl = `${baseUrl}/settings?tab=subscription`
+
     // Create Checkout Session for subscription
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -330,7 +340,7 @@ export class StripeProvider implements IPaymentProvider {
       ],
       mode: 'subscription',
       success_url: params.returnUrl + '?success=true',
-      cancel_url: params.returnUrl + '?cancelled=true',
+      cancel_url: cancelUrl, // Redirect to settings on cancel instead of success page
       customer_email: params.customerEmail,
       metadata: params.metadata,
       client_reference_id: params.metadata.subscriptionId,

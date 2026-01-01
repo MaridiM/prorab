@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+// import { motion, AnimatePresence } from 'framer-motion'
 import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive, Sparkles, Zap, Star, Info, X, ChevronDown, RefreshCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -148,9 +148,22 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 					setProcessingPlanId(null)
 					return
 				}
-				// Use replace instead of href to prevent adding checkout to history
-				// This ensures that if user was on success page before, it won't be in history
-				window.location.replace(url)
+				
+				// Before redirecting to Stripe, ensure success page is not in browser history
+				// Replace current history entry with settings to prevent back navigation to success
+				// This is important because Stripe's "Back" button uses browser history
+				const currentUrl = window.location.href
+				if (currentUrl.includes('/payment/success')) {
+					// If we're on success page, replace it with settings before going to Stripe
+					window.history.replaceState({ fromSettings: true }, '', '/settings?tab=subscription')
+				} else {
+					// Replace current entry with settings to ensure clean history
+					window.history.replaceState({ fromSettings: true }, '', '/settings?tab=subscription')
+				}
+				
+				// Now redirect to Stripe checkout
+				// This will add Stripe to history, but settings will be before it (not success)
+				window.location.href = url
 			} else {
 				toast('Не удалось получить URL для оплаты', 'error')
 				setProcessingPlanId(null)
@@ -335,7 +348,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 						subscriptionId: subscriptionId,
 						providerType: null, // null means backend will auto-select by IP
 						targetPlanId: planId, // Desired plan ID - will be applied after payment
-						targetPlan: selectedPlan?.slug?.toUpperCase(), // Desired plan enum - will be applied after payment
+						targetPlan: selectedPlan?.slug?.toUpperCase() || null, // Desired plan enum - will be applied after payment
 					},
 				})
 			}

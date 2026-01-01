@@ -199,7 +199,8 @@
       "Bash(dir \"g:\\\\Projects\\\\prorab\\\\v-1\"\" | findstr /I \"README \")",
       "Bash(node:*)",
       "Bash(pnpm prisma migrate dev:*)",
-      "Bash(pnpm prisma migrate deploy:*)"
+      "Bash(pnpm prisma migrate deploy:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.6.13",
+  "version": "1.6.14",
   "description": "",
   "author": "",
   "private": true,
@@ -20,6 +20,7 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:seed:plans": "tsx prisma/seed-plans.ts",
     "prisma:seed:providers": "tsx prisma/seed-payment-providers.ts",
+    "stripe:create-products": "tsx scripts/create-stripe-products.ts",
     "db:seed": "pnpm prisma:seed",
     "test": "jest",
     "test:watch": "jest --watch",

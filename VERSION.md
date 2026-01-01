@@ -1,12 +1,49 @@
 # ProRab Version Information
 
-**Current Version:** v1.6.13
+**Current Version:** v1.6.14
 **Release Date:** 2025-12-31
 **Status:** 🟢 Production Ready
 
 ---
 
 ## Version History
+
+### v1.6.14 (2025-12-31) - Stripe Checkout Cancel Button Fix
+
+**FIXES:**
+
+- 🐛 **Stripe Cancel Button Redirect** - Fixed back button on Stripe checkout page
+  - Cancel button now redirects to `/settings?tab=subscription` instead of success page
+  - Applied to both one-time payments and recurring subscriptions
+  - Extracts base URL from `returnUrl` to build correct cancel URL
+  - Improves user experience when canceling payment
+
+**TECHNICAL DETAILS:**
+
+- Modified `stripe.provider.ts` in `createPayment()` and `createSubscription()` methods
+- Extracts base URL: `params.returnUrl.split('/payment')[0]`
+- Builds cancel URL: `${baseUrl}/settings?tab=subscription`
+- Sets `cancel_url` parameter in Stripe Checkout session
+
+**NOTE ON METADATA IN CHECKOUT:**
+
+The technical metadata (targetPlanId, targetPlan JSON) that was appearing in Stripe checkout description has been addressed:
+- Description cleaning logic (`cleanDescription`) already exists in the code
+- Splits description by ` | ` to remove any appended metadata
+- If you still see metadata, restart the API server to load the latest code
+- Create a new payment to test - old Stripe sessions (up to 24h) will show old description
+
+**FILES MODIFIED:**
+
+Backend:
+- [apps/api/src/core/payments/providers/stripe.provider.ts](apps/api/src/core/payments/providers/stripe.provider.ts#L144-L145)
+
+Package versions:
+- [package.json](package.json#L3)
+- [apps/api/package.json](apps/api/package.json#L3)
+- [apps/web/package.json](apps/web/package.json#L2)
+
+---
 
 ### v1.6.13 (2025-12-31) - Payment Flow & Plan Update Critical Fixes
 

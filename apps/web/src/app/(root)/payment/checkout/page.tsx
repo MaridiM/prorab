@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
-import { Loader2, CreditCard, Lock } from 'lucide-react'
+import { Loader2, CreditCard, Lock, ArrowLeft } from 'lucide-react'
 
 /**
  * Mock Payment Checkout Page
@@ -105,7 +106,16 @@ export default function PaymentCheckoutPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+		<div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 relative">
+			{/* Back Button */}
+			{/* <Link 
+				href="/settings?tab=subscription"
+				className="absolute top-4 left-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors z-10"
+			>
+				<ArrowLeft className="h-4 w-4" />
+				<span>Назад</span>
+			</Link> */}
+			
 			<Card className="max-w-md w-full p-8 space-y-6">
 				{/* Mock Provider Logo */}
 				<div className="flex justify-center">

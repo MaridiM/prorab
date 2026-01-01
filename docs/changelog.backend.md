@@ -5,6 +5,31 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.14] - 2025-12-31 - Stripe Checkout Cancel Button Fix
+
+### Fixed
+- **Stripe Cancel Button Redirect**: Исправлена кнопка "Назад" на странице Stripe checkout
+  - Теперь редиректит на `/settings?tab=subscription` вместо страницы успешной оплаты
+  - Применено к одноразовым платежам (`createPayment`) и подпискам (`createSubscription`)
+  - Извлекается базовый URL из `returnUrl`: `params.returnUrl.split('/payment')[0]`
+  - Формируется корректный `cancel_url`: `${baseUrl}/settings?tab=subscription`
+  - Улучшен UX при отмене платежа
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/core/payments/providers/stripe.provider.ts` (строки 141-145, 328-330)
+    - Добавлено извлечение baseUrl из returnUrl
+    - Установлен `cancel_url` в Stripe Checkout session
+    - Изменения применены к обоим методам: `createPayment()` и `createSubscription()`
+
+### Note
+- **Метаданные в Stripe Checkout**: Логика очистки описания (`cleanDescription`) уже существует в коде
+  - Автоматически удаляет JSON метаданные из описания (split по ` | `)
+  - Если метаданные все еще видны, перезапустите API сервер для загрузки нового кода
+  - Создайте новый платеж для теста - старые Stripe сессии (до 24ч) будут показывать старое описание
+
+---
+
 ## [1.6.13] - 2025-12-31 - Payment Flow & Plan Update Critical Fixes
 
 ### Fixed
