@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useSearchParams } from 'next/navigation'
-// import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Crown, Check, Loader2, AlertCircle, TrendingUp, Users, FolderOpen, HardDrive, Sparkles, Zap, Star, Info, X, ChevronDown, RefreshCcw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -44,6 +44,7 @@ import {
 	ChangePlanDocument,
 	InitializePaymentDocument,
 	EarlyBirdStatsDocument,
+	IsEarlyBirdAvailableForMeDocument,
 	PaymentProviderType,
 } from '@/packages/api/graphql/__generated__/output'
 import {
@@ -73,6 +74,9 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const { data: teamsData } = useQuery(MyTeamsDocument)
 	const { data: earlyBirdData } = useQuery(EarlyBirdStatsDocument, {
 		fetchPolicy: 'cache-and-network', // Always get fresh data
+	})
+	const { data: earlyBirdForMeData } = useQuery(IsEarlyBirdAvailableForMeDocument, {
+		fetchPolicy: 'cache-and-network', // Always get fresh data for current user
 	})
 	const searchParams = useSearchParams()
 
@@ -202,6 +206,14 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	const plans = useMemo(() => plansData?.availablePlansDetailed || [], [plansData?.availablePlansDetailed])
 	const teams = useMemo(() => teamsData?.myTeams || [], [teamsData?.myTeams])
 
+	// Check if Early Bird is available for current user
+	// This checks both:
+	// 1. User hasn't used Early Bird before (one per user lifetime)
+	// 2. Global Early Bird limit hasn't been reached (500 slots)
+	const isEarlyBirdAvailable = useMemo(() => {
+		return earlyBirdForMeData?.isEarlyBirdAvailableForMe ?? false
+	}, [earlyBirdForMeData?.isEarlyBirdAvailableForMe])
+
 	// Calculate maximum Early Bird discount across all plans
 	const maxEarlyBirdDiscount = useMemo(() => {
 		if (!plans || plans.length === 0) return 0
@@ -288,7 +300,8 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							teamId: effectiveTeamId,
 							planId: planId,
 							plan: selectedPlan?.slug?.toUpperCase() as any,
-							useEarlyBird: selectedPlan?.isEarlyBird || false,
+							// Only use Early Bird if it's available AND plan supports it
+							useEarlyBird: (isEarlyBirdAvailable && selectedPlan?.isEarlyBird) || false,
 						},
 					},
 				})
@@ -546,7 +559,9 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 									})
 
 									const rubPrice = plan.prices.find((p) => p.currency === 'RUB')
-									const displayPrice = rubPrice ? (plan.isEarlyBird ? rubPrice.earlyBirdPrice : rubPrice.price) : 0
+									// Only show Early Bird price if Early Bird is available AND plan supports it
+									const shouldShowEarlyBird = isEarlyBirdAvailable && plan.isEarlyBird
+									const displayPrice = rubPrice ? (shouldShowEarlyBird ? rubPrice.earlyBirdPrice : rubPrice.price) : 0
 									const hasTrialPeriod = plan.trialDays && plan.trialDays > 0
 
 									return (
@@ -634,7 +649,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 															</Badge>
 														</motion.div>
 													)}
-													{plan.isEarlyBird && !plan.isPopular && (
+													{shouldShowEarlyBird && !plan.isPopular && (
 														<motion.div 
 															initial={{ opacity: 0, scale: 0 }}
 															animate={{ opacity: 1, scale: 1 }}
@@ -674,7 +689,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 												<span className="text-lg font-medium text-muted-foreground">/мес</span>
 											</div>
 											<AnimatePresence>
-												{plan.isEarlyBird && rubPrice && rubPrice.price !== rubPrice.earlyBirdPrice && (
+												{shouldShowEarlyBird && rubPrice && rubPrice.price !== rubPrice.earlyBirdPrice && (
 													<motion.div 
 														className="flex items-center gap-2 flex-wrap"
 														initial={{ opacity: 0 }}
@@ -1192,7 +1207,9 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 						const plan = selectedPlanDetails
 						const isCurrent = subscription?.planId === plan.id
 						const rubPrice = plan.prices.find((p) => p.currency === 'RUB')
-						const displayPrice = rubPrice ? (plan.isEarlyBird ? rubPrice.earlyBirdPrice : rubPrice.price) : 0
+						// Only show Early Bird price if Early Bird is available AND plan supports it
+						const shouldShowEarlyBird = isEarlyBirdAvailable && plan.isEarlyBird
+						const displayPrice = rubPrice ? (shouldShowEarlyBird ? rubPrice.earlyBirdPrice : rubPrice.price) : 0
 						const hasTrialPeriod = plan.trialDays && plan.trialDays > 0
 						const allFeatures = plan.features
 							.filter((f) => f.isIncluded)
@@ -1224,7 +1241,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 															Популярный
 														</Badge>
 													)}
-													{plan.isEarlyBird && (
+													{shouldShowEarlyBird && (
 														<Badge variant="secondary" className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-700 dark:text-amber-400 border-amber-500/40">
 															<Sparkles className="w-3 h-3 mr-1" />
 															Early Bird
@@ -1262,7 +1279,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 											</p>
 											<span className="text-xl font-medium text-muted-foreground">/мес</span>
 										</div>
-										{plan.isEarlyBird && rubPrice && rubPrice.price !== rubPrice.earlyBirdPrice && (
+										{shouldShowEarlyBird && rubPrice && rubPrice.price !== rubPrice.earlyBirdPrice && (
 											<div className="flex items-center gap-3 flex-wrap">
 												<p className="text-sm text-muted-foreground line-through">
 													Обычная цена: {rubPrice.price}₽/мес

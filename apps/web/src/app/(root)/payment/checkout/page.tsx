@@ -76,14 +76,21 @@ export default function PaymentCheckoutPage() {
 			try {
 				// Parse returnUrl and ensure it has required parameters
 				const url = new URL(returnUrl, window.location.origin)
-				url.searchParams.set('success', 'true')
-				// Add timestamp to ensure unique paymentId
-				if (!url.searchParams.has('paymentId')) {
-					url.searchParams.set('paymentId', `mock-${Date.now()}`)
+				
+				// Extract paymentId from existing URL if present, otherwise use mock
+				let paymentId = url.searchParams.get('paymentId')
+				if (!paymentId) {
+					paymentId = `mock-${Date.now()}`
 				}
-				// Add fromCheckout flag to indicate we came from checkout
-				url.searchParams.set('fromCheckout', 'true')
-				window.location.replace(url.toString())
+				
+				// Clean the URL path and rebuild with correct parameters
+				// This prevents duplicate query parameters
+				const cleanUrl = new URL('/payment/success', window.location.origin)
+				cleanUrl.searchParams.set('success', 'true')
+				cleanUrl.searchParams.set('paymentId', paymentId)
+				cleanUrl.searchParams.set('fromCheckout', 'true')
+				
+				window.location.replace(cleanUrl.toString())
 			} catch (error) {
 				// If URL parsing fails, use fallback
 				console.error('Failed to parse returnUrl:', error)

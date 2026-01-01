@@ -67,7 +67,23 @@ export class PaymentsService {
     // If targetPlanId is provided, use the target plan; otherwise use current subscription plan
     let planToUse = subscription.planRef;
     let planIdToUse = subscription.planId;
+
+    // Determine Early Bird eligibility
+    // If user has active Early Bird subscription, they keep Early Bird pricing when changing plans
     let isEarlyBird = subscription.isEarlyBird;
+
+    // Import SubscriptionsService to check Early Bird availability
+    const { SubscriptionsService } = await import('../subscriptions/subscriptions.service');
+    const subscriptionsService = new SubscriptionsService(this.prisma);
+
+    // Check if Early Bird is available for this user
+    const isEarlyBirdAvailable = await subscriptionsService.isEarlyBirdAvailableForUser(userId);
+
+    // If user has active Early Bird OR is eligible for Early Bird, use Early Bird pricing
+    if (isEarlyBirdAvailable && planToUse?.isEarlyBird) {
+      isEarlyBird = true;
+      this.logger.log(`User ${userId} is eligible for Early Bird pricing`);
+    }
 
     if (targetPlanId && targetPlanId !== subscription.planId) {
       // Load target plan from database
@@ -81,9 +97,12 @@ export class PaymentsService {
       if (targetPlan) {
         planToUse = targetPlan;
         planIdToUse = targetPlanId;
-        // Check if target plan has early bird pricing
-        // For now, we'll use the early bird status from subscription
-        // In the future, this could be determined based on target plan's early bird availability
+
+        // Re-check Early Bird for target plan
+        if (isEarlyBirdAvailable && targetPlan.isEarlyBird) {
+          isEarlyBird = true;
+          this.logger.log(`Target plan ${targetPlan.name} will use Early Bird pricing`);
+        }
       } else {
         this.logger.warn(`Target plan not found: ${targetPlanId}, using current subscription plan`);
       }

@@ -1,12 +1,123 @@
 # ProRab Version Information
 
-**Current Version:** v1.6.14
-**Release Date:** 2025-12-31
+**Current Version:** v1.6.16
+**Release Date:** 2026-01-02
 **Status:** 🟢 Production Ready
 
 ---
 
 ## Version History
+
+### v1.6.16 (2026-01-02) - Fix Early Bird Display for Active Subscribers
+
+**CRITICAL FIX:**
+
+- 🐛 **Active Early Bird Users See Full Price** - Fixed critical bug where users with active Early Bird subscriptions saw full prices
+  - Problem: Users with active Early Bird subscription couldn't see Early Bird prices when changing plans
+  - Root cause: `isEarlyBirdAvailableForUser` returned `false` for users who already have Early Bird
+  - Solution: Added separate check for ACTIVE Early Bird subscriptions
+
+**HOW IT WORKS NOW:**
+
+Three-tier check in `isEarlyBirdAvailableForUser`:
+
+1. **First check**: Does user have ACTIVE Early Bird subscription?
+   - If YES → Return `true` (can always see Early Bird prices for plan changes)
+
+2. **Second check**: Has user EVER used Early Bird (but not active now)?
+   - If YES → Return `false` (cannot get Early Bird again after cancellation)
+
+3. **Third check**: Is user new AND are global slots available?
+   - If YES → Return `true` (can get Early Bird for first time)
+
+**USER SCENARIOS:**
+
+| User Status | Result | Can See Early Bird? |
+|-------------|--------|---------------------|
+| Active Early Bird subscriber | `hasActive = true` | ✅ YES (always) |
+| Cancelled Early Bird subscriber | `hasUsed = true`, `hasActive = false` | ❌ NO |
+| New user (slots available) | `hasUsed = false`, `remaining > 0` | ✅ YES |
+| New user (slots full) | `hasUsed = false`, `remaining = 0` | ❌ NO |
+
+**TECHNICAL DETAILS:**
+
+- Added new method `hasActiveEarlyBird(userId)` - checks for active Early Bird subscription
+- Modified `isEarlyBirdAvailableForUser(userId)` logic:
+  - Old: `!hasUsed || remaining > 0` (incorrect)
+  - New: Three-step validation (correct)
+- Located in [subscriptions.service.ts](apps/api/src/modules/subscriptions/subscriptions.service.ts#L619-L670)
+
+**FILES MODIFIED:**
+
+Backend:
+- [apps/api/src/modules/subscriptions/subscriptions.service.ts](apps/api/src/modules/subscriptions/subscriptions.service.ts#L619-L670)
+
+Package versions:
+- [package.json](package.json#L3)
+- [apps/api/package.json](apps/api/package.json#L3)
+- [apps/web/package.json](apps/web/package.json#L2)
+
+---
+
+### v1.6.15 (2026-01-02) - User-Specific Early Bird Eligibility
+
+**FEATURE:**
+
+- ✨ **User-Specific Early Bird Check** - Early Bird pricing now checks individual user eligibility
+  - Each user can only use Early Bird once in their lifetime (one Early Bird per user)
+  - System checks both global availability (500 slots) AND user eligibility
+  - If user already used Early Bird, shows full price instead
+  - Early Bird badge and pricing only shown if user is eligible
+
+**HOW IT WORKS:**
+
+Before:
+- Showed Early Bird price to everyone if global limit not reached (500 users)
+- Problem: User saw Early Bird price in plans, but got full price at checkout
+
+After:
+- Backend tracks which users already used Early Bird (`isEarlyBird` flag on subscription)
+- New GraphQL query `isEarlyBirdAvailableForMe` checks user eligibility
+- Frontend shows Early Bird price ONLY if user hasn't used it before
+- Full price displayed for users who already got Early Bird
+
+**USER EXPERIENCE:**
+
+1. **First-time user (slots available)**: Sees Early Bird price and badge → Can purchase at Early Bird price
+2. **First-time user (slots full)**: Sees full price, no badge → Purchases at full price
+3. **Returning user (already used Early Bird)**: Sees full price, no badge → Cannot get Early Bird again
+4. **Current Early Bird subscriber**: Keeps their Early Bird price forever
+
+**TECHNICAL DETAILS:**
+
+Backend (API):
+- Added `hasUsedEarlyBird(userId)` - checks if user has subscription with `isEarlyBird=true`
+- Added `isEarlyBirdAvailableForUser(userId)` - checks user + global availability
+- New GraphQL query `isEarlyBirdAvailableForMe` - authenticated, user-specific
+- Located in [subscriptions.service.ts](apps/api/src/modules/subscriptions/subscriptions.service.ts#L600-L634)
+
+Frontend (Web):
+- Updated `SubscriptionManagement` to use `IsEarlyBirdAvailableForMeDocument`
+- Changed `isEarlyBirdAvailable` from global to user-specific check
+- Early Bird badge and pricing hide automatically if user ineligible
+- Located in [SubscriptionManagement.tsx](apps/web/src/packages/components/settings/SubscriptionManagement.tsx#L78-L80)
+
+**FILES MODIFIED:**
+
+Backend:
+- [apps/api/src/modules/subscriptions/subscriptions.service.ts](apps/api/src/modules/subscriptions/subscriptions.service.ts#L595-L634)
+- [apps/api/src/modules/subscriptions/subscriptions.resolver.ts](apps/api/src/modules/subscriptions/subscriptions.resolver.ts#L118-L129)
+
+Frontend:
+- [apps/web/src/packages/api/graphql/subscriptions.graphql](apps/web/src/packages/api/graphql/subscriptions.graphql#L179-L181)
+- [apps/web/src/packages/components/settings/SubscriptionManagement.tsx](apps/web/src/packages/components/settings/SubscriptionManagement.tsx#L47)
+
+Package versions:
+- [package.json](package.json#L3)
+- [apps/api/package.json](apps/api/package.json#L3)
+- [apps/web/package.json](apps/web/package.json#L2)
+
+---
 
 ### v1.6.14 (2025-12-31) - Stripe Checkout Cancel Button Fix
 

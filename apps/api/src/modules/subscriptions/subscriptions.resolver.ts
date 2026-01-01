@@ -116,6 +116,19 @@ export class SubscriptionsResolver {
   }
 
   /**
+   * Check if Early Bird is available for the current user
+   * Authenticated query - checks both global availability and user eligibility
+   * User can only use Early Bird once in their lifetime
+   */
+  @Query(() => Boolean)
+  @UseGuards(AuthGuard)
+  async isEarlyBirdAvailableForMe(
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    return this.subscriptionsService.isEarlyBirdAvailableForUser(user.id);
+  }
+
+  /**
    * Get all available plans from database with full details (prices, features)
    * Public query - no authentication required
    */

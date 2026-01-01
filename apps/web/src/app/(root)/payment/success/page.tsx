@@ -44,14 +44,18 @@ export default function PaymentSuccessPage() {
 			return
 		}
 
+		// Clean paymentId - remove any query parameters that might have been accidentally included
+		// This handles cases where URL was malformed and paymentId contains "?success=true" etc.
+		const cleanPaymentId = paymentId.split('?')[0].split('&')[0].trim()
+
 		// If we reach here, parameters are valid - allow page to show
 		setIsValid(true)
 		
 		// Try to confirm payment if it's still pending
 		// This handles both mock payments and real payments where webhook hasn't been called yet
-		if (paymentId && !paymentId.startsWith('mock-')) {
+		if (cleanPaymentId && !cleanPaymentId.startsWith('mock-')) {
 			// Only confirm real paymentIds (not mock timestamps)
-			confirmMockPayment({ variables: { paymentId } })
+			confirmMockPayment({ variables: { paymentId: cleanPaymentId } })
 				.then(() => {
 					// Refetch subscription to get updated plan
 					refetchSubscription()

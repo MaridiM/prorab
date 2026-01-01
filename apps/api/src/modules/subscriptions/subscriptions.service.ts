@@ -593,6 +593,83 @@ export class SubscriptionsService {
   }
 
   /**
+   * Check if user has already used Early Bird pricing
+   * @param userId User ID
+   * @returns true if user has already used Early Bird
+   */
+  async hasUsedEarlyBird(userId: string): Promise<boolean> {
+    // Check if user has any subscription with isEarlyBird = true
+    const earlyBirdSubscription = await this.prisma.subscription.findFirst({
+      where: {
+        team: {
+          ownerId: userId,
+        },
+        isEarlyBird: true,
+      },
+    });
+
+    return !!earlyBirdSubscription;
+  }
+
+  /**
+   * Check if user currently has an active Early Bird subscription
+   * @param userId User ID
+   * @returns true if user has active Early Bird subscription
+   */
+  async hasActiveEarlyBird(userId: string): Promise<boolean> {
+    const earlyBirdSubscription = await this.prisma.subscription.findFirst({
+      where: {
+        team: {
+          ownerId: userId,
+        },
+        isEarlyBird: true,
+        status: {
+          in: [
+            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.TRIALING,
+            SubscriptionStatus.PENDING_PAYMENT,
+          ],
+        },
+      },
+    });
+
+    return !!earlyBirdSubscription;
+  }
+
+  /**
+   * Check if Early Bird is available for a specific user
+   * User can use Early Bird if:
+   * 1. They have ACTIVE Early Bird subscription (can change plans within Early Bird)
+   * 2. OR: They never used Early Bird AND global slots available
+   *
+   * @param userId User ID
+   * @returns true if user can use Early Bird pricing
+   */
+  async isEarlyBirdAvailableForUser(userId: string): Promise<boolean> {
+    // First check: Does user have ACTIVE Early Bird subscription?
+    // If yes, they can always use Early Bird (for plan changes)
+    const hasActive = await this.hasActiveEarlyBird(userId);
+    if (hasActive) {
+      return true;
+    }
+
+    // Second check: Has user EVER used Early Bird?
+    const hasUsed = await this.hasUsedEarlyBird(userId);
+    if (hasUsed) {
+      // User had Early Bird before but doesn't have active subscription now
+      // (cancelled, expired, etc.) - cannot get Early Bird again
+      return false;
+    }
+
+    // Third check: Global Early Bird availability
+    const used = await this.getEarlyBirdCount();
+    const remaining = Math.max(0, EARLY_BIRD_LIMIT - used);
+
+    // New user who never had Early Bird can get it if slots available
+    return remaining > 0;
+  }
+
+  /**
    * Get Early Bird statistics for UI display
    * Returns used count, limit, remaining, availability, and total teams
    */

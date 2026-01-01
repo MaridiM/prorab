@@ -176,6 +176,10 @@ query EarlyBirdStats {
   }
 }
 
+query IsEarlyBirdAvailableForMe {
+  isEarlyBirdAvailableForMe
+}
+
 # ============ MUTATIONS ============
 
 mutation CreateSubscription($input: CreateSubscriptionInput!) {

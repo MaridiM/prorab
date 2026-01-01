@@ -5,6 +5,36 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.15] - 2026-01-02 - User-Specific Early Bird Display
+
+### Changed
+- **Early Bird Availability Check**: Изменена логика отображения Early Bird цены с глобальной на персональную
+  - Теперь использует GraphQL query `isEarlyBirdAvailableForMe` вместо глобального `earlyBirdStats.isAvailable`
+  - Early Bird цена и бейдж показываются только если пользователь имеет право на скидку
+  - Проверяет оба условия: не использовал ли пользователь Early Bird ранее + есть ли свободные слоты
+
+### Fixed
+- **Early Bird Price Mismatch**: Исправлена проблема несоответствия цен
+  - До: Пользователь видел Early Bird цену в планах, но получал полную цену при оплате
+  - После: Пользователь видит только ту цену, которую реально может получить
+  - Если пользователь уже использовал Early Bird, отображается полная цена без бейджа
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/web/src/packages/api/graphql/subscriptions.graphql` (строки 179-181)
+    - Добавлен query `IsEarlyBirdAvailableForMe` для персональной проверки
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx`
+    - Импортирован `IsEarlyBirdAvailableForMeDocument` (строка 47)
+    - Добавлен `useQuery(IsEarlyBirdAvailableForMeDocument)` (строки 78-80)
+    - Изменен `isEarlyBirdAvailable` с `earlyBirdStats.isAvailable` на `isEarlyBirdAvailableForMe` (строки 213-215)
+
+### Impact
+- **Улучшенная честность**: Пользователи видят только реально доступные цены
+- **Нет путаницы**: Исчезла ситуация когда цена в UI не совпадает с ценой при оплате
+- **Правильные ожидания**: Если Early Bird недоступен, пользователь сразу видит полную цену
+
+---
+
 ## [1.6.13] - 2025-12-31 - Payment Success Page Critical Fix
 
 ### Fixed

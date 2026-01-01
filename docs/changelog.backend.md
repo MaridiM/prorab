@@ -5,6 +5,71 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.16] - 2026-01-02 - Critical Fix: Early Bird Display for Active Subscribers
+
+### Fixed
+- **CRITICAL: Active Early Bird Users See Full Price**: Исправлен критический баг в логике проверки Early Bird
+  - Проблема: Пользователи с активной Early Bird подпиской видели полную цену вместо Early Bird
+  - Корень проблемы: `isEarlyBirdAvailableForUser` возвращал `false` для всех, кто уже имел Early Bird
+  - Решение: Добавлена проверка АКТИВНОЙ подписки перед проверкой истории использования
+
+### Added
+- **hasActiveEarlyBird(userId)**: Новый метод для проверки активной Early Bird подписки
+  - Проверяет статусы: ACTIVE, TRIALING, PENDING_PAYMENT
+  - Отличается от `hasUsedEarlyBird` который проверяет всю историю
+
+### Changed
+- **isEarlyBirdAvailableForUser(userId)**: Изменена логика трехуровневой проверки
+  - Уровень 1: Активная Early Bird подписка → `return true` (всегда показываем Early Bird)
+  - Уровень 2: Использовал раньше, но неактивна → `return false` (не может получить снова)
+  - Уровень 3: Новый пользователь + есть слоты → `return true` (может получить впервые)
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` (строки 619-670)
+    - Добавлен метод `hasActiveEarlyBird` с проверкой статуса подписки
+    - Переписана логика `isEarlyBirdAvailableForUser` с трех шагов
+    - Старая логика: `return !hasUsed || remaining > 0` (неправильно)
+    - Новая логика: Три последовательных проверки (правильно)
+
+### Impact
+- **Активные Early Bird пользователи**: Теперь ВСЕГДА видят Early Bird цены при смене плана
+- **Отмененные Early Bird пользователи**: НЕ могут получить Early Bird снова (работало и раньше)
+- **Новые пользователи**: Получают Early Bird если есть слоты (работало и раньше)
+
+---
+
+## [1.6.15] - 2026-01-02 - User-Specific Early Bird Eligibility
+
+### Added
+- **User-Specific Early Bird Check**: Реализована проверка права пользователя на Early Bird цену
+  - Новый метод `hasUsedEarlyBird(userId)` - проверяет, использовал ли пользователь Early Bird
+  - Новый метод `isEarlyBirdAvailableForUser(userId)` - комплексная проверка доступности
+  - Новый GraphQL query `isEarlyBirdAvailableForMe` - возвращает доступность для текущего пользователя
+  - Каждый пользователь может использовать Early Bird только один раз за все время
+
+### Changed
+- **Early Bird Logic**: Изменена логика показа Early Bird цены
+  - Теперь проверяется не только глобальный лимит (500 мест), но и история пользователя
+  - Если у пользователя уже есть/была подписка с `isEarlyBird=true`, Early Bird недоступен
+  - Frontend получает персональную доступность через `isEarlyBirdAvailableForMe`
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts` (строки 595-634)
+    - `hasUsedEarlyBird(userId)`: проверка по subscription.isEarlyBird для команд пользователя
+    - `isEarlyBirdAvailableForUser(userId)`: объединяет проверку пользователя + глобальный лимит
+  - `apps/api/src/modules/subscriptions/subscriptions.resolver.ts` (строки 118-129)
+    - Новый query `isEarlyBirdAvailableForMe` с защитой `@UseGuards(AuthGuard)`
+    - Возвращает Boolean - доступен ли Early Bird для текущего пользователя
+
+### Impact
+- **Честная система скидок**: Пользователи не могут многократно получать Early Bird скидку
+- **Корректное отображение цен**: Пользователь видит только ту цену, которую действительно может получить
+- **Улучшенный UX**: Нет ситуации "вижу Early Bird, но получаю полную цену"
+
+---
+
 ## [1.6.14] - 2025-12-31 - Stripe Checkout Cancel Button Fix
 
 ### Fixed
