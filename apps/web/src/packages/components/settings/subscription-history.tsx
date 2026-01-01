@@ -1,10 +1,11 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { motion } from 'framer-motion';
-import { Calendar, Check, Clock, Crown, Zap, XCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import { Calendar, Check, Clock, Crown, Zap, XCircle, RefreshCw, Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -14,8 +15,8 @@ import {
 } from '@/packages/ui';
 import { Badge } from '@/packages/components/ui/badge';
 import { Button } from '@/packages/components/ui/button';
-import { MySubscriptionHistoryFromPaymentsDocument, MySubscriptionDocument } from '@/packages/api/graphql/__generated__/output';
-import Link from 'next/link';
+import { MySubscriptionHistoryFromPaymentsDocument, MySubscriptionDocument, InitializePaymentDocument } from '@/packages/api/graphql/__generated__/output';
+import { useToast } from '@/packages/hooks';
 
 const statusConfig = {
   ACTIVE: {
@@ -52,6 +53,9 @@ const planIcons = {
 };
 
 export function SubscriptionHistory() {
+  const [processingRenewal, setProcessingRenewal] = useState(false);
+  const { toast } = useToast();
+
   // Get both history and current subscription in parallel
   const { data, loading } = useQuery(MySubscriptionHistoryFromPaymentsDocument, {
     fetchPolicy: 'cache-and-network',
@@ -59,7 +63,49 @@ export function SubscriptionHistory() {
   const { data: currentSubData } = useQuery(MySubscriptionDocument, {
     fetchPolicy: 'cache-and-network',
   });
+  const [initializePayment] = useMutation(InitializePaymentDocument, {
+    onCompleted: (data) => {
+      if (data.initializePayment.url) {
+        // Redirect to payment URL
+        window.location.replace(data.initializePayment.url);
+      }
+    },
+    onError: (error) => {
+      setProcessingRenewal(false);
+      toast('Не удалось инициализировать платеж. Попробуйте еще раз.', 'error');
+      console.error('Payment initialization error:', error);
+    },
+  });
 
+  // Extract data after hooks
+  const historyEntries = data?.mySubscriptionHistoryFromPayments || [];
+  const currentSubscription = currentSubData?.mySubscription;
+
+  // Define handleRenewPlan callback - must be before any conditional returns
+  const handleRenewPlan = useCallback(async () => {
+    if (!currentSubscription?.id || !currentSubscription?.planId) {
+      toast('Не удалось определить подписку или план. Попробуйте обновить страницу.', 'error');
+      return;
+    }
+
+    setProcessingRenewal(true);
+
+    try {
+      await initializePayment({
+        variables: {
+          subscriptionId: currentSubscription.id,
+          providerType: null, // null means backend will auto-select by IP
+          targetPlanId: currentSubscription.planId,
+          targetPlan: currentSubscription.plan,
+        },
+      });
+    } catch (error) {
+      setProcessingRenewal(false);
+      console.error('Error initializing payment:', error);
+    }
+  }, [currentSubscription, initializePayment, toast]);
+
+  // Conditional return must be after all hooks
   if (loading) {
     return (
       <Card>
@@ -70,9 +116,6 @@ export function SubscriptionHistory() {
       </Card>
     );
   }
-
-  const historyEntries = data?.mySubscriptionHistoryFromPayments || [];
-  const currentSubscription = currentSubData?.mySubscription;
 
   if (historyEntries.length === 0) {
     return null;
@@ -171,13 +214,21 @@ export function SubscriptionHistory() {
                       <Button
                         size="sm"
                         variant="outline"
-                        asChild
+                        onClick={handleRenewPlan}
+                        disabled={processingRenewal}
                         className="border-primary/50 hover:bg-primary/10"
                       >
-                        <Link href="/settings?tab=subscription&showPlans=true">
-                          Изменить план
-                          <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                        </Link>
+                        {processingRenewal ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                            Обработка...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                            Продлить план
+                          </>
+                        )}
                       </Button>
                     )}
                   </div>
