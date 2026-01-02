@@ -194,6 +194,17 @@ export function SubscriptionHistory() {
                             Оплачено: {format(new Date(entry.paidAt), 'd MMM yyyy, HH:mm', { locale: ru })}
                           </span>
                         </div>
+                        {entry.periodStartAt && entry.periodEndAt && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="w-3.5 h-3.5 opacity-70" />
+                            <span>
+                              {isCurrent 
+                                ? `Действует с ${format(new Date(entry.periodStartAt), 'd MMM yyyy', { locale: ru })} до ${format(new Date(entry.periodEndAt), 'd MMM yyyy', { locale: ru })}`
+                                : `Действовала с ${format(new Date(entry.periodStartAt), 'd MMM yyyy', { locale: ru })} до ${format(new Date(entry.periodEndAt), 'd MMM yyyy', { locale: ru })}`
+                              }
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-baseline gap-2">
                           <span className={`text-xl font-bold ${isCurrent ? 'text-primary' : 'text-foreground'}`}>
                             {entry.amount}
@@ -235,6 +246,13 @@ export function SubscriptionHistory() {
                           </>
                         )}
                       </Button>
+                    ) : entry.isRenewal ? (
+                      // If this payment was a renewal (same plan), it's part of the current period chain
+                      // Don't show "completed" - it's just a previous payment in the same subscription
+                      <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                        <Clock className="w-4 h-4" />
+                        <span>Продлена</span>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400">
                         <XCircle className="w-4 h-4" />

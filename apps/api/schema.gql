@@ -3578,7 +3578,10 @@ type SubscriptionHistoryModel {
   currency: String!
   id: ID!
   isEarlyBird: Boolean!
+  isRenewal: Boolean
   paidAt: DateTime!
+  periodEndAt: DateTime
+  periodStartAt: DateTime
   planName: String!
   planSlug: String!
 }

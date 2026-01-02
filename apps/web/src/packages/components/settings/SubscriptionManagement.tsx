@@ -1020,7 +1020,18 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div>
 								<p className="text-sm text-muted-foreground mb-1">Начало периода</p>
-								<p className="font-medium">{formatDate(subscription.currentPeriodStart)}</p>
+								<p className="font-medium">
+									{(() => {
+										const periodStart = new Date(subscription.currentPeriodStart);
+										const now = new Date();
+										// If period start is in the future, show current date as period start
+										// This handles cases where plan was renewed but period start wasn't updated correctly
+										if (periodStart > now) {
+											return format(now, 'dd MMMM yyyy', { locale: ru });
+										}
+										return formatDate(subscription.currentPeriodStart);
+									})()}
+								</p>
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground mb-1">

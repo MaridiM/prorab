@@ -5,6 +5,41 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.19] - 2026-01-02 - Subscription Period Fixes & History Improvements
+
+### Fixed
+- **GraphQL Codegen**: Исправлена проблема с экспортом `AvailablePaymentProvidersDocument`
+  - Перегенерированы GraphQL типы для корректного экспорта всех документов
+  - Если ошибка сохраняется, рекомендуется очистить кэш Next.js (удалить папку `.next`)
+- **Subscription Period Display**: Исправлено отображение периода подписки
+  - Если `currentPeriodStart` в будущем, показывается текущая дата как начало периода
+  - Это исправляет ситуацию, когда показывается дата в будущем, хотя период уже действует
+- **Subscription History Renewal Logic**: Исправлена логика определения продлений в истории
+  - Добавлено поле `isRenewal` для различения продлений и смены плана
+  - Если план был продлен (тот же план), предыдущий платеж не показывается как "завершен"
+  - Для продлений показывается статус "Продлена" вместо "Подписка завершена"
+- **Period Calculation**: Исправлен расчет периодов при продлении и смене плана
+  - При продлении плана период начинается с даты оплаты, а не с конца предыдущего периода
+  - При смене плана предыдущий план завершается в момент оплаты нового
+  - Периоды не перекрываются и основаны на реальных датах оплаты
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Исправлена логика обновления периодов при продлении и смене плана
+    - Период всегда начинается с даты оплаты
+  - `apps/api/src/modules/subscriptions/subscriptions.resolver.ts`
+    - Добавлена логика определения продлений (isRenewal)
+    - Улучшен расчет дат периодов для истории подписок
+  - `apps/api/src/modules/subscriptions/models/subscription-history.model.ts`
+    - Добавлено поле `isRenewal` для различения продлений и смены плана
+    - Добавлено поле `periodStartAt` для отображения даты начала периода
+  - `apps/web/src/packages/components/settings/SubscriptionManagement.tsx`
+    - Исправлено отображение периода: если дата начала в будущем, показывается текущая дата
+  - `apps/web/src/packages/components/settings/subscription-history.tsx`
+    - Добавлено отображение статуса "Продлена" для продлений
+    - Улучшено отображение дат периодов (начало и конец)
+
 ## [1.6.18] - 2026-01-02 - Subscription History UI Improvements & Landing Page Updates
 
 ### Changed

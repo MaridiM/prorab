@@ -551,32 +551,37 @@ export class PaymentsService {
       status: newStatus,
     };
 
+    // Determine if this is a plan change (different planId) or renewal (same planId)
+    const isPlanChange = metadata?.targetPlanId && 
+      subscription.planId && 
+      metadata.targetPlanId !== subscription.planId;
+    
     if (subscription.status === SubscriptionStatus.PENDING_PAYMENT) {
       // First payment - activate subscription
       updateData.currentPeriodStart = now;
       updateData.currentPeriodEnd = subscription.trialEndsAt || new Date(
         now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
       );
+    } else if (isPlanChange) {
+      // Plan change - new period starts from payment date
+      // Previous plan ends at payment date, new plan starts from payment date
+      updateData.currentPeriodStart = now;
+      updateData.currentPeriodEnd = new Date(
+        now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
+      );
+      this.logger.log(
+        `Plan change: Previous plan ends at ${now}, new plan period: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
+      );
     } else {
-      // Renewal or plan change - extend period
-      if (trialWasActive) {
-        // Trial was active and plan changed - end trial immediately and set new period
-        updateData.currentPeriodStart = now;
-        updateData.currentPeriodEnd = new Date(
-          now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
-        );
-        this.logger.log(
-          `Plan change during active trial: Ending trial immediately. New period: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
-        );
-      } else {
-        // Normal renewal - extend period
-        const nextPeriodEnd = new Date(
-          subscription.currentPeriodEnd.getTime() +
-            BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
-        );
-        updateData.currentPeriodStart = subscription.currentPeriodEnd;
-        updateData.currentPeriodEnd = nextPeriodEnd;
-      }
+      // Renewal of same plan - new period starts from payment date
+      // This ensures periods don't overlap and are based on actual payment dates
+      updateData.currentPeriodStart = now;
+      updateData.currentPeriodEnd = new Date(
+        now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
+      );
+      this.logger.log(
+        `Plan renewal: New period starts from payment date: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
+      );
     }
 
     // Update plan if metadata contains target plan information

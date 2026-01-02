@@ -125,6 +125,9 @@ query MySubscriptionHistoryFromPayments {
     isEarlyBird
     paidAt
     createdAt
+    periodStartAt
+    periodEndAt
+    isRenewal
   }
 }
 
