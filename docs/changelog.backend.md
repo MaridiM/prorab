@@ -5,6 +5,32 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.18] - 2026-01-02 - Seed Updates for FOREMAN Users with Subscriptions
+
+### Added
+- **Seed Script Enhancement**: Обновлен seed-файл для автоматического создания подписок для пользователей с ролью FOREMAN
+  - Добавлены поля `businessRole` и `subscriptionPlan` в интерфейс `SeedUser`
+  - Для всех пользователей с `businessRole: 'FOREMAN'` автоматически создаются команды и подписки
+  - Подписки создаются с указанным тарифным планом (`LITE`, `FOREMAN`, `BRIGADE`)
+  - Подписки создаются со статусом `TRIALING` (14 дней пробного периода) и Early Bird ценой
+  - Demo пользователь теперь имеет роль FOREMAN с тарифом BRIGADE
+
+### Changed
+- **User Creation in Seed**: Обновлена логика создания пользователей
+  - При создании пользователя устанавливается `businessRole` и `businessRoleAssignedAt`
+  - При обновлении существующего пользователя обновляется `businessRole`, если он указан
+  - Команды для FOREMAN пользователей создаются автоматически с правильным названием
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/prisma/seed.ts`
+    - Добавлены поля `businessRole` и `subscriptionPlan` в интерфейс `SeedUser`
+    - Добавлен цикл создания команд и подписок для всех FOREMAN пользователей (строки 228-327)
+    - Обновлена логика создания пользователей для установки `businessRole`
+    - Оптимизировано создание команды для demo пользователя (используется существующая, если есть)
+
+---
+
 ## [1.6.17] - 2026-01-02 - Subscription History from Payments & Plan Metadata Fix
 
 ### Added

@@ -202,14 +202,6 @@ export function SubscriptionHistory() {
                             {entry.currency}
                           </span>
                         </div>
-                        {!isCurrent && (
-                          <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/50 bg-gray-50 dark:bg-gray-900/50 rounded-md px-2 py-1.5 -mx-2">
-                            <XCircle className="w-4 h-4 text-red-500 dark:text-red-400" />
-                            <span className="text-sm font-medium text-red-600 dark:text-red-400">
-                              Подписка завершена
-                            </span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -223,7 +215,7 @@ export function SubscriptionHistory() {
                       Оплачено
                     </Badge>
 
-                    {isCurrent && (
+                    {isCurrent ? (
                       <Button
                         size="sm"
                         variant="default"
@@ -243,14 +235,11 @@ export function SubscriptionHistory() {
                           </>
                         )}
                       </Button>
-                    )}
-                    {!isCurrent && (
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 text-xs font-semibold"
-                      >
-                        Завершена
-                      </Badge>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400">
+                        <XCircle className="w-4 h-4" />
+                        <span>Подписка завершена</span>
+                      </div>
                     )}
                   </div>
                 </div>
