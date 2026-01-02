@@ -29,6 +29,8 @@ interface SeedUser {
 	phone: string
 	role: AdminRoleType | null
 	roleDescription: string
+	businessRole?: 'FOREMAN' | 'WORKER' // Бизнес-роль пользователя
+	subscriptionPlan?: 'LITE' | 'FOREMAN' | 'BRIGADE' // Тарифный план для прорабов
 }
 
 const SEED_USERS: SeedUser[] = [
@@ -68,14 +70,16 @@ const SEED_USERS: SeedUser[] = [
 		role: AdminRoleType.SUPPORT,
 		roleDescription: 'Просмотр тикетов и базовая поддержка',
 	},
-	// 5. Demo User - обычный пользователь с демо данными
+	// 5. Demo User - прораб с демо данными
 	{
 		email: 'demo@prorab.app',
 		password: 'demo123456',
 		fullName: 'Демо Пользователь',
 		phone: '+7 (999) 123-45-67',
 		role: null, // Обычный пользователь без админ роли
-		roleDescription: 'Обычный пользователь с демо проектами',
+		roleDescription: 'Прораб с демо проектами',
+		businessRole: 'FOREMAN', // Прораб - владелец команды
+		subscriptionPlan: 'BRIGADE', // Тариф "Бригада" для демо пользователя
 	},
 	// 6-8. Обычные пользователи для тестирования команд
 	{
@@ -146,6 +150,18 @@ async function main() {
 		if (existingUser) {
 			console.log(`   ⚠️  User already exists: ${seedUser.email}`)
 
+			// Обновляем businessRole если указан и отличается
+			if (seedUser.businessRole && existingUser.businessRole !== seedUser.businessRole) {
+				await prisma.user.update({
+					where: { id: existingUser.id },
+					data: {
+						businessRole: seedUser.businessRole as any,
+						businessRoleAssignedAt: new Date(),
+					},
+				})
+				console.log(`      🔧 Business role updated: ${seedUser.businessRole}`)
+			}
+
 			// Проверяем и создаем админ роль если нужна
 			if (seedUser.role && !existingUser.adminRole) {
 				console.log(`      👑 Creating ${seedUser.role} role...`)
@@ -184,6 +200,8 @@ async function main() {
 				phone: seedUser.phone,
 				hasCompletedOnboarding: true,
 				onboardingCompletedAt: daysAgo(30),
+				businessRole: seedUser.businessRole || null,
+				businessRoleAssignedAt: seedUser.businessRole ? new Date() : null,
 			},
 		})
 
@@ -216,6 +234,100 @@ async function main() {
 	console.log(`   ✅ Total users: ${createdUsers.length}`)
 	console.log('')
 
+	// Создаём команды и подписки для всех пользователей с ролью FOREMAN
+	console.log('👥 Creating teams and subscriptions for FOREMAN users...')
+	const foremanUsers = createdUsers.filter(u => {
+		const seedUser = SEED_USERS.find(su => su.email === u.email)
+		return seedUser?.businessRole === 'FOREMAN'
+	})
+
+	for (const foremanUser of foremanUsers) {
+		const seedUser = SEED_USERS.find(su => su.email === foremanUser.email)
+		if (!seedUser || !seedUser.subscriptionPlan) continue
+
+		// Проверяем, есть ли уже команда у пользователя
+		let team = await prisma.team.findFirst({
+			where: { ownerId: foremanUser.id },
+		})
+
+		if (!team) {
+			// Создаём команду для прораба
+			team = await prisma.team.create({
+				data: {
+					name: `${seedUser.fullName} - Команда`,
+					logoType: LogoType.GENERATED,
+					iconId: 'building',
+					colorId: 'blue',
+					ownerId: foremanUser.id,
+				},
+			})
+
+			// Добавляем владельца как члена команды
+			await prisma.teamMember.create({
+				data: {
+					teamId: team.id,
+					userId: foremanUser.id,
+					role: 'OWNER',
+					salaryType: 'percentage',
+					salaryAmount: 15,
+				},
+			})
+
+			// Обновляем текущую команду пользователя
+			await prisma.user.update({
+				where: { id: foremanUser.id },
+				data: { currentTeamId: team.id },
+			})
+
+			console.log(`   ✅ Team created for ${foremanUser.email}: ${team.name}`)
+		}
+
+		// Создаём подписку
+		const planSlug = seedUser.subscriptionPlan.toLowerCase()
+		const plan = await prisma.plan.findUnique({
+			where: { slug: planSlug },
+		})
+
+		if (!plan) {
+			console.log(`   ⚠️  Plan "${planSlug}" not found for ${foremanUser.email}`)
+			continue
+		}
+
+		// Проверяем, существует ли уже подписка
+		const existingSubscription = await prisma.subscription.findUnique({
+			where: { teamId: team.id },
+		})
+
+		if (existingSubscription) {
+			console.log(`   ⚠️  Subscription already exists for ${foremanUser.email}`)
+			continue
+		}
+
+		const now = new Date()
+		const trialEndsAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 дней пробного периода
+		const currentPeriodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 дней
+
+		const planEnum = planSlug.toUpperCase() as 'LITE' | 'FOREMAN' | 'BRIGADE'
+
+		await prisma.subscription.create({
+			data: {
+				teamId: team.id,
+				plan: planEnum,
+				planId: plan.id,
+				status: 'TRIALING',
+				currentPeriodStart: now,
+				currentPeriodEnd: currentPeriodEnd,
+				trialEndsAt: trialEndsAt,
+				isEarlyBird: true,
+				currency: 'RUB',
+			},
+		})
+
+		console.log(`   ✅ Subscription created for ${foremanUser.email}: ${plan.name} (TRIALING, Early Bird)`)
+	}
+
+	console.log('')
+
 	// Находим демо пользователя для создания проектов
 	const demoUser = createdUsers.find(u => u.email === 'demo@prorab.app')
 
@@ -224,36 +336,50 @@ async function main() {
 		return
 	}
 
-	// 2. Создаём команду
-	console.log('👥 Creating team...')
-	const team = await prisma.team.create({
-		data: {
-			name: 'СтройМастер',
-			logoType: LogoType.GENERATED,
-			iconId: 'building',
-			colorId: 'blue',
-			ownerId: demoUser.id,
-		},
+	// Находим команду demo пользователя (уже создана выше для FOREMAN пользователей)
+	let team = await prisma.team.findFirst({
+		where: { ownerId: demoUser.id },
 	})
 
-	// Добавляем владельца как члена команды
-	await prisma.teamMember.create({
-		data: {
-			teamId: team.id,
-			userId: demoUser.id,
-			role: 'OWNER',
-			salaryType: 'percentage',
-			salaryAmount: 15,
-		},
-	})
+	if (!team) {
+		// Если команда не создана (старая версия seed), создаем её
+		console.log('👥 Creating team for demo user...')
+		team = await prisma.team.create({
+			data: {
+				name: 'СтройМастер',
+				logoType: LogoType.GENERATED,
+				iconId: 'building',
+				colorId: 'blue',
+				ownerId: demoUser.id,
+			},
+		})
 
-	// Обновляем текущую команду пользователя
-	await prisma.user.update({
-		where: { id: demoUser.id },
-		data: { currentTeamId: team.id },
-	})
+		// Добавляем владельца как члена команды
+		await prisma.teamMember.create({
+			data: {
+				teamId: team.id,
+				userId: demoUser.id,
+				role: 'OWNER',
+				salaryType: 'percentage',
+				salaryAmount: 15,
+			},
+		})
 
-	console.log(`   ✅ Team created: ${team.name}`)
+		// Обновляем текущую команду пользователя
+		await prisma.user.update({
+			where: { id: demoUser.id },
+			data: { currentTeamId: team.id },
+		})
+
+		console.log(`   ✅ Team created: ${team.name}`)
+	} else {
+		// Обновляем название команды для demo пользователя на "СтройМастер"
+		team = await prisma.team.update({
+			where: { id: team.id },
+			data: { name: 'СтройМастер' },
+		})
+		console.log(`   ✅ Using existing team: ${team.name}`)
+	}
 
 	// 3. Создаём проекты
 	console.log('🏗️ Creating projects...')

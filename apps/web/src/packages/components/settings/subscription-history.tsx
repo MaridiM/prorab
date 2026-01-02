@@ -164,39 +164,52 @@ export function SubscriptionHistory() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className={`
-                      w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+                      w-10 h-10 rounded-lg flex items-center justify-center shrink-0
                       ${isCurrent ? 'bg-primary/10' : 'bg-muted'}
                     `}>
                       <PlanIcon className={`w-5 h-5 ${isCurrent ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h4 className="font-semibold">{entry.planName}</h4>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h4 className={`text-lg font-bold ${isCurrent ? 'text-primary' : 'text-foreground'}`}>
+                          {entry.planName}
+                        </h4>
                         {isCurrent && (
-                          <Badge variant="default" className="text-xs">
+                          <Badge variant="default" className="text-xs font-semibold bg-primary text-primary-foreground">
                             Текущая
                           </Badge>
                         )}
                         {entry.isEarlyBird && (
-                          <Badge variant="secondary" className="text-xs bg-amber-500/10 text-amber-700 border-amber-500/20">
+                          <Badge variant="secondary" className="text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
                             Early Bird
                           </Badge>
                         )}
                       </div>
 
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5" />
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3.5 h-3.5 opacity-70" />
                           <span>
                             Оплачено: {format(new Date(entry.paidAt), 'd MMM yyyy, HH:mm', { locale: ru })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">
-                            {entry.amount} {entry.currency}
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-xl font-bold ${isCurrent ? 'text-primary' : 'text-foreground'}`}>
+                            {entry.amount}
+                          </span>
+                          <span className="text-sm font-medium text-muted-foreground">
+                            {entry.currency}
                           </span>
                         </div>
+                        {!isCurrent && (
+                          <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/50 bg-gray-50 dark:bg-gray-900/50 rounded-md px-2 py-1.5 -mx-2">
+                            <XCircle className="w-4 h-4 text-red-500 dark:text-red-400" />
+                            <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                              Подписка завершена
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -204,19 +217,19 @@ export function SubscriptionHistory() {
                   <div className="flex flex-col items-end gap-2">
                     <Badge
                       variant="outline"
-                      className={`${isCurrent ? 'bg-green-500/10 text-green-700 border-green-500/20' : 'bg-gray-500/10 text-gray-700 border-gray-500/20'} flex items-center gap-1 whitespace-nowrap`}
+                      className={`${isCurrent ? 'bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30 font-semibold' : 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20'} flex items-center gap-1.5 whitespace-nowrap text-xs`}
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className={`w-3.5 h-3.5 ${isCurrent ? 'text-green-600 dark:text-green-400' : ''}`} />
                       Оплачено
                     </Badge>
 
                     {isCurrent && (
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant="default"
                         onClick={handleRenewPlan}
                         disabled={processingRenewal}
-                        className="border-primary/50 hover:bg-primary/10"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md hover:shadow-lg transition-all"
                       >
                         {processingRenewal ? (
                           <>
@@ -231,6 +244,14 @@ export function SubscriptionHistory() {
                         )}
                       </Button>
                     )}
+                    {!isCurrent && (
+                      <Badge
+                        variant="outline"
+                        className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 text-xs font-semibold"
+                      >
+                        Завершена
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -241,3 +262,4 @@ export function SubscriptionHistory() {
     </Card>
   );
 }
+
