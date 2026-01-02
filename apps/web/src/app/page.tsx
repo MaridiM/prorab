@@ -102,29 +102,53 @@ const pricingPlans = [
   {
     name: "Лайт",
     price: "490",
+    earlyBirdPrice: "290",
     period: "/мес",
     subtitle: "Одиночки, тест",
-    perks: ["1 активный объект", "1 участник (только прораб)", "Учёт расходов", "Фотоотчёты"],
+    perks: [
+      "1 активный проект",
+      "1 участник команды",
+      "500 МБ хранилища",
+      "Базовый функционал",
+      "Email поддержка (24 часа)",
+    ],
     gradient: "from-slate-500 to-slate-600",
   },
   {
     name: "Прораб",
     price: "990",
+    earlyBirdPrice: "690",
     period: "/мес",
     subtitle: "Частные прорабы",
-    perks: ["До 4 объектов", "До 3 участников", "Расчёт зарплаты", "Все функции"],
-    yearPrice: "7 900 ₽/год",
+    perks: [
+      "До 4 активных проектов",
+      "До 3 участников команды",
+      "2 ГБ хранилища",
+      "Расчёты зарплаты",
+      "Фотоотчёты",
+      "Приоритетная поддержка (8 часов)",
+      "Учёт рабочего времени",
+      "Аналитика по проектам",
+    ],
     featured: true,
     gradient: "from-blue-500 to-indigo-500",
   },
   {
     name: "Бригада",
-    price: "990",
-    oldPrice: "1 990",
-    period: "/мес навсегда",
+    price: "1990",
+    earlyBirdPrice: "1490",
+    period: "/мес",
     subtitle: "Первые 500 бригад 🔥",
-    perks: ["Безлимит объектов", "До 10 участников", "Полный контроль", "Приоритетная поддержка"],
-    yearPrice: "12 900 ₽/год (обычно)",
+    perks: [
+      "Неограниченное количество проектов",
+      "До 10 участников команды",
+      "10 ГБ хранилища",
+      "API доступ",
+      "Выделенная поддержка",
+      "Расширенная аналитика",
+      "Приоритетные обновления",
+      "История изменений",
+    ],
     best: true,
     gradient: "from-amber-500 to-orange-500",
   },
@@ -788,7 +812,7 @@ export default function Page() {
                   variants={fadeIn}
                 >
                   <Sparkles className="w-4 h-4 text-accent" />
-                  <span className="font-medium">Спецпредложение: тариф «Бригада» за 990 ₽/мес навсегда</span>
+                  <span className="font-medium">Спецпредложение: тариф «Бригада» за 1 490 ₽/мес по Early Bird цене</span>
                 </motion.div>
 
                 <motion.h1 
@@ -1311,7 +1335,7 @@ export default function Page() {
                 Простые и честные тарифы
               </h2>
               <p className="text-lg text-muted-foreground">
-                Спецпредложение для первых 500 бригад: тариф «Бригада» за 990 ₽/мес вечно (вместо 1 990 ₽)
+                Спецпредложение для первых 500 бригад: тариф «Бригада» за 1 490 ₽/мес по Early Bird цене (вместо 1 990 ₽)
               </p>
             </motion.div>
 
@@ -1326,7 +1350,7 @@ export default function Page() {
                 <motion.div
                   key={i}
                   className={cn(
-                    "relative p-8 rounded-3xl border transition-all duration-300 cursor-pointer",
+                    "relative p-8 rounded-3xl border transition-all duration-300 cursor-pointer flex flex-col h-full",
                     plan.best
                       ? "bg-card border-2 border-primary/50 shadow-2xl shadow-primary/10"
                       : "bg-card border-border/30 hover:border-border/60"
@@ -1376,16 +1400,31 @@ export default function Page() {
                   </div>
 
                   <div className="mb-8">
-                    {plan.oldPrice && (
-                      <span className="text-lg text-muted-foreground line-through mr-2">
-                        {plan.oldPrice} ₽
-                      </span>
+                    {plan.earlyBirdPrice ? (
+                      <>
+                        <span className="text-lg text-muted-foreground line-through mr-2">
+                          {plan.price} ₽
+                        </span>
+                        <span className="text-5xl font-bold">{plan.earlyBirdPrice}</span>
+                        <span className="text-muted-foreground"> ₽{plan.period}</span>
+                        <div className="text-sm text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                          Early Bird: экономия {Number(plan.price.replace(/\s/g, '')) - Number(plan.earlyBirdPrice.replace(/\s/g, ''))} ₽/мес
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {plan.oldPrice && (
+                          <span className="text-lg text-muted-foreground line-through mr-2">
+                            {plan.oldPrice} ₽
+                          </span>
+                        )}
+                        <span className="text-5xl font-bold">{plan.price}</span>
+                        <span className="text-muted-foreground"> ₽{plan.period}</span>
+                      </>
                     )}
-                    <span className="text-5xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground"> ₽{plan.period}</span>
                   </div>
 
-                  <ul className="space-y-4 mb-8">
+                  <ul className="space-y-4 mb-8 flex-grow">
                     {plan.perks.map((perk, j) => (
                       <li key={j} className="flex items-center gap-3 text-sm">
                         <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center shrink-0">
@@ -1399,9 +1438,9 @@ export default function Page() {
                   <GlowButton
                     href={user ? "/dashboard" : "/auth/register"}
                     variant={plan.best ? "secondary" : plan.featured ? "primary" : "outline"}
-                    className="w-full"
+                    className="w-full mt-auto"
                   >
-                    {user ? "Перейти к дашборду" : plan.best ? "Забрать навсегда" : "Выбрать"}
+                    {user ? "Открыть дашборд" : plan.best ? "Начать бесплатно" : "Выбрать план"}
                   </GlowButton>
                 </motion.div>
               ))}

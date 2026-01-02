@@ -98,10 +98,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    // Don't fetch if already on auth pages and no session token
+    // Don't fetch if already on auth pages or landing page and no session token
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname
-      if ((pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) && !hasSessionToken()) {
+      if (((pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) || pathname === '/') && !hasSessionToken()) {
         setUser(null)
         setIsLoading(false)
         return
@@ -118,9 +118,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (!isRedirectingRef.current && typeof document !== 'undefined') {
             isRedirectingRef.current = true
             clearAuthCookies();
-            // Only redirect if not already on auth pages
+            // Only redirect if not already on auth pages or public pages (like landing page)
             const pathname = window.location.pathname
-            if (!pathname.startsWith('/auth')) {
+            if (!pathname.startsWith('/auth') && pathname !== '/') {
               router.replace('/auth/login');
             }
           }
@@ -152,7 +152,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Clear cookies and redirect to login
         clearAuthCookies();
         const pathname = window.location.pathname
-        if (!pathname.startsWith('/auth')) {
+        // Only redirect if not already on auth pages or public pages (like landing page)
+        if (!pathname.startsWith('/auth') && pathname !== '/') {
           router.replace('/auth/login');
         }
       }
