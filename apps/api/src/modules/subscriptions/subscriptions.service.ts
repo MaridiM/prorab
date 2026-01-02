@@ -17,6 +17,7 @@ import {
   TRIAL_DURATION_DAYS,
   BILLING_CYCLE_DAYS,
   EARLY_BIRD_LIMIT,
+  TRIAL_ALLOWED_ONLY_FOR_PLAN,
 } from './constants/plans.constants';
 import { PlanLimitsModel } from './models/plan-limits.model';
 import { UsageStatsModel } from './models/usage-stats.model';
@@ -74,16 +75,24 @@ export class SubscriptionsService {
     // Get team owner (user who is creating the subscription)
     const teamOwner = team.owner;
 
-    // Check trial eligibility - user can only get trial once per plan
+    // Check trial eligibility - user can only get trial ONCE (not per plan, but overall)
+    // This prevents users from getting multiple trial periods by changing plans
     let alreadyTrialed = false;
-    if (input.planId && trialDays > 0) {
-      alreadyTrialed = await this.hasUsedTrial(teamOwner.id, input.planId);
+    if (trialDays > 0) {
+      // Check if user has used trial for ANY plan (not just this specific plan)
+      const user = await this.prisma.user.findUnique({
+        where: { id: teamOwner.id },
+        select: { trialedPlanIds: true },
+      });
+
+      // If user has ANY plan in trialedPlanIds, they already used trial
+      alreadyTrialed = (user?.trialedPlanIds?.length || 0) > 0;
 
       if (alreadyTrialed) {
-        // Disable trial if user already used it for this plan
+        // Disable trial if user already used it for any plan
         trialDays = 0;
         console.log(
-          `User ${teamOwner.id} already used trial for plan ${input.planId}. Trial disabled.`
+          `User ${teamOwner.id} already used trial for another plan. Trial disabled to prevent abuse.`
         );
       }
     }

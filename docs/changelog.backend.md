@@ -5,6 +5,58 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.17] - 2026-01-02 - Subscription History from Payments & Plan Metadata Fix
+
+### Added
+- **Payment-Based Subscription History**: Реализована история подписок на основе успешных платежей
+  - Новый метод `getSubscriptionHistoryFromPayments(userId)` - возвращает все успешные платежи как историю
+  - Новый GraphQL query `mySubscriptionHistoryFromPayments` - предоставляет историю для фронтенда
+  - Каждый успешный платеж = отдельная запись в истории подписок
+  - История сортируется по дате оплаты (новые сверху)
+
+### Fixed
+- **Plan Detection from Payment Metadata**: Исправлено определение плана из metadata платежа
+  - План теперь извлекается из `failureReason` (mock платежи) или `description` (реальные платежи)
+  - Добавлен fallback: если metadata нет, план определяется по сумме платежа
+  - Логика определения: 290/490 RUB = Лайт, 690/990 RUB = Прораб, 1490/1990 RUB = Бригада
+  - Early Bird статус также определяется из metadata или по сумме (меньшая сумма = Early Bird)
+
+### Changed
+- **Payment Metadata Storage**: Улучшено сохранение metadata о плане в платеже
+  - Для mock платежей: metadata хранится в `failureReason` (формат: `TARGET_PLAN_METADATA:planId|plan|isEarlyBird`)
+  - Для реальных платежей: metadata сохраняется в `description` после успешной оплаты (формат: `TARGET_PLAN:planId|plan|isEarlyBird`)
+  - Metadata сохраняется при обновлении статуса платежа на `SUCCEEDED`
+
+### Fixed
+- **GraphQL Schema Conflict**: Исправлен конфликт типов `DateTime` в GraphQL схеме
+  - Удален явный импорт `GraphQLDateTime` из `graphql-scalars` в `SubscriptionHistoryModel`
+  - Заменен `@Field(() => GraphQLDateTime)` на `@Field(() => Date)` для использования автоматического скаляра NestJS
+  - Удалена регистрация `DateTime: GraphQLDateTime` из `graphql.config.ts`
+  - Теперь NestJS GraphQL использует единый автоматически сгенерированный `DateTime` скаляр
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/subscriptions/subscriptions.service.ts`
+    - Добавлен метод `getSubscriptionHistoryFromPayments` (строки 224-283)
+    - Метод собирает все успешные платежи из всех команд пользователя
+  - `apps/api/src/modules/subscriptions/subscriptions.resolver.ts`
+    - Добавлен query `mySubscriptionHistoryFromPayments` (строки 139-156)
+    - Реализована логика извлечения плана из metadata с fallback по сумме
+  - `apps/api/src/modules/subscriptions/models/subscription-history.model.ts`
+    - Заменен `GraphQLDateTime` на `Date` для устранения конфликта схемы
+  - `apps/api/src/core/config/graphql.config.ts`
+    - Удалена регистрация `DateTime: GraphQLDateTime`
+  - `apps/api/src/modules/payments/payments.service.ts`
+    - Улучшено сохранение metadata в `description` после успешной оплаты (строки 487-509)
+
+### Impact
+- **Полная история**: Пользователи видят все свои покупки планов, включая предыдущие
+- **Корректные данные**: Планы определяются правильно даже для старых платежей
+- **Стабильность API**: Устранен конфликт GraphQL схемы, API запускается без ошибок
+- **Метаданные**: Информация о плане сохраняется для всех типов платежей
+
+---
+
 ## [1.6.16] - 2026-01-02 - Critical Fix: Early Bird Display for Active Subscribers
 
 ### Fixed

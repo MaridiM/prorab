@@ -43,3 +43,8 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
 export const TRIAL_DURATION_DAYS = 14;
 export const BILLING_CYCLE_DAYS = 30;
 export const EARLY_BIRD_LIMIT = 500;
+
+// Trial period configuration
+// Set to null to allow trial on all plans (current behavior)
+// Set to specific plan slug (e.g., 'lite') to allow trial only on that plan
+export const TRIAL_ALLOWED_ONLY_FOR_PLAN: string | null = 'lite'; // Only LITE plan has trial period

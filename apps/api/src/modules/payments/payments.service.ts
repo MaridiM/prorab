@@ -514,10 +514,31 @@ export class PaymentsService {
     const subscription = payment.subscription;
     const now = new Date();
 
-    // Determine correct status based on trial period
+    // Check if payment metadata contains target plan information (plan change)
+    // This happens when user selects a different plan and completes payment
+    const planChanged = metadata?.targetPlanId && metadata.targetPlanId !== subscription.planId;
+    
+    // IMPORTANT: When changing plan, ALWAYS remove trial period
+    // Trial period should only be available on first subscription creation, not on plan changes
+    let shouldRemoveTrial = false;
+    let trialWasActive = false;
+    
+    if (planChanged) {
+      // Always remove trial when changing plan
+      shouldRemoveTrial = true;
+      trialWasActive = subscription.trialEndsAt !== null && subscription.trialEndsAt > now;
+      this.logger.log(
+        `Plan change detected: ${subscription.planId} -> ${metadata.targetPlanId}. Trial period will be removed.`
+      );
+    }
+
+    // Determine correct status based on trial period (AFTER checking for plan change)
     let newStatus: SubscriptionStatus;
-    if (subscription.trialEndsAt && subscription.trialEndsAt > now) {
-      // Trial period is active
+    if (shouldRemoveTrial) {
+      // Plan changed - no trial, status should be ACTIVE
+      newStatus = SubscriptionStatus.ACTIVE;
+    } else if (subscription.trialEndsAt && subscription.trialEndsAt > now) {
+      // Trial period is active (and no plan change)
       newStatus = SubscriptionStatus.TRIALING;
     } else {
       // No trial or trial expired
@@ -537,23 +558,31 @@ export class PaymentsService {
         now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
       );
     } else {
-      // Renewal - extend period
-      const nextPeriodEnd = new Date(
-        subscription.currentPeriodEnd.getTime() +
-          BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
-      );
-      updateData.currentPeriodStart = subscription.currentPeriodEnd;
-      updateData.currentPeriodEnd = nextPeriodEnd;
+      // Renewal or plan change - extend period
+      if (trialWasActive) {
+        // Trial was active and plan changed - end trial immediately and set new period
+        updateData.currentPeriodStart = now;
+        updateData.currentPeriodEnd = new Date(
+          now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
+        );
+        this.logger.log(
+          `Plan change during active trial: Ending trial immediately. New period: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
+        );
+      } else {
+        // Normal renewal - extend period
+        const nextPeriodEnd = new Date(
+          subscription.currentPeriodEnd.getTime() +
+            BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000,
+        );
+        updateData.currentPeriodStart = subscription.currentPeriodEnd;
+        updateData.currentPeriodEnd = nextPeriodEnd;
+      }
     }
 
-    // Check if payment metadata contains target plan information (plan change)
-    // This happens when user selects a different plan and completes payment
+    // Update plan if metadata contains target plan information
     if (metadata?.targetPlanId) {
-      // Update plan even if it's the same (to ensure Early Bird status is updated)
-      const planChanged = metadata.targetPlanId !== subscription.planId;
-
       if (planChanged) {
-        this.logger.log(`Plan change detected in payment metadata: ${subscription.planId} -> ${metadata.targetPlanId}`);
+        this.logger.log(`Plan change: ${subscription.planId} -> ${metadata.targetPlanId}`);
       } else {
         this.logger.log(`Same plan selected, but updating Early Bird status if needed`);
       }
@@ -592,6 +621,14 @@ export class PaymentsService {
       if (metadata.isEarlyBird !== undefined) {
         updateData.isEarlyBird = metadata.isEarlyBird === 'true';
         this.logger.log(`Updating Early Bird status to: ${updateData.isEarlyBird}`);
+      }
+
+      // IMPORTANT: When changing plan, ALWAYS remove trial period
+      if (planChanged) {
+        updateData.trialEndsAt = null;
+        this.logger.log(
+          `Plan change: Trial period removed. User must pay for the new plan.`
+        );
       }
 
       this.logger.log(`Plan and Early Bird status will be updated after payment confirmation`);

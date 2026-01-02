@@ -177,8 +177,30 @@ export class TeamsService extends CoreService {
         const planEnum = planEnumMap[plan.slug] || 'LITE';
 
         // Calculate trial period
+        // IMPORTANT: Trial period should only be granted ONCE per user (not per plan)
+        // This prevents users from getting multiple trial periods by changing plans
         const now = new Date();
-        const trialDays = plan.trialDays ?? 0;
+        let trialDays = plan.trialDays ?? 0;
+        
+        // Check if user has already used trial for ANY plan
+        if (trialDays > 0) {
+          const user = await tx.user.findUnique({
+            where: { id: team.ownerId },
+            select: { trialedPlanIds: true },
+          });
+          
+          // If user has ANY plan in trialedPlanIds, they already used trial
+          const hasUsedTrial = (user?.trialedPlanIds?.length || 0) > 0;
+          
+          if (hasUsedTrial) {
+            // Disable trial if user already used it for any plan
+            trialDays = 0;
+            this.logger.log(
+              `User ${team.ownerId} already used trial for another plan. Trial disabled during onboarding.`
+            );
+          }
+        }
+        
         const trialEndsAt = trialDays > 0
           ? new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000)
           : null;
@@ -200,6 +222,29 @@ export class TeamsService extends CoreService {
             isEarlyBird: false,
           },
         });
+
+        // Mark trial as used if trial was granted (only once per user)
+        if (trialEndsAt && input.planId) {
+          const user = await tx.user.findUnique({
+            where: { id: team.ownerId },
+            select: { trialedPlanIds: true },
+          });
+          
+          // Only mark if not already marked (prevent duplicates)
+          if (!user?.trialedPlanIds?.includes(input.planId)) {
+            await tx.user.update({
+              where: { id: team.ownerId },
+              data: {
+                trialedPlanIds: {
+                  push: input.planId,
+                },
+              },
+            });
+            this.logger.log(
+              `Marked trial as used for user ${team.ownerId} on plan ${input.planId} during onboarding`
+            );
+          }
+        }
 
         this.logger.log(`Created subscription ${subscription.id} for team ${team.id}`);
       }
