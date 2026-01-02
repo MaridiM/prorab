@@ -1334,9 +1334,13 @@ export default function Page() {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 Простые и честные тарифы
               </h2>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-muted-foreground mb-2">
                 Спецпредложение для первых 500 бригад: тариф «Бригада» за 1 490 ₽/мес по Early Bird цене (вместо 1 990 ₽)
               </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm text-primary font-medium">
+                <Zap className="w-4 h-4" />
+                14 дней бесплатного пробного периода для всех тарифов
+              </div>
             </motion.div>
 
             <motion.div 
@@ -1410,6 +1414,10 @@ export default function Page() {
                         <div className="text-sm text-amber-600 dark:text-amber-400 mt-1 font-medium">
                           Early Bird: экономия {Number(plan.price.replace(/\s/g, '')) - Number(plan.earlyBirdPrice.replace(/\s/g, ''))} ₽/мес
                         </div>
+                        <div className="text-sm text-primary mt-2 font-medium flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          14 дней бесплатно
+                        </div>
                       </>
                     ) : (
                       <>
@@ -1420,6 +1428,10 @@ export default function Page() {
                         )}
                         <span className="text-5xl font-bold">{plan.price}</span>
                         <span className="text-muted-foreground"> ₽{plan.period}</span>
+                        <div className="text-sm text-primary mt-2 font-medium flex items-center gap-1">
+                          <Zap className="w-3 h-3" />
+                          14 дней бесплатно
+                        </div>
                       </>
                     )}
                   </div>
