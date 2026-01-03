@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Toaster } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { PageLoader } from '@/packages/components/ui/spinner'
 import { useAuth } from '@/packages/libs/auth'
 import { clearAuthCookies } from '@/packages/utils'
 
@@ -48,26 +48,12 @@ export default function ProtectedLayout({
 
 	// Show loading state while checking authentication
 	if (isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-background">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-sm text-muted-foreground">Загрузка...</p>
-				</div>
-			</div>
-		)
+		return <PageLoader text="Загрузка..." />
 	}
 
 	// Don't render content if not authenticated (show loading while redirecting)
 	if (!isAuthenticated || !user) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-background">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-sm text-muted-foreground">Перенаправление...</p>
-				</div>
-			</div>
-		)
+		return <PageLoader text="Перенаправление..." />
 	}
 
 	return (

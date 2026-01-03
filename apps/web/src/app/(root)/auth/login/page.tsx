@@ -60,7 +60,10 @@ export default function LoginPage() {
         onCompleted: async (data) => {
             if (data.verifyTwoFactorLogin.user) {
                 success("Вход выполнен успешно")
+                // Wait for user to be refetched before redirecting
                 await refetchUser()
+                // Small delay to ensure state is updated
+                await new Promise(resolve => setTimeout(resolve, 100))
 
                 if (redirectUrl) {
                     router.push(redirectUrl)

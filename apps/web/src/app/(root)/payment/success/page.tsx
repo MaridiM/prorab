@@ -11,7 +11,7 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 import Link from 'next/link'
 import { MySubscriptionDocument, ConfirmMockPaymentDocument } from '@/packages/api/graphql'
-import { Spinner } from '@/packages/components/ui/spinner'
+import { PageLoader } from '@/packages/components/ui/spinner'
 
 export default function PaymentSuccessPage() {
 	const router = useRouter()
@@ -122,25 +122,11 @@ export default function PaymentSuccessPage() {
 
 	// Don't render anything if page is not valid (will redirect)
 	if (!isValid) {
-		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="flex flex-col items-center gap-4">
-					<Spinner size="xl" variant="logo" />
-					<p className="text-sm text-muted-foreground">Перенаправление...</p>
-				</div>
-			</div>
-		)
+		return <PageLoader text="Перенаправление..." />
 	}
 
 	if (subscriptionLoading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen">
-				<div className="flex flex-col items-center gap-4">
-					<Spinner size="xl" variant="logo" />
-					<p className="text-sm text-muted-foreground">Загрузка...</p>
-				</div>
-			</div>
-		)
+		return <PageLoader text="Загрузка..." />
 	}
 
 	const subscription = subscriptionData?.mySubscription

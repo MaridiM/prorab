@@ -155,73 +155,149 @@ function Spinner({ size = "md", variant = "default", className, color }: Spinner
     return null
 }
 
-// Full page loader with branded style
-function PageLoader({ text = "Загрузка..." }: { text?: string }) {
-    return (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex flex-col items-center gap-6">
-                {/* Logo with animated ring */}
-                <div className="relative">
-                    {/* Rotating gradient ring */}
-                    <motion.div
-                        className="absolute inset-0 rounded-2xl"
-                        style={{
-                            background: "conic-gradient(from 0deg, transparent 0%, hsl(var(--primary)) 50%, transparent 100%)",
-                            padding: "2px",
-                            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                            WebkitMaskComposite: "xor",
-                            maskComposite: "exclude"
-                        }}
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
+// Full page loader with branded style - единый прелоадер для всего приложения
+function PageLoader({ 
+    text = "Загрузка...", 
+    fullScreen = true,
+    className 
+}: { 
+    text?: string
+    fullScreen?: boolean
+    className?: string
+}) {
+    const content = (
+        <div className={cn("flex flex-col items-center gap-8", className)}>
+            {/* Main spinner container */}
+            <div className="relative w-20 h-20">
+                {/* Outer rotating ring */}
+                <motion.div
+                    className="absolute inset-0 rounded-full border-4 border-transparent"
+                    style={{
+                        borderTopColor: "hsl(var(--primary))",
+                        borderRightColor: "hsl(var(--primary))",
+                        borderBottomColor: "transparent",
+                        borderLeftColor: "transparent",
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ 
+                        duration: 1.2, 
+                        repeat: Infinity, 
+                        ease: "linear" 
+                    }}
+                />
 
-                    {/* Pulsing glow */}
-                    <motion.div
-                        className="absolute inset-0 rounded-2xl bg-amber-400/20"
+                {/* Middle pulsing ring */}
+                <motion.div
+                    className="absolute inset-2 rounded-full border-2"
+                    style={{
+                        borderColor: "hsl(var(--primary) / 0.3)",
+                    }}
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.5, 0.8, 0.5]
+                    }}
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
+
+                {/* Inner logo container */}
+                <motion.div
+                    className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center backdrop-blur-sm"
+                    animate={{
+                        scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                >
+                    <motion.span
+                        className="font-bold text-xl text-primary"
                         animate={{
-                            scale: [1, 1.2, 1],
-                            opacity: [0.3, 0.6, 0.3]
+                            opacity: [0.7, 1, 0.7],
                         }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    />
-
-                    {/* Logo */}
-                    <motion.div
-                        className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-2xl shadow-amber-500/30"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
                     >
-                        <span className="font-bold text-2xl text-amber-950">PR</span>
-                    </motion.div>
-                </div>
+                        PR
+                    </motion.span>
+                </motion.div>
 
-                {/* Loading text */}
+                {/* Glow effect */}
+                <motion.div
+                    className="absolute inset-0 rounded-full bg-primary/10 blur-xl"
+                    animate={{
+                        opacity: [0.3, 0.6, 0.3],
+                        scale: [1, 1.2, 1]
+                    }}
+                    transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
+            </div>
+
+            {/* Loading text with fade animation */}
+            <motion.div
+                className="flex flex-col items-center gap-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
                 <motion.p
-                    className="text-sm font-medium text-muted-foreground"
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="text-base font-medium text-foreground"
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
                 >
                     {text}
                 </motion.p>
 
-                {/* Animated dots */}
-                <div className="flex items-center gap-1.5">
+                {/* Minimal progress dots */}
+                <div className="flex items-center gap-1.5 mt-2">
                     {[0, 1, 2].map((i) => (
                         <motion.div
                             key={i}
-                            className="w-2 h-2 rounded-full bg-primary"
-                            animate={{ y: [0, -10, 0] }}
+                            className="w-1.5 h-1.5 rounded-full bg-primary/60"
+                            animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.4, 1, 0.4]
+                            }}
                             transition={{
-                                duration: 0.6,
+                                duration: 1,
                                 repeat: Infinity,
-                                delay: i * 0.15,
+                                delay: i * 0.2,
                                 ease: "easeInOut"
                             }}
                         />
                     ))}
                 </div>
+            </motion.div>
+        </div>
+    )
+
+    if (fullScreen) {
+        return (
+            <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center">
+                {content}
             </div>
+        )
+    }
+
+    return (
+        <div className="relative flex items-center justify-center">
+            {content}
         </div>
     )
 }
