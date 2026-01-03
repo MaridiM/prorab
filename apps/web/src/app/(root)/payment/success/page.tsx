@@ -6,11 +6,12 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import { Card } from '@/packages/components/ui/card'
 import { Button } from '@/packages/components/ui/button'
 import { Alert, AlertDescription } from '@/packages/components/ui/alert'
-import { CheckCircle2, Download, ArrowRight, Loader2 } from 'lucide-react'
+import { CheckCircle2, Download, ArrowRight } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
 import Link from 'next/link'
 import { MySubscriptionDocument, ConfirmMockPaymentDocument } from '@/packages/api/graphql'
+import { Spinner } from '@/packages/components/ui/spinner'
 
 export default function PaymentSuccessPage() {
 	const router = useRouter()
@@ -123,7 +124,10 @@ export default function PaymentSuccessPage() {
 	if (!isValid) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+				<div className="flex flex-col items-center gap-4">
+					<Spinner size="xl" variant="logo" />
+					<p className="text-sm text-muted-foreground">Перенаправление...</p>
+				</div>
 			</div>
 		)
 	}
@@ -131,7 +135,10 @@ export default function PaymentSuccessPage() {
 	if (subscriptionLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+				<div className="flex flex-col items-center gap-4">
+					<Spinner size="xl" variant="logo" />
+					<p className="text-sm text-muted-foreground">Загрузка...</p>
+				</div>
 			</div>
 		)
 	}

@@ -166,10 +166,74 @@ async function seedPlans() {
     // Check if plan already exists
     const existing = await prisma.plan.findUnique({
       where: { slug: planData.slug },
+      include: { prices: true },
     })
 
     if (existing) {
-      console.log(`   ⏭️  Plan "${planData.name}" already exists, skipping...`)
+      console.log(`   ⚠️  Plan "${planData.name}" already exists, updating prices...`)
+      
+      // Update plan basic info
+      await prisma.plan.update({
+        where: { slug: planData.slug },
+        data: {
+          name: planData.name,
+          description: planData.description,
+          maxActiveProjects: planData.maxActiveProjects,
+          maxMembers: planData.maxMembers,
+          storageGB: planData.storageGB,
+          isPopular: planData.isPopular,
+          sortOrder: planData.sortOrder,
+          isEarlyBird: true,
+        },
+      })
+
+      // Update or create prices for each currency
+      for (const priceData of planData.prices) {
+        const existingPrice = existing.prices.find(
+          p => p.currency === priceData.currency && p.billingCycleDays === 30
+        )
+
+        if (existingPrice) {
+          // Update existing price
+          await prisma.planPrice.update({
+            where: { id: existingPrice.id },
+            data: {
+              price: priceData.price,
+              earlyBirdPrice: priceData.earlyBirdPrice,
+            },
+          })
+          console.log(`      ✅ Updated ${priceData.currency} price: ${priceData.price} (Early Bird: ${priceData.earlyBirdPrice})`)
+        } else {
+          // Create new price
+          await prisma.planPrice.create({
+            data: {
+              planId: existing.id,
+              currency: priceData.currency,
+              price: priceData.price,
+              earlyBirdPrice: priceData.earlyBirdPrice,
+              billingCycleDays: 30,
+            },
+          })
+          console.log(`      ✅ Created ${priceData.currency} price: ${priceData.price} (Early Bird: ${priceData.earlyBirdPrice})`)
+        }
+      }
+
+      // Update features
+      await prisma.planFeature.deleteMany({
+        where: { planId: existing.id },
+      })
+
+      await prisma.planFeature.createMany({
+        data: planData.features.map(feature => ({
+          planId: existing.id,
+          name: feature.name,
+          description: feature.description,
+          isIncluded: true,
+          sortOrder: feature.sortOrder,
+        })),
+      })
+
+      console.log(`   ✅ Plan "${planData.name}" updated with ${planData.prices.length} prices and ${planData.features.length} features`)
       continue
     }
 

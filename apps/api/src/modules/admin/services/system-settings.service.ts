@@ -232,14 +232,19 @@ export class SystemSettingsService {
     const defaults = this.getDefaultSettings();
 
     for (const setting of defaults) {
-      const existing = await this.prisma.systemSettings.findUnique({
-        where: { key: setting.key },
-      });
-
-      if (!existing) {
-        await this.prisma.systemSettings.create({
-          data: setting,
+      try {
+        const existing = await this.prisma.systemSettings.findFirst({
+          where: { key: setting.key },
         });
+
+        if (!existing) {
+          await this.prisma.systemSettings.create({
+            data: setting,
+          });
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to check/create setting ${setting.key}: ${error.message}`);
+        // Continue with next setting instead of failing completely
       }
     }
 

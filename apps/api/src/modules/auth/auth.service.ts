@@ -176,14 +176,22 @@ export class AuthService {
 
 		// Check if 2FA is enabled
 		const twoFactorStatus = await this.twoFactorService.getStatus(user.id)
+		console.log('[2FA Login] User 2FA status:', twoFactorStatus)
+
 		if (twoFactorStatus.enabled) {
 			// Generate temporary token for 2FA verification
 			const twoFactorToken = this.generateToken()
-			await this.redisService.set(
-				`2fa_pending:${twoFactorToken}`,
-				JSON.stringify({ userId: user.id, userAgent, ip }),
-				300, // 5 minutes TTL
-			)
+			console.log('[2FA Login] Generated twoFactorToken:', twoFactorToken)
+
+			const redisKey = `2fa_pending:${twoFactorToken}`
+			const redisValue = JSON.stringify({ userId: user.id, userAgent, ip })
+
+			console.log('[2FA Login] Saving to Redis:', redisKey)
+			await this.redisService.set(redisKey, redisValue, 300) // 5 minutes TTL
+
+			// Verify it was saved
+			const saved = await this.redisService.get(redisKey)
+			console.log('[2FA Login] Verification - saved to Redis:', saved ? 'YES' : 'NO')
 
 			return {
 				user,
@@ -206,16 +214,24 @@ export class AuthService {
 		twoFactorToken: string,
 		code: string,
 	): Promise<{ user: any; sessionToken: string; refreshToken: string }> {
+		console.log('[2FA Verify] Received twoFactorToken:', twoFactorToken)
+		console.log('[2FA Verify] Received code:', code)
+
 		// Get pending 2FA data from Redis
 		const pendingData = await this.redisService.get(`2fa_pending:${twoFactorToken}`)
+		console.log('[2FA Verify] Pending data from Redis:', pendingData ? 'Found' : 'NOT FOUND')
+
 		if (!pendingData) {
 			throw new UnauthorizedException('Недействительный или истёкший токен 2FA')
 		}
 
 		const { userId, userAgent, ip } = JSON.parse(pendingData)
+		console.log('[2FA Verify] Extracted userId:', userId)
 
 		// Verify 2FA code
 		const isValid = await this.twoFactorService.verify2FAToken(userId, code)
+		console.log('[2FA Verify] Code verification result:', isValid)
+
 		if (!isValid) {
 			throw new UnauthorizedException('Неверный код двухфакторной аутентификации')
 		}
@@ -285,12 +301,34 @@ export class AuthService {
 			createdAt: Date.now(),
 		}
 
-		await this.redisService.setSession(sessionToken, sessionData, this.sessionTtl)
-		await this.redisService.setRefreshToken(
-			refreshToken,
-			{ userId, sessionToken },
-			this.refreshTokenTtl,
-		)
+		// Store session in Redis (if available)
+		if (this.redisService.isAvailable()) {
+			await this.redisService.setSession(sessionToken, sessionData, this.sessionTtl)
+			await this.redisService.setRefreshToken(
+				refreshToken,
+				{ userId, sessionToken },
+				this.refreshTokenTtl,
+			)
+		}
+
+		// Always store session in database as fallback
+		const expiresAt = new Date(Date.now() + this.sessionTtl)
+		await this.prisma.session.create({
+			data: {
+				sessionToken,
+				userId,
+				userAgent,
+				ip,
+				city,
+				country,
+				device,
+				browser,
+				os,
+				expiresAt,
+			},
+		}).catch((err: any) => {
+			this.logger.error(`Failed to store session in database for user ${userId}: ${err.message}`, err.stack)
+		})
 
 		// Log to LoginHistory (Async, fire-and-forget to not block login)
 		this.prisma.loginHistory.create({
@@ -312,7 +350,52 @@ export class AuthService {
 	}
 
 	async validateSession(sessionToken: string): Promise<SessionData | null> {
-		return this.redisService.getSession(sessionToken)
+		// Try Redis first (fast)
+		if (this.redisService.isAvailable()) {
+			const session = await this.redisService.getSession(sessionToken)
+			if (session) {
+				return session
+			}
+		}
+
+		// Fallback to database if Redis is unavailable or session not found in Redis
+		this.logger.debug(`Redis unavailable or session not found, checking database for token: ${sessionToken.substring(0, 8)}...`)
+		
+		try {
+			const dbSession = await this.prisma.session.findUnique({
+				where: { sessionToken },
+				include: { user: true },
+			})
+
+			if (!dbSession) {
+				return null
+			}
+
+			// Check if session is expired
+			if (dbSession.expiresAt < new Date()) {
+			// Delete expired session
+			await this.prisma.session.delete({
+					where: { id: dbSession.id },
+				})
+				return null
+			}
+
+			// Convert database session to SessionData format
+			return {
+				userId: dbSession.userId,
+				userAgent: dbSession.userAgent || undefined,
+				ip: dbSession.ip || undefined,
+				city: dbSession.city || undefined,
+				country: dbSession.country || undefined,
+				device: dbSession.device || undefined,
+				browser: dbSession.browser || undefined,
+				os: dbSession.os || undefined,
+				createdAt: dbSession.createdAt.getTime(),
+			}
+		} catch (error) {
+			this.logger.error(`Error validating session from database: ${error.message}`, error.stack)
+			return null
+		}
 	}
 
 	async refreshSession(
@@ -324,18 +407,37 @@ export class AuthService {
 		if (!refreshData) return null
 
 		// Delete old refresh token
-		await this.redisService.deleteRefreshToken(refreshToken)
+		if (this.redisService.isAvailable()) {
+			await this.redisService.deleteRefreshToken(refreshToken)
+		}
 
-		// Delete old session if exists
-		await this.redisService.deleteSession(refreshData.sessionToken, refreshData.userId)
+		// Delete old session if exists (from both Redis and database)
+		if (this.redisService.isAvailable()) {
+			await this.redisService.deleteSession(refreshData.sessionToken, refreshData.userId)
+		}
+		await this.prisma.session.deleteMany({
+			where: { sessionToken: refreshData.sessionToken },
+		}).catch(err => {
+			this.logger.error(`Failed to delete old session from database: ${err.message}`, err.stack)
+		})
 
 		// Create new session
 		return this.createSession(refreshData.userId, userAgent, ip)
 	}
 
 	async logout(sessionToken: string, refreshToken: string, userId: string): Promise<void> {
-		await this.redisService.deleteSession(sessionToken, userId)
-		await this.redisService.deleteRefreshToken(refreshToken)
+		// Delete from Redis (if available)
+		if (this.redisService.isAvailable()) {
+			await this.redisService.deleteSession(sessionToken, userId)
+			await this.redisService.deleteRefreshToken(refreshToken)
+		}
+
+		// Always delete from database
+		await this.prisma.session.deleteMany({
+			where: { sessionToken },
+		}).catch((err: any) => {
+			this.logger.error(`Failed to delete session from database: ${err.message}`, err.stack)
+		})
 	}
 
 	async getUserSessions(userId: string): Promise<SessionData[]> {
@@ -353,15 +455,45 @@ export class AuthService {
 	}
 
 	async revokeSession(sessionToken: string, userId: string): Promise<void> {
-		await this.redisService.deleteSession(sessionToken, userId)
+		// Delete from Redis (if available)
+		if (this.redisService.isAvailable()) {
+			await this.redisService.deleteSession(sessionToken, userId)
+		}
+
+		// Always delete from database
+		await this.prisma.session.deleteMany({
+			where: { sessionToken },
+		}).catch(err => {
+			this.logger.error(`Failed to revoke session from database: ${err.message}`, err.stack)
+		})
 	}
 
 	async revokeAllSessions(userId: string, exceptToken?: string): Promise<void> {
-		const sessionTokens = await this.redisService.getUserSessions(userId)
+		// Get sessions from Redis (if available) or database
+		let sessionTokens: string[] = []
+		
+		if (this.redisService.isAvailable()) {
+			sessionTokens = await this.redisService.getUserSessions(userId)
+		} else {
+			// Fallback to database
+			const dbSessions = await this.prisma.session.findMany({
+				where: { userId },
+				select: { sessionToken: true },
+			})
+			sessionTokens = dbSessions.map((s: any) => s.sessionToken)
+		}
 
+		// Delete sessions (except the one specified)
 		for (const token of sessionTokens) {
 			if (token !== exceptToken) {
-				await this.redisService.deleteSession(token, userId)
+				if (this.redisService.isAvailable()) {
+					await this.redisService.deleteSession(token, userId)
+				}
+				await this.prisma.session.deleteMany({
+					where: { sessionToken: token },
+				}).catch(err => {
+					this.logger.error(`Failed to delete session from database: ${err.message}`, err.stack)
+				})
 			}
 		}
 	}

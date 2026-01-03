@@ -162,25 +162,61 @@ async function main() {
 				console.log(`      🔧 Business role updated: ${seedUser.businessRole}`)
 			}
 
-			// Проверяем и создаем админ роль если нужна
-			if (seedUser.role && !existingUser.adminRole) {
-				console.log(`      👑 Creating ${seedUser.role} role...`)
-				await prisma.adminRole.create({
-					data: {
-						userId: existingUser.id,
-						role: seedUser.role as any,
-						permissions: seedUser.role === AdminRoleType.SUPER_ADMIN
-							? [...RolePermissions.SUPER_ADMIN]
-							: seedUser.role === AdminRoleType.ADMIN
-							? [...RolePermissions.ADMIN]
-							: seedUser.role === AdminRoleType.MODERATOR
-							? [...RolePermissions.MODERATOR]
-							: [...RolePermissions.SUPPORT],
-						twoFactorEnforced: false,
-						ipWhitelist: [],
-					},
-				})
-				console.log(`      ✅ Role assigned`)
+			// Определяем правильные права доступа для роли
+			const expectedPermissions = seedUser.role === AdminRoleType.SUPER_ADMIN
+				? [...RolePermissions.SUPER_ADMIN]
+				: seedUser.role === AdminRoleType.ADMIN
+				? [...RolePermissions.ADMIN]
+				: seedUser.role === AdminRoleType.MODERATOR
+				? [...RolePermissions.MODERATOR]
+				: seedUser.role === AdminRoleType.SUPPORT
+				? [...RolePermissions.SUPPORT]
+				: [];
+
+			// Проверяем и создаем/обновляем админ роль
+			if (seedUser.role) {
+				if (!existingUser.adminRole) {
+					// Создаем роль, если её нет
+					console.log(`      👑 Creating ${seedUser.role} role...`)
+					await prisma.adminRole.create({
+						data: {
+							userId: existingUser.id,
+							role: seedUser.role as any,
+							permissions: expectedPermissions,
+							twoFactorEnforced: false,
+							ipWhitelist: [],
+						},
+					})
+					console.log(`      ✅ Role assigned: ${seedUser.role}`)
+				} else {
+					// Обновляем роль, если она существует, но не соответствует seed данным
+					const needsUpdate = 
+						existingUser.adminRole.role !== seedUser.role ||
+						JSON.stringify(existingUser.adminRole.permissions.sort()) !== JSON.stringify(expectedPermissions.sort());
+
+					if (needsUpdate) {
+						console.log(`      🔧 Updating ${seedUser.role} role and permissions...`)
+						await prisma.adminRole.update({
+							where: { userId: existingUser.id },
+							data: {
+								role: seedUser.role as any,
+								permissions: expectedPermissions,
+							},
+						})
+						console.log(`      ✅ Role updated: ${seedUser.role} with ${expectedPermissions.length} permissions`)
+					} else {
+						console.log(`      ✅ Role already correct: ${seedUser.role}`)
+					}
+				}
+			} else {
+				// Если в seed нет роли, но у пользователя есть - удаляем её
+				if (existingUser.adminRole) {
+					console.log(`      🗑️  Removing admin role (user should not have admin role)...`)
+					await prisma.adminRole.delete({
+						where: { userId: existingUser.id },
+					})
+					console.log(`      ✅ Admin role removed`)
+				}
 			}
 
 			createdUsers.push(existingUser)
@@ -209,22 +245,26 @@ async function main() {
 
 		// Создаём админ роль если указана
 		if (seedUser.role) {
+			const expectedPermissions = seedUser.role === AdminRoleType.SUPER_ADMIN
+				? [...RolePermissions.SUPER_ADMIN]
+				: seedUser.role === AdminRoleType.ADMIN
+				? [...RolePermissions.ADMIN]
+				: seedUser.role === AdminRoleType.MODERATOR
+				? [...RolePermissions.MODERATOR]
+				: seedUser.role === AdminRoleType.SUPPORT
+				? [...RolePermissions.SUPPORT]
+				: [];
+
 			await prisma.adminRole.create({
 				data: {
 					userId: user.id,
 					role: seedUser.role as any,
-					permissions: seedUser.role === AdminRoleType.SUPER_ADMIN
-						? [...RolePermissions.SUPER_ADMIN]
-						: seedUser.role === AdminRoleType.ADMIN
-						? [...RolePermissions.ADMIN]
-						: seedUser.role === AdminRoleType.MODERATOR
-						? [...RolePermissions.MODERATOR]
-						: [...RolePermissions.SUPPORT],
+					permissions: expectedPermissions,
 					twoFactorEnforced: false,
 					ipWhitelist: [],
 				},
 			})
-			console.log(`      👑 Role assigned: ${seedUser.role}`)
+			console.log(`      👑 Role assigned: ${seedUser.role} (${expectedPermissions.length} permissions)`)
 		}
 
 		createdUsers.push(user)
@@ -305,7 +345,8 @@ async function main() {
 
 		const now = new Date()
 		const trialEndsAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 дней пробного периода
-		const currentPeriodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30 дней
+		// For trialing subscriptions, currentPeriodEnd should equal trialEndsAt
+		const currentPeriodEnd = trialEndsAt
 
 		const planEnum = planSlug.toUpperCase() as 'LITE' | 'FOREMAN' | 'BRIGADE'
 
@@ -316,7 +357,7 @@ async function main() {
 				planId: plan.id,
 				status: 'TRIALING',
 				currentPeriodStart: now,
-				currentPeriodEnd: currentPeriodEnd,
+				currentPeriodEnd: currentPeriodEnd, // Set to trialEndsAt for trial period
 				trialEndsAt: trialEndsAt,
 				isEarlyBird: true,
 				currency: 'RUB',

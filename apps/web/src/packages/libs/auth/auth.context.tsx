@@ -112,6 +112,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { data, error } = await fetchMe()
 
       if (error || !data?.me) {
+        // Check if it's a network error (API server not available)
+        const errorMessage = error?.message || ''
+        const isNetworkError = errorMessage.includes('Failed to fetch') || 
+                               errorMessage.includes('NetworkError') ||
+                               errorMessage.includes('fetch') ||
+                               (error && !checkAuthError(error))
+        
         // Check if it's an authentication error (session not found, expired, or deleted)
         if (error && checkAuthError(error)) {
           // Prevent multiple redirects
@@ -124,8 +131,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
               router.replace('/auth/login');
             }
           }
+        } else if (isNetworkError) {
+          // Network error - don't redirect, just set user to null
+          // This allows the page to show an error message instead of infinite redirect
+          console.warn('[AuthContext] Network error fetching user:', error)
+          setUser(null)
+          // Don't redirect on network errors - let the page handle it
+          return
+        } else {
+          // Other error - set user to null but don't redirect
+          setUser(null)
         }
-        setUser(null)
       } else {
         // Reset redirecting flag on successful fetch
         isRedirectingRef.current = false
@@ -146,6 +162,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       }
     } catch (err: any) {
+      // Check if it's a network error
+      const errorMessage = err?.message || ''
+      const isNetworkError = errorMessage.includes('Failed to fetch') || 
+                            errorMessage.includes('NetworkError') ||
+                            errorMessage.includes('fetch')
+      
       // Check if it's an authentication error (session not found, expired, or deleted)
       if (checkAuthError(err) && typeof document !== 'undefined' && !isRedirectingRef.current) {
         isRedirectingRef.current = true
@@ -156,8 +178,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (!pathname.startsWith('/auth') && pathname !== '/') {
           router.replace('/auth/login');
         }
+      } else if (isNetworkError) {
+        // Network error - don't redirect, just log and set user to null
+        console.warn('[AuthContext] Network error in refreshUser:', err)
+        setUser(null)
+        // Don't redirect on network errors
+        return
+      } else {
+        // Other error
+        console.error('[AuthContext] Error refreshing user:', err)
+        setUser(null)
       }
-      setUser(null)
     } finally {
       setIsLoading(false)
     }

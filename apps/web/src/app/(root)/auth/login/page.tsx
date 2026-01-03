@@ -79,8 +79,15 @@ export default function LoginPage() {
         try {
             const result = await authLogin(data.email, data.password)
 
+            console.log('[Frontend Login] Login result:', {
+                requiresTwoFactor: result?.requiresTwoFactor,
+                hasTwoFactorToken: !!result?.twoFactorToken,
+                tokenLength: result?.twoFactorToken?.length,
+            })
+
             // Check if 2FA is required
             if (result?.requiresTwoFactor && result?.twoFactorToken) {
+                console.log('[Frontend Login] Setting twoFactorToken:', result.twoFactorToken)
                 setTwoFactorToken(result.twoFactorToken)
                 setShowTwoFactor(true)
                 return
@@ -107,6 +114,13 @@ export default function LoginPage() {
             error('Введите 6-значный код')
             return
         }
+
+        console.log('[Frontend 2FA] Sending verification:', {
+            twoFactorToken,
+            code: twoFactorCode,
+            tokenLength: twoFactorToken?.length,
+            codeLength: twoFactorCode?.length,
+        })
 
         await verifyTwoFactor({
             variables: {

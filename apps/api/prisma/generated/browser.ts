@@ -48,6 +48,11 @@ export type TelegramAuthToken = Prisma.TelegramAuthTokenModel
  */
 export type LoginHistory = Prisma.LoginHistoryModel
 /**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
  * Model Team
  * 
  */

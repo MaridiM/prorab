@@ -4,6 +4,7 @@ import { createClient, RedisClientType } from 'redis'
 interface RedisOptions {
 	host: string
 	port: number
+	password?: string
 }
 
 @Injectable()
@@ -14,6 +15,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 	private connectionAttempted = false
 
 	constructor(@Inject('REDIS_OPTIONS') private options: RedisOptions) {}
+
+	/**
+	 * Check if Redis is currently connected and available
+	 */
+	isAvailable(): boolean {
+		return this.isConnected
+	}
 
 	async onModuleInit() {
 		this.client = createClient({
@@ -28,14 +36,24 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 					return Math.min(retries * 100, 3000)
 				},
 			},
+			...(this.options.password && this.options.password.trim() !== '' && { password: this.options.password }),
 		})
 
 		// Only log errors once to avoid spam
 		let errorLogged = false
 		this.client.on('error', (err) => {
 			if (!errorLogged) {
-				this.logger.error(`Redis connection error: ${err.message}`)
-				this.logger.warn('Redis features will be unavailable until connection is established.')
+				const errorMsg = err.message || String(err)
+				this.logger.error(`Redis connection error: ${errorMsg}`)
+				
+				// Provide helpful error messages
+				if (errorMsg.includes('WRONGPASS') || errorMsg.includes('NOAUTH')) {
+					this.logger.warn('Redis authentication failed. Check REDIS_PASSWORD in .env or remove it if Redis has no password.')
+				} else if (errorMsg.includes('ECONNREFUSED')) {
+					this.logger.warn(`Redis connection refused. Make sure Redis is running on ${this.options.host}:${this.options.port}`)
+				} else {
+					this.logger.warn('Redis features will be unavailable until connection is established.')
+				}
 				errorLogged = true
 			}
 			this.isConnected = false
@@ -60,10 +78,14 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 			this.connectionAttempted = true
 		} catch (error) {
 			this.connectionAttempted = true
+			const errorMsg = error instanceof Error ? error.message : String(error)
 			this.logger.warn(
 				`Failed to connect to Redis at ${this.options.host}:${this.options.port}. ` +
-				'Redis features will be unavailable. Make sure Redis is running.'
+				`Error: ${errorMsg}. Redis features will be unavailable.`
 			)
+			if (errorMsg.includes('WRONGPASS') || errorMsg.includes('NOAUTH')) {
+				this.logger.warn('💡 Tip: If Redis has no password, remove REDIS_PASSWORD from .env or set it to empty string.')
+			}
 			this.isConnected = false
 		}
 	}
@@ -102,11 +124,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	async set(key: string, value: string, ttlMs?: number): Promise<void> {
+	async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
 		if (!this.ensureConnected()) return
 		try {
-			if (ttlMs) {
-				await this.client.set(key, value, { PX: ttlMs })
+			if (ttlSeconds) {
+				// Use EX for seconds (not PX for milliseconds)
+				await this.client.set(key, value, { EX: ttlSeconds })
 			} else {
 				await this.client.set(key, value)
 			}
@@ -147,8 +170,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	async setJson<T>(key: string, value: T, ttlMs?: number): Promise<void> {
-		await this.set(key, JSON.stringify(value), ttlMs)
+	async setJson<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+		await this.set(key, JSON.stringify(value), ttlSeconds)
 	}
 
 	// ==================== Set Operations ====================
@@ -225,7 +248,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 		},
 		ttlMs: number,
 	): Promise<void> {
-		await this.setJson(`session:${sessionToken}`, data, ttlMs)
+		// Convert milliseconds to seconds for Redis
+		const ttlSeconds = Math.ceil(ttlMs / 1000)
+		await this.setJson(`session:${sessionToken}`, data, ttlSeconds)
 		// Track user sessions
 		await this.sAdd(`user_sessions:${data.userId}`, sessionToken)
 	}
@@ -266,7 +291,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 		},
 		ttlMs: number,
 	): Promise<void> {
-		await this.setJson(`refresh:${refreshToken}`, data, ttlMs)
+		// Convert milliseconds to seconds for Redis
+		const ttlSeconds = Math.ceil(ttlMs / 1000)
+		await this.setJson(`refresh:${refreshToken}`, data, ttlSeconds)
 	}
 
 	async getRefreshToken(refreshToken: string): Promise<{

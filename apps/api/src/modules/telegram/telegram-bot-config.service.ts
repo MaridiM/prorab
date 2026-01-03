@@ -74,9 +74,14 @@ export class TelegramBotConfigService {
   async findByBotName(botName: string): Promise<TelegramBot | null> {
     this.logger.log(`Fetching Telegram bot by name: ${botName}`);
 
-    return this.prisma.telegramBot.findUnique({
-      where: { botName },
-    });
+    try {
+      return await this.prisma.telegramBot.findFirst({
+        where: { botName },
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to find bot by name ${botName}: ${error.message}`);
+      return null;
+    }
   }
 
   /**
@@ -85,9 +90,14 @@ export class TelegramBotConfigService {
   async findByUsername(username: string): Promise<TelegramBot | null> {
     this.logger.log(`Fetching Telegram bot by username: ${username}`);
 
-    return this.prisma.telegramBot.findUnique({
-      where: { username },
-    });
+    try {
+      return await this.prisma.telegramBot.findFirst({
+        where: { username },
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to find bot by username ${username}: ${error.message}`);
+      return null;
+    }
   }
 
   /**

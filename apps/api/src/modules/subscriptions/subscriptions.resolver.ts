@@ -14,12 +14,14 @@ import { User } from '@prisma/generated/client';
 import { PLAN_LIMITS, BILLING_CYCLE_DAYS } from './constants/plans.constants';
 import { AdminPlansService } from '../admin/services/admin-plans.service';
 import { AdminPlanModel } from '../admin/models/admin-plan.model';
+import { PrismaService } from '@/core/prisma/prisma.service';
 
 @Resolver(() => SubscriptionModel)
 export class SubscriptionsResolver {
   constructor(
     private subscriptionsService: SubscriptionsService,
     private adminPlansService: AdminPlansService,
+    private prisma: PrismaService,
   ) {}
 
   @Query(() => SubscriptionModel, { nullable: true })
@@ -35,8 +37,26 @@ export class SubscriptionsResolver {
 
     const limits = await this.subscriptionsService.getPlanLimits(subscription.plan);
 
+    // Find current active period from payments
+    // Current period = the payment period that contains "now"
+    const now = new Date();
+    const currentPayment = await this.prisma.payment.findFirst({
+      where: {
+        subscriptionId: subscription.id,
+        status: 'SUCCEEDED',
+        periodStartAt: { lte: now },
+        periodEndAt: { gte: now },
+      },
+      orderBy: { paidAt: 'desc' },
+    });
+
+    // Override currentPeriodStart with the actual current payment period start
+    // This ensures we show the CURRENT period, not the first payment date
+    const currentPeriodStart = currentPayment?.periodStartAt || subscription.currentPeriodStart;
+
     return {
       ...subscription,
+      currentPeriodStart,
       limits,
       planRef: subscription.planRef ? {
         ...subscription.planRef,
@@ -142,7 +162,7 @@ export class SubscriptionsResolver {
     @CurrentUser() user: User,
   ): Promise<SubscriptionHistoryModel[]> {
     const payments = await this.subscriptionsService.getSubscriptionHistoryFromPayments(user.id);
-    
+
     // Get current subscription to determine period end for current plan
     const currentSubscription = await this.subscriptionsService.findByUserId(user.id);
 
@@ -237,86 +257,59 @@ export class SubscriptionsResolver {
         isEarlyBird = payment.subscription?.isEarlyBird || false;
       }
 
-      // Calculate period dates based on payment date
-      // Each payment represents a 30-day period starting from the payment date
+      // Read period dates from database (stored when payment succeeded)
+      // If periodStartAt and periodEndAt are not set (old payments before migration),
+      // fall back to calculating based on payment date
       const paidAtDate = payment.paidAt || payment.createdAt;
-      const periodStartAt = paidAtDate; // Period always starts from payment date
-      
-      let periodEndAt: Date | null = null;
-      let isRenewal = false; // Flag to indicate if this payment was a renewal (same plan)
-      
-      // Check if this payment is for the current subscription
-      const isCurrentPlan = currentSubscription && 
-        currentSubscription.planId === payment.subscription?.planId &&
-        currentSubscription.teamId === payment.subscription?.teamId;
-      
-      // Get next payment to determine if plan was renewed or changed
-      const nextPayment = payments[index + 1]; // Next payment in sorted list (newer first)
-      
-      if (isCurrentPlan && currentSubscription) {
-        // For current plan, use currentPeriodEnd from subscription
-        // This is the actual end date of the current active period
-        periodEndAt = currentSubscription.currentPeriodEnd;
-        
-        // Check if next payment is a renewal (same plan) - if so, this payment is part of current period
-        if (nextPayment) {
-          // Try to extract plan info from next payment
-          let nextPlanSlug = 'unknown';
-          if (nextPayment.failureReason && nextPayment.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
-            const metadataPart = nextPayment.failureReason.replace('TARGET_PLAN_METADATA:', '');
-            const [, targetPlan] = metadataPart.split('|');
-            if (targetPlan) {
-              nextPlanSlug = targetPlan.toLowerCase();
-            }
-          } else if (nextPayment.description && nextPayment.description.includes('TARGET_PLAN:')) {
-            const targetPlanMatch = nextPayment.description.match(/TARGET_PLAN:[^|]+\|([^|]+)\|/);
-            if (targetPlanMatch) {
-              nextPlanSlug = targetPlanMatch[1].toLowerCase();
-            }
-          } else if (nextPayment.subscription?.planRef?.slug) {
-            nextPlanSlug = nextPayment.subscription.planRef.slug.toLowerCase();
-          }
-          
-          // If next payment is for the same plan, it's a renewal
-          if (nextPlanSlug === planSlug) {
-            isRenewal = true;
-          }
-        }
+
+      let periodStartAt: Date;
+      let periodEndAt: Date;
+
+      if (payment.periodStartAt && payment.periodEndAt) {
+        // Use period data from payment (accurate data stored in database)
+        periodStartAt = payment.periodStartAt;
+        periodEndAt = payment.periodEndAt;
       } else {
-        // For completed plans, find next payment date or calculate as paidAt + 30 days
-        if (nextPayment) {
-          // Try to extract plan info from next payment to determine if it was renewal or plan change
-          let nextPlanSlug = 'unknown';
-          if (nextPayment.failureReason && nextPayment.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
-            const metadataPart = nextPayment.failureReason.replace('TARGET_PLAN_METADATA:', '');
-            const [, targetPlan] = metadataPart.split('|');
-            if (targetPlan) {
-              nextPlanSlug = targetPlan.toLowerCase();
-            }
-          } else if (nextPayment.description && nextPayment.description.includes('TARGET_PLAN:')) {
-            const targetPlanMatch = nextPayment.description.match(/TARGET_PLAN:[^|]+\|([^|]+)\|/);
-            if (targetPlanMatch) {
-              nextPlanSlug = targetPlanMatch[1].toLowerCase();
-            }
-          } else if (nextPayment.subscription?.planRef?.slug) {
-            nextPlanSlug = nextPayment.subscription.planRef.slug.toLowerCase();
-          }
-          
-          // If next payment is for the same plan, it was a renewal (not a plan change)
-          if (nextPlanSlug === planSlug) {
-            isRenewal = true;
-            // For renewals, period continues until next payment, but it's not "completed"
-            // We'll mark it differently in the frontend
-            periodEndAt = nextPayment.paidAt || nextPayment.createdAt;
-          } else {
-            // Plan change - previous plan ended when new plan payment was made
-            periodEndAt = nextPayment.paidAt || nextPayment.createdAt;
-          }
-        } else {
-          // No next payment, calculate as paidAt + 30 days (billing cycle)
-          periodEndAt = new Date(paidAtDate);
-          periodEndAt.setDate(periodEndAt.getDate() + BILLING_CYCLE_DAYS);
+        // Fallback for old payments without period data
+        // Calculate period as paidAt + 30 days
+        periodStartAt = paidAtDate;
+        periodEndAt = new Date(paidAtDate);
+        periodEndAt.setDate(periodEndAt.getDate() + BILLING_CYCLE_DAYS);
+      }
+
+      // Determine if this payment was a renewal (same plan as next payment)
+      // Payments are sorted DESC (newest first), so next payment in time has index < current
+      let isRenewal = false;
+      const nextPaymentInTime = payments.find((p, i) => i < index);
+
+      if (nextPaymentInTime) {
+        // Extract plan slug from next payment
+        let nextPlanSlug = 'unknown';
+
+        // Try to extract from failureReason (mock payments)
+        if (nextPaymentInTime.failureReason && nextPaymentInTime.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
+          const [, targetPlan] = nextPaymentInTime.failureReason.replace('TARGET_PLAN_METADATA:', '').split('|');
+          if (targetPlan) nextPlanSlug = targetPlan.toLowerCase();
         }
+        // Try to extract from description (real payments)
+        else if (nextPaymentInTime.description && nextPaymentInTime.description.includes('TARGET_PLAN:')) {
+          const targetPlanMatch = nextPaymentInTime.description.match(/TARGET_PLAN:[^|]+\|([^|]+)\|/);
+          if (targetPlanMatch) nextPlanSlug = targetPlanMatch[1].toLowerCase();
+        }
+        // Fallback: use subscription plan
+        else if (nextPaymentInTime.subscription?.planRef?.slug) {
+          nextPlanSlug = nextPaymentInTime.subscription.planRef.slug.toLowerCase();
+        }
+        // Final fallback: determine from amount
+        else {
+          const amount = Number(nextPaymentInTime.amount);
+          if (amount === 290 || amount === 490) nextPlanSlug = 'lite';
+          else if (amount === 690 || amount === 990) nextPlanSlug = 'foreman';
+          else if (amount === 1490 || amount === 1990) nextPlanSlug = 'brigade';
+        }
+
+        // If next payment is same plan, this was a renewal
+        isRenewal = nextPlanSlug === planSlug;
       }
 
       return {

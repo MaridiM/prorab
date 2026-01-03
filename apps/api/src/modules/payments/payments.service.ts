@@ -499,11 +499,65 @@ export class PaymentsService {
       updatedDescription = `${payment.description || ''} | TARGET_PLAN:${targetPlanId}|${targetPlan}|${isEarlyBirdFromMetadata}`;
     }
 
+    // Calculate subscription period for this payment
+    // This will be displayed in subscription history
+    const paymentTime = new Date();
+    const paidAt = paymentTime; // Use current time as payment time
+
+    // IMPORTANT: We need the CURRENT subscription state (before any updates)
+    // to determine the period for this payment
+    // Fetch fresh subscription data to get accurate currentPeriodEnd
+    const currentSub = await this.prisma.subscription.findUnique({
+      where: { id: payment.subscriptionId },
+      select: {
+        id: true,
+        status: true,
+        planId: true,
+        currentPeriodStart: true,
+        currentPeriodEnd: true,
+      },
+    });
+
+    if (!currentSub) {
+      throw new Error('Subscription not found');
+    }
+
+    // Determine if this is a plan change or renewal
+    const isChangingPlan = metadata?.targetPlanId &&
+      currentSub.planId &&
+      metadata.targetPlanId !== currentSub.planId;
+
+    let periodStartAt: Date;
+    let periodEndAt: Date;
+
+    if (currentSub.status === SubscriptionStatus.PENDING_PAYMENT) {
+      // First payment - period starts from payment date
+      periodStartAt = paidAt;
+      periodEndAt = new Date(paidAt.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+      this.logger.log(`First payment: period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`);
+    } else if (isChangingPlan) {
+      // Plan change - new period starts from payment date
+      periodStartAt = paidAt;
+      periodEndAt = new Date(paidAt.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+      this.logger.log(`Plan change: period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`);
+    } else {
+      // Renewal - period starts from CURRENT period end (not payment date!)
+      // This ensures continuous periods even if user pays early
+      const currentPeriodEnd = currentSub.currentPeriodEnd || currentSub.currentPeriodStart || paidAt;
+      periodStartAt = currentPeriodEnd;
+      periodEndAt = new Date(currentPeriodEnd.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+      this.logger.log(
+        `Renewal: extending from ${currentPeriodEnd.toISOString()}, period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`
+      );
+    }
+
     await this.prisma.payment.update({
       where: { id: payment.id },
       data: {
         status: PaymentStatus.SUCCEEDED,
-        paidAt: new Date(),
+        paidAt: paidAt,
+        periodStartAt,
+        periodEndAt,
         ...(updatedDescription !== payment.description && { description: updatedDescription }),
       },
     });
@@ -573,14 +627,14 @@ export class PaymentsService {
         `Plan change: Previous plan ends at ${now}, new plan period: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
       );
     } else {
-      // Renewal of same plan - new period starts from payment date
-      // This ensures periods don't overlap and are based on actual payment dates
-      updateData.currentPeriodStart = now;
+      // Renewal of same plan - extend period end by 30 days
+      // currentPeriodStart stays the same, only currentPeriodEnd extends
+      const currentPeriodEnd = subscription.currentPeriodEnd || subscription.currentPeriodStart || now;
       updateData.currentPeriodEnd = new Date(
-        now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
+        currentPeriodEnd.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
       );
       this.logger.log(
-        `Plan renewal: New period starts from payment date: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
+        `Plan renewal: Current period ${subscription.currentPeriodStart.toISOString()} - ${currentPeriodEnd.toISOString()}, extending end to ${updateData.currentPeriodEnd.toISOString()}`
       );
     }
 

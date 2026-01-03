@@ -390,6 +390,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   TelegramAuthToken: 'TelegramAuthToken',
   LoginHistory: 'LoginHistory',
+  Session: 'Session',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "session" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -885,6 +886,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.LoginHistoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.LoginHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Session: {
+      payload: Prisma.$SessionPayload<ExtArgs>
+      fields: Prisma.SessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        findFirst: {
+          args: Prisma.SessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        findMany: {
+          args: Prisma.SessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        create: {
+          args: Prisma.SessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        createMany: {
+          args: Prisma.SessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        delete: {
+          args: Prisma.SessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        update: {
+          args: Prisma.SessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPayload>
+        }
+        aggregate: {
+          args: Prisma.SessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSession>
+        }
+        groupBy: {
+          args: Prisma.SessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number
         }
       }
     }
@@ -3642,6 +3717,25 @@ export const LoginHistoryScalarFieldEnum = {
 export type LoginHistoryScalarFieldEnum = (typeof LoginHistoryScalarFieldEnum)[keyof typeof LoginHistoryScalarFieldEnum]
 
 
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  userAgent: 'userAgent',
+  ip: 'ip',
+  city: 'city',
+  country: 'country',
+  device: 'device',
+  browser: 'browser',
+  os: 'os',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
 export const TeamScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -3988,6 +4082,8 @@ export const PaymentScalarFieldEnum = {
   failureReason: 'failureReason',
   paidAt: 'paidAt',
   refundedAt: 'refundedAt',
+  periodStartAt: 'periodStartAt',
+  periodEndAt: 'periodEndAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4802,6 +4898,7 @@ export type GlobalOmitConfig = {
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   telegramAuthToken?: Prisma.TelegramAuthTokenOmit
   loginHistory?: Prisma.LoginHistoryOmit
+  session?: Prisma.SessionOmit
   team?: Prisma.TeamOmit
   projectPayout?: Prisma.ProjectPayoutOmit
   workLog?: Prisma.WorkLogOmit

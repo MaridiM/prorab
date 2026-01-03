@@ -24,13 +24,13 @@ model User {
   currentTeamId          String?   @map("current_team_id")
 
   // OAuth fields
-  oauthProvider    String? @map("oauth_provider") // "telegram", "google", etc.
-  oauthProviderId  String? @map("oauth_provider_id") // Provider's user ID
-  telegramChatId   String? @unique @map("telegram_chat_id")
+  oauthProvider     String? @map("oauth_provider") // "telegram", "google", etc.
+  oauthProviderId   String? @map("oauth_provider_id") // Provider's user ID
+  telegramChatId    String? @unique @map("telegram_chat_id")
   telegramFirstName String? @map("telegram_first_name")
   telegramLastName  String? @map("telegram_last_name")
-  telegramUsername String? @map("telegram_username")
-  telegramPhotoUrl String? @map("telegram_photo_url")
+  telegramUsername  String? @map("telegram_username")
+  telegramPhotoUrl  String? @map("telegram_photo_url")
 
   // Two-Factor Authentication
   twoFactorEnabled     Boolean  @default(false) @map("two_factor_enabled")
@@ -64,7 +64,8 @@ model User {
   adminRole            AdminRole?
   adminActionLogs      AdminActionLog[]          @relation("AdminActionLogs")
   createdTemplates     TeamTemplate[]            @relation("TeamTemplateCreator")
-  loginHistory         LoginHistory[]
+  loginHistory         LoginHistory[]            @relation("LoginHistory")
+  sessions             Session[]                 @relation("Sessions")
 
   @@index([currentTeamId])
   @@index([oauthProvider, oauthProviderId])
@@ -153,16 +154,16 @@ model PasswordResetToken {
 }
 
 model TelegramAuthToken {
-  id        String   @id @default(uuid())
-  token            String   @unique
-  chatId           String?  @map("chat_id")
-  telegramFirstName String? @map("telegram_first_name")
-  telegramLastName  String? @map("telegram_last_name")
-  telegramUsername  String? @map("telegram_username")
-  telegramPhotoUrl  String? @map("telegram_photo_url")
-  used      Boolean  @default(false)
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  token             String   @unique
+  chatId            String?  @map("chat_id")
+  telegramFirstName String?  @map("telegram_first_name")
+  telegramLastName  String?  @map("telegram_last_name")
+  telegramUsername  String?  @map("telegram_username")
+  telegramPhotoUrl  String?  @map("telegram_photo_url")
+  used              Boolean  @default(false)
+  expiresAt         DateTime @map("expires_at")
+  createdAt         DateTime @default(now()) @map("created_at")
 
   @@index([token])
   @@index([expiresAt])
@@ -170,23 +171,45 @@ model TelegramAuthToken {
 }
 
 model LoginHistory {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
+  id        String  @id @default(uuid())
+  userId    String  @map("user_id")
   ip        String
-  userAgent String?  @map("user_agent")
+  userAgent String? @map("user_agent")
   city      String?
   country   String?
-  device    String?  // Parsed device name (e.g. "iPhone", "Mac")
-  browser   String?  // Parsed browser (e.g. "Chrome", "Safari")
-  os        String?  // Parsed OS (e.g. "iOS", "Windows")
-  
+  device    String? // Parsed device name (e.g. "iPhone", "Mac")
+  browser   String? // Parsed browser (e.g. "Chrome", "Safari")
+  os        String? // Parsed OS (e.g. "iOS", "Windows")
+
   createdAt DateTime @default(now()) @map("created_at")
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation("LoginHistory", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
   @@map("login_history")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  user         User     @relation("Sessions", fields: [userId], references: [id], onDelete: Cascade)
+  userAgent    String?  @map("user_agent")
+  ip           String?
+  city         String?
+  country      String?
+  device       String?
+  browser      String?
+  os           String?
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 // ==================== BUSINESS ====================
@@ -203,16 +226,16 @@ model Team {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  owner           User               @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members         TeamMember[]
-  projects        Project[]
-  inviteCodes     InviteCode[]
-  currentForUsers User[]             @relation("CurrentTeam")
-  subscription        Subscription?
-  customRoles         CustomRole[]
-  announcements       TeamAnnouncement[]
-  auditLogs           TeamAuditLog[]
-  retentionPolicies   DataRetentionPolicy[]
+  owner             User                  @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members           TeamMember[]
+  projects          Project[]
+  inviteCodes       InviteCode[]
+  currentForUsers   User[]                @relation("CurrentTeam")
+  subscription      Subscription?
+  customRoles       CustomRole[]
+  announcements     TeamAnnouncement[]
+  auditLogs         TeamAuditLog[]
+  retentionPolicies DataRetentionPolicy[]
 
   @@index([ownerId])
   @@map("teams")
@@ -311,10 +334,10 @@ model CustomRole {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  team         Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  parentRole   CustomRole?  @relation("RoleHierarchy", fields: [parentRoleId], references: [id], onDelete: SetNull)
-  childRoles   CustomRole[] @relation("RoleHierarchy")
-  teamMembers  TeamMember[]
+  team              Team                    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  parentRole        CustomRole?             @relation("RoleHierarchy", fields: [parentRoleId], references: [id], onDelete: SetNull)
+  childRoles        CustomRole[]            @relation("RoleHierarchy")
+  teamMembers       TeamMember[]
   assignmentHistory RoleAssignmentHistory[]
 
   @@unique([teamId, name])
@@ -588,7 +611,7 @@ model Plan {
   description String? @db.Text
 
   // Plan Limits
-  maxActiveProjects Int?  // null = unlimited (for BRIGADE plan)
+  maxActiveProjects Int? // null = unlimited (for BRIGADE plan)
   maxMembers        Int   @map("max_members")
   storageGB         Float @map("storage_gb") // Storage limit in GB
 
@@ -599,7 +622,7 @@ model Plan {
   isEarlyBird Boolean @default(false) @map("is_early_bird") // Early bird pricing active
 
   // Trial Period
-  trialDays   Int?    @map("trial_days") // Number of trial days (null = no trial)
+  trialDays Int? @map("trial_days") // Number of trial days (null = no trial)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -622,7 +645,7 @@ model PlanPrice {
   currency String @db.VarChar(3) // "RUB", "USD", "EUR"
 
   price          Decimal @db.Decimal(10, 2) // Regular price
-  earlyBirdPrice Decimal @db.Decimal(10, 2) @map("early_bird_price") // Discounted price for early adopters
+  earlyBirdPrice Decimal @map("early_bird_price") @db.Decimal(10, 2) // Discounted price for early adopters
 
   billingCycleDays Int @default(30) @map("billing_cycle_days") // 30 for monthly, 365 for yearly
 
@@ -681,23 +704,23 @@ enum PaymentProviderType {
 
 // Telegram Bot - Configuration for multiple Telegram bots
 model TelegramBot {
-  id          String   @id @default(uuid())
-  botName     String   @unique @db.VarChar(50) // Unique identifier: "oauth", "support", etc.
-  token       String   @db.Text // Encrypted bot token
-  username    String   @unique @db.VarChar(50) // @botname
-  displayName String   @db.VarChar(100) // Human-readable name
-  description String?  @db.Text
+  id          String  @id @default(uuid())
+  botName     String  @unique @db.VarChar(50) // Unique identifier: "oauth", "support", etc.
+  token       String  @db.Text // Encrypted bot token
+  username    String  @unique @db.VarChar(50) // @botname
+  displayName String  @db.VarChar(100) // Human-readable name
+  description String? @db.Text
 
-  isActive  Boolean @default(true) @map("is_active") // Bot is enabled
-  isPrimary Boolean @default(false) @map("is_primary") // Primary OAuth bot
+  isActive   Boolean @default(true) @map("is_active") // Bot is enabled
+  isPrimary  Boolean @default(false) @map("is_primary") // Primary OAuth bot
   webhookUrl String? @map("webhook_url") // Individual webhook URL for this bot
 
   // Bot Info (fetched from Telegram API)
-  avatarUrl             String?  @map("avatar_url")
-  firstName             String?  @map("first_name")
-  canJoinGroups         Boolean  @default(false) @map("can_join_groups")
-  canReadMessages       Boolean  @default(false) @map("can_read_messages")
-  supportsInlineQueries Boolean  @default(false) @map("supports_inline_queries")
+  avatarUrl             String? @map("avatar_url")
+  firstName             String? @map("first_name")
+  canJoinGroups         Boolean @default(false) @map("can_join_groups")
+  canReadMessages       Boolean @default(false) @map("can_read_messages")
+  supportsInlineQueries Boolean @default(false) @map("supports_inline_queries")
 
   // Metadata
   createdBy  String?   @map("created_by") // Admin user ID
@@ -713,7 +736,7 @@ model TelegramBot {
 model Subscription {
   id                     String             @id @default(uuid())
   teamId                 String             @unique @map("team_id")
-  plan                   SubscriptionPlan   // DEPRECATED: Will be replaced by planId
+  plan                   SubscriptionPlan // DEPRECATED: Will be replaced by planId
   planId                 String?            @map("plan_id") // NEW: Foreign key to SubscriptionPlan
   status                 SubscriptionStatus @default(TRIALING)
   currentPeriodStart     DateTime           @map("current_period_start")
@@ -728,9 +751,9 @@ model Subscription {
   createdAt              DateTime           @default(now()) @map("created_at")
   updatedAt              DateTime           @updatedAt @map("updated_at")
 
-  team          Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  planRef       Plan?                @relation(fields: [planId], references: [id]) // NEW: Relation to Plan model
-  payments      Payment[]
+  team     Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  planRef  Plan?     @relation(fields: [planId], references: [id]) // NEW: Relation to Plan model
+  payments Payment[]
 
   @@index([teamId])
   @@index([status])
@@ -770,13 +793,19 @@ model Payment {
   // DEPRECATED fields (kept for backward compatibility)
   yookassaPaymentId String? @unique @map("yookassa_payment_id") // DEPRECATED: Use providerPaymentId instead
 
-  paymentMethod String?  @map("payment_method")
-  description   String?  @db.Text
-  failureReason String?  @map("failure_reason") @db.Text
+  paymentMethod String?   @map("payment_method")
+  description   String?   @db.Text
+  failureReason String?   @map("failure_reason") @db.Text
   paidAt        DateTime? @map("paid_at")
   refundedAt    DateTime? @map("refunded_at")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Subscription period tracking - when this payment was made, what period did it cover?
+  // This allows accurate history display without complex calculations
+  periodStartAt DateTime? @map("period_start_at") // Start of subscription period for this payment
+  periodEndAt   DateTime? @map("period_end_at") // End of subscription period for this payment
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
@@ -1020,21 +1049,21 @@ model SystemStatistics {
 // ==================== TEAM COMMUNICATIONS ====================
 
 model TeamAnnouncement {
-  id          String   @id @default(uuid())
-  teamId      String?  @map("team_id") // null = global announcement
-  title       String   @db.VarChar(200)
-  content     String   @db.Text
+  id          String               @id @default(uuid())
+  teamId      String?              @map("team_id") // null = global announcement
+  title       String               @db.VarChar(200)
+  content     String               @db.Text
   priority    AnnouncementPriority @default(NORMAL)
   type        AnnouncementType     @default(INFO)
-  isPinned    Boolean  @default(false) @map("is_pinned")
-  expiresAt   DateTime? @map("expires_at")
-  publishedAt DateTime? @map("published_at")
-  createdBy   String   @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  isPinned    Boolean              @default(false) @map("is_pinned")
+  expiresAt   DateTime?            @map("expires_at")
+  publishedAt DateTime?            @map("published_at")
+  createdBy   String               @map("created_by")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
 
-  team      Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  readBy    AnnouncementRead[]
+  team   Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  readBy AnnouncementRead[]
 
   @@index([teamId])
   @@index([publishedAt])
@@ -1073,16 +1102,16 @@ enum AnnouncementType {
 // ==================== TEAM OPERATIONS ====================
 
 model TeamTemplate {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(100)
-  description String?  @db.Text
-  settings    Json     // Team settings structure
-  roles       Json     // Default custom roles configuration
-  projectSetup Json?   // Optional default project structure
-  isPublic    Boolean  @default(false) @map("is_public")
-  createdById String   @map("created_by_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(100)
+  description  String?  @db.Text
+  settings     Json // Team settings structure
+  roles        Json // Default custom roles configuration
+  projectSetup Json? // Optional default project structure
+  isPublic     Boolean  @default(false) @map("is_public")
+  createdById  String   @map("created_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   createdBy User @relation("TeamTemplateCreator", fields: [createdById], references: [id])
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 
 export function InitialLoader() {
     const [isVisible, setIsVisible] = useState(true)
@@ -29,42 +30,71 @@ export function InitialLoader() {
     if (!isVisible) return null
 
     return (
-        <div 
+        <div
             className={`fixed inset-0 z-[10000] bg-background flex items-center justify-center transition-opacity duration-500 ${isFading ? 'opacity-0' : 'opacity-100'}`}
         >
-            <div className="flex flex-col items-center">
-                {/* Logo with pulse */}
+            <div className="flex flex-col items-center gap-6">
+                {/* Logo with animated ring */}
                 <div className="relative">
-                    {/* Pulse rings */}
-                    <div className="absolute inset-0 rounded-2xl bg-accent/30 animate-ping" style={{ animationDuration: '1.5s' }} />
-                    <div className="absolute inset-0 rounded-2xl bg-accent/20 animate-pulse" />
-                    
+                    {/* Rotating gradient ring */}
+                    <motion.div
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                            background: "conic-gradient(from 0deg, transparent 0%, hsl(var(--primary)) 50%, transparent 100%)",
+                            padding: "2px",
+                            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                            WebkitMaskComposite: "xor",
+                            maskComposite: "exclude"
+                        }}
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    />
+
+                    {/* Pulsing glow */}
+                    <motion.div
+                        className="absolute inset-0 rounded-2xl bg-amber-400/20"
+                        animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.3, 0.6, 0.3]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+
                     {/* Logo */}
-                    <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-xl shadow-amber-500/30 animate-pulse">
+                    <motion.div
+                        className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-2xl shadow-amber-500/30"
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
                         <span className="font-bold text-2xl text-amber-950">PR</span>
-                    </div>
+                    </motion.div>
                 </div>
 
-                {/* Bouncing dots */}
-                <div className="mt-8 flex items-center gap-2">
-                    <div 
-                        className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce" 
-                        style={{ animationDelay: '0ms', animationDuration: '0.6s' }} 
-                    />
-                    <div 
-                        className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce" 
-                        style={{ animationDelay: '150ms', animationDuration: '0.6s' }} 
-                    />
-                    <div 
-                        className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-bounce" 
-                        style={{ animationDelay: '300ms', animationDuration: '0.6s' }} 
-                    />
-                </div>
-
-                {/* Text */}
-                <p className="mt-6 text-sm text-muted-foreground animate-pulse">
+                {/* Loading text */}
+                <motion.p
+                    className="text-sm font-medium text-muted-foreground"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
                     Загрузка...
-                </p>
+                </motion.p>
+
+                {/* Animated dots */}
+                <div className="flex items-center gap-1.5">
+                    {[0, 1, 2].map((i) => (
+                        <motion.div
+                            key={i}
+                            className="w-2 h-2 rounded-full bg-primary"
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{
+                                duration: 0.6,
+                                repeat: Infinity,
+                                delay: i * 0.15,
+                                ease: "easeInOut"
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     )

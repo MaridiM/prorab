@@ -57,6 +57,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   TelegramAuthToken: 'TelegramAuthToken',
   LoginHistory: 'LoginHistory',
+  Session: 'Session',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
@@ -233,6 +234,25 @@ export const LoginHistoryScalarFieldEnum = {
 } as const
 
 export type LoginHistoryScalarFieldEnum = (typeof LoginHistoryScalarFieldEnum)[keyof typeof LoginHistoryScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  userAgent: 'userAgent',
+  ip: 'ip',
+  city: 'city',
+  country: 'country',
+  device: 'device',
+  browser: 'browser',
+  os: 'os',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {
@@ -581,6 +601,8 @@ export const PaymentScalarFieldEnum = {
   failureReason: 'failureReason',
   paidAt: 'paidAt',
   refundedAt: 'refundedAt',
+  periodStartAt: 'periodStartAt',
+  periodEndAt: 'periodEndAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

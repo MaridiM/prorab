@@ -89,11 +89,22 @@ export class TwoFactorService {
 				secret: OTPAuth.Secret.fromBase32(secret),
 			})
 
+			// Log the current expected token for debugging
+			const currentToken = totp.generate()
+			console.log('[2FA Debug] Current expected token:', currentToken)
+			console.log('[2FA Debug] Received token:', token)
+			console.log('[2FA Debug] Token length:', token?.length)
+			console.log('[2FA Debug] Secret (first 10 chars):', secret?.substring(0, 10))
+
 			// Verify with a window of ±1 period (90 seconds total)
 			const delta = totp.validate({ token, window: 1 })
 
+			console.log('[2FA Debug] Validation delta:', delta)
+			console.log('[2FA Debug] Is valid:', delta !== null)
+
 			return delta !== null
 		} catch (error) {
+			console.error('[2FA Debug] Error during verification:', error)
 			return false
 		}
 	}
@@ -164,6 +175,9 @@ export class TwoFactorService {
 	 * Verify 2FA token during login
 	 */
 	async verify2FAToken(userId: string, token: string): Promise<boolean> {
+		console.log('[2FA Login] Verifying token for user:', userId)
+		console.log('[2FA Login] Received token:', token)
+
 		const user = await this.prisma.user.findUnique({
 			where: { id: userId },
 			select: {
@@ -173,19 +187,29 @@ export class TwoFactorService {
 			},
 		})
 
+		console.log('[2FA Login] User 2FA enabled:', user?.twoFactorEnabled)
+		console.log('[2FA Login] User has secret:', !!user?.twoFactorSecret)
+
 		if (!user?.twoFactorEnabled || !user?.twoFactorSecret) {
+			console.log('[2FA Login] 2FA not enabled or secret missing')
 			return false
 		}
 
 		const secret = this.decryptSecret(user.twoFactorSecret)
+		console.log('[2FA Login] Secret decrypted successfully')
 
 		// Try TOTP first
+		console.log('[2FA Login] Trying TOTP verification...')
 		if (this.verifyToken(secret, token)) {
+			console.log('[2FA Login] ✓ TOTP verification successful')
 			return true
 		}
 
 		// Try backup codes
-		return this.verifyBackupCode(userId, token, user.twoFactorBackupCodes)
+		console.log('[2FA Login] TOTP failed, trying backup codes...')
+		const backupResult = await this.verifyBackupCode(userId, token, user.twoFactorBackupCodes)
+		console.log('[2FA Login] Backup code result:', backupResult)
+		return backupResult
 	}
 
 	/**
