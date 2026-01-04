@@ -171,16 +171,21 @@ export class UsersService {
 	}
 
 	async deleteAccount(userId: string, password: string) {
+		this.logger.log(`[DeleteAccount] Starting deletion for user ${userId}`)
+		
 		// Verify password first
 		const user = await this.findById(userId)
 		if (!user) {
+			this.logger.warn(`[DeleteAccount] User ${userId} not found`)
 			throw new BadRequestException('Пользователь не найден')
 		}
 
 		const isValidPassword = await this.verifyPassword(user.passwordHash, password)
 		if (!isValidPassword) {
+			this.logger.warn(`[DeleteAccount] Invalid password for user ${userId}`)
 			throw new UnauthorizedException('Неверный пароль')
 		}
+
 		// Safety check: find all teams where user is the owner
 		const ownedTeams = await this.prisma.team.findMany({
 			where: { ownerId: userId },
@@ -191,12 +196,15 @@ export class UsersService {
 			},
 		})
 
+		this.logger.log(`[DeleteAccount] Found ${ownedTeams.length} owned teams for user ${userId}`)
+
 		// Check if user owns any teams with other members or active projects
 		const hasActiveTeams = ownedTeams.some(
 			team => team.members.length > 1 || team.projects.length > 0
 		)
 
 		if (hasActiveTeams) {
+			this.logger.warn(`[DeleteAccount] User ${userId} has active teams, cannot delete`)
 			throw new BadRequestException(
 				'Невозможно удалить аккаунт. У вас есть команды с участниками или проектами. Пожалуйста, удалите команды или передайте право владения другому участнику.'
 			)
@@ -205,6 +213,7 @@ export class UsersService {
 		// Cancel all active subscriptions before deleting
 		for (const team of ownedTeams) {
 			if (team.subscription && team.subscription.status === 'ACTIVE') {
+				this.logger.log(`[DeleteAccount] Cancelling subscription for team ${team.id}`)
 				await this.prisma.subscription.update({
 					where: { id: team.subscription.id },
 					data: { status: 'CANCELLED' },
@@ -214,13 +223,29 @@ export class UsersService {
 
 		// Delete avatar file if exists
 		if (user.avatarUrl) {
+			this.logger.log(`[DeleteAccount] Deleting avatar file: ${user.avatarUrl}`)
 			this.deleteAvatarFile(user.avatarUrl)
 		}
 
-		// Delete the user (Prisma cascade will handle related records)
-		return this.prisma.user.delete({
-			where: { id: userId },
+		// Delete all user sessions first (to prevent any issues)
+		await this.prisma.session.deleteMany({
+			where: { userId },
 		})
+		this.logger.log(`[DeleteAccount] Deleted all sessions for user ${userId}`)
+
+		// Delete the user (Prisma cascade will handle related records)
+		try {
+			const deletedUser = await this.prisma.user.delete({
+				where: { id: userId },
+			})
+			this.logger.log(`[DeleteAccount] Successfully deleted user ${userId}`)
+			return deletedUser
+		} catch (error: any) {
+			this.logger.error(`[DeleteAccount] Failed to delete user ${userId}:`, error)
+			throw new BadRequestException(
+				`Не удалось удалить аккаунт: ${error.message || 'Неизвестная ошибка'}`
+			)
+		}
 	}
 
 	// ==================== Avatar ====================
@@ -308,6 +333,8 @@ export class UsersService {
 			where: { id: userId },
 			data: {
 				telegramChatId: null,
+				telegramFirstName: null,
+				telegramLastName: null,
 				telegramUsername: null,
 				telegramPhotoUrl: null,
 			},

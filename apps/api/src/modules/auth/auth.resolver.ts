@@ -25,6 +25,7 @@ import { TelegramAuthService } from '../telegram/telegram-auth.service'
 import {
 	TelegramAuthPayload,
 	TelegramAuthStatusPayload,
+	TelegramLinkStatusPayload,
 } from '../telegram/models/telegram-auth.model'
 import { CheckTelegramAuthInput } from '../telegram/dto/telegram-auth.dto'
 
@@ -360,6 +361,21 @@ export class AuthResolver {
 		res.clearCookie('refresh_token', COOKIE_OPTIONS)
 	}
 	// ==================== Telegram Integration Updates ====================
+
+	/**
+	 * Проверка статуса токена для связывания (без авторизации/создания сессии)
+	 * Используется для polling в настройках при привязке Telegram
+	 */
+	@UseGuards(AuthGuard)
+	@Mutation(() => TelegramLinkStatusPayload, {
+		description: 'Проверить статус токена для связывания Telegram (без создания сессии)',
+	})
+	async checkTelegramLinkStatus(
+		@Args('input') input: CheckTelegramAuthInput,
+	): Promise<TelegramLinkStatusPayload> {
+		const { completed } = await this.telegramAuthService.checkAuthToken(input.token)
+		return { completed }
+	}
 
 	@UseGuards(AuthGuard)
 	@Mutation(() => Boolean, {

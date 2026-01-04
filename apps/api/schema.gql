@@ -2136,6 +2136,9 @@ type Mutation {
   changePlan(input: ChangePlanInput!): Subscription!
   checkTelegramAuth(input: CheckTelegramAuthInput!): TelegramAuthStatusPayload!
 
+  """Проверить статус токена для связывания Telegram (без создания сессии)"""
+  checkTelegramLinkStatus(input: CheckTelegramAuthInput!): TelegramLinkStatusPayload!
+
   """Close project with final calculations (owner only)"""
   closeProject(projectId: ID!): Project!
 
@@ -2259,6 +2262,9 @@ type Mutation {
 
   """Отправка приглашения в команду по email"""
   sendInviteByEmail(input: SendInviteByEmailInput!): SendInviteResult!
+
+  """Отправить тестовое уведомление в Telegram"""
+  sendTestTelegramNotification: Boolean!
 
   """Test connection for a service category (admin only)"""
   testServiceConnection(category: SettingCategory!): ConnectionTestResult!
@@ -4240,6 +4246,11 @@ type TelegramBotConfigStatus {
 
   """Whether bot is registered and active"""
   isRegistered: Boolean!
+}
+
+"""Статус проверки токена для связывания Telegram (без авторизации)"""
+type TelegramLinkStatusPayload {
+  completed: Boolean!
 }
 
 """Test bot token result"""

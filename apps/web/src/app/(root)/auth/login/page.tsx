@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion, Variants, AnimatePresence } from "framer-motion"
-import { ArrowRight, Loader2, Mail, Lock, Shield, ArrowLeft } from "lucide-react"
+import { ArrowRight, Loader2, Mail, Lock, Shield, ArrowLeft, Key } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@apollo/client/react"
@@ -31,12 +31,13 @@ export default function LoginPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { success, error } = useToast()
-    const { login: authLogin, isLoading, refetchUser } = useAuth()
+    const { login: authLogin, isLoading } = useAuth()
 
     // 2FA state
     const [showTwoFactor, setShowTwoFactor] = useState(false)
     const [twoFactorToken, setTwoFactorToken] = useState('')
     const [twoFactorCode, setTwoFactorCode] = useState('')
+    const [useBackupCode, setUseBackupCode] = useState(false)
 
     // Get redirect URL from query params (if coming from invite link)
     const redirectUrl = searchParams.get('redirect')
@@ -60,17 +61,18 @@ export default function LoginPage() {
         onCompleted: async (data) => {
             if (data.verifyTwoFactorLogin.user) {
                 success("Вход выполнен успешно")
-                // Wait for user to be refetched before redirecting
-                await refetchUser()
-                // Small delay to ensure state is updated
-                await new Promise(resolve => setTimeout(resolve, 100))
-
-                if (redirectUrl) {
-                    router.push(redirectUrl)
-                } else {
-                    const hasOnboarding = data.verifyTwoFactorLogin.user.hasCompletedOnboarding
-                    router.push(hasOnboarding ? '/dashboard' : '/onboarding')
-                }
+                
+                // Determine redirect path
+                const targetPath = redirectUrl 
+                    ? redirectUrl 
+                    : data.verifyTwoFactorLogin.user.hasCompletedOnboarding 
+                        ? '/dashboard' 
+                        : '/onboarding'
+                
+                // Use window.location for a full page reload to properly initialize auth state
+                // This is more reliable than router.push after 2FA because it ensures
+                // cookies are properly read and auth context is fully initialized
+                window.location.href = targetPath
             }
         },
         onError: (err) => {
@@ -113,9 +115,18 @@ export default function LoginPage() {
 
     const handleTwoFactorSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (twoFactorCode.length !== 6) {
-            error('Введите 6-значный код')
-            return
+        
+        // Validate code length based on type
+        if (useBackupCode) {
+            if (twoFactorCode.length !== 8) {
+                error('Резервный код должен содержать 8 символов')
+                return
+            }
+        } else {
+            if (twoFactorCode.length !== 6) {
+                error('Введите 6-значный код')
+                return
+            }
         }
 
         console.log('[Frontend 2FA] Sending verification:', {
@@ -123,6 +134,7 @@ export default function LoginPage() {
             code: twoFactorCode,
             tokenLength: twoFactorToken?.length,
             codeLength: twoFactorCode?.length,
+            useBackupCode,
         })
 
         await verifyTwoFactor({
@@ -136,6 +148,12 @@ export default function LoginPage() {
     const handleBackToLogin = () => {
         setShowTwoFactor(false)
         setTwoFactorToken('')
+        setTwoFactorCode('')
+        setUseBackupCode(false)
+    }
+
+    const toggleBackupCode = () => {
+        setUseBackupCode(!useBackupCode)
         setTwoFactorCode('')
     }
 
@@ -159,16 +177,21 @@ export default function LoginPage() {
                     animate="visible"
                 >
                     <motion.div
-                        className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/60 text-white mb-4 shadow-lg shadow-primary/30"
+                        className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl text-white mb-4 shadow-lg ${useBackupCode ? 'bg-gradient-to-br from-amber-500 to-amber-600 shadow-amber-500/30' : 'bg-gradient-to-br from-primary to-primary/60 shadow-primary/30'}`}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                     >
-                        <Shield className="w-7 h-7" />
+                        {useBackupCode ? <Key className="w-7 h-7" /> : <Shield className="w-7 h-7" />}
                     </motion.div>
-                    <h1 className="text-2xl font-bold tracking-tight">Двухфакторная аутентификация</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {useBackupCode ? 'Резервный код' : 'Двухфакторная аутентификация'}
+                    </h1>
                     <p className="text-muted-foreground mt-2 text-sm">
-                        Введите код из приложения аутентификации
+                        {useBackupCode 
+                            ? 'Введите один из ваших резервных кодов'
+                            : 'Введите код из приложения аутентификации'
+                        }
                     </p>
                 </motion.div>
 
@@ -182,26 +205,41 @@ export default function LoginPage() {
                 >
                     <div className="space-y-2">
                         <label className="text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1.5">
-                            <Lock className="w-3.5 h-3.5" />
-                            Код подтверждения
+                            {useBackupCode ? <Key className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                            {useBackupCode ? 'Резервный код' : 'Код подтверждения'}
                         </label>
-                        <Input
-                            type="text"
-                            placeholder="000000"
-                            value={twoFactorCode}
-                            onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            maxLength={6}
-                            autoFocus
-                            className="h-14 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all text-center text-2xl tracking-[0.5em] font-mono"
-                        />
+                        {useBackupCode ? (
+                            <Input
+                                type="text"
+                                placeholder="XXXXXXXX"
+                                value={twoFactorCode}
+                                onChange={(e) => setTwoFactorCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                                maxLength={8}
+                                autoFocus
+                                className="h-14 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all text-center text-2xl tracking-[0.3em] font-mono uppercase"
+                            />
+                        ) : (
+                            <Input
+                                type="text"
+                                placeholder="000000"
+                                value={twoFactorCode}
+                                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                maxLength={6}
+                                autoFocus
+                                className="h-14 px-4 rounded-xl bg-secondary/30 border-border/50 focus:border-primary/50 focus-visible:ring-primary/20 transition-all text-center text-2xl tracking-[0.5em] font-mono"
+                            />
+                        )}
                         <p className="text-xs text-muted-foreground text-center mt-2">
-                            Введите 6-значный код из Google Authenticator или другого приложения
+                            {useBackupCode 
+                                ? 'Введите 8-символьный резервный код'
+                                : 'Введите 6-значный код из Google Authenticator или другого приложения'
+                            }
                         </p>
                     </div>
 
                     <Button
                         type="submit"
-                        disabled={verifyingTwoFactor || twoFactorCode.length !== 6}
+                        disabled={verifyingTwoFactor || (useBackupCode ? twoFactorCode.length !== 8 : twoFactorCode.length !== 6)}
                         className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 group"
                     >
                         {verifyingTwoFactor ? (
@@ -213,6 +251,17 @@ export default function LoginPage() {
                             </>
                         )}
                     </Button>
+
+                    <button
+                        type="button"
+                        onClick={toggleBackupCode}
+                        className="w-full text-center text-xs text-primary hover:text-primary/80 transition-colors py-2"
+                    >
+                        {useBackupCode 
+                            ? '← Использовать код из приложения'
+                            : 'Использовать резервный код →'
+                        }
+                    </button>
 
                     <Button
                         type="button"

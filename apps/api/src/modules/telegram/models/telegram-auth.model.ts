@@ -27,3 +27,9 @@ export class TelegramAuthStatusPayload {
 	@Field({ nullable: true })
 	refreshToken?: string
 }
+
+@ObjectType({ description: 'Статус проверки токена для связывания Telegram (без авторизации)' })
+export class TelegramLinkStatusPayload {
+	@Field()
+	completed: boolean
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation } from '@apollo/client/react'
+import { useMutation, useApolloClient } from '@apollo/client/react'
 import { gql } from '@apollo/client'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -25,6 +25,7 @@ import {
 	AlertDialogTitle,
 } from '@/packages/ui'
 import { useToast } from '@/packages/hooks/use-toast'
+import { useAuth } from '@/packages/libs/auth/auth.context'
 
 const DELETE_ACCOUNT = gql`
 	mutation DeleteAccount($input: DeleteAccountInput!) {
@@ -38,18 +39,25 @@ interface DeleteAccountDialogProps {
 
 export function DeleteAccountDialog({ userEmail }: DeleteAccountDialogProps) {
 	const router = useRouter()
+	const apolloClient = useApolloClient()
+	const { logout } = useAuth()
 	const { toast, success, error: showError } = useToast()
 	const [password, setPassword] = useState('')
 	const [confirmationOpen, setConfirmationOpen] = useState(false)
 	const [finalConfirmOpen, setFinalConfirmOpen] = useState(false)
 
 	const [deleteAccount, { loading }] = useMutation(DELETE_ACCOUNT, {
-		onCompleted: () => {
-			success('Аккаунт удалён и будет перенаправлен на главную страницу')
-			// Redirect to home page after 2 seconds
-			setTimeout(() => {
-				router.push('/')
-			}, 2000)
+		onCompleted: async () => {
+			success('Аккаунт успешно удалён')
+			
+			// Clear Apollo cache
+			await apolloClient.clearStore()
+			
+			// Logout to clear session cookies and auth state
+			await logout()
+			
+			// Redirect to login page
+			router.push('/auth/login')
 		},
 		onError: (err) => {
 			showError(err.message || 'Не удалось удалить аккаунт')

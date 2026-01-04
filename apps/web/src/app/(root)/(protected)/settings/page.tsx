@@ -935,7 +935,13 @@ function SettingsContent() {
 											</div>
 
 											<div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-												{/* Telegram */} <TelegramConnection isConnected={!!me?.telegramChatId} telegramUsername={me?.telegramUsername || undefined} onUnlink={() => { }} />
+												{/* Telegram */} 
+												<TelegramConnection 
+													isConnected={!!me?.telegramChatId} 
+													telegramUsername={me?.telegramUsername || undefined} 
+													onUnlink={refetchMe}
+													onLinkSuccess={refetchMe}
+												/>
 
 												{/* Info */}
 												<div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-blue-500/5 border border-blue-500/20">

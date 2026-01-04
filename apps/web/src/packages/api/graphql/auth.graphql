@@ -182,6 +182,12 @@ mutation LinkTelegramAccount($token: String!) {
   linkTelegramAccount(token: $token)
 }
 
+mutation CheckTelegramLinkStatus($input: CheckTelegramAuthInput!) {
+  checkTelegramLinkStatus(input: $input) {
+    completed
+  }
+}
+
 # ==================== Queries ====================
 
 query Me {
@@ -195,6 +201,8 @@ query Me {
     hasCompletedOnboarding
     businessRole
     businessRoleAssignedAt
+    telegramChatId
+    telegramUsername
     createdAt
     notificationSettings {
       id
@@ -227,6 +235,10 @@ query Me {
       permissions
     }
   }
+}
+
+mutation SendTestTelegramNotification {
+  sendTestTelegramNotification
 }
 
 query Sessions {

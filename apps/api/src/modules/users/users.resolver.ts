@@ -1,6 +1,7 @@
 import { Args, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql'
 import { UseGuards, UnauthorizedException } from '@nestjs/common'
 import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal'
+import { Inject, forwardRef } from '@nestjs/common'
 
 import { CurrentUser, CurrentUserData } from '../../shared/decorators/current-user.decorator'
 import { AuthGuard } from '../../shared/guards/auth.guard'
@@ -15,10 +16,15 @@ import { DeleteAccountInput } from './dto/delete-account.input'
 import { UpdateStoragePreferenceInput } from './dto/update-storage-preference.input'
 import { RequestChangeEmailInput } from './dto/request-change-email.input'
 import { ConfirmEmailChangeInput } from './dto/confirm-email-change.input'
+import { TelegramNotificationService } from '../telegram/telegram-notification.service'
 
 @Resolver(() => User)
 export class UsersResolver {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		@Inject(forwardRef(() => TelegramNotificationService))
+		private readonly telegramNotificationService: TelegramNotificationService,
+	) {}
 
 	@Query(() => User, { nullable: true })
 	@UseGuards(AuthGuard)
@@ -188,6 +194,31 @@ export class UsersResolver {
 		@Args('input') input: ConfirmEmailChangeInput,
 	): Promise<boolean> {
 		return this.usersService.confirmEmailChange(input.token)
+	}
+
+	/**
+	 * Send test Telegram notification
+	 */
+	@Mutation(() => Boolean, {
+		description: 'Отправить тестовое уведомление в Telegram',
+	})
+	@UseGuards(AuthGuard)
+	async sendTestTelegramNotification(@CurrentUser() currentUser: CurrentUserData): Promise<boolean> {
+		if (!currentUser?.id) {
+			throw new UnauthorizedException('User not authenticated')
+		}
+
+		const testMessage =
+			`🧪 *Тестовое уведомление*\n\n` +
+			`✅ Уведомления Telegram работают корректно!\n\n` +
+			`📅 ${new Date().toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' })}\n\n` +
+			`Это тестовое сообщение для проверки работы уведомлений.`
+
+		return await this.telegramNotificationService.sendNotificationToUser(
+			currentUser.id,
+			testMessage,
+			'Markdown',
+		)
 	}
 }
 

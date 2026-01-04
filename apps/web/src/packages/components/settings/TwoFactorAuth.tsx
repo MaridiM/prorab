@@ -64,7 +64,10 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 	const [backupCodes, setBackupCodes] = useState<string[]>([])
 	const [showDisableDialog, setShowDisableDialog] = useState(false)
 	const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
+	const [showViewCodesDialog, setShowViewCodesDialog] = useState(false)
+	const [viewCodesToken, setViewCodesToken] = useState('')
 	const [copiedCode, setCopiedCode] = useState<string | null>(null)
+	const [isViewingCodes, setIsViewingCodes] = useState(false)
 
 	const { data, loading, refetch } = useQuery(TwoFactorStatusDocument)
 
@@ -106,11 +109,21 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 		Regenerate2FaBackupCodesDocument,
 		{
 			onCompleted: (data) => {
-				setBackupCodes(data.regenerate2FABackupCodes.backupCodes)
+				const codes = data.regenerate2FABackupCodes.backupCodes
+				setBackupCodes(codes)
 				setShowRegenerateDialog(false)
 				setRegenerateCode('')
+				if (isViewingCodes) {
+					setShowViewCodesDialog(false)
+					setViewCodesToken('')
+					// Keep isViewingCodes true so the dialog shows
+					toastSuccess('Резервные коды показаны. Сохраните их в безопасном месте')
+				} else {
+					// For regeneration, show codes in setup flow
+					setSetupStep('backup')
+					toastSuccess('Резервные коды обновлены. Сохраните новые коды в безопасном месте')
+				}
 				refetch()
-				toastSuccess('Резервные коды обновлены. Сохраните новые коды в безопасном месте')
 			},
 			onError: (error) => {
 				toastError(error.message || 'Ошибка обновления кодов')
@@ -160,6 +173,21 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 		await regenerateBackupCodes({
 			variables: {
 				input: { token: regenerateCode },
+			},
+		})
+	}
+
+	const handleViewBackupCodes = async () => {
+		if (viewCodesToken.length !== 6) {
+			toastError('Введите 6-значный код')
+			return
+		}
+
+		setIsViewingCodes(true)
+		// Use regenerate mutation to get new codes (old ones will be invalidated)
+		await regenerateBackupCodes({
+			variables: {
+				input: { token: viewCodesToken },
 			},
 		})
 	}
@@ -509,15 +537,29 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 										</p>
 									</div>
 								</div>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setShowRegenerateDialog(true)}
-									className="rounded-xl"
-								>
-									<RefreshCw className="w-4 h-4 mr-2" />
-									Обновить
-								</Button>
+								<div className="flex gap-2">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => {
+											setViewCodesToken('')
+											setShowViewCodesDialog(true)
+										}}
+										className="rounded-xl"
+									>
+										<Key className="w-4 h-4 mr-2" />
+										Показать
+									</Button>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={() => setShowRegenerateDialog(true)}
+										className="rounded-xl"
+									>
+										<RefreshCw className="w-4 h-4 mr-2" />
+										Обновить
+									</Button>
+								</div>
 							</div>
 
 							<Button
@@ -574,11 +616,11 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Отключить двухфакторную аутентификацию?</AlertDialogTitle>
-						<AlertDialogDescription className="space-y-4">
-							<p>
-								Это снизит уровень безопасности вашего аккаунта. Для подтверждения введите код из
-								приложения аутентификации.
-							</p>
+						<AlertDialogDescription>
+							Это снизит уровень безопасности вашего аккаунта. Для подтверждения введите код из
+							приложения аутентификации.
+						</AlertDialogDescription>
+						<div className="space-y-4 mt-4">
 							<Input
 								type="text"
 								placeholder="000000"
@@ -587,7 +629,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 								maxLength={6}
 								className="text-center text-lg tracking-widest font-mono"
 							/>
-						</AlertDialogDescription>
+						</div>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setDisableCode('')}>Отмена</AlertDialogCancel>
@@ -614,11 +656,11 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Обновить резервные коды?</AlertDialogTitle>
-						<AlertDialogDescription className="space-y-4">
-							<p>
-								Все текущие резервные коды будут аннулированы. Для подтверждения введите код из
-								приложения аутентификации.
-							</p>
+						<AlertDialogDescription>
+							Все текущие резервные коды будут аннулированы. Для подтверждения введите код из
+							приложения аутентификации.
+						</AlertDialogDescription>
+						<div className="space-y-4 mt-4">
 							<Input
 								type="text"
 								placeholder="000000"
@@ -627,7 +669,7 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 								maxLength={6}
 								className="text-center text-lg tracking-widest font-mono"
 							/>
-						</AlertDialogDescription>
+						</div>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={() => setRegenerateCode('')}>Отмена</AlertDialogCancel>
@@ -647,6 +689,106 @@ export function TwoFactorAuth({ className }: TwoFactorAuthProps) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{/* View Backup Codes Dialog */}
+			<AlertDialog open={showViewCodesDialog} onOpenChange={setShowViewCodesDialog}>
+				<AlertDialogContent className="max-w-2xl">
+					<AlertDialogHeader>
+						<AlertDialogTitle>Показать резервные коды</AlertDialogTitle>
+						<AlertDialogDescription>
+							Для просмотра резервных кодов необходимо подтвердить доступ кодом из приложения аутентификации.
+							После подтверждения будут сгенерированы новые коды, а старые будут аннулированы.
+						</AlertDialogDescription>
+						<div className="space-y-4 mt-4">
+							<Input
+								type="text"
+								placeholder="000000"
+								value={viewCodesToken}
+								onChange={(e) => setViewCodesToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+								maxLength={6}
+								className="text-center text-lg tracking-widest font-mono"
+								autoFocus
+							/>
+						</div>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => setViewCodesToken('')}>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleViewBackupCodes}
+							disabled={regenerating || viewCodesToken.length !== 6}
+						>
+							{regenerating ? (
+								<>
+									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+									Загрузка...
+								</>
+							) : (
+								'Показать коды'
+							)}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* Show Backup Codes Dialog (after viewing, not after regenerating) */}
+			{backupCodes.length > 0 && !showRegenerateDialog && !showViewCodesDialog && isViewingCodes && (
+				<AlertDialog open={true} onOpenChange={(open) => {
+					if (!open) {
+						setBackupCodes([])
+						setIsViewingCodes(false)
+					}
+				}}>
+					<AlertDialogContent className="max-w-2xl">
+						<AlertDialogHeader>
+							<AlertDialogTitle>Ваши резервные коды</AlertDialogTitle>
+							<AlertDialogDescription>
+								Сохраните эти коды в безопасном месте. Каждый код можно использовать только один раз.
+								Если вы потеряете доступ к приложению аутентификации, используйте один из этих кодов для входа.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<div className="space-y-4">
+							<div className="grid grid-cols-2 gap-2 p-4 rounded-xl bg-muted/50 max-h-[300px] overflow-y-auto">
+								{backupCodes.map((code) => (
+									<div
+										key={code}
+										className="flex items-center justify-between p-2 rounded-lg bg-background"
+									>
+										<code className="font-mono text-sm">{code}</code>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-6 w-6"
+											onClick={() => handleCopyCode(code)}
+										>
+											{copiedCode === code ? (
+												<Check className="w-3 h-3 text-green-600" />
+											) : (
+												<Copy className="w-3 h-3" />
+											)}
+										</Button>
+									</div>
+								))}
+							</div>
+							<Button
+								variant="outline"
+								onClick={handleDownloadCodes}
+								className="w-full"
+							>
+								<Download className="w-4 h-4 mr-2" />
+								Скачать коды
+							</Button>
+						</div>
+						<AlertDialogFooter>
+							<AlertDialogAction onClick={() => {
+								setBackupCodes([])
+								setIsViewingCodes(false)
+							}}>
+								Готово
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			)}
 		</>
 	)
 }

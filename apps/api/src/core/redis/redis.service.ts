@@ -111,9 +111,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 	// ==================== Basic Operations ====================
 
 	async get(key: string): Promise<string | null> {
-		if (!this.ensureConnected()) return null
+		this.logger.log(`[Redis GET] Key: ${key}, Connected: ${this.isConnected}`)
+		if (!this.ensureConnected()) {
+			this.logger.warn(`[Redis GET] Not connected, returning null for key: ${key}`)
+			return null
+		}
 		try {
 			const result = await this.client.get(key)
+			const ttl = await this.client.ttl(key)
+			this.logger.log(`[Redis GET] Key: ${key}, Found: ${result ? 'YES' : 'NO'}, TTL: ${ttl}s`)
 			if (typeof result === 'string') {
 				return result
 			}
@@ -125,14 +131,25 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 	}
 
 	async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
-		if (!this.ensureConnected()) return
+		this.logger.log(`[Redis SET] Key: ${key}, TTL: ${ttlSeconds}, Connected: ${this.isConnected}`)
+		if (!this.ensureConnected()) {
+			this.logger.warn(`[Redis SET] Not connected, skipping set for key: ${key}`)
+			return
+		}
 		try {
 			if (ttlSeconds) {
-				// Use EX for seconds (not PX for milliseconds)
-				await this.client.set(key, value, { EX: ttlSeconds })
+				// Use setEx for setting with expiry (more reliable)
+				await this.client.setEx(key, ttlSeconds, value)
+				this.logger.log(`[Redis SET] Successfully set key: ${key} with TTL: ${ttlSeconds}s using setEx`)
 			} else {
 				await this.client.set(key, value)
+				this.logger.log(`[Redis SET] Successfully set key: ${key} without TTL`)
 			}
+			
+			// Verify immediately after set
+			const verify = await this.client.get(key)
+			const ttl = await this.client.ttl(key)
+			this.logger.log(`[Redis SET] Verification - Key: ${key}, Found: ${verify ? 'YES' : 'NO'}, TTL: ${ttl}s`)
 		} catch (error) {
 			this.logger.error(`Redis set error for key "${key}":`, error)
 		}
