@@ -944,6 +944,9 @@ function ActivityLoader({
 	onExpensesLoaded: (projectId: string, expenses: Expense[]) => void
 	onReportsLoaded: (projectId: string, reports: PhotoReport[]) => void
 }) {
+	const expensesLoadedRef = useRef(false)
+	const reportsLoadedRef = useRef(false)
+
 	const { data: expensesData, error: expensesError, loading: expensesLoading } = useQuery(ExpensesByProjectDocument, {
 		variables: { projectId },
 		skip: !projectId,
@@ -956,17 +959,27 @@ function ActivityLoader({
 		fetchPolicy: 'cache-and-network',
 	})
 
+	// Reset refs when projectId changes
 	useEffect(() => {
-		if (expensesData?.expensesByProject) {
-			onExpensesLoaded(projectId, expensesData.expensesByProject as Expense[])
-		}
-	}, [expensesData, projectId, onExpensesLoaded])
+		expensesLoadedRef.current = false
+		reportsLoadedRef.current = false
+	}, [projectId])
 
 	useEffect(() => {
-		if (reportsData?.projectPhotoReports) {
+		if (expensesData?.expensesByProject && !expensesLoading && !expensesLoadedRef.current) {
+			expensesLoadedRef.current = true
+			onExpensesLoaded(projectId, expensesData.expensesByProject as Expense[])
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [expensesData?.expensesByProject, projectId, expensesLoading])
+
+	useEffect(() => {
+		if (reportsData?.projectPhotoReports && !reportsLoading && !reportsLoadedRef.current) {
+			reportsLoadedRef.current = true
 			onReportsLoaded(projectId, reportsData.projectPhotoReports as PhotoReport[])
 		}
-	}, [reportsData, projectId, onReportsLoaded])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [reportsData?.projectPhotoReports, projectId, reportsLoading])
 
 	return null
 }
@@ -1145,20 +1158,32 @@ export default function DashboardPage() {
 	// Callback to handle activity data from individual projects
 	const handleExpensesLoaded = useCallback((projectId: string, expenses: Expense[]) => {
 		setAllExpenses(prev => {
+			// Skip if already loaded to prevent infinite loops
+			if (prev.has(projectId)) return prev
 			const newMap = new Map(prev)
 			newMap.set(projectId, expenses)
 			return newMap
 		})
-		setLoadedProjects(prev => new Set(prev).add(`${projectId}-expenses`))
+		setLoadedProjects(prev => {
+			// Skip if already marked as loaded
+			if (prev.has(`${projectId}-expenses`)) return prev
+			return new Set(prev).add(`${projectId}-expenses`)
+		})
 	}, [])
 
 	const handleReportsLoaded = useCallback((projectId: string, reports: PhotoReport[]) => {
 		setAllReports(prev => {
+			// Skip if already loaded to prevent infinite loops
+			if (prev.has(projectId)) return prev
 			const newMap = new Map(prev)
 			newMap.set(projectId, reports)
 			return newMap
 		})
-		setLoadedProjects(prev => new Set(prev).add(`${projectId}-reports`))
+		setLoadedProjects(prev => {
+			// Skip if already marked as loaded
+			if (prev.has(`${projectId}-reports`)) return prev
+			return new Set(prev).add(`${projectId}-reports`)
+		})
 	}, [])
 
 	// Check if expenses and reports are loading
@@ -1256,12 +1281,12 @@ export default function DashboardPage() {
 		}
 	}, [activeProjects, projectStatsMap])
 
-	// Reset loading state when team or projects change
+	// Reset loading state when team changes (not when projects list changes to avoid infinite loops)
 	useEffect(() => {
 		setLoadedProjects(new Set())
 		setAllExpenses(new Map())
 		setAllReports(new Map())
-	}, [currentTeamId, activeProjects.length])
+	}, [currentTeamId])
 
 	// Handlers
 	const handleTeamChange = (teamId: string) => {

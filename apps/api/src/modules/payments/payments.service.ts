@@ -537,17 +537,30 @@ export class PaymentsService {
       this.logger.log(`First payment: period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`);
     } else if (isChangingPlan) {
       // Plan change - new period starts from payment date
+      // The old plan period ends at paidAt, new plan starts fresh
       periodStartAt = paidAt;
       periodEndAt = new Date(paidAt.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
       this.logger.log(`Plan change: period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`);
     } else {
-      // Renewal - period starts from CURRENT period end (not payment date!)
-      // This ensures continuous periods even if user pays early
+      // Renewal of same plan - period starts from CURRENT period end (not payment date!)
+      // This ensures continuous periods even if user pays early or late
+      // Example: if current period ends Jan 15, renewal period is Jan 15 - Feb 14
       const currentPeriodEnd = currentSub.currentPeriodEnd || currentSub.currentPeriodStart || paidAt;
-      periodStartAt = currentPeriodEnd;
-      periodEndAt = new Date(currentPeriodEnd.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+      
+      // If user pays AFTER current period end (late payment), start from payment date
+      // If user pays BEFORE current period end (early renewal), start from current period end
+      if (paidAt > currentPeriodEnd) {
+        // Late payment - period starts from payment date (gap in coverage)
+        periodStartAt = paidAt;
+        this.logger.log(`Late renewal: gap detected, starting from payment date`);
+      } else {
+        // Normal or early renewal - period starts from current period end (continuous coverage)
+        periodStartAt = currentPeriodEnd;
+      }
+      
+      periodEndAt = new Date(periodStartAt.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
       this.logger.log(
-        `Renewal: extending from ${currentPeriodEnd.toISOString()}, period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`
+        `Renewal: current period ends ${currentPeriodEnd.toISOString()}, new period ${periodStartAt.toISOString()} to ${periodEndAt.toISOString()}`
       );
     }
 
@@ -627,14 +640,25 @@ export class PaymentsService {
         `Plan change: Previous plan ends at ${now}, new plan period: ${updateData.currentPeriodStart} to ${updateData.currentPeriodEnd}`
       );
     } else {
-      // Renewal of same plan - extend period end by 30 days
-      // currentPeriodStart stays the same, only currentPeriodEnd extends
+      // Renewal of same plan - extend period end
+      // currentPeriodStart stays the same (original subscription start)
+      // currentPeriodEnd extends by 30 days from current end (not from payment date!)
       const currentPeriodEnd = subscription.currentPeriodEnd || subscription.currentPeriodStart || now;
-      updateData.currentPeriodEnd = new Date(
-        currentPeriodEnd.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000
-      );
+      
+      // Calculate new period end based on whether this is early or late payment
+      let newPeriodEnd: Date;
+      if (now > currentPeriodEnd) {
+        // Late payment - extend from payment date (gap in coverage)
+        newPeriodEnd = new Date(now.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+        this.logger.log(`Late renewal: extending from payment date ${now.toISOString()}`);
+      } else {
+        // Normal or early renewal - extend from current period end (continuous coverage)
+        newPeriodEnd = new Date(currentPeriodEnd.getTime() + BILLING_CYCLE_DAYS * 24 * 60 * 60 * 1000);
+      }
+      
+      updateData.currentPeriodEnd = newPeriodEnd;
       this.logger.log(
-        `Plan renewal: Current period ${subscription.currentPeriodStart.toISOString()} - ${currentPeriodEnd.toISOString()}, extending end to ${updateData.currentPeriodEnd.toISOString()}`
+        `Plan renewal: Current period ${subscription.currentPeriodStart?.toISOString()} - ${currentPeriodEnd.toISOString()}, extending end to ${newPeriodEnd.toISOString()}`
       );
     }
 

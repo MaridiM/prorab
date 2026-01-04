@@ -52,6 +52,51 @@ const planIcons = {
   BRIGADE: Crown,
 };
 
+// Helper function to determine period status
+// Returns: 'completed' | 'active' | 'queued'
+function getPeriodStatus(startDate: Date, endDate: Date): 'completed' | 'active' | 'queued' {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of today
+  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+  
+  if (end < today) {
+    // Period ended before today
+    return 'completed';
+  } else if (start > today) {
+    // Period starts after today (queued/future)
+    return 'queued';
+  } else {
+    // Period is active (today is between start and end)
+    return 'active';
+  }
+}
+
+// Status badge component for period status
+function PeriodStatusBadge({ status }: { status: 'completed' | 'active' | 'queued' }) {
+  switch (status) {
+    case 'active':
+      return (
+        <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30">
+          Действует
+        </Badge>
+      );
+    case 'queued':
+      return (
+        <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30">
+          В очереди
+        </Badge>
+      );
+    case 'completed':
+    default:
+      return (
+        <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/30">
+          Завершён
+        </Badge>
+      );
+  }
+}
+
 export function SubscriptionHistory() {
   const [processingRenewal, setProcessingRenewal] = useState(false);
   const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({});
@@ -91,6 +136,7 @@ export function SubscriptionHistory() {
 
   // Group payments by plan - if same plan is renewed multiple times, group them together
   // This prevents showing duplicates for renewals
+  // Important: history is sorted DESC (newest first), so we process from newest to oldest
   const groupedHistory = historyEntries.reduce((acc: any[], entry, index) => {
     // Find if we already have an entry for this plan
     const existingEntry = acc.find(e => e.planSlug === entry.planSlug);
@@ -107,20 +153,86 @@ export function SubscriptionHistory() {
         periodEndAt: entry.periodEndAt,
       });
 
-      // Update period start to earliest payment
-      if (new Date(entry.paidAt) < new Date(existingEntry.periodStartAt)) {
-        existingEntry.periodStartAt = entry.periodStartAt;
+      // Track the EARLIEST periodStartAt (this is when the subscription on this plan started)
+      if (entry.periodStartAt) {
+        const entryStart = new Date(entry.periodStartAt).getTime();
+        const existingStart = existingEntry.firstPeriodStart 
+          ? new Date(existingEntry.firstPeriodStart).getTime() 
+          : Infinity;
+        if (entryStart < existingStart) {
+          existingEntry.firstPeriodStart = entry.periodStartAt;
+        }
+      }
+      
+      // Track the LATEST periodEndAt (this is when the subscription will end after all renewals)
+      if (entry.periodEndAt) {
+        const existingEnd = existingEntry.lastPeriodEnd 
+          ? new Date(existingEntry.lastPeriodEnd).getTime() 
+          : 0;
+        const newEnd = new Date(entry.periodEndAt).getTime();
+        if (newEnd > existingEnd) {
+          existingEntry.lastPeriodEnd = entry.periodEndAt;
+        }
       }
     } else {
       // This is a new plan (not a renewal) - add as separate entry
       acc.push({
         ...entry,
         renewals: [],
+        // Track period boundaries for this plan
+        firstPeriodStart: entry.periodStartAt,
+        lastPeriodEnd: entry.periodEndAt,
       });
     }
 
     return acc;
   }, []);
+
+  // Sort renewals by status priority, then by date
+  // Order: 1. Future (queued) - top, 2. Current (active) - middle, 3. Past (completed) - bottom
+  groupedHistory.forEach(entry => {
+    if (entry.renewals && entry.renewals.length > 0) {
+      entry.renewals.sort((a: any, b: any) => {
+        const startA = a.periodStartAt ? new Date(a.periodStartAt) : new Date(a.paidAt);
+        const endA = a.periodEndAt ? new Date(a.periodEndAt) : new Date(startA.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const startB = b.periodStartAt ? new Date(b.periodStartAt) : new Date(b.paidAt);
+        const endB = b.periodEndAt ? new Date(b.periodEndAt) : new Date(startB.getTime() + 30 * 24 * 60 * 60 * 1000);
+        
+        const statusA = getPeriodStatus(startA, endA);
+        const statusB = getPeriodStatus(startB, endB);
+        
+        // Priority: queued (0) > active (1) > completed (2)
+        const priorityMap = { queued: 0, active: 1, completed: 2 };
+        const priorityA = priorityMap[statusA];
+        const priorityB = priorityMap[statusB];
+        
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB; // Lower priority number = higher in list
+        }
+        
+        // Within same status, sort by start date descending (newest first)
+        return startB.getTime() - startA.getTime();
+      });
+    }
+    
+    // Set display period dates:
+    // - periodStartAt = earliest period start (when subscription on this plan began)
+    // - periodEndAt = latest period end (when subscription will end after all renewals)
+    if (entry.firstPeriodStart) {
+      entry.periodStartAt = entry.firstPeriodStart;
+    }
+    if (entry.lastPeriodEnd) {
+      entry.periodEndAt = entry.lastPeriodEnd;
+    }
+  });
+
+  // Sort grouped history by latest period end date (newest first)
+  // Plans with most recent activity appear at the top
+  groupedHistory.sort((a, b) => {
+    const dateA = a.lastPeriodEnd ? new Date(a.lastPeriodEnd).getTime() : new Date(a.paidAt).getTime();
+    const dateB = b.lastPeriodEnd ? new Date(b.lastPeriodEnd).getTime() : new Date(b.paidAt).getTime();
+    return dateB - dateA; // Descending order (newest first)
+  });
 
   // Define handleRenewPlan callback - must be before any conditional returns
   const handleRenewPlan = useCallback(async () => {
@@ -171,6 +283,21 @@ export function SubscriptionHistory() {
   const mostRecentCurrentEntry = groupedHistory.length > 0 && groupedHistory[0].planSlug === currentPlanSlug
     ? groupedHistory[0]
     : null;
+
+  // For current subscription, use the period from the subscription itself (which is updated correctly)
+  // instead of calculating from grouped payments. This ensures we show the correct period
+  // that reflects all renewals
+  if (mostRecentCurrentEntry && currentSubscription) {
+    // Use subscription's currentPeriodEnd - this is the correct end date after all renewals
+    if (currentSubscription.currentPeriodEnd) {
+      mostRecentCurrentEntry.periodEndAt = currentSubscription.currentPeriodEnd;
+    }
+    // Use subscription's currentPeriodStart - this is when the current plan started
+    // (not the first payment ever, but when user switched to this specific plan)
+    if (currentSubscription.currentPeriodStart) {
+      mostRecentCurrentEntry.periodStartAt = currentSubscription.currentPeriodStart;
+    }
+  }
 
   return (
     <Card>
@@ -341,47 +468,81 @@ export function SubscriptionHistory() {
                           </tr>
                         </thead>
                         <tbody>
-                          {entry.renewals.map((renewal: any, renewalIndex: number) => {
-                            // Use actual period data from backend instead of calculating
-                            const renewalStartDate = renewal.periodStartAt ? new Date(renewal.periodStartAt) : new Date(renewal.paidAt);
-                            const renewalEndDate = renewal.periodEndAt ? new Date(renewal.periodEndAt) : new Date(renewalStartDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                          {/* Combine main entry with renewals and sort by status priority */}
+                          {(() => {
+                            // Find the original payment entry from historyEntries to get correct period dates
+                            const originalPayment = historyEntries.find((e: any) => e.id === entry.id);
+                            
+                            // Create combined list with main entry and all renewals
+                            // Each payment uses its own periodStartAt and periodEndAt from backend
+                            const allPayments = [
+                              {
+                                id: entry.id,
+                                paidAt: entry.paidAt,
+                                // Use original period dates from the specific payment (not grouped dates)
+                                periodStartAt: originalPayment?.periodStartAt || entry.periodStartAt,
+                                periodEndAt: originalPayment?.periodEndAt || entry.periodEndAt,
+                                amount: entry.amount,
+                                isEarlyBird: entry.isEarlyBird,
+                              },
+                              ...entry.renewals,
+                            ];
 
-                            const isRenewalActive = new Date() <= renewalEndDate;
+                            // Sort all payments by status priority: queued > active > completed
+                            const sortedPayments = allPayments.sort((a: any, b: any) => {
+                              const startA = a.periodStartAt ? new Date(a.periodStartAt) : new Date(a.paidAt);
+                              const endA = a.periodEndAt ? new Date(a.periodEndAt) : new Date(startA.getTime() + 30 * 24 * 60 * 60 * 1000);
+                              const startB = b.periodStartAt ? new Date(b.periodStartAt) : new Date(b.paidAt);
+                              const endB = b.periodEndAt ? new Date(b.periodEndAt) : new Date(startB.getTime() + 30 * 24 * 60 * 60 * 1000);
+                              
+                              const statusA = getPeriodStatus(startA, endA);
+                              const statusB = getPeriodStatus(startB, endB);
+                              
+                              // Priority: queued (0) > active (1) > completed (2)
+                              const priorityMap = { queued: 0, active: 1, completed: 2 };
+                              const priorityA = priorityMap[statusA];
+                              const priorityB = priorityMap[statusB];
+                              
+                              if (priorityA !== priorityB) {
+                                return priorityA - priorityB;
+                              }
+                              
+                              // Within same status, sort by start date descending (newest first)
+                              return startB.getTime() - startA.getTime();
+                            });
 
-                            return (
-                              <tr key={renewal.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30">
-                                <td className="py-2 px-2 text-muted-foreground">
-                                  {format(new Date(renewal.paidAt), 'd MMM yyyy, HH:mm', { locale: ru })}
-                                </td>
-                                <td className="py-2 px-2 text-muted-foreground">
-                                  {format(renewalStartDate, 'd MMM yyyy', { locale: ru })} — {format(renewalEndDate, 'd MMM yyyy', { locale: ru })}
-                                </td>
-                                <td className="py-2 px-2 text-right font-medium">
-                                  {renewal.amount} {entry.currency}
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  {renewal.isEarlyBird ? (
-                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
-                                      Early Bird
-                                    </Badge>
-                                  ) : (
-                                    <span className="text-muted-foreground">—</span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-2 text-center">
-                                  {isRenewalActive ? (
-                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30">
-                                      Действует
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-gray-500/15 text-gray-700 dark:text-gray-400 border-gray-500/30">
-                                      Завершена
-                                    </Badge>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
+                            return sortedPayments.map((payment: any) => {
+                              const paymentStartDate = payment.periodStartAt ? new Date(payment.periodStartAt) : new Date(payment.paidAt);
+                              const paymentEndDate = payment.periodEndAt ? new Date(payment.periodEndAt) : new Date(paymentStartDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+                              const periodStatus = getPeriodStatus(paymentStartDate, paymentEndDate);
+
+                              return (
+                                <tr key={payment.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30">
+                                  <td className="py-2 px-2 text-muted-foreground">
+                                    {format(new Date(payment.paidAt), 'd MMM yyyy, HH:mm', { locale: ru })}
+                                  </td>
+                                  <td className="py-2 px-2 text-muted-foreground">
+                                    {format(paymentStartDate, 'd MMM yyyy', { locale: ru })} — {format(paymentEndDate, 'd MMM yyyy', { locale: ru })}
+                                  </td>
+                                  <td className="py-2 px-2 text-right font-medium">
+                                    {payment.amount} {entry.currency}
+                                  </td>
+                                  <td className="py-2 px-2 text-center">
+                                    {payment.isEarlyBird ? (
+                                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
+                                        Early Bird
+                                      </Badge>
+                                    ) : (
+                                      <span className="text-muted-foreground">—</span>
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-2 text-center">
+                                    <PeriodStatusBadge status={periodStatus} />
+                                  </td>
+                                </tr>
+                              );
+                            });
+                          })()}
                         </tbody>
                       </table>
                     </div>

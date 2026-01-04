@@ -37,7 +37,7 @@ export default function ProtectedLayout({
 				hasRedirectedRef.current = true
 				// Clear any stale cookies
 				clearAuthCookies()
-				// Redirect to login
+				// Redirect to login immediately
 				router.replace('/auth/login')
 			}
 		} else {
@@ -52,7 +52,14 @@ export default function ProtectedLayout({
 	}
 
 	// Don't render content if not authenticated (show loading while redirecting)
-	if (!isAuthenticated || !user) {
+	// But only show redirect message if we haven't redirected yet
+	if ((!isAuthenticated || !user) && !hasRedirectedRef.current) {
+		return <PageLoader text="Перенаправление..." />
+	}
+
+	// If we've redirected but still showing this component, show loading
+	// This prevents flash of content before redirect completes
+	if ((!isAuthenticated || !user) && hasRedirectedRef.current) {
 		return <PageLoader text="Перенаправление..." />
 	}
 

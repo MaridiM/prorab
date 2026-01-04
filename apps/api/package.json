@@ -24,7 +24,7 @@
     "prisma:seed:settings": "tsx prisma/seed-storage-settings.ts",
     "prisma:seed:demo-payments": "tsx scripts/seed-demo-payment-history.ts",
     "db:reset": "tsx scripts/reset-database.ts",
-    "db:reset:seed": "pnpm db:reset && pnpm prisma:seed:plans && pnpm prisma:seed && pnpm prisma:seed:faq && pnpm prisma:seed:settings && prisma:seed:demo-payments",
+    "db:reset:seed": "pnpm db:reset && pnpm prisma:seed:plans && pnpm prisma:seed:providers && pnpm prisma:seed && pnpm prisma:seed:faq && pnpm prisma:seed:settings && pnpm prisma:seed:demo-payments",
     "stripe:create-products": "tsx scripts/create-stripe-products.ts",
     "yookassa:create-config": "tsx scripts/create-yookassa-config.ts",
     "db:seed": "pnpm prisma:seed",

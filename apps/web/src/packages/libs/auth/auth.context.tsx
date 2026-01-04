@@ -76,6 +76,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const isRedirectingRef = useRef(false)
+  const isRefreshingRef = useRef(false)
   const router = useRouter()
 
   // Apollo mutations
@@ -83,7 +84,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [registerMutation] = useMutation(RegisterDocument)
   const [logoutMutation] = useMutation(LogoutDocument)
   const [fetchMe] = useLazyQuery(MeDocument, {
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: false
   })
 
   // Check if session token exists (quick check before loading user)
@@ -93,8 +95,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   const refreshUser = useCallback(async () => {
-    // Prevent multiple calls if already redirecting
-    if (isRedirectingRef.current) {
+    // Prevent multiple calls if already redirecting or refreshing
+    if (isRedirectingRef.current || isRefreshingRef.current) {
       return
     }
 
@@ -108,8 +110,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
+    isRefreshingRef.current = true
+
     try {
-      const { data, error } = await fetchMe()
+      const { data, error } = await fetchMe({
+        fetchPolicy: 'network-only'
+      })
 
       if (error || !data?.me) {
         // Check if it's a network error (API server not available)
@@ -125,22 +131,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (!isRedirectingRef.current && typeof document !== 'undefined') {
             isRedirectingRef.current = true
             clearAuthCookies();
+            setUser(null)
+            setIsLoading(false)
             // Only redirect if not already on auth pages or public pages (like landing page)
             const pathname = window.location.pathname
             if (!pathname.startsWith('/auth') && pathname !== '/') {
               router.replace('/auth/login');
             }
+            return
           }
         } else if (isNetworkError) {
           // Network error - don't redirect, just set user to null
           // This allows the page to show an error message instead of infinite redirect
           console.warn('[AuthContext] Network error fetching user:', error)
           setUser(null)
+          setIsLoading(false)
           // Don't redirect on network errors - let the page handle it
           return
         } else {
           // Other error - set user to null but don't redirect
           setUser(null)
+          setIsLoading(false)
         }
       } else {
         // Reset redirecting flag on successful fetch
@@ -191,26 +202,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } finally {
       setIsLoading(false)
+      isRefreshingRef.current = false
     }
-  }, [fetchMe, router, hasSessionToken])
+  }, [router, hasSessionToken])
 
   // Reset redirecting flag on mount
   useEffect(() => {
     isRedirectingRef.current = false
   }, [])
 
+  // Initial user fetch on mount
   useEffect(() => {
-    refreshUser()
-  }, [refreshUser])
+    // Only fetch once on mount, not on every refreshUser change
+    if (isLoading && !isRefreshingRef.current) {
+      refreshUser()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Quick redirect for authenticated users on auth pages (before user loads)
   // BUT only if we're not already redirecting to avoid loops
   useEffect(() => {
-    if (isLoading && hasSessionToken() && !isRedirectingRef.current) {
+    if (isLoading && hasSessionToken() && !isRedirectingRef.current && !isRefreshingRef.current) {
       const pathname = window.location.pathname
       // If we have a session token but user is still loading, and we're on auth pages
       // redirect immediately to prevent showing login page
       if (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')) {
+        isRedirectingRef.current = true
         router.replace('/dashboard')
       }
     }
