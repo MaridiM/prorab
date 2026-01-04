@@ -5,6 +5,133 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-04 - Система Донатов 🎁
+
+### Added
+- **Donations Module**: Полноценная система добровольных пожертвований
+  - Модель `Donation` в Prisma schema с полями amount, currency, status, message, donorName
+  - Enum `DonationStatus`: PENDING, SUCCEEDED, FAILED, CANCELLED, REFUNDED
+  - Поддержка трех платежных провайдеров: YooKassa, Stripe, Telegram Stars
+  - Добавлено `TELEGRAM_STARS` в enum `PaymentProviderType`
+
+- **Payment Provider Interface**: Расширен интерфейс для донатов
+  - Метод `createDonation()` для создания платежа доната
+  - Метод `createTelegramInvoice()` для отправки invoice в Telegram чат
+  - Интерфейсы `CreateDonationParams`, `CreateTelegramInvoiceParams`
+
+- **Telegram Stars Provider**: Новый платежный провайдер
+  - Файл `telegram-stars.provider.ts` с полной реализацией IPaymentProvider
+  - Создание invoice через Telegram Bot API
+  - Поддержка валюты XTR (Telegram Stars)
+  - Интеграция с Telegraf ботом
+
+- **Donations Service**: Бизнес-логика донатов
+  - `createDonation()` - инициализация платежа с автовыбором провайдера по IP
+  - `handleDonationSucceeded()` - обработка успешного платежа
+  - `getUserDonations()` - история донатов пользователя
+  - `getDonationStats()` - статистика донатов
+  - Установка бейджа благодарности `hasDonatorBadge = true`
+
+- **GraphQL API для донатов**:
+  - Мутация `createDonation(input: CreateDonationInput!): DonationUrl!`
+  - Query `myDonations: [Donation!]!`
+  - Query `donationStats: DonationStats!`
+  - Models: Donation, DonationUrl, DonationStats
+
+- **Webhook Controllers для донатов**:
+  - `POST /webhooks/donations/yookassa` - обработка YooKassa webhook
+  - `POST /webhooks/donations/stripe` - обработка Stripe webhook
+  - Проверка подписи и обработка успешных платежей
+
+- **Payment Provider Factory**: Обновлена фабрика провайдеров
+  - Добавлен case для `PaymentProviderType.TELEGRAM_STARS`
+  - Создание экземпляров TelegramStarsProvider
+  - Экспорт PaymentProviderFactory из PaymentsModule для использования в DonationsModule
+
+- **Email Notifications**: Письмо благодарности донатору
+  - Метод `sendDonationThankYouEmail()` в MailService
+  - HTML шаблон с градиентным дизайном
+  - Отображение суммы доната и сообщения
+  - Информация о бейдже благодарности
+
+- **User Model Updates**:
+  - Поле `hasDonatorBadge` для отображения бейджа на аватаре
+  - Связь `donations` для истории донатов
+
+- **Telegram Bot Integration**: Команда /donate в Support боте (@ProRabSupportBot)
+  - Добавлена команда `/donate` в меню бота
+  - Inline кнопки с суммами: ⭐ 50, 150, 250, 500 Stars
+  - Возможность ввода произвольной суммы (в разработке)
+  - Обработка `pre_checkout_query` для подтверждения платежа
+  - Обработка `successful_payment` для завершения доната
+  - Автоматическая установка бейджа благодарности
+  - Отправка благодарственного сообщения в Telegram после успешного платежа
+  - Создание записи Donation в БД при создании invoice
+  - Обновление статуса доната при успешной оплате
+
+### Technical Details
+- Применены изменения schema через `npx prisma db push`
+- Donations Module создан в `apps/api/src/modules/donations/` и зарегистрирован в AppModule
+- Payment Provider Factory обновлен для поддержки Telegram Stars
+- Интеграция с существующей системой платежей через Factory Pattern
+- Созданы файлы:
+  - `apps/api/src/core/payments/providers/telegram-stars.provider.ts`
+  - `apps/api/src/modules/donations/donations.module.ts`
+  - `apps/api/src/modules/donations/donations.service.ts`
+  - `apps/api/src/modules/donations/donations.resolver.ts`
+  - `apps/api/src/modules/donations/models/donation.model.ts`
+  - `apps/api/src/modules/donations/dto/create-donation.input.ts`
+  - `apps/api/src/modules/donations/controllers/yookassa-donation-webhook.controller.ts`
+  - `apps/api/src/modules/donations/controllers/stripe-donation-webhook.controller.ts`
+
+## [1.6.22] - 2026-01-04 - Telegram Integration & Account Deletion Fixes
+
+### Fixed
+- **Telegram Account Linking**: Исправлена проблема создания нового аккаунта при подключении Telegram
+  - Создана отдельная мутация `checkTelegramLinkStatus` для проверки статуса без авторизации
+  - Мутация `checkTelegramAuth` теперь используется только для входа через Telegram
+  - При связывании Telegram с существующим аккаунтом больше не создается новый пользователь
+- **Account Deletion**: Исправлена проблема с удалением аккаунта
+  - Добавлено удаление всех сессий пользователя перед удалением аккаунта
+  - Улучшено логирование процесса удаления для отладки
+  - Добавлена более информативная обработка ошибок при удалении
+
+### Added
+- **Telegram Notification Testing**: Добавлена возможность тестирования Telegram уведомлений
+  - Новая мутация `sendTestTelegramNotification` для отправки тестового сообщения
+  - Проверяет наличие `telegramChatId` и настройки уведомлений перед отправкой
+- **Telegram Account Unlinking**: Реализована функциональность отключения Telegram
+  - Метод `disconnectTelegram` теперь удаляет все данные Telegram (chatId, username, firstName, lastName, photoUrl)
+  - Добавлена мутация `disconnectTelegram` в GraphQL схему
+- **Telegram Link Status Check**: Добавлена мутация для проверки статуса связывания без авторизации
+  - Новая мутация `checkTelegramLinkStatus` для polling статуса токена
+  - Используется только для связывания аккаунта, не создает сессию
+
+### Changed
+- **Telegram Notification Service**: Улучшена интеграция с UsersModule
+  - `TelegramNotificationService` добавлен в `UsersModule` для доступа к тестированию уведомлений
+- **User Deletion Process**: Улучшен процесс удаления пользователя
+  - Добавлено логирование каждого шага удаления
+  - Сессии удаляются явно перед удалением пользователя
+  - Улучшена обработка ошибок с детальными сообщениями
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/api/src/modules/auth/auth.resolver.ts`
+    - Добавлена мутация `checkTelegramLinkStatus` для проверки статуса без авторизации
+  - `apps/api/src/modules/users/users.resolver.ts`
+    - Добавлена мутация `sendTestTelegramNotification` для тестирования уведомлений
+    - Добавлен импорт `TelegramNotificationService`
+  - `apps/api/src/modules/users/users.module.ts`
+    - Добавлен импорт `TelegramOAuthBotModule` для доступа к `TelegramNotificationService`
+  - `apps/api/src/modules/users/users.service.ts`
+    - Улучшен метод `disconnectTelegram` для удаления всех полей Telegram
+    - Добавлено логирование и удаление сессий в `deleteAccount`
+  - `apps/api/src/modules/telegram/models/telegram-auth.model.ts`
+    - Добавлен новый тип `TelegramLinkStatusPayload` для статуса связывания
+
+---
+
 ## [1.6.18] - 2026-01-02 - Seed Updates for FOREMAN Users with Subscriptions
 
 ### Added

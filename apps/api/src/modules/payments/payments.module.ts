@@ -20,6 +20,6 @@ import { SystemSettingsService } from '../admin/services/system-settings.service
     PaymentProviderFactory,
     SystemSettingsService, // Required by PaymentProviderFactory
   ],
-  exports: [PaymentsService],
+  exports: [PaymentsService, PaymentProviderFactory],
 })
 export class PaymentsModule {}

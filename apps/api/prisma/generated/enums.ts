@@ -66,7 +66,8 @@ export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
 
 export const PaymentProviderType = {
   YOOKASSA: 'YOOKASSA',
-  STRIPE: 'STRIPE'
+  STRIPE: 'STRIPE',
+  TELEGRAM_STARS: 'TELEGRAM_STARS'
 } as const
 
 export type PaymentProviderType = (typeof PaymentProviderType)[keyof typeof PaymentProviderType]
@@ -240,3 +241,14 @@ export const ExportFormat = {
 } as const
 
 export type ExportFormat = (typeof ExportFormat)[keyof typeof ExportFormat]
+
+
+export const DonationStatus = {
+  PENDING: 'PENDING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  REFUNDED: 'REFUNDED'
+} as const
+
+export type DonationStatus = (typeof DonationStatus)[keyof typeof DonationStatus]

@@ -15,6 +15,7 @@ import { IPaymentProvider } from '../interfaces/payment-provider.interface'
 import { PaymentProviderType, type PaymentProvider } from '@prisma/generated/client'
 import { YookassaProvider } from '../providers/yookassa.provider'
 import { StripeProvider } from '../providers/stripe.provider'
+import { TelegramStarsProvider } from '../providers/telegram-stars.provider'
 
 @Injectable()
 export class PaymentProviderFactory {
@@ -93,6 +94,13 @@ export class PaymentProviderFactory {
         provider = new StripeProvider(
           this.configService,
           this.systemSettings,
+          this.logger,
+        )
+        break
+
+      case PaymentProviderType.TELEGRAM_STARS:
+        provider = new TelegramStarsProvider(
+          this.configService,
           this.logger,
         )
         break

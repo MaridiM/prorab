@@ -247,3 +247,8 @@ export type DataRetentionPolicy = Prisma.DataRetentionPolicyModel
  * 
  */
 export type DataExportRequest = Prisma.DataExportRequestModel
+/**
+ * Model Donation
+ * 
+ */
+export type Donation = Prisma.DonationModel

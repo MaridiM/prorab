@@ -50,6 +50,7 @@ export type UserMinAggregateOutputType = {
   storageMigratedAt: Date | null
   businessRole: $Enums.BusinessRole | null
   businessRoleAssignedAt: Date | null
+  hasDonatorBadge: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -80,6 +81,7 @@ export type UserMaxAggregateOutputType = {
   storageMigratedAt: Date | null
   businessRole: $Enums.BusinessRole | null
   businessRoleAssignedAt: Date | null
+  hasDonatorBadge: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -112,6 +114,7 @@ export type UserCountAggregateOutputType = {
   businessRole: number
   businessRoleAssignedAt: number
   trialedPlanIds: number
+  hasDonatorBadge: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -144,6 +147,7 @@ export type UserMinAggregateInputType = {
   storageMigratedAt?: true
   businessRole?: true
   businessRoleAssignedAt?: true
+  hasDonatorBadge?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -174,6 +178,7 @@ export type UserMaxAggregateInputType = {
   storageMigratedAt?: true
   businessRole?: true
   businessRoleAssignedAt?: true
+  hasDonatorBadge?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -206,6 +211,7 @@ export type UserCountAggregateInputType = {
   businessRole?: true
   businessRoleAssignedAt?: true
   trialedPlanIds?: true
+  hasDonatorBadge?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -311,6 +317,7 @@ export type UserGroupByOutputType = {
   businessRole: $Enums.BusinessRole | null
   businessRoleAssignedAt: Date | null
   trialedPlanIds: string[]
+  hasDonatorBadge: boolean
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -364,6 +371,7 @@ export type UserWhereInput = {
   businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   trialedPlanIds?: Prisma.StringNullableListFilter<"User">
+  hasDonatorBadge?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -380,6 +388,7 @@ export type UserWhereInput = {
   createdTemplates?: Prisma.TeamTemplateListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  donations?: Prisma.DonationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -410,6 +419,7 @@ export type UserOrderByWithRelationInput = {
   businessRole?: Prisma.SortOrderInput | Prisma.SortOrder
   businessRoleAssignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialedPlanIds?: Prisma.SortOrder
+  hasDonatorBadge?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   verificationTokens?: Prisma.VerificationTokenOrderByRelationAggregateInput
@@ -426,6 +436,7 @@ export type UserOrderByWithRelationInput = {
   createdTemplates?: Prisma.TeamTemplateOrderByRelationAggregateInput
   loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  donations?: Prisma.DonationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -459,6 +470,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   trialedPlanIds?: Prisma.StringNullableListFilter<"User">
+  hasDonatorBadge?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   verificationTokens?: Prisma.VerificationTokenListRelationFilter
@@ -475,6 +487,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdTemplates?: Prisma.TeamTemplateListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  donations?: Prisma.DonationListRelationFilter
 }, "id" | "email" | "emailNormalized" | "telegramChatId">
 
 export type UserOrderByWithAggregationInput = {
@@ -505,6 +518,7 @@ export type UserOrderByWithAggregationInput = {
   businessRole?: Prisma.SortOrderInput | Prisma.SortOrder
   businessRoleAssignedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialedPlanIds?: Prisma.SortOrder
+  hasDonatorBadge?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -543,6 +557,7 @@ export type UserScalarWhereWithAggregatesInput = {
   businessRole?: Prisma.EnumBusinessRoleNullableWithAggregatesFilter<"User"> | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   trialedPlanIds?: Prisma.StringNullableListFilter<"User">
+  hasDonatorBadge?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -574,6 +589,7 @@ export type UserCreateInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -590,6 +606,7 @@ export type UserCreateInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -620,6 +637,7 @@ export type UserUncheckedCreateInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -635,6 +653,7 @@ export type UserUncheckedCreateInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -664,6 +683,7 @@ export type UserUpdateInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -680,6 +700,7 @@ export type UserUpdateInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -710,6 +731,7 @@ export type UserUncheckedUpdateInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -725,6 +747,7 @@ export type UserUncheckedUpdateInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -755,6 +778,7 @@ export type UserCreateManyInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -786,6 +810,7 @@ export type UserUpdateManyMutationInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -818,6 +843,7 @@ export type UserUncheckedUpdateManyInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -858,6 +884,7 @@ export type UserCountOrderByAggregateInput = {
   businessRole?: Prisma.SortOrder
   businessRoleAssignedAt?: Prisma.SortOrder
   trialedPlanIds?: Prisma.SortOrder
+  hasDonatorBadge?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -888,6 +915,7 @@ export type UserMaxOrderByAggregateInput = {
   storageMigratedAt?: Prisma.SortOrder
   businessRole?: Prisma.SortOrder
   businessRoleAssignedAt?: Prisma.SortOrder
+  hasDonatorBadge?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -918,6 +946,7 @@ export type UserMinOrderByAggregateInput = {
   storageMigratedAt?: Prisma.SortOrder
   businessRole?: Prisma.SortOrder
   businessRoleAssignedAt?: Prisma.SortOrder
+  hasDonatorBadge?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1207,6 +1236,20 @@ export type UserUpdateOneRequiredWithoutCreatedTemplatesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedTemplatesInput, Prisma.UserUpdateWithoutCreatedTemplatesInput>, Prisma.UserUncheckedUpdateWithoutCreatedTemplatesInput>
 }
 
+export type UserCreateNestedOneWithoutDonationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDonationsInput, Prisma.UserUncheckedCreateWithoutDonationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDonationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDonationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDonationsInput, Prisma.UserUncheckedCreateWithoutDonationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDonationsInput
+  upsert?: Prisma.UserUpsertWithoutDonationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDonationsInput, Prisma.UserUpdateWithoutDonationsInput>, Prisma.UserUncheckedUpdateWithoutDonationsInput>
+}
+
 export type UserCreateWithoutNotificationSettingsInput = {
   id?: string
   email: string
@@ -1234,6 +1277,7 @@ export type UserCreateWithoutNotificationSettingsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1249,6 +1293,7 @@ export type UserCreateWithoutNotificationSettingsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationSettingsInput = {
@@ -1279,6 +1324,7 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1293,6 +1339,7 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationSettingsInput = {
@@ -1338,6 +1385,7 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1353,6 +1401,7 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
@@ -1383,6 +1432,7 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1397,6 +1447,7 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVerificationTokensInput = {
@@ -1426,6 +1477,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1441,6 +1493,7 @@ export type UserCreateWithoutVerificationTokensInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -1471,6 +1524,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1485,6 +1539,7 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -1530,6 +1585,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1545,6 +1601,7 @@ export type UserUpdateWithoutVerificationTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -1575,6 +1632,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1589,6 +1647,7 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1618,6 +1677,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1633,6 +1693,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1663,6 +1724,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1677,6 +1739,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1722,6 +1785,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1737,6 +1801,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1767,6 +1832,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1781,6 +1847,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLoginHistoryInput = {
@@ -1810,6 +1877,7 @@ export type UserCreateWithoutLoginHistoryInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -1825,6 +1893,7 @@ export type UserCreateWithoutLoginHistoryInput = {
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLoginHistoryInput = {
@@ -1855,6 +1924,7 @@ export type UserUncheckedCreateWithoutLoginHistoryInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1869,6 +1939,7 @@ export type UserUncheckedCreateWithoutLoginHistoryInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLoginHistoryInput = {
@@ -1914,6 +1985,7 @@ export type UserUpdateWithoutLoginHistoryInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -1929,6 +2001,7 @@ export type UserUpdateWithoutLoginHistoryInput = {
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLoginHistoryInput = {
@@ -1959,6 +2032,7 @@ export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1973,6 +2047,7 @@ export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -2002,6 +2077,7 @@ export type UserCreateWithoutSessionsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2017,6 +2093,7 @@ export type UserCreateWithoutSessionsInput = {
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -2047,6 +2124,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2061,6 +2139,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2106,6 +2185,7 @@ export type UserUpdateWithoutSessionsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2121,6 +2201,7 @@ export type UserUpdateWithoutSessionsInput = {
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -2151,6 +2232,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2165,6 +2247,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedTeamsInput = {
@@ -2194,6 +2277,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2209,6 +2293,7 @@ export type UserCreateWithoutOwnedTeamsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedTeamsInput = {
@@ -2239,6 +2324,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2253,6 +2339,7 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedTeamsInput = {
@@ -2287,6 +2374,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2302,6 +2390,7 @@ export type UserCreateWithoutCurrentTeamInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCurrentTeamInput = {
@@ -2331,6 +2420,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2346,6 +2436,7 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCurrentTeamInput = {
@@ -2396,6 +2487,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2411,6 +2503,7 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
@@ -2441,6 +2534,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2455,6 +2549,7 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutCurrentTeamInput = {
@@ -2504,6 +2599,7 @@ export type UserScalarWhereInput = {
   businessRole?: Prisma.EnumBusinessRoleNullableFilter<"User"> | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   trialedPlanIds?: Prisma.StringNullableListFilter<"User">
+  hasDonatorBadge?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
@@ -2535,6 +2631,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2550,6 +2647,7 @@ export type UserCreateWithoutTeamMembershipsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -2580,6 +2678,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2594,6 +2693,7 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -2639,6 +2739,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2654,6 +2755,7 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -2684,6 +2786,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2698,6 +2801,7 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSalaryChangesInput = {
@@ -2727,6 +2831,7 @@ export type UserCreateWithoutSalaryChangesInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2742,6 +2847,7 @@ export type UserCreateWithoutSalaryChangesInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSalaryChangesInput = {
@@ -2772,6 +2878,7 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2786,6 +2893,7 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSalaryChangesInput = {
@@ -2831,6 +2939,7 @@ export type UserUpdateWithoutSalaryChangesInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -2846,6 +2955,7 @@ export type UserUpdateWithoutSalaryChangesInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryChangesInput = {
@@ -2876,6 +2986,7 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2890,6 +3001,7 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTasksInput = {
@@ -2919,6 +3031,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -2934,6 +3047,7 @@ export type UserCreateWithoutCreatedTasksInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTasksInput = {
@@ -2964,6 +3078,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2978,6 +3093,7 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTasksInput = {
@@ -3023,6 +3139,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3038,6 +3155,7 @@ export type UserUpdateWithoutCreatedTasksInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTasksInput = {
@@ -3068,6 +3186,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3082,6 +3201,7 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -3111,6 +3231,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -3126,6 +3247,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -3156,6 +3278,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3170,6 +3293,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -3215,6 +3339,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3230,6 +3355,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -3260,6 +3386,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3274,6 +3401,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminRoleInput = {
@@ -3303,6 +3431,7 @@ export type UserCreateWithoutAdminRoleInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -3318,6 +3447,7 @@ export type UserCreateWithoutAdminRoleInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminRoleInput = {
@@ -3348,6 +3478,7 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3362,6 +3493,7 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminRoleInput = {
@@ -3407,6 +3539,7 @@ export type UserUpdateWithoutAdminRoleInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3422,6 +3555,7 @@ export type UserUpdateWithoutAdminRoleInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminRoleInput = {
@@ -3452,6 +3586,7 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3466,6 +3601,7 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminActionLogsInput = {
@@ -3495,6 +3631,7 @@ export type UserCreateWithoutAdminActionLogsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -3510,6 +3647,7 @@ export type UserCreateWithoutAdminActionLogsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminActionLogsInput = {
@@ -3540,6 +3678,7 @@ export type UserUncheckedCreateWithoutAdminActionLogsInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3554,6 +3693,7 @@ export type UserUncheckedCreateWithoutAdminActionLogsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminActionLogsInput = {
@@ -3599,6 +3739,7 @@ export type UserUpdateWithoutAdminActionLogsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3614,6 +3755,7 @@ export type UserUpdateWithoutAdminActionLogsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
@@ -3644,6 +3786,7 @@ export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3658,6 +3801,7 @@ export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTemplatesInput = {
@@ -3687,6 +3831,7 @@ export type UserCreateWithoutCreatedTemplatesInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
@@ -3702,6 +3847,7 @@ export type UserCreateWithoutCreatedTemplatesInput = {
   adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
@@ -3732,6 +3878,7 @@ export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3746,6 +3893,7 @@ export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTemplatesInput = {
@@ -3791,6 +3939,7 @@ export type UserUpdateWithoutCreatedTemplatesInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3806,6 +3955,7 @@ export type UserUpdateWithoutCreatedTemplatesInput = {
   adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
@@ -3836,6 +3986,7 @@ export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3848,6 +3999,207 @@ export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
   salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDonationsInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
+  currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
+  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
+  createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDonationsInput = {
+  id?: string
+  email: string
+  emailNormalized: string
+  emailVerified?: boolean
+  passwordHash?: string | null
+  fullName: string
+  phone?: string | null
+  avatarUrl?: string | null
+  hasCompletedOnboarding?: boolean
+  onboardingCompletedAt?: Date | string | null
+  currentTeamId?: string | null
+  oauthProvider?: string | null
+  oauthProviderId?: string | null
+  telegramChatId?: string | null
+  telegramFirstName?: string | null
+  telegramLastName?: string | null
+  telegramUsername?: string | null
+  telegramPhotoUrl?: string | null
+  twoFactorEnabled?: boolean
+  twoFactorSecret?: string | null
+  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
+  storagePreference?: $Enums.StorageProviderType | null
+  storageMigratedFrom?: $Enums.StorageProviderType | null
+  storageMigratedAt?: Date | string | null
+  businessRole?: $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Date | string | null
+  trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedCreateNestedOneWithoutUserInput
+  ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
+  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
+  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
+  createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDonationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDonationsInput, Prisma.UserUncheckedCreateWithoutDonationsInput>
+}
+
+export type UserUpsertWithoutDonationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDonationsInput, Prisma.UserUncheckedUpdateWithoutDonationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDonationsInput, Prisma.UserUncheckedCreateWithoutDonationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDonationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDonationsInput, Prisma.UserUncheckedUpdateWithoutDonationsInput>
+}
+
+export type UserUpdateWithoutDonationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
+  currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
+  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
+  createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDonationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  currentTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
+  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
+  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
+  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
+  ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
+  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
+  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
+  createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -3879,6 +4231,7 @@ export type UserCreateManyCurrentTeamInput = {
   businessRole?: $Enums.BusinessRole | null
   businessRoleAssignedAt?: Date | string | null
   trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -3910,6 +4263,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
@@ -3925,6 +4279,7 @@ export type UserUpdateWithoutCurrentTeamInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCurrentTeamInput = {
@@ -3954,6 +4309,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3969,6 +4325,7 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
@@ -3998,6 +4355,7 @@ export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
   businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
   businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
+  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -4019,6 +4377,7 @@ export type UserCountOutputType = {
   createdTemplates: number
   loginHistory: number
   sessions: number
+  donations: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4033,6 +4392,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   createdTemplates?: boolean | UserCountOutputTypeCountCreatedTemplatesArgs
   loginHistory?: boolean | UserCountOutputTypeCountLoginHistoryArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  donations?: boolean | UserCountOutputTypeCountDonationsArgs
 }
 
 /**
@@ -4122,6 +4482,13 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.SessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDonationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DonationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4151,6 +4518,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   businessRole?: boolean
   businessRoleAssignedAt?: boolean
   trialedPlanIds?: boolean
+  hasDonatorBadge?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
@@ -4167,6 +4535,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdTemplates?: boolean | Prisma.User$createdTemplatesArgs<ExtArgs>
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  donations?: boolean | Prisma.User$donationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4198,6 +4567,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   businessRole?: boolean
   businessRoleAssignedAt?: boolean
   trialedPlanIds?: boolean
+  hasDonatorBadge?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -4231,6 +4601,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   businessRole?: boolean
   businessRoleAssignedAt?: boolean
   trialedPlanIds?: boolean
+  hasDonatorBadge?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   currentTeam?: boolean | Prisma.User$currentTeamArgs<ExtArgs>
@@ -4264,11 +4635,12 @@ export type UserSelectScalar = {
   businessRole?: boolean
   businessRoleAssignedAt?: boolean
   trialedPlanIds?: boolean
+  hasDonatorBadge?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramFirstName" | "telegramLastName" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "businessRole" | "businessRoleAssignedAt" | "trialedPlanIds" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "emailNormalized" | "emailVerified" | "passwordHash" | "fullName" | "phone" | "avatarUrl" | "hasCompletedOnboarding" | "onboardingCompletedAt" | "currentTeamId" | "oauthProvider" | "oauthProviderId" | "telegramChatId" | "telegramFirstName" | "telegramLastName" | "telegramUsername" | "telegramPhotoUrl" | "twoFactorEnabled" | "twoFactorSecret" | "twoFactorBackupCodes" | "storagePreference" | "storageMigratedFrom" | "storageMigratedAt" | "businessRole" | "businessRoleAssignedAt" | "trialedPlanIds" | "hasDonatorBadge" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   verificationTokens?: boolean | Prisma.User$verificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -4284,6 +4656,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdTemplates?: boolean | Prisma.User$createdTemplatesArgs<ExtArgs>
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  donations?: boolean | Prisma.User$donationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4310,6 +4683,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdTemplates: Prisma.$TeamTemplatePayload<ExtArgs>[]
     loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    donations: Prisma.$DonationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4339,6 +4713,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     businessRole: $Enums.BusinessRole | null
     businessRoleAssignedAt: Date | null
     trialedPlanIds: string[]
+    hasDonatorBadge: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -4749,6 +5124,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   createdTemplates<T extends Prisma.User$createdTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   loginHistory<T extends Prisma.User$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  donations<T extends Prisma.User$donationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$donationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4805,6 +5181,7 @@ export interface UserFieldRefs {
   readonly businessRole: Prisma.FieldRef<"User", 'BusinessRole'>
   readonly businessRoleAssignedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly trialedPlanIds: Prisma.FieldRef<"User", 'String[]'>
+  readonly hasDonatorBadge: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -5521,6 +5898,30 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.donations
+ */
+export type User$donationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Donation
+   */
+  select?: Prisma.DonationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Donation
+   */
+  omit?: Prisma.DonationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DonationInclude<ExtArgs> | null
+  where?: Prisma.DonationWhereInput
+  orderBy?: Prisma.DonationOrderByWithRelationInput | Prisma.DonationOrderByWithRelationInput[]
+  cursor?: Prisma.DonationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DonationScalarFieldEnum | Prisma.DonationScalarFieldEnum[]
 }
 
 /**

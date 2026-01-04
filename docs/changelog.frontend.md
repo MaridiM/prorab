@@ -5,6 +5,130 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-04 - Система Донатов UI 🎁
+
+### Added
+- **Donation Dialog Component**: Диалог создания доната
+  - Preset кнопки с суммами: 100₽, 300₽, 500₽, 1000₽
+  - Поле для произвольной суммы (от 50₽ до 100,000₽)
+  - Textarea для сообщения (макс 500 символов)
+  - Input для имени донатора
+  - Checkbox "Сделать донат анонимным"
+  - Валидация суммы и автоматический выбор провайдера
+  - Интеграция с мутацией `createDonation`
+
+- **Donations History Component**: История донатов пользователя
+  - Список всех донатов с датами и суммами
+  - Иконки статусов: CheckCircle (SUCCEEDED), Clock (PENDING), XCircle (FAILED)
+  - Отображение сообщений от донатора
+  - Skeleton loader при загрузке
+  - Пустое состояние "У вас пока нет донатов"
+
+- **Settings Page Updates**: Интеграция донатов в настройки
+  - Обновлена кнопка "Поддержать" - открывает Donation Dialog
+  - Новая вкладка "Мои донаты" с иконкой Coffee
+  - Отображение истории донатов в отдельной секции
+  - Замена toast сообщения на реальный функционал
+
+- **Donation Success Page**: Страница благодарности
+  - Иконка успеха с анимацией
+  - Заголовок "Спасибо за поддержку!"
+  - Информация о полученном бейдже благодарности
+  - Кнопки навигации: "Перейти в профиль", "Вернуться на главную"
+  - Получение donationId из URL параметров
+
+- **GraphQL Integration**: Запросы и мутации для донатов
+  - Файл `donations.graphql` с типами и operations
+  - Мутация `CREATE_DONATION` в `donations.ts`
+  - Query `GET_MY_DONATIONS` для истории
+  - Query `GET_DONATION_STATS` для статистики
+
+- **Donator Badge**: Бейдж благодарности на аватаре
+  - Props `showDonatorBadge` в Avatar component
+  - Иконка Coffee в правом нижнем углу аватара
+  - Отображается для пользователей с `hasDonatorBadge = true`
+
+### Changed
+- **Settings Page**: Переработан блок "Поддержите разработку"
+  - Кнопка теперь открывает полноценный диалог вместо toast
+  - Добавлена интеграция с системой платежей
+  - Поддержка всех трех провайдеров: YooKassa, Stripe, Telegram Stars
+
+### UI/UX Improvements
+- Градиентные кнопки для preset сумм с иконками
+- Адаптивный дизайн диалога для мобильных устройств
+- Плавные анимации появления элементов
+- Информация о способах оплаты в диалоге
+
+### Technical Details
+- Создано 4 новых компонента в `packages/components/donations/`
+- Создана страница `/donation/success` для благодарности
+- Интеграция с Apollo Client для GraphQL запросов
+- Использование React Hook Form для валидации форм
+
+## [1.6.22] - 2026-01-04 - Telegram Integration UI & Account Deletion Fixes
+
+### Fixed
+- **Telegram Connection Status**: Исправлена проблема с отображением статуса подключения Telegram
+  - Добавлены поля `telegramChatId` и `telegramUsername` в GraphQL запрос `Me`
+  - UI теперь корректно обновляется после подключения Telegram без перезагрузки страницы
+  - Статус "Подключено: @username" отображается сразу после успешного подключения
+- **Account Deletion Redirect**: Исправлена проблема с редиректом после удаления аккаунта
+  - Редирект теперь происходит на `/auth/login` вместо главной страницы
+  - Добавлена очистка Apollo кэша перед редиректом
+  - Добавлен вызов `logout()` для очистки сессии и cookies
+- **2FA Backup Codes Display**: Исправлена проблема с отображением резервных кодов 2FA
+  - Коды теперь корректно отображаются в диалоге после ввода 2FA кода
+  - Исправлена логика показа диалога с кодами
+- **2FA Token Verification**: Улучшено логирование для отладки проблем с токенами 2FA
+  - Добавлено детальное логирование операций Redis для диагностики
+  - Исправлен метод `set` в RedisService для использования `setEx` вместо `set` с опциями
+
+### Added
+- **Telegram Unlink Functionality**: Добавлена возможность отключения Telegram
+  - Кнопка "Отключить" теперь активна и работает
+  - Добавлен диалог подтверждения отключения с предупреждением
+  - При отключении удаляются все данные Telegram из аккаунта
+- **Telegram Notification Testing**: Добавлена кнопка тестирования Telegram уведомлений
+  - Кнопка "Тест" (🧪) появляется когда Telegram подключен
+  - Отправляет тестовое сообщение в Telegram бот для проверки работы уведомлений
+  - Показывает результат отправки (успех/ошибка)
+- **Telegram Link Status Check**: Добавлена поддержка новой мутации для проверки статуса связывания
+  - Компонент `TelegramConnection` использует `checkTelegramLinkStatus` вместо `checkTelegramAuth`
+  - Предотвращает создание нового аккаунта при связывании Telegram
+
+### Changed
+- **Telegram Connection Component**: Улучшен компонент подключения Telegram
+  - Убрана перезагрузка страницы после подключения, используется `refetchMe`
+  - Добавлены колбэки `onLinkSuccess` и `onUnlink` для обновления данных
+  - UI обновляется автоматически через Apollo cache refetch
+- **Account Deletion Flow**: Улучшен процесс удаления аккаунта
+  - Добавлена очистка Apollo кэша перед редиректом
+  - Добавлен вызов `logout()` для полной очистки состояния авторизации
+  - Редирект происходит на страницу логина вместо главной страницы
+
+### Technical Details
+- Модифицированные файлы:
+  - `apps/web/src/packages/api/graphql/auth.graphql`
+    - Добавлены поля `telegramChatId` и `telegramUsername` в запрос `Me`
+    - Добавлена мутация `SendTestTelegramNotification`
+    - Добавлена мутация `CheckTelegramLinkStatus`
+  - `apps/web/src/packages/components/settings/telegram-connection.tsx`
+    - Добавлена функциональность отключения Telegram с диалогом подтверждения
+    - Добавлена кнопка тестирования уведомлений
+    - Использование `checkTelegramLinkStatus` вместо `checkTelegramAuth`
+    - Автоматическое обновление UI через `refetchMe`
+  - `apps/web/src/packages/components/settings/DeleteAccountDialog.tsx`
+    - Исправлен редирект на `/auth/login`
+    - Добавлена очистка Apollo кэша
+    - Добавлен вызов `logout()` для очистки сессии
+  - `apps/web/src/packages/components/settings/TwoFactorAuth.tsx`
+    - Исправлена логика показа диалога с резервными кодами
+  - `apps/web/src/app/(root)/(protected)/settings/page.tsx`
+    - Переданы колбэки `refetchMe` в компонент `TelegramConnection`
+
+---
+
 ## [1.6.21] - 2026-01-02 - Seed Users Roles & Permissions Update
 
 ### Fixed

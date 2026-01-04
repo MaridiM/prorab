@@ -75,6 +75,22 @@ export interface IPaymentProvider {
    * Cancel a subscription
    */
   cancelSubscription?(subscriptionId: string): Promise<void>
+
+  /**
+   * Create a donation payment
+   * Optional method for donation-specific handling
+   * @param params - Donation creation parameters
+   * @returns Payment result with confirmation URL
+   */
+  createDonation?(params: CreateDonationParams): Promise<PaymentResult>
+
+  /**
+   * Create Telegram invoice for donations
+   * Telegram Stars specific method
+   * @param params - Telegram invoice parameters
+   * @returns Invoice result with invoice link
+   */
+  createTelegramInvoice?(params: CreateTelegramInvoiceParams): Promise<TelegramInvoiceResult>
 }
 
 /**
@@ -259,4 +275,90 @@ export interface WebhookEvent {
 
   /** Created at timestamp */
   createdAt: Date
+}
+
+/**
+ * Parameters for creating a donation
+ */
+export interface CreateDonationParams {
+  /** Donation amount */
+  amount: number
+
+  /** Currency code (RUB, USD, EUR, XTR for Telegram Stars) */
+  currency: string
+
+  /** Return URL after payment */
+  returnUrl: string
+
+  /** Donor message (optional) */
+  message?: string
+
+  /** Donor name (optional) */
+  donorName?: string
+
+  /** Is anonymous donation */
+  isAnonymous?: boolean
+
+  /** Customer email (optional) */
+  customerEmail?: string
+
+  /** Metadata to attach to donation */
+  metadata?: {
+    donationId: string
+    userId: string
+    [key: string]: any
+  }
+
+  /** Idempotency key (optional, for retries) */
+  idempotencyKey?: string
+}
+
+/**
+ * Parameters for creating Telegram invoice
+ * Used by Telegram Stars provider
+ */
+export interface CreateTelegramInvoiceParams {
+  /** Chat ID to send invoice to */
+  chatId: number
+
+  /** Invoice title */
+  title: string
+
+  /** Invoice description */
+  description: string
+
+  /** Payment payload (for identifying payment) */
+  payload: string
+
+  /** Price in Telegram Stars */
+  prices: Array<{
+    label: string
+    amount: number
+  }>
+
+  /** Photo URL (optional) */
+  photoUrl?: string
+
+  /** Photo size (optional) */
+  photoSize?: number
+
+  /** Photo width (optional) */
+  photoWidth?: number
+
+  /** Photo height (optional) */
+  photoHeight?: number
+}
+
+/**
+ * Telegram invoice creation result
+ */
+export interface TelegramInvoiceResult {
+  /** Telegram message ID */
+  messageId: number
+
+  /** Invoice link (for web payments) */
+  invoiceLink?: string
+
+  /** Success status */
+  success: boolean
 }

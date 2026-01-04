@@ -14,6 +14,7 @@ import { WorkLogsModule } from './modules/work-logs/work-logs.module'
 import { TasksModule } from './modules/tasks/tasks.module'
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module'
 import { PaymentsModule } from './modules/payments/payments.module'
+import { DonationsModule } from './modules/donations/donations.module'
 import { TelegramModule } from './modules/telegram/telegram.module'
 import { MailModule } from './core/mail/mail.module'
 import { StorageModule } from './core/storage/storage.module'
@@ -34,6 +35,7 @@ import { AuthGuard } from './shared/guards/auth.guard'
 		TasksModule,
 		SubscriptionsModule,
 		PaymentsModule,
+		DonationsModule,
 		TelegramModule,
 		MailModule,
 		StorageModule,

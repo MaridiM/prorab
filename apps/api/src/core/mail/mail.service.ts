@@ -830,6 +830,103 @@ export class MailService {
 `
 	}
 
+	async sendDonationThankYouEmail(
+		email: string,
+		name: string,
+		amount: string,
+		currency: string,
+		message?: string,
+	): Promise<boolean> {
+		const sendSmtpEmail = new Brevo.SendSmtpEmail()
+		sendSmtpEmail.subject = '❤️ Спасибо за поддержку — ProRab.space'
+		sendSmtpEmail.sender = { email: this.fromEmail, name: this.fromName }
+		sendSmtpEmail.to = [{ email, name: name || email }]
+		sendSmtpEmail.htmlContent = this.getDonationThankYouTemplate(
+			name || 'Пользователь',
+			amount,
+			currency,
+			message,
+		)
+
+		try {
+			await this.apiInstance.sendTransacEmail(sendSmtpEmail)
+			this.logger.log(`Donation thank you email sent to ${email}`)
+			return true
+		} catch (error) {
+			this.logger.error(`Failed to send donation thank you email to ${email}`, error)
+			return false
+		}
+	}
+
+	private getDonationThankYouTemplate(
+		name: string,
+		amount: string,
+		currency: string,
+		message?: string,
+	): string {
+		return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 36px; margin: 0;">
+        ❤️ Огромное спасибо!
+      </h1>
+    </div>
+
+    <p style="color: #333333; font-size: 18px; line-height: 1.6;">
+      Здравствуйте, ${name}!
+    </p>
+
+    <p style="color: #333333; font-size: 16px; line-height: 1.6;">
+      Ваш донат помогает нам развивать ProRab.space и делать сервис лучше для всех пользователей. Мы невероятно ценим вашу поддержку!
+    </p>
+
+    <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-left: 4px solid #667eea; padding: 25px; margin: 30px 0; border-radius: 8px;">
+      <p style="margin: 0 0 10px 0; color: #333333; font-size: 24px; font-weight: bold;">
+        ${amount} ${currency}
+      </p>
+      ${message ? `<p style="margin: 0; color: #666666; font-size: 14px; font-style: italic;">"${message}"</p>` : ''}
+    </div>
+
+    <div style="background-color: #f0fdf4; border: 2px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 8px; text-align: center;">
+      <p style="margin: 0; color: #166534; font-size: 16px;">
+        <strong>🎉 Вы получили бейдж благодарности!</strong>
+      </p>
+      <p style="margin: 10px 0 0 0; color: #166534; font-size: 14px;">
+        Теперь на вашем аватаре будет отображаться специальный значок, показывающий, что вы поддержали проект.
+      </p>
+    </div>
+
+    <p style="color: #333333; font-size: 16px; line-height: 1.6;">
+      Благодаря таким пользователям, как вы, мы можем продолжать улучшать платформу, добавлять новые функции и предоставлять качественную поддержку.
+    </p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${this.frontendUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+        Перейти в ProRab.space
+      </a>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
+
+    <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
+      Ещё раз спасибо за вашу поддержку! ❤️
+    </p>
+
+    <p style="color: #999999; font-size: 12px; text-align: center;">
+      Если у вас есть вопросы, свяжитесь с нами через support@prorab.space
+    </p>
+  </div>
+</body>
+</html>
+`
+	}
+
 	private getRefundSuccessTemplate(
 		name: string,
 		amount: string,

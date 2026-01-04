@@ -13,6 +13,8 @@ import { ConfigService } from '@nestjs/config'
 import { TelegramSupportService } from './telegram-support.service'
 import { FAQService } from './faq.service'
 import { UsersService } from '../users/users.service'
+import { DonationsService } from '../donations/donations.service'
+import { PrismaService } from '../../core/prisma/prisma.service'
 
 @Update()
 @Injectable()
@@ -25,6 +27,8 @@ export class TelegramSupportBot {
 		private readonly supportService: TelegramSupportService,
 		private readonly faqService: FAQService,
 		private readonly usersService: UsersService,
+		private readonly donationsService: DonationsService,
+		private readonly prisma: PrismaService,
 	) {
 		const botToken = config.get<string>('telegramSupport.botToken')
 		const botUsername = config.get<string>('telegramSupport.botUsername', 'ProRabSupportBot')
@@ -52,6 +56,7 @@ export class TelegramSupportBot {
 			await this.bot.telegram.setMyCommands([
 				{ command: 'start', description: '🏠 Главное меню' },
 				{ command: 'help', description: '📚 Справка по командам' },
+				{ command: 'donate', description: '❤️ Поддержать проект' },
 				{ command: 'status', description: '📊 Статус обращения' },
 				{ command: 'cancel', description: '❌ Отменить обращение' },
 			])
@@ -420,6 +425,86 @@ export class TelegramSupportBot {
 		}
 	}
 
+	@Command('donate')
+	async onDonate(@Ctx() ctx: Context): Promise<void> {
+		// Check if this is our bot (Support bot)
+		const botInfo = await ctx.telegram.getMe()
+		const expectedBotUsername = this.config.get<string>('telegramSupport.botUsername', 'ProRabSupportBot')
+		if (botInfo.username !== expectedBotUsername) {
+			return // Skip if not our bot
+		}
+
+		const chatId = ctx.chat?.id?.toString()
+		if (!chatId) {
+			this.logger.error(`[ProRabSupportBot] /donate: No chatId in context`)
+			return
+		}
+
+		this.logger.log(`[ProRabSupportBot] /donate command received from chat ${chatId}`)
+
+		try {
+			let user = null
+			try {
+				user = await this.usersService.findByTelegramChatId(chatId)
+				this.logger.log(`[ProRabSupportBot] Database query completed for /donate, user: ${user ? user.fullName : 'not found'}`)
+			} catch (dbError: any) {
+				this.logger.error(`[ProRabSupportBot] Database error in /donate for chat ${chatId}:`, {
+					message: dbError?.message,
+					stack: dbError?.stack,
+					name: dbError?.name,
+				})
+			}
+
+			if (!user) {
+				try {
+					await ctx.reply(
+						'⚠️ Сначала авторизуйтесь через @ProRabSpaceBot\n\n' +
+							'Чтобы поддержать проект, сначала войдите на платформу:\n\n' +
+							'1️⃣ Откройте @ProRabSpaceBot\n' +
+							'2️⃣ Авторизуйтесь на сайте через него\n' +
+							'3️⃣ Вернитесь сюда и используйте /donate\n\n' +
+							'После авторизации вам станут доступны все функции!',
+						{
+							parse_mode: 'Markdown',
+							link_preview_options: { is_disabled: true },
+						},
+					)
+					this.logger.log(`[ProRabSupportBot] Auth message sent for /donate to chat ${chatId}`)
+				} catch (replyError: any) {
+					this.logger.error(`[ProRabSupportBot] Failed to send auth message in /donate:`, {
+						message: replyError?.message,
+						stack: replyError?.stack,
+					})
+				}
+				return
+			}
+
+			// Show donation options
+			await ctx.reply(
+				'❤️ *Поддержите ProRab.space!*\n\n' +
+					'Ваши донаты помогают нам развивать платформу и делать её лучше.\n\n' +
+					'Выберите сумму доната в Telegram Stars:',
+				{
+					parse_mode: 'Markdown',
+					...Markup.inlineKeyboard([
+						[
+							Markup.button.callback('⭐ 50 Stars (100₽)', 'donate_50'),
+							Markup.button.callback('⭐ 150 Stars (300₽)', 'donate_150'),
+						],
+						[
+							Markup.button.callback('⭐ 250 Stars (500₽)', 'donate_250'),
+							Markup.button.callback('⭐ 500 Stars (1000₽)', 'donate_500'),
+						],
+						[Markup.button.callback('💬 Своя сумма', 'donate_custom')],
+					]),
+				},
+			)
+		} catch (error) {
+			this.logger.error(`[ProRabSupportBot] Error in /donate:`, error)
+			await ctx.reply('Произошла ошибка. Попробуйте ещё раз.')
+		}
+	}
+
 	// ==================== Text Messages ====================
 
 	@On('text')
@@ -589,6 +674,9 @@ export class TelegramSupportBot {
 						[Markup.button.callback('❌ Нет', 'cancel_action')],
 					]),
 				)
+			} else if (data.startsWith('donate_')) {
+				await this.handleDonateCallback(ctx, data)
+				return // Return early as handleDonateCallback sends the invoice
 			}
 
 			await ctx.answerCbQuery()
@@ -868,6 +956,148 @@ export class TelegramSupportBot {
 				link_preview_options: { is_disabled: true },
 			},
 		)
+	}
+
+	// ==================== Donations ====================
+
+	private async handleDonateCallback(ctx: Context, data: string): Promise<void> {
+		const chatId = ctx.chat?.id
+		if (!chatId) {
+			this.logger.error(`[ProRabSupportBot] handleDonateCallback: No chatId`)
+			return
+		}
+
+		try {
+			const user = await this.usersService.findByTelegramChatId(chatId.toString())
+			if (!user) {
+				await ctx.answerCbQuery('❌ Ошибка авторизации')
+				return
+			}
+
+			// Parse amount from callback data
+			let starsAmount: number
+			if (data === 'donate_50') {
+				starsAmount = 50
+			} else if (data === 'donate_150') {
+				starsAmount = 150
+			} else if (data === 'donate_250') {
+				starsAmount = 250
+			} else if (data === 'donate_500') {
+				starsAmount = 500
+			} else if (data === 'donate_custom') {
+				await ctx.answerCbQuery()
+				await ctx.reply(
+					'💬 Введите сумму в Telegram Stars (от 25 до 2500):\n\n' +
+						'Например: 100',
+				)
+				// TODO: Handle custom amount input via text message
+				return
+			} else {
+				await ctx.answerCbQuery('❌ Неизвестная сумма')
+				return
+			}
+
+			// Create donation in database
+			const donation = await this.prisma.donation.create({
+				data: {
+					userId: user.id,
+					amount: starsAmount * 2, // 1 Star ≈ 2 RUB
+					currency: 'XTR',
+					providerType: 'TELEGRAM_STARS',
+					providerPaymentId: `tg_pending_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+					status: 'PENDING',
+				},
+			})
+
+			// Send invoice
+			await ctx.telegram.sendInvoice(chatId, {
+				title: 'Поддержка ProRab.space',
+				description: `Донат ${starsAmount} Stars в поддержку развития платформы`,
+				payload: JSON.stringify({
+					donationId: donation.id,
+					userId: user.id,
+				}),
+				provider_token: '', // Empty for Telegram Stars
+				currency: 'XTR',
+				prices: [
+					{
+						label: `${starsAmount} Stars`,
+						amount: starsAmount,
+					},
+				],
+			})
+
+			await ctx.answerCbQuery('✅ Инвойс отправлен!')
+			this.logger.log(`[ProRabSupportBot] Invoice sent to chat ${chatId} for ${starsAmount} Stars`)
+		} catch (error) {
+			this.logger.error(`[ProRabSupportBot] Error in handleDonateCallback:`, error)
+			await ctx.answerCbQuery('❌ Ошибка создания инвойса')
+		}
+	}
+
+	@On('pre_checkout_query')
+	async onPreCheckout(@Ctx() ctx: Context): Promise<void> {
+		const query = (ctx as any).update.pre_checkout_query
+		this.logger.log(`[ProRabSupportBot] Pre-checkout query received: ${query.id}`)
+
+		try {
+			// Always approve pre-checkout query for donations
+			await ctx.telegram.answerPreCheckoutQuery(query.id, true)
+			this.logger.log(`[ProRabSupportBot] Pre-checkout query approved: ${query.id}`)
+		} catch (error) {
+			this.logger.error(`[ProRabSupportBot] Error in pre-checkout:`, error)
+			await ctx.telegram.answerPreCheckoutQuery(query.id, false, {
+				error_message: 'Ошибка обработки платежа',
+			})
+		}
+	}
+
+	@On('message')
+	async onSuccessfulPayment(@Ctx() ctx: Context): Promise<void> {
+		const message = (ctx as any).update.message
+
+		// Only handle successful_payment messages
+		if (!message || !message.successful_payment) {
+			return
+		}
+
+		const payment = message.successful_payment
+		this.logger.log(`[ProRabSupportBot] Successful payment received:`, payment)
+
+		try {
+			const payload = JSON.parse(payment.invoice_payload)
+			const donationId = payload.donationId
+			const userId = payload.userId
+
+			// Update donation status
+			await this.prisma.donation.update({
+				where: { id: donationId },
+				data: {
+					status: 'SUCCEEDED',
+					paidAt: new Date(),
+					providerPaymentId: payment.telegram_payment_charge_id,
+				},
+			})
+
+			// Grant donator badge
+			await this.prisma.user.update({
+				where: { id: userId },
+				data: { hasDonatorBadge: true },
+			})
+
+			// Send thank you message
+			await ctx.reply(
+				'❤️ *Огромное спасибо за поддержку!*\n\n' +
+					`Ваш донат на сумму ${payment.total_amount} Stars помогает нам развивать ProRab.space и делать платформу лучше!\n\n` +
+					'🎉 Вы получили бейдж благодарности! Теперь на вашем аватаре будет отображаться специальный значок.\n\n' +
+					'Спасибо, что поддерживаете проект! 💜',
+				{ parse_mode: 'Markdown' },
+			)
+
+			this.logger.log(`[ProRabSupportBot] Donation ${donationId} marked as succeeded`)
+		} catch (error) {
+			this.logger.error(`[ProRabSupportBot] Error processing successful payment:`, error)
+		}
 	}
 
 	// ==================== Formatters ====================

@@ -425,7 +425,8 @@ export const ModelName = {
   TeamCloneLog: 'TeamCloneLog',
   TeamAuditLog: 'TeamAuditLog',
   DataRetentionPolicy: 'DataRetentionPolicy',
-  DataExportRequest: 'DataExportRequest'
+  DataExportRequest: 'DataExportRequest',
+  Donation: 'Donation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "session" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "session" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest" | "donation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3553,6 +3554,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Donation: {
+      payload: Prisma.$DonationPayload<ExtArgs>
+      fields: Prisma.DonationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DonationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DonationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        findFirst: {
+          args: Prisma.DonationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DonationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        findMany: {
+          args: Prisma.DonationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>[]
+        }
+        create: {
+          args: Prisma.DonationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        createMany: {
+          args: Prisma.DonationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DonationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>[]
+        }
+        delete: {
+          args: Prisma.DonationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        update: {
+          args: Prisma.DonationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        deleteMany: {
+          args: Prisma.DonationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DonationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DonationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>[]
+        }
+        upsert: {
+          args: Prisma.DonationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DonationPayload>
+        }
+        aggregate: {
+          args: Prisma.DonationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDonation>
+        }
+        groupBy: {
+          args: Prisma.DonationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DonationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DonationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DonationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3620,6 +3695,7 @@ export const UserScalarFieldEnum = {
   businessRole: 'businessRole',
   businessRoleAssignedAt: 'businessRoleAssignedAt',
   trialedPlanIds: 'trialedPlanIds',
+  hasDonatorBadge: 'hasDonatorBadge',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4333,6 +4409,25 @@ export const DataExportRequestScalarFieldEnum = {
 export type DataExportRequestScalarFieldEnum = (typeof DataExportRequestScalarFieldEnum)[keyof typeof DataExportRequestScalarFieldEnum]
 
 
+export const DonationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  amount: 'amount',
+  currency: 'currency',
+  providerType: 'providerType',
+  providerPaymentId: 'providerPaymentId',
+  status: 'status',
+  message: 'message',
+  donorName: 'donorName',
+  isAnonymous: 'isAnonymous',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DonationScalarFieldEnum = (typeof DonationScalarFieldEnum)[keyof typeof DonationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4813,6 +4908,20 @@ export type EnumExportFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 export type ListEnumExportFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExportFormat[]'>
     
 
+
+/**
+ * Reference to a field of type 'DonationStatus'
+ */
+export type EnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'DonationStatus[]'
+ */
+export type ListEnumDonationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DonationStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -4934,6 +5043,7 @@ export type GlobalOmitConfig = {
   teamAuditLog?: Prisma.TeamAuditLogOmit
   dataRetentionPolicy?: Prisma.DataRetentionPolicyOmit
   dataExportRequest?: Prisma.DataExportRequestOmit
+  donation?: Prisma.DonationOmit
 }
 
 /* Types for Logging */

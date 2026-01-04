@@ -2493,6 +2493,7 @@ type PaymentProviderModel {
 """Payment provider types"""
 enum PaymentProviderType {
   STRIPE
+  TELEGRAM_STARS
   YOOKASSA
 }
 

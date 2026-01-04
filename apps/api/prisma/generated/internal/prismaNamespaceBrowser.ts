@@ -92,7 +92,8 @@ export const ModelName = {
   TeamCloneLog: 'TeamCloneLog',
   TeamAuditLog: 'TeamAuditLog',
   DataRetentionPolicy: 'DataRetentionPolicy',
-  DataExportRequest: 'DataExportRequest'
+  DataExportRequest: 'DataExportRequest',
+  Donation: 'Donation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -139,6 +140,7 @@ export const UserScalarFieldEnum = {
   businessRole: 'businessRole',
   businessRoleAssignedAt: 'businessRoleAssignedAt',
   trialedPlanIds: 'trialedPlanIds',
+  hasDonatorBadge: 'hasDonatorBadge',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -850,6 +852,25 @@ export const DataExportRequestScalarFieldEnum = {
 } as const
 
 export type DataExportRequestScalarFieldEnum = (typeof DataExportRequestScalarFieldEnum)[keyof typeof DataExportRequestScalarFieldEnum]
+
+
+export const DonationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  amount: 'amount',
+  currency: 'currency',
+  providerType: 'providerType',
+  providerPaymentId: 'providerPaymentId',
+  status: 'status',
+  message: 'message',
+  donorName: 'donorName',
+  isAnonymous: 'isAnonymous',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DonationScalarFieldEnum = (typeof DonationScalarFieldEnum)[keyof typeof DonationScalarFieldEnum]
 
 
 export const SortOrder = {
