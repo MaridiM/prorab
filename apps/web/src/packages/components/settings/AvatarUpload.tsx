@@ -49,6 +49,7 @@ interface AvatarUploadProps {
 		fullName: string
 		email: string
 		avatarUrl?: string | null
+		hasDonatorBadge?: boolean | null
 	}
 	onAvatarChange?: () => void
 }

@@ -4,11 +4,12 @@ import { SubscriptionsResolver } from './subscriptions.resolver';
 import { PublicStatsController } from './controllers/public-stats.controller';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
 import { AdminPlansService } from '../admin/services/admin-plans.service';
 import { AdminActionLogService } from '../admin/services/admin-action-log.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, UsersModule],
   providers: [
     SubscriptionsService,
     SubscriptionsResolver,

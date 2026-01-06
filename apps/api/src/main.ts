@@ -67,20 +67,35 @@ async function bootstrap() {
 	app.use(graphqlPath, graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }))
 
 	// ✅ Raw body middleware for webhooks (must be before JSON parser)
+	// This middleware preserves raw body for signature verification (Stripe, YooKassa)
 	app.use('/webhooks', (req: any, res: any, next: any) => {
-		if (req.is('application/json')) {
+		if (req.is('application/json') || req.is('application/x-www-form-urlencoded')) {
 			let data = ''
 			req.setEncoding('utf8')
 			req.on('data', (chunk: string) => {
 				data += chunk
 			})
 			req.on('end', () => {
-				req.rawBody = data
-				req.body = JSON.parse(data)
+				// Store raw body as Buffer for Stripe signature verification
+				req.rawBody = Buffer.from(data, 'utf-8')
+				try {
+					req.body = JSON.parse(data)
+				} catch {
+					// If not JSON, keep as string (for form-urlencoded)
+					req.body = data
+				}
 				next()
 			})
 		} else {
-			next()
+			// For other content types, read as buffer
+			const chunks: Buffer[] = []
+			req.on('data', (chunk: Buffer) => {
+				chunks.push(chunk)
+			})
+			req.on('end', () => {
+				req.rawBody = Buffer.concat(chunks)
+				next()
+			})
 		}
 	})
 

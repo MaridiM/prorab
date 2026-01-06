@@ -1048,7 +1048,7 @@ export class TelegramSupportBot {
 			this.logger.error(`[ProRabSupportBot] Error in pre-checkout:`, error)
 			await ctx.telegram.answerPreCheckoutQuery(query.id, false, {
 				error_message: 'Ошибка обработки платежа',
-			})
+			} as any)
 		}
 	}
 

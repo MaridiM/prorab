@@ -1158,6 +1158,14 @@ input CreateDataExportInput {
   userId: String
 }
 
+input CreateDonationInput {
+  amount: Float!
+  donorName: String
+  isAnonymous: Boolean! = false
+  message: String
+  providerType: PaymentProviderType
+}
+
 input CreateExpenseInput {
   """Сумма расхода"""
   amount: Float!
@@ -1589,6 +1597,43 @@ input Disable2FAInput {
   token: String!
 }
 
+type Donation {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  donorName: String
+  id: ID!
+  isAnonymous: Boolean!
+  message: String
+  paidAt: DateTime
+  providerPaymentId: String!
+  providerType: PaymentProviderType!
+  status: DonationStatus!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type DonationStats {
+  averageAmount: Float!
+  successfulCount: Int!
+  totalAmount: Float!
+  totalCount: Int!
+}
+
+"""Status of a donation"""
+enum DonationStatus {
+  CANCELLED
+  FAILED
+  PENDING
+  REFUNDED
+  SUCCEEDED
+}
+
+type DonationUrl {
+  donationId: String!
+  url: String!
+}
+
 type EarlyBirdStatsModel {
   """Whether Early Bird program is still available"""
   isAvailable: Boolean!
@@ -1663,6 +1708,25 @@ type FileTypeStats {
 
   """Total size in bytes"""
   totalSize: Float!
+}
+
+input GenerateTokenInput {
+  """Token expiration in days. Leave empty for no expiration."""
+  expiresInDays: Int
+
+  """Name for the token (e.g., "Zapier Integration")"""
+  name: String!
+}
+
+type GeneratedToken {
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  name: String!
+
+  """The plaintext token. Store it securely - it cannot be retrieved again!"""
+  token: String!
+  tokenPrefix: String!
 }
 
 type InviteCode {
@@ -2134,6 +2198,7 @@ type Mutation {
   changeAdminRole(newRole: String!, roleId: String!): AdminRoleDetail!
   changePassword(input: ChangePasswordInput!): Boolean!
   changePlan(input: ChangePlanInput!): Subscription!
+  checkDonationStatus(id: ID!): Donation!
   checkTelegramAuth(input: CheckTelegramAuthInput!): TelegramAuthStatusPayload!
 
   """Проверить статус токена для связывания Telegram (без создания сессии)"""
@@ -2150,6 +2215,7 @@ type Mutation {
 
   """Подтвердить mock платёж (для разработки/тестирования)"""
   confirmMockPayment(paymentId: String!): Boolean!
+  createDonation(input: CreateDonationInput!): DonationUrl!
 
   """Создать расход"""
   createExpense(input: CreateExpenseInput!): Expense!
@@ -2209,6 +2275,7 @@ type Mutation {
   enable2FA(input: Enable2FAInput!): TwoFactorEnableResponse!
   forgotPassword(email: String!): Boolean!
   generate2FASecret: TwoFactorSetup!
+  generateApiToken(input: GenerateTokenInput!): GeneratedToken!
   initTelegramAuth: TelegramAuthPayload!
 
   """Initialize default system settings (super admin only)"""
@@ -2258,6 +2325,7 @@ type Mutation {
   revokeAdminRole(roleId: String!): Boolean!
   revokeAllSessions: Boolean!
   revokeAllSessionsIncludingCurrent: Boolean!
+  revokeApiToken(tokenId: String!): Boolean!
   revokeSession(sessionId: String!): Boolean!
 
   """Отправка приглашения в команду по email"""
@@ -2600,6 +2668,17 @@ type PermissionDefinition {
 
   """Permission name"""
   name: String!
+}
+
+type PersonalAccessToken {
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  isExpired: Boolean!
+  lastUsedAt: DateTime
+  lastUsedIp: String
+  name: String!
+  tokenPrefix: String!
 }
 
 type PersonnelAnalytics {
@@ -3105,18 +3184,14 @@ type Query {
 
   """Получить доступные платёжные провайдеры (Yookassa, Stripe)"""
   availablePaymentProviders: [PaymentProviderModel!]!
-
-  """Get available plans for public (active plans only)"""
-  availablePlans(
-    """Filter prices by currency (RUB, USD, EUR)"""
-    currency: String
-  ): [AdminPlanModel!]!
+  availablePlans: [PlanLimits!]!
   availablePlansDetailed: [AdminPlanModel!]!
 
   """Получить доступные варианты хранилища"""
   availableStorageProviders: [StorageProviderOption!]!
   canAddProject(teamId: String!): Boolean!
   currentPlanLimits(teamId: String!): PlanLimits!
+  donation(id: ID!): Donation
   earlyBirdStats: EarlyBirdStatsModel!
 
   """Получить расход по ID"""
@@ -3151,6 +3226,9 @@ type Query {
 
   """Get all work logs for a team member (owner or self)"""
   memberWorkLogs(memberId: ID!): [WorkLog!]!
+  myApiTokens: [PersonalAccessToken!]!
+  myDonationStats: DonationStats!
+  myDonations: [Donation!]!
 
   """Получить настройки хранилища пользователя"""
   myStoragePreference: UserStoragePreference!
@@ -4686,6 +4764,9 @@ type User {
   emailVerified: Boolean!
   fullName: String!
   hasCompletedOnboarding: Boolean!
+
+  """Имеет ли пользователь бейдж донатора"""
+  hasDonatorBadge: Boolean!
   id: ID!
   notificationSettings: NotificationSettings
   phone: String

@@ -62,6 +62,11 @@ export class User {
 	@Field(() => Date, { nullable: true })
 	businessRoleAssignedAt?: Date | null
 
+	@Field(() => Boolean, {
+		description: 'Имеет ли пользователь бейдж донатора',
+	})
+	hasDonatorBadge: boolean
+
 	@Field()
 	createdAt: Date
 

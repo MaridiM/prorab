@@ -4,11 +4,12 @@ import { PhotoReportsResolver } from './photo-reports.resolver';
 import { PublicPhotoReportsResolver } from './public-photo-reports.resolver';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
 import { StorageModule } from '../../core/storage/storage.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, StorageModule, SubscriptionsModule],
+  imports: [PrismaModule, AuthModule, UsersModule, StorageModule, SubscriptionsModule],
   providers: [
     PhotoReportsService,
     PhotoReportsResolver,

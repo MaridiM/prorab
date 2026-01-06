@@ -1,12 +1,44 @@
 # ProRab Version Information
 
-**Current Version:** v1.6.16
-**Release Date:** 2026-01-02
+**Current Version:** v1.7.1
+**Release Date:** 2026-01-06
 **Status:** 🟢 Production Ready
 
 ---
 
 ## Version History
+
+### v1.7.1 (2026-01-06) - Personal Access Tokens (API Keys) 🔑
+
+**NEW FEATURE:**
+
+- 🔑 **Personal Access Tokens** - Generate API keys for external integrations
+  - Users can generate, list, and revoke API tokens from Settings → API
+  - Tokens start with `prorab_` prefix for easy identification
+  - Optional expiration (1-365 days) or permanent tokens
+  - Last used timestamp and IP tracking
+  - Secure SHA256 token hashing (plaintext shown only once)
+
+**BACKEND:**
+- Added `PersonalAccessToken` model to Prisma schema
+- Created `PersonalAccessTokensService` with generateToken, validateToken, revokeToken
+- Created `PersonalAccessTokensResolver` with GraphQL mutations and queries
+- Updated `AuthGuard` to validate API tokens alongside session cookies
+
+**FRONTEND:**
+- Created `ApiTokensSettings` component with token management UI
+- Token generation dialog with copy-to-clipboard
+- Token list with revoke confirmation
+
+**FILES CREATED:**
+- `apps/api/src/modules/users/personal-access-tokens.service.ts` (~150 LOC)
+- `apps/api/src/modules/users/personal-access-tokens.resolver.ts` (~60 LOC)
+- `apps/api/src/modules/users/models/personal-access-token.model.ts`
+- `apps/api/src/modules/users/dto/generate-token.input.ts`
+- `apps/web/src/packages/components/settings/ApiTokensSettings.tsx` (~330 LOC)
+- `apps/web/src/packages/api/graphql/api-tokens.graphql`
+
+---
 
 ### v1.6.16 (2026-01-02) - Fix Early Bird Display for Active Subscribers
 

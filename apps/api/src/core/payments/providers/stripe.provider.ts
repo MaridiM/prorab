@@ -109,6 +109,55 @@ export class StripeProvider implements IPaymentProvider {
   }
 
   /**
+   * Create donation
+   * IMPORTANT: Donations must use real payment providers, no mock mode allowed
+   */
+  async createDonation(params: any): Promise<PaymentResult> {
+    await this.ensureInitialized()
+
+    // Donations require real payment provider - throw error if not configured
+    if (!this.stripe) {
+      const error = new Error(
+        'Stripe provider not configured. Please set STRIPE_SECRET_KEY in environment variables or SystemSettings.'
+      )
+      this.logger.error(error.message)
+      throw error
+    }
+
+    const description = params.description || params.message || `Donation from ${params.donorName || 'anonymous'}`
+
+    // Create Checkout Session for donation
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: params.currency?.toLowerCase() || 'rub',
+            product_data: {
+              name: 'Добровольное пожертвование',
+              description: description,
+            },
+            unit_amount: Math.round(params.amount * 100), // Convert to cents/kopecks
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: params.returnUrl,
+      cancel_url: params.returnUrl.replace('success', 'cancel'),
+      customer_email: params.customerEmail,
+      metadata: params.metadata,
+    })
+
+    return {
+      paymentId: session.id,
+      confirmationUrl: session.url || '',
+      status: this.mapStripeStatus(session.payment_status),
+      expiresAt: new Date(session.expires_at * 1000),
+    }
+  }
+
+  /**
    * Create payment using Stripe Checkout
    */
   async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
@@ -178,9 +227,19 @@ export class StripeProvider implements IPaymentProvider {
   /**
    * Get payment details
    * For Stripe, we need to get the Checkout Session first, then the Payment Intent
+   * IMPORTANT: Requires real payment provider, no mock mode allowed
    */
   async getPayment(paymentId: string): Promise<PaymentDetails> {
     await this.ensureInitialized()
+
+    // Donations require real payment provider - throw error if not configured
+    if (!this.stripe) {
+      const error = new Error(
+        'Stripe provider not configured. Cannot check payment status without provider credentials.'
+      )
+      this.logger.error(error.message)
+      throw error
+    }
 
     // Check if it's a Checkout Session or Payment Intent
     if (paymentId.startsWith('cs_')) {

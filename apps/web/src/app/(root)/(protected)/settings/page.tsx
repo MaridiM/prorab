@@ -66,6 +66,7 @@ import {
 	ChevronDown,
 } from 'lucide-react'
 import { TelegramConnection } from '@/packages/components/settings/telegram-connection'
+import { DonationDialog, DonationsHistory } from '@/packages/components/donations'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import {
@@ -178,6 +179,15 @@ const stagger = {
 	},
 }
 
+const listItem = {
+	hidden: { opacity: 0, y: 20 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.4, ease: [0.22, 0.61, 0.36, 1] as any },
+	},
+}
+
 type TabId = 'profile' | 'security' | 'notifications' | 'subscription' | 'appearance' | 'help' | 'about'
 
 const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
@@ -236,6 +246,7 @@ function SettingsContent() {
 	const [showPasswordForm, setShowPasswordForm] = useState(false)
 	const [showEmailForm, setShowEmailForm] = useState(false)
 	const [show2FADialog, setShow2FADialog] = useState(false)
+	const [showDonationDialog, setShowDonationDialog] = useState(false)
 	const [pendingNewEmail, setPendingNewEmail] = useState<string | null>(null)
 	const [emailCooldown, setEmailCooldown] = useState(0)
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -2000,18 +2011,21 @@ function SettingsContent() {
 												<Button
 													variant="outline"
 													className="rounded-lg sm:rounded-xl border-amber-500/30 text-amber-600 hover:bg-amber-500/10 h-9 sm:h-10 text-sm"
-													onClick={() => {
-														showToast({
-															title: 'Спасибо! 💛',
-															description: 'Донаты будут доступны в следующей версии',
-															type: 'info',
-														})
-													}}
+													onClick={() => setShowDonationDialog(true)}
 												>
 													<Coffee className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
 													Поддержать
 												</Button>
 											</div>
+										</motion.section>
+
+										{/* Donations History Section */}
+										<motion.section
+											key="donations-history"
+											variants={listItem}
+											className="mt-6"
+										>
+											<DonationsHistory />
 										</motion.section>
 									</motion.div>
 								</motion.div>
@@ -2064,6 +2078,9 @@ function SettingsContent() {
 					</DialogContent>
 				</Dialog>
 			)}
+
+			{/* Donation Dialog */}
+			<DonationDialog open={showDonationDialog} onOpenChange={setShowDonationDialog} />
 		</div>
 	)
 }

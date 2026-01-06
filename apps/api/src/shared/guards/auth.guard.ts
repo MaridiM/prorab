@@ -1,13 +1,16 @@
 import {
 	CanActivate,
 	ExecutionContext,
+	Inject,
 	Injectable,
 	UnauthorizedException,
+	forwardRef,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
 import { AuthService } from '../../modules/auth/auth.service'
+import { PersonalAccessTokensService } from '../../modules/users/personal-access-tokens.service'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
 
 @Injectable()
@@ -15,6 +18,8 @@ export class AuthGuard implements CanActivate {
 	constructor(
 		private readonly authService: AuthService,
 		private readonly reflector: Reflector,
+		@Inject(forwardRef(() => PersonalAccessTokensService))
+		private readonly tokensService: PersonalAccessTokensService,
 	) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,6 +50,20 @@ export class AuthGuard implements CanActivate {
 
 		const { req } = gqlContext
 
+		// Try API token first (Authorization: Bearer prorab_*)
+		const apiToken = this.extractApiToken(req)
+		if (apiToken) {
+			const ip = req.ip || req.headers?.['x-forwarded-for'] || req.connection?.remoteAddress
+			const userId = await this.tokensService.validateToken(apiToken, ip)
+			if (userId) {
+				req.user = { id: userId }
+				req.isApiToken = true
+				return true
+			}
+			throw new UnauthorizedException('Недействительный API токен')
+		}
+
+		// Fallback to session token
 		const sessionToken = this.extractSessionToken(req)
 		if (!sessionToken) {
 			throw new UnauthorizedException('Требуется авторизация')
@@ -62,18 +81,28 @@ export class AuthGuard implements CanActivate {
 		return true
 	}
 
+	/**
+	 * Extract API token (starts with prorab_) from Authorization header
+	 */
+	private extractApiToken(req: any): string | undefined {
+		const authHeader = req.headers?.authorization
+		if (authHeader?.startsWith('Bearer prorab_')) {
+			return authHeader.substring(7) // Remove "Bearer "
+		}
+		return undefined
+	}
+
 	private extractSessionToken(req: any): string | undefined {
 		// Try to get from cookies first
 		const cookieToken = req.cookies?.['session_token']
 		if (cookieToken) return cookieToken
 
-		// Fallback to Authorization header
+		// Fallback to Authorization header (for session tokens)
 		const authHeader = req.headers?.authorization
-		if (authHeader?.startsWith('Bearer ')) {
+		if (authHeader?.startsWith('Bearer ') && !authHeader.startsWith('Bearer prorab_')) {
 			return authHeader.substring(7)
 		}
 
 		return undefined
 	}
 }
-

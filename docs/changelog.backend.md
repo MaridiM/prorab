@@ -5,6 +5,41 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-01-06 - Personal Access Tokens (API Keys) 🔑
+
+### Added
+- **PersonalAccessToken Model**: Новая модель в Prisma schema
+  - Поля: id, userId, name, tokenHash, tokenPrefix, lastUsedAt, lastUsedIp, expiresAt
+  - Уникальный индекс по tokenHash для быстрого поиска
+  - Каскадное удаление при удалении пользователя
+
+- **PersonalAccessTokensService**: Сервис для управления API токенами
+  - `generateToken(userId, name, expiresInDays?)` - создание нового токена
+  - `listTokens(userId)` - список токенов пользователя (без хэшей)
+  - `revokeToken(userId, tokenId)` - отзыв токена
+  - `validateToken(token, ip?)` - валидация токена для аутентификации
+
+- **GraphQL API**:
+  - Query `myApiTokens` - получение списка токенов текущего пользователя
+  - Mutation `generateApiToken(input)` - создание нового токена
+  - Mutation `revokeApiToken(tokenId)` - отзыв токена
+  - Типы: `PersonalAccessToken`, `GeneratedToken`, `GenerateTokenInput`
+
+### Changed
+- **AuthGuard**: Обновлен для поддержки API токенов
+  - Проверка `Authorization: Bearer prorab_*` токенов
+  - Приоритет API токена над сессионными cookies
+  - Обновление lastUsedAt/lastUsedIp при успешной аутентификации
+
+### Technical Details
+- Созданные файлы:
+  - `apps/api/src/modules/users/personal-access-tokens.service.ts` (~150 LOC)
+  - `apps/api/src/modules/users/personal-access-tokens.resolver.ts` (~60 LOC)
+  - `apps/api/src/modules/users/models/personal-access-token.model.ts`
+  - `apps/api/src/modules/users/dto/generate-token.input.ts`
+
+---
+
 ## [1.7.0] - 2026-01-04 - Система Донатов 🎁
 
 ### Added

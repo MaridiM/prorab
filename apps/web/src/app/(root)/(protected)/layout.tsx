@@ -6,6 +6,7 @@ import { Toaster } from 'sonner'
 import { PageLoader } from '@/packages/components/ui/spinner'
 import { useAuth } from '@/packages/libs/auth'
 import { clearAuthCookies } from '@/packages/utils'
+import { DonationFloatingButton } from '@/packages/components/donations'
 
 export default function ProtectedLayout({
 	children,
@@ -63,11 +64,15 @@ export default function ProtectedLayout({
 		return <PageLoader text="Перенаправление..." />
 	}
 
+	// Don't show donation button on donation success page
+	const showDonationButton = !pathname?.includes('/donation/success')
+
 	return (
 		<>
 			<Suspense fallback={null}>
 				{children}
 			</Suspense>
+			{showDonationButton && <DonationFloatingButton />}
 			<Toaster position="top-right" richColors />
 		</>
 	)

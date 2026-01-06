@@ -110,6 +110,51 @@ export class YookassaProvider implements IPaymentProvider {
   }
 
   /**
+   * Create donation
+   * IMPORTANT: Donations must use real payment providers, no mock mode allowed
+   */
+  async createDonation(params: any): Promise<PaymentResult> {
+    await this.ensureInitialized()
+
+    // Donations require real payment provider - throw error if not configured
+    if (!this.client) {
+      const error = new Error(
+        'YooKassa provider not configured. Please set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY in environment variables or SystemSettings.'
+      )
+      this.logger.error(error.message)
+      throw error
+    }
+
+    const description = params.description || params.message || `Добровольное пожертвование от ${params.donorName || 'анонима'}`
+
+    const paymentData: ICreatePayment = {
+      amount: {
+        value: params.amount.toFixed(2),
+        currency: params.currency || 'RUB',
+      },
+      confirmation: {
+        type: 'redirect',
+        return_url: params.returnUrl,
+      },
+      capture: true, // Auto-capture
+      description: description,
+      metadata: params.metadata,
+    }
+
+    this.logger.debug(`Creating YooKassa donation payment: ${JSON.stringify(paymentData)}`)
+
+    const payment = await this.client.createPayment(paymentData)
+
+    return {
+      paymentId: payment.id,
+      confirmationUrl: payment.confirmation?.confirmation_url || '',
+      status: this.mapYookassaStatus(payment.status),
+      paymentMethod: payment.payment_method?.type,
+      expiresAt: payment.expires_at ? new Date(payment.expires_at) : undefined,
+    }
+  }
+
+  /**
    * Create payment
    */
   async createPayment(params: CreatePaymentParams): Promise<PaymentResult> {
@@ -172,9 +217,19 @@ export class YookassaProvider implements IPaymentProvider {
 
   /**
    * Get payment details
+   * IMPORTANT: Requires real payment provider, no mock mode allowed
    */
   async getPayment(paymentId: string): Promise<PaymentDetails> {
     await this.ensureInitialized()
+
+    // Donations require real payment provider - throw error if not configured
+    if (!this.client) {
+      const error = new Error(
+        'YooKassa provider not configured. Cannot check payment status without provider credentials.'
+      )
+      this.logger.error(error.message)
+      throw error
+    }
 
     const payment = await this.client.getPayment(paymentId)
 
@@ -236,8 +291,18 @@ export class YookassaProvider implements IPaymentProvider {
    */
   verifyWebhookSignature(body: string | Buffer, signature: string): boolean {
     if (!this.webhookSecret) {
-      this.logger.warn('Webhook secret not configured, skipping signature verification')
-      return true // Allow in dev mode
+      const isDevelopment = process.env.NODE_ENV !== 'production'
+      if (isDevelopment) {
+        this.logger.warn('Webhook secret not configured, skipping signature verification (dev mode)')
+        return true // Allow in dev mode
+      }
+      this.logger.error('Webhook secret not configured in production!')
+      return false
+    }
+
+    if (!signature) {
+      this.logger.warn('Missing webhook signature')
+      return false
     }
 
     const bodyString = typeof body === 'string' ? body : body.toString('utf-8')
@@ -246,7 +311,13 @@ export class YookassaProvider implements IPaymentProvider {
     hmac.update(bodyString)
     const expectedSignature = hmac.digest('hex')
 
-    return expectedSignature === signature
+    const isValid = expectedSignature === signature
+    
+    if (!isValid) {
+      this.logger.warn(`Signature mismatch. Expected: ${expectedSignature.substring(0, 10)}..., Got: ${signature.substring(0, 10)}...`)
+    }
+
+    return isValid
   }
 
   /**

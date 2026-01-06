@@ -391,6 +391,7 @@ export const ModelName = {
   TelegramAuthToken: 'TelegramAuthToken',
   LoginHistory: 'LoginHistory',
   Session: 'Session',
+  PersonalAccessToken: 'PersonalAccessToken',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
@@ -442,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "session" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest" | "donation"
+    modelProps: "user" | "notificationSettings" | "verificationToken" | "passwordResetToken" | "telegramAuthToken" | "loginHistory" | "session" | "personalAccessToken" | "team" | "projectPayout" | "workLog" | "customRole" | "roleAssignmentHistory" | "teamMember" | "teamMemberSalaryHistory" | "inviteCode" | "project" | "expense" | "photoReport" | "reportPhoto" | "task" | "plan" | "planPrice" | "planFeature" | "paymentProvider" | "telegramBot" | "subscription" | "payment" | "supportTicket" | "supportMessage" | "fAQEntry" | "adminRole" | "systemSettings" | "adminActionLog" | "systemStatistics" | "teamAnnouncement" | "announcementRead" | "teamTemplate" | "teamMergeLog" | "teamCloneLog" | "teamAuditLog" | "dataRetentionPolicy" | "dataExportRequest" | "donation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -961,6 +962,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SessionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    PersonalAccessToken: {
+      payload: Prisma.$PersonalAccessTokenPayload<ExtArgs>
+      fields: Prisma.PersonalAccessTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PersonalAccessTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PersonalAccessTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.PersonalAccessTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PersonalAccessTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        findMany: {
+          args: Prisma.PersonalAccessTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>[]
+        }
+        create: {
+          args: Prisma.PersonalAccessTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        createMany: {
+          args: Prisma.PersonalAccessTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PersonalAccessTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.PersonalAccessTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        update: {
+          args: Prisma.PersonalAccessTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.PersonalAccessTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PersonalAccessTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PersonalAccessTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.PersonalAccessTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonalAccessTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.PersonalAccessTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePersonalAccessToken>
+        }
+        groupBy: {
+          args: Prisma.PersonalAccessTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalAccessTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PersonalAccessTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonalAccessTokenCountAggregateOutputType> | number
         }
       }
     }
@@ -3812,6 +3887,21 @@ export const SessionScalarFieldEnum = {
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
+export const PersonalAccessTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  tokenHash: 'tokenHash',
+  tokenPrefix: 'tokenPrefix',
+  lastUsedAt: 'lastUsedAt',
+  lastUsedIp: 'lastUsedIp',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PersonalAccessTokenScalarFieldEnum = (typeof PersonalAccessTokenScalarFieldEnum)[keyof typeof PersonalAccessTokenScalarFieldEnum]
+
+
 export const TeamScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -5008,6 +5098,7 @@ export type GlobalOmitConfig = {
   telegramAuthToken?: Prisma.TelegramAuthTokenOmit
   loginHistory?: Prisma.LoginHistoryOmit
   session?: Prisma.SessionOmit
+  personalAccessToken?: Prisma.PersonalAccessTokenOmit
   team?: Prisma.TeamOmit
   projectPayout?: Prisma.ProjectPayoutOmit
   workLog?: Prisma.WorkLogOmit

@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { EncryptionService } from '../../shared/services/encryption.service';
 import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
 import { StorageModule } from '../../core/storage/storage.module';
 import { TelegramModule } from '../telegram/telegram.module';
 import { PaymentProviderFactory } from '../../core/payments/factories/payment-provider.factory';
@@ -47,7 +48,12 @@ import { AdminTeamOperationsResolver } from './resolvers/admin-team-operations.r
 import { AdminAuditResolver } from './resolvers/admin-audit.resolver';
 
 @Module({
-  imports: [AuthModule, StorageModule, TelegramModule],
+  imports: [
+    forwardRef(() => AuthModule),
+    UsersModule,
+    StorageModule,
+    forwardRef(() => TelegramModule),
+  ],
   providers: [
     // Core Services
     PrismaService,

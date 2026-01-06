@@ -1,0 +1,80 @@
+# Donations GraphQL Schema
+
+# ==================== Enums ====================
+
+enum DonationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProviderType {
+  YOOKASSA
+  STRIPE
+  TELEGRAM_STARS
+}
+
+# ==================== Types ====================
+
+type Donation {
+  id: ID!
+  userId: String!
+  amount: Float!
+  currency: String!
+  providerType: PaymentProviderType!
+  providerPaymentId: String!
+  status: DonationStatus!
+  message: String
+  donorName: String
+  isAnonymous: Boolean!
+  paidAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DonationUrl {
+  url: String!
+  donationId: String!
+}
+
+type DonationStats {
+  totalAmount: Float!
+  totalCount: Int!
+  successfulCount: Int!
+  averageAmount: Float!
+}
+
+# ==================== Inputs ====================
+
+input CreateDonationInput {
+  amount: Float!
+  message: String
+  donorName: String
+  isAnonymous: Boolean
+  providerType: PaymentProviderType
+}
+
+# ==================== Queries ====================
+
+extend type Query {
+  # Get donation by ID
+  donation(id: ID!): Donation
+
+  # Get current user's donations
+  myDonations: [Donation!]!
+
+  # Get current user's donation statistics
+  myDonationStats: DonationStats!
+}
+
+# ==================== Mutations ====================
+
+extend type Mutation {
+  # Create a donation and get payment URL
+  createDonation(input: CreateDonationInput!): DonationUrl!
+
+  # Check donation status with payment provider
+  checkDonationStatus(id: ID!): Donation!
+}

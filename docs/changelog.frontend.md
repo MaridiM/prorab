@@ -5,66 +5,76 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0] - 2026-01-04 - Система Донатов UI 🎁
+## [1.7.0] - 2026-01-05 - Система Донатов UI 🎁
 
 ### Added
-- **Donation Dialog Component**: Диалог создания доната
-  - Preset кнопки с суммами: 100₽, 300₽, 500₽, 1000₽
+- **GraphQL Integration**: Запросы и мутации для донатов
+  - Файл `apps/web/src/packages/api/graphql/donations.graphql` с типами Donation, DonationUrl, DonationStats
+  - Enum типы: DonationStatus, PaymentProviderType
+  - Input тип: CreateDonationInput с полями amount, message, donorName, isAnonymous, providerType
+  - Query `myDonations` для получения истории донатов
+  - Query `myDonationStats` для получения статистики
+  - Mutation `createDonation` для создания доната и получения платежной ссылки
+
+- **Donation Dialog Component**: UI диалог создания доната
+  - Файл `apps/web/src/packages/components/donations/donation-dialog.tsx`
+  - Preset кнопки с суммами: 100₽, 300₽, 500₽, 1000₽ с градиентным дизайном
   - Поле для произвольной суммы (от 50₽ до 100,000₽)
-  - Textarea для сообщения (макс 500 символов)
+  - Textarea для сообщения (макс 500 символов) с счетчиком
   - Input для имени донатора
   - Checkbox "Сделать донат анонимным"
-  - Валидация суммы и автоматический выбор провайдера
-  - Интеграция с мутацией `createDonation`
+  - Валидация суммы на клиенте
+  - Интеграция с мутацией `CREATE_DONATION`
+  - Редирект на платежный URL после создания
+  - Toast уведомления об ошибках
+  - Loading состояние кнопки с анимацией
 
 - **Donations History Component**: История донатов пользователя
+  - Файл `apps/web/src/packages/components/donations/donations-history.tsx`
   - Список всех донатов с датами и суммами
-  - Иконки статусов: CheckCircle (SUCCEEDED), Clock (PENDING), XCircle (FAILED)
+  - Иконки статусов: CheckCircle (SUCCEEDED), Clock (PENDING), XCircle (FAILED/CANCELLED)
+  - Цветовая индикация статусов
   - Отображение сообщений от донатора
+  - Поддержка анонимных донатов
   - Skeleton loader при загрузке
-  - Пустое состояние "У вас пока нет донатов"
+  - Пустое состояние "У вас пока нет донатов" с иконкой Coffee
+  - Форматирование дат на русском языке (date-fns)
+  - Статистика: всего донатов и успешных
 
-- **Settings Page Updates**: Интеграция донатов в настройки
-  - Обновлена кнопка "Поддержать" - открывает Donation Dialog
-  - Новая вкладка "Мои донаты" с иконкой Coffee
-  - Отображение истории донатов в отдельной секции
-  - Замена toast сообщения на реальный функционал
+- **Settings Page Updates**: Интеграция донатов в страницу настроек
+  - Файл `apps/web/src/app/(root)/(protected)/settings/page.tsx`
+  - Кнопка "Поддержать" теперь открывает DonationDialog
+  - Добавлена секция DonationsHistory после блока "Поддержите разработку"
+  - Добавлено состояние `showDonationDialog` для управления диалогом
 
-- **Donation Success Page**: Страница благодарности
-  - Иконка успеха с анимацией
-  - Заголовок "Спасибо за поддержку!"
-  - Информация о полученном бейдже благодарности
-  - Кнопки навигации: "Перейти в профиль", "Вернуться на главную"
-  - Получение donationId из URL параметров
+- **Donation Success Page**: Страница благодарности после успешного платежа
+  - Файл `apps/web/src/app/(root)/donation/success/page.tsx`
+  - Анимированный UI с Framer Motion
+  - Отображение суммы доната и сообщения
+  - Confetti эффект при успешной оплате (canvas-confetti)
+  - Уведомление о получении бейджа благодарности
+  - Кнопки "Вернуться в настройки" и "На главную"
+  - Polling статуса доната каждые 3 секунды
+  - Gradient дизайн purple-pink
 
-- **GraphQL Integration**: Запросы и мутации для донатов
-  - Файл `donations.graphql` с типами и operations
-  - Мутация `CREATE_DONATION` в `donations.ts`
-  - Query `GET_MY_DONATIONS` для истории
-  - Query `GET_DONATION_STATS` для статистики
+- **Donator Badge**: Визуальный бейдж на аватаре пользователя
+  - Обновлен компонент `UserAvatar` в `apps/web/src/packages/components/ui/avatar.tsx`
+  - Золотая звезда с градиентом amber-yellow в правом нижнем углу аватара
+  - Адаптивные размеры бейджа для всех размеров аватара (xs, sm, md, lg, xl)
+  - Добавлено поле `hasDonatorBadge` в интерфейс пользователя
+  - Параметр `showBadge` для управления отображением (по умолчанию true)
+  - Tooltip "Благодарный донатор" при наведении
 
-- **Donator Badge**: Бейдж благодарности на аватаре
-  - Props `showDonatorBadge` в Avatar component
-  - Иконка Coffee в правом нижнем углу аватара
-  - Отображается для пользователей с `hasDonatorBadge = true`
-
-### Changed
-- **Settings Page**: Переработан блок "Поддержите разработку"
-  - Кнопка теперь открывает полноценный диалог вместо toast
-  - Добавлена интеграция с системой платежей
-  - Поддержка всех трех провайдеров: YooKassa, Stripe, Telegram Stars
-
-### UI/UX Improvements
-- Градиентные кнопки для preset сумм с иконками
-- Адаптивный дизайн диалога для мобильных устройств
-- Плавные анимации появления элементов
-- Информация о способах оплаты в диалоге
+- **GraphQL Query Me Update**: Добавлено поле `hasDonatorBadge`
+  - Файл `apps/web/src/packages/api/graphql/auth.graphql`
+  - Бейдж автоматически отображается для пользователей с донатами
 
 ### Technical Details
-- Создано 4 новых компонента в `packages/components/donations/`
-- Создана страница `/donation/success` для благодарности
-- Интеграция с Apollo Client для GraphQL запросов
-- Использование React Hook Form для валидации форм
+- GraphQL schema создана в `apps/web/src/packages/api/graphql/donations.graphql`
+- Созданы компоненты в `apps/web/src/packages/components/donations/`
+- Использование Apollo Client для GraphQL запросов
+- Интеграция с shadcn/ui компонентами (Dialog, Card, Button, Input, Textarea, Checkbox)
+- Поддержка трех провайдеров платежей: YooKassa (РФ), Stripe (международные), Telegram Stars (через бота)
 
 ## [1.6.22] - 2026-01-04 - Telegram Integration UI & Account Deletion Fixes
 

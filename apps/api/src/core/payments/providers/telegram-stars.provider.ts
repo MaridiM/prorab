@@ -181,19 +181,21 @@ export class TelegramStarsProvider implements IPaymentProvider {
     this.ensureInitialized()
 
     try {
-      const message = await this.bot!.telegram.sendInvoice({
-        chat_id: params.chatId,
-        title: params.title,
-        description: params.description,
-        payload: params.payload,
-        provider_token: '', // Empty for Telegram Stars
-        currency: 'XTR',
-        prices: params.prices,
-        photo_url: params.photoUrl,
-        photo_size: params.photoSize,
-        photo_width: params.photoWidth,
-        photo_height: params.photoHeight,
-      })
+      const message = await this.bot!.telegram.sendInvoice(
+        params.chatId,
+        {
+          title: params.title,
+          description: params.description,
+          payload: params.payload,
+          provider_token: '', // Empty for Telegram Stars
+          currency: 'XTR',
+          prices: params.prices,
+          photo_url: params.photoUrl,
+          photo_size: params.photoSize,
+          photo_width: params.photoWidth,
+          photo_height: params.photoHeight,
+        }
+      )
 
       // Create invoice link for web fallback
       const invoiceLink = await this.bot!.telegram.createInvoiceLink({

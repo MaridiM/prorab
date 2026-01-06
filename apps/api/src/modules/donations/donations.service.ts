@@ -26,7 +26,7 @@ export class DonationsService {
       // Get user details
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, email: true, firstName: true, lastName: true },
+        select: { id: true, email: true, fullName: true },
       })
 
       if (!user) {
@@ -53,7 +53,7 @@ export class DonationsService {
           providerPaymentId: `temp_${Date.now()}`, // Temporary, will be updated after payment creation
           status: DonationStatus.PENDING,
           message: input.message,
-          donorName: input.donorName || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          donorName: input.donorName || user.fullName || undefined,
           isAnonymous: input.isAnonymous || false,
         },
       })
@@ -136,17 +136,6 @@ export class DonationsService {
       // Find donation by provider payment ID
       const donation = await this.prisma.donation.findUnique({
         where: { providerPaymentId },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              hasDonatorBadge: true,
-            },
-          },
-        },
       })
 
       if (!donation) {
@@ -156,6 +145,17 @@ export class DonationsService {
 
       if (donation.status === DonationStatus.SUCCEEDED) {
         this.logger.warn(`Donation ${donation.id} already marked as succeeded`)
+        return
+      }
+
+      // Get user to check badge status and send email
+      const user = await this.prisma.user.findUnique({
+        where: { id: donation.userId },
+        select: { id: true, email: true, fullName: true, hasDonatorBadge: true },
+      })
+
+      if (!user) {
+        this.logger.warn(`User not found for donation ${donation.id}`)
         return
       }
 
@@ -169,7 +169,7 @@ export class DonationsService {
       })
 
       // Grant donator badge if not already granted
-      if (!donation.user.hasDonatorBadge) {
+      if (!user.hasDonatorBadge) {
         await this.prisma.user.update({
           where: { id: donation.userId },
           data: { hasDonatorBadge: true },
@@ -178,7 +178,10 @@ export class DonationsService {
       }
 
       // Send thank you email
-      await this.sendThankYouEmail(donation)
+      await this.sendThankYouEmail({
+        ...donation,
+        user,
+      })
 
       this.logger.log(`Donation ${donation.id} marked as succeeded`)
     } catch (error) {
@@ -192,12 +195,12 @@ export class DonationsService {
    */
   private async sendThankYouEmail(donation: any) {
     try {
-      const userName = donation.user.firstName || donation.user.email.split('@')[0]
+      const userName = donation.user.fullName || donation.user.email.split('@')[0]
 
       await this.mailService.sendDonationThankYouEmail(
         donation.user.email,
         userName,
-        `${donation.amount}`,
+        `${Number(donation.amount)}`,
         donation.currency,
         donation.message,
       )
@@ -213,10 +216,16 @@ export class DonationsService {
    * Get user's donation history
    */
   async getUserDonations(userId: string) {
-    return this.prisma.donation.findMany({
+    const donations = await this.prisma.donation.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     })
+
+    // Convert Decimal to number for GraphQL
+    return donations.map((donation) => ({
+      ...donation,
+      amount: Number(donation.amount),
+    }))
   }
 
   /**
@@ -253,6 +262,120 @@ export class DonationsService {
       throw new NotFoundException('Donation not found')
     }
 
-    return donation
+    // Convert Decimal to number for GraphQL
+    return {
+      ...donation,
+      amount: Number(donation.amount),
+    }
+  }
+
+  /**
+   * Check donation status with payment provider
+   * Useful when webhooks are not received or delayed
+   */
+  async checkDonationStatus(donationId: string) {
+    try {
+      const donation = await this.prisma.donation.findUnique({
+        where: { id: donationId },
+      })
+
+      if (!donation) {
+        throw new NotFoundException('Donation not found')
+      }
+
+      // Skip check if already succeeded or cancelled
+      if (
+        donation.status === DonationStatus.SUCCEEDED ||
+        donation.status === DonationStatus.CANCELLED ||
+        donation.status === DonationStatus.FAILED
+      ) {
+        return {
+          ...donation,
+          amount: Number(donation.amount),
+        }
+      }
+
+      // Skip check for Telegram Stars (status is updated via bot webhook)
+      if (donation.providerType === PaymentProviderType.TELEGRAM_STARS) {
+        return {
+          ...donation,
+          amount: Number(donation.amount),
+        }
+      }
+
+      // Skip check if providerPaymentId is temporary
+      if (donation.providerPaymentId.startsWith('temp_')) {
+        this.logger.warn(`Donation ${donationId} has temporary payment ID, skipping status check`)
+        return {
+          ...donation,
+          amount: Number(donation.amount),
+        }
+      }
+
+      // Get payment provider
+      const provider = await this.paymentProviderFactory.getProvider(donation.providerType)
+
+      // Check payment status with provider
+      const paymentDetails = await provider.getPayment(donation.providerPaymentId)
+
+      // Map provider status to donation status
+      let newStatus: DonationStatus = donation.status
+
+      if (paymentDetails.status === 'succeeded') {
+        newStatus = DonationStatus.SUCCEEDED
+      } else if (paymentDetails.status === 'cancelled') {
+        newStatus = DonationStatus.CANCELLED
+      } else if (paymentDetails.status === 'failed') {
+        newStatus = DonationStatus.FAILED
+      }
+
+      // Update donation if status changed
+      if (newStatus !== donation.status) {
+        const updateData: any = {
+          status: newStatus,
+        }
+
+        if (newStatus === DonationStatus.SUCCEEDED && paymentDetails.paidAt) {
+          updateData.paidAt = paymentDetails.paidAt
+        }
+
+        await this.prisma.donation.update({
+          where: { id: donationId },
+          data: updateData,
+        })
+
+        // If succeeded, handle success logic (badge, email, etc.)
+        if (newStatus === DonationStatus.SUCCEEDED) {
+          await this.handleDonationSucceeded(donation.providerPaymentId)
+        }
+
+        this.logger.log(
+          `Donation ${donationId} status updated from ${donation.status} to ${newStatus}`,
+        )
+      }
+
+      // Return updated donation
+      const updatedDonation = await this.prisma.donation.findUnique({
+        where: { id: donationId },
+      })
+
+      return {
+        ...updatedDonation!,
+        amount: Number(updatedDonation!.amount),
+      }
+    } catch (error) {
+      this.logger.error(`Failed to check donation status for ${donationId}:`, error)
+      // Return current donation status even if check failed
+      const donation = await this.prisma.donation.findUnique({
+        where: { id: donationId },
+      })
+      if (!donation) {
+        throw new NotFoundException('Donation not found')
+      }
+      return {
+        ...donation,
+        amount: Number(donation.amount),
+      }
+    }
   }
 }

@@ -203,6 +203,7 @@ query Me {
     businessRoleAssignedAt
     telegramChatId
     telegramUsername
+    hasDonatorBadge
     createdAt
     notificationSettings {
       id

@@ -69,3 +69,6 @@ WHERE p.subscription_id = s.id
   AND (p.period_start_at IS NULL OR p.period_end_at IS NULL);
 
 
+
+
+
