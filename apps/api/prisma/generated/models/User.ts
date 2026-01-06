@@ -389,7 +389,6 @@ export type UserWhereInput = {
   loginHistory?: Prisma.LoginHistoryListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   donations?: Prisma.DonationListRelationFilter
-  personalAccessTokens?: Prisma.PersonalAccessTokenListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -438,7 +437,6 @@ export type UserOrderByWithRelationInput = {
   loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   donations?: Prisma.DonationOrderByRelationAggregateInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -490,7 +488,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   loginHistory?: Prisma.LoginHistoryListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   donations?: Prisma.DonationListRelationFilter
-  personalAccessTokens?: Prisma.PersonalAccessTokenListRelationFilter
 }, "id" | "email" | "emailNormalized" | "telegramChatId">
 
 export type UserOrderByWithAggregationInput = {
@@ -610,7 +607,6 @@ export type UserCreateInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -658,7 +654,6 @@ export type UserUncheckedCreateInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -706,7 +701,6 @@ export type UserUpdateInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -754,7 +748,6 @@ export type UserUncheckedUpdateInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1089,20 +1082,6 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
-export type UserCreateNestedOneWithoutPersonalAccessTokensInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedCreateWithoutPersonalAccessTokensInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPersonalAccessTokensInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutPersonalAccessTokensNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedCreateWithoutPersonalAccessTokensInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPersonalAccessTokensInput
-  upsert?: Prisma.UserUpsertWithoutPersonalAccessTokensInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPersonalAccessTokensInput, Prisma.UserUpdateWithoutPersonalAccessTokensInput>, Prisma.UserUncheckedUpdateWithoutPersonalAccessTokensInput>
-}
-
 export type UserCreateNestedOneWithoutOwnedTeamsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedTeamsInput, Prisma.UserUncheckedCreateWithoutOwnedTeamsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedTeamsInput
@@ -1315,7 +1294,6 @@ export type UserCreateWithoutNotificationSettingsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationSettingsInput = {
@@ -1362,7 +1340,6 @@ export type UserUncheckedCreateWithoutNotificationSettingsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationSettingsInput = {
@@ -1425,7 +1402,6 @@ export type UserUpdateWithoutNotificationSettingsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
@@ -1472,7 +1448,6 @@ export type UserUncheckedUpdateWithoutNotificationSettingsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVerificationTokensInput = {
@@ -1519,7 +1494,6 @@ export type UserCreateWithoutVerificationTokensInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerificationTokensInput = {
@@ -1566,7 +1540,6 @@ export type UserUncheckedCreateWithoutVerificationTokensInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerificationTokensInput = {
@@ -1629,7 +1602,6 @@ export type UserUpdateWithoutVerificationTokensInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationTokensInput = {
@@ -1676,7 +1648,6 @@ export type UserUncheckedUpdateWithoutVerificationTokensInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -1723,7 +1694,6 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1770,7 +1740,6 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1833,7 +1802,6 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1880,7 +1848,6 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLoginHistoryInput = {
@@ -1927,7 +1894,6 @@ export type UserCreateWithoutLoginHistoryInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLoginHistoryInput = {
@@ -1974,7 +1940,6 @@ export type UserUncheckedCreateWithoutLoginHistoryInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLoginHistoryInput = {
@@ -2037,7 +2002,6 @@ export type UserUpdateWithoutLoginHistoryInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLoginHistoryInput = {
@@ -2084,7 +2048,6 @@ export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -2131,7 +2094,6 @@ export type UserCreateWithoutSessionsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -2178,7 +2140,6 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2241,7 +2202,6 @@ export type UserUpdateWithoutSessionsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -2287,211 +2247,6 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
-  donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutPersonalAccessTokensInput = {
-  id?: string
-  email: string
-  emailNormalized: string
-  emailVerified?: boolean
-  passwordHash?: string | null
-  fullName: string
-  phone?: string | null
-  avatarUrl?: string | null
-  hasCompletedOnboarding?: boolean
-  onboardingCompletedAt?: Date | string | null
-  oauthProvider?: string | null
-  oauthProviderId?: string | null
-  telegramChatId?: string | null
-  telegramFirstName?: string | null
-  telegramLastName?: string | null
-  telegramUsername?: string | null
-  telegramPhotoUrl?: string | null
-  twoFactorEnabled?: boolean
-  twoFactorSecret?: string | null
-  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
-  storagePreference?: $Enums.StorageProviderType | null
-  storageMigratedFrom?: $Enums.StorageProviderType | null
-  storageMigratedAt?: Date | string | null
-  businessRole?: $Enums.BusinessRole | null
-  businessRoleAssignedAt?: Date | string | null
-  trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
-  hasDonatorBadge?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  verificationTokens?: Prisma.VerificationTokenCreateNestedManyWithoutUserInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
-  notificationSettings?: Prisma.NotificationSettingsCreateNestedOneWithoutUserInput
-  ownedTeams?: Prisma.TeamCreateNestedManyWithoutOwnerInput
-  teamMemberships?: Prisma.TeamMemberCreateNestedManyWithoutUserInput
-  currentTeam?: Prisma.TeamCreateNestedOneWithoutCurrentForUsersInput
-  createdTasks?: Prisma.TaskCreateNestedManyWithoutCreatedByInput
-  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
-  salaryChanges?: Prisma.TeamMemberSalaryHistoryCreateNestedManyWithoutChangedByInput
-  adminRole?: Prisma.AdminRoleCreateNestedOneWithoutUserInput
-  adminActionLogs?: Prisma.AdminActionLogCreateNestedManyWithoutAdminUserInput
-  createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
-  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutPersonalAccessTokensInput = {
-  id?: string
-  email: string
-  emailNormalized: string
-  emailVerified?: boolean
-  passwordHash?: string | null
-  fullName: string
-  phone?: string | null
-  avatarUrl?: string | null
-  hasCompletedOnboarding?: boolean
-  onboardingCompletedAt?: Date | string | null
-  currentTeamId?: string | null
-  oauthProvider?: string | null
-  oauthProviderId?: string | null
-  telegramChatId?: string | null
-  telegramFirstName?: string | null
-  telegramLastName?: string | null
-  telegramUsername?: string | null
-  telegramPhotoUrl?: string | null
-  twoFactorEnabled?: boolean
-  twoFactorSecret?: string | null
-  twoFactorBackupCodes?: Prisma.UserCreatetwoFactorBackupCodesInput | string[]
-  storagePreference?: $Enums.StorageProviderType | null
-  storageMigratedFrom?: $Enums.StorageProviderType | null
-  storageMigratedAt?: Date | string | null
-  businessRole?: $Enums.BusinessRole | null
-  businessRoleAssignedAt?: Date | string | null
-  trialedPlanIds?: Prisma.UserCreatetrialedPlanIdsInput | string[]
-  hasDonatorBadge?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  verificationTokens?: Prisma.VerificationTokenUncheckedCreateNestedManyWithoutUserInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
-  notificationSettings?: Prisma.NotificationSettingsUncheckedCreateNestedOneWithoutUserInput
-  ownedTeams?: Prisma.TeamUncheckedCreateNestedManyWithoutOwnerInput
-  teamMemberships?: Prisma.TeamMemberUncheckedCreateNestedManyWithoutUserInput
-  createdTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutCreatedByInput
-  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
-  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedCreateNestedManyWithoutChangedByInput
-  adminRole?: Prisma.AdminRoleUncheckedCreateNestedOneWithoutUserInput
-  adminActionLogs?: Prisma.AdminActionLogUncheckedCreateNestedManyWithoutAdminUserInput
-  createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
-  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutPersonalAccessTokensInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedCreateWithoutPersonalAccessTokensInput>
-}
-
-export type UserUpsertWithoutPersonalAccessTokensInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedUpdateWithoutPersonalAccessTokensInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedCreateWithoutPersonalAccessTokensInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutPersonalAccessTokensInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutPersonalAccessTokensInput, Prisma.UserUncheckedUpdateWithoutPersonalAccessTokensInput>
-}
-
-export type UserUpdateWithoutPersonalAccessTokensInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
-  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
-  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
-  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
-  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
-  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  verificationTokens?: Prisma.VerificationTokenUpdateManyWithoutUserNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
-  notificationSettings?: Prisma.NotificationSettingsUpdateOneWithoutUserNestedInput
-  ownedTeams?: Prisma.TeamUpdateManyWithoutOwnerNestedInput
-  teamMemberships?: Prisma.TeamMemberUpdateManyWithoutUserNestedInput
-  currentTeam?: Prisma.TeamUpdateOneWithoutCurrentForUsersNestedInput
-  createdTasks?: Prisma.TaskUpdateManyWithoutCreatedByNestedInput
-  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
-  salaryChanges?: Prisma.TeamMemberSalaryHistoryUpdateManyWithoutChangedByNestedInput
-  adminRole?: Prisma.AdminRoleUpdateOneWithoutUserNestedInput
-  adminActionLogs?: Prisma.AdminActionLogUpdateManyWithoutAdminUserNestedInput
-  createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
-  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutPersonalAccessTokensInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailNormalized?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  hasCompletedOnboarding?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  currentTeamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  oauthProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  oauthProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramChatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramFirstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramLastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  telegramPhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twoFactorBackupCodes?: Prisma.UserUpdatetwoFactorBackupCodesInput | string[]
-  storagePreference?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
-  storageMigratedFrom?: Prisma.NullableEnumStorageProviderTypeFieldUpdateOperationsInput | $Enums.StorageProviderType | null
-  storageMigratedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  businessRole?: Prisma.NullableEnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole | null
-  businessRoleAssignedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  trialedPlanIds?: Prisma.UserUpdatetrialedPlanIdsInput | string[]
-  hasDonatorBadge?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  verificationTokens?: Prisma.VerificationTokenUncheckedUpdateManyWithoutUserNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
-  notificationSettings?: Prisma.NotificationSettingsUncheckedUpdateOneWithoutUserNestedInput
-  ownedTeams?: Prisma.TeamUncheckedUpdateManyWithoutOwnerNestedInput
-  teamMemberships?: Prisma.TeamMemberUncheckedUpdateManyWithoutUserNestedInput
-  createdTasks?: Prisma.TaskUncheckedUpdateManyWithoutCreatedByNestedInput
-  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
-  salaryChanges?: Prisma.TeamMemberSalaryHistoryUncheckedUpdateManyWithoutChangedByNestedInput
-  adminRole?: Prisma.AdminRoleUncheckedUpdateOneWithoutUserNestedInput
-  adminActionLogs?: Prisma.AdminActionLogUncheckedUpdateManyWithoutAdminUserNestedInput
-  createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
-  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2539,7 +2294,6 @@ export type UserCreateWithoutOwnedTeamsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedTeamsInput = {
@@ -2586,7 +2340,6 @@ export type UserUncheckedCreateWithoutOwnedTeamsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedTeamsInput = {
@@ -2638,7 +2391,6 @@ export type UserCreateWithoutCurrentTeamInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCurrentTeamInput = {
@@ -2685,7 +2437,6 @@ export type UserUncheckedCreateWithoutCurrentTeamInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCurrentTeamInput = {
@@ -2753,7 +2504,6 @@ export type UserUpdateWithoutOwnedTeamsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
@@ -2800,7 +2550,6 @@ export type UserUncheckedUpdateWithoutOwnedTeamsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutCurrentTeamInput = {
@@ -2899,7 +2648,6 @@ export type UserCreateWithoutTeamMembershipsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTeamMembershipsInput = {
@@ -2946,7 +2694,6 @@ export type UserUncheckedCreateWithoutTeamMembershipsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTeamMembershipsInput = {
@@ -3009,7 +2756,6 @@ export type UserUpdateWithoutTeamMembershipsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
@@ -3056,7 +2802,6 @@ export type UserUncheckedUpdateWithoutTeamMembershipsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSalaryChangesInput = {
@@ -3103,7 +2848,6 @@ export type UserCreateWithoutSalaryChangesInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSalaryChangesInput = {
@@ -3150,7 +2894,6 @@ export type UserUncheckedCreateWithoutSalaryChangesInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSalaryChangesInput = {
@@ -3213,7 +2956,6 @@ export type UserUpdateWithoutSalaryChangesInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSalaryChangesInput = {
@@ -3260,7 +3002,6 @@ export type UserUncheckedUpdateWithoutSalaryChangesInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTasksInput = {
@@ -3307,7 +3048,6 @@ export type UserCreateWithoutCreatedTasksInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTasksInput = {
@@ -3354,7 +3094,6 @@ export type UserUncheckedCreateWithoutCreatedTasksInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTasksInput = {
@@ -3417,7 +3156,6 @@ export type UserUpdateWithoutCreatedTasksInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTasksInput = {
@@ -3464,7 +3202,6 @@ export type UserUncheckedUpdateWithoutCreatedTasksInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -3511,7 +3248,6 @@ export type UserCreateWithoutSupportTicketsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -3558,7 +3294,6 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -3621,7 +3356,6 @@ export type UserUpdateWithoutSupportTicketsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -3668,7 +3402,6 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminRoleInput = {
@@ -3715,7 +3448,6 @@ export type UserCreateWithoutAdminRoleInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminRoleInput = {
@@ -3762,7 +3494,6 @@ export type UserUncheckedCreateWithoutAdminRoleInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminRoleInput = {
@@ -3825,7 +3556,6 @@ export type UserUpdateWithoutAdminRoleInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminRoleInput = {
@@ -3872,7 +3602,6 @@ export type UserUncheckedUpdateWithoutAdminRoleInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminActionLogsInput = {
@@ -3919,7 +3648,6 @@ export type UserCreateWithoutAdminActionLogsInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminActionLogsInput = {
@@ -3966,7 +3694,6 @@ export type UserUncheckedCreateWithoutAdminActionLogsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminActionLogsInput = {
@@ -4029,7 +3756,6 @@ export type UserUpdateWithoutAdminActionLogsInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
@@ -4076,7 +3802,6 @@ export type UserUncheckedUpdateWithoutAdminActionLogsInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedTemplatesInput = {
@@ -4123,7 +3848,6 @@ export type UserCreateWithoutCreatedTemplatesInput = {
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
@@ -4170,7 +3894,6 @@ export type UserUncheckedCreateWithoutCreatedTemplatesInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   donations?: Prisma.DonationUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedTemplatesInput = {
@@ -4233,7 +3956,6 @@ export type UserUpdateWithoutCreatedTemplatesInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
@@ -4280,7 +4002,6 @@ export type UserUncheckedUpdateWithoutCreatedTemplatesInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDonationsInput = {
@@ -4327,7 +4048,6 @@ export type UserCreateWithoutDonationsInput = {
   createdTemplates?: Prisma.TeamTemplateCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDonationsInput = {
@@ -4374,7 +4094,6 @@ export type UserUncheckedCreateWithoutDonationsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedCreateNestedManyWithoutCreatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDonationsInput = {
@@ -4437,7 +4156,6 @@ export type UserUpdateWithoutDonationsInput = {
   createdTemplates?: Prisma.TeamTemplateUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDonationsInput = {
@@ -4484,7 +4202,6 @@ export type UserUncheckedUpdateWithoutDonationsInput = {
   createdTemplates?: Prisma.TeamTemplateUncheckedUpdateManyWithoutCreatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyCurrentTeamInput = {
@@ -4563,7 +4280,6 @@ export type UserUpdateWithoutCurrentTeamInput = {
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCurrentTeamInput = {
@@ -4610,7 +4326,6 @@ export type UserUncheckedUpdateWithoutCurrentTeamInput = {
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   donations?: Prisma.DonationUncheckedUpdateManyWithoutUserNestedInput
-  personalAccessTokens?: Prisma.PersonalAccessTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCurrentTeamInput = {
@@ -4663,7 +4378,6 @@ export type UserCountOutputType = {
   loginHistory: number
   sessions: number
   donations: number
-  personalAccessTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4679,7 +4393,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   loginHistory?: boolean | UserCountOutputTypeCountLoginHistoryArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   donations?: boolean | UserCountOutputTypeCountDonationsArgs
-  personalAccessTokens?: boolean | UserCountOutputTypeCountPersonalAccessTokensArgs
 }
 
 /**
@@ -4776,13 +4489,6 @@ export type UserCountOutputTypeCountDonationsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.DonationWhereInput
 }
 
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountPersonalAccessTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PersonalAccessTokenWhereInput
-}
-
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4830,7 +4536,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   donations?: boolean | Prisma.User$donationsArgs<ExtArgs>
-  personalAccessTokens?: boolean | Prisma.User$personalAccessTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4952,7 +4657,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   donations?: boolean | Prisma.User$donationsArgs<ExtArgs>
-  personalAccessTokens?: boolean | Prisma.User$personalAccessTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4980,7 +4684,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     donations: Prisma.$DonationPayload<ExtArgs>[]
-    personalAccessTokens: Prisma.$PersonalAccessTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5422,7 +5125,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   loginHistory<T extends Prisma.User$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   donations<T extends Prisma.User$donationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$donationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DonationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  personalAccessTokens<T extends Prisma.User$personalAccessTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$personalAccessTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersonalAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6220,30 +5922,6 @@ export type User$donationsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.DonationScalarFieldEnum | Prisma.DonationScalarFieldEnum[]
-}
-
-/**
- * User.personalAccessTokens
- */
-export type User$personalAccessTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PersonalAccessToken
-   */
-  select?: Prisma.PersonalAccessTokenSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the PersonalAccessToken
-   */
-  omit?: Prisma.PersonalAccessTokenOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PersonalAccessTokenInclude<ExtArgs> | null
-  where?: Prisma.PersonalAccessTokenWhereInput
-  orderBy?: Prisma.PersonalAccessTokenOrderByWithRelationInput | Prisma.PersonalAccessTokenOrderByWithRelationInput[]
-  cursor?: Prisma.PersonalAccessTokenWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PersonalAccessTokenScalarFieldEnum | Prisma.PersonalAccessTokenScalarFieldEnum[]
 }
 
 /**

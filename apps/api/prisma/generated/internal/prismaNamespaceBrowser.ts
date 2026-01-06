@@ -58,7 +58,6 @@ export const ModelName = {
   TelegramAuthToken: 'TelegramAuthToken',
   LoginHistory: 'LoginHistory',
   Session: 'Session',
-  PersonalAccessToken: 'PersonalAccessToken',
   Team: 'Team',
   ProjectPayout: 'ProjectPayout',
   WorkLog: 'WorkLog',
@@ -256,21 +255,6 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
-
-
-export const PersonalAccessTokenScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  name: 'name',
-  tokenHash: 'tokenHash',
-  tokenPrefix: 'tokenPrefix',
-  lastUsedAt: 'lastUsedAt',
-  lastUsedIp: 'lastUsedIp',
-  expiresAt: 'expiresAt',
-  createdAt: 'createdAt'
-} as const
-
-export type PersonalAccessTokenScalarFieldEnum = (typeof PersonalAccessTokenScalarFieldEnum)[keyof typeof PersonalAccessTokenScalarFieldEnum]
 
 
 export const TeamScalarFieldEnum = {

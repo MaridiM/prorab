@@ -53,11 +53,6 @@ export type LoginHistory = Prisma.LoginHistoryModel
  */
 export type Session = Prisma.SessionModel
 /**
- * Model PersonalAccessToken
- * 
- */
-export type PersonalAccessToken = Prisma.PersonalAccessTokenModel
-/**
  * Model Team
  * 
  */

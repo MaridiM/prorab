@@ -62,13 +62,13 @@ export function UpgradeButton() {
   if (isTopPlan) {
     return (
       <Button
-        variant="outline"
+        variant="default"
         size="sm"
         asChild
-        className="border-primary/30 bg-primary/5 hover:bg-primary/10"
+        className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-indigo-500/20 transition-all font-semibold"
       >
         <Link href="/settings?tab=subscription">
-          <Crown className="w-4 h-4 mr-2 text-primary" />
+          <Crown className="w-4 h-4 mr-2" />
           <span className="hidden sm:inline">{planName}</span>
           <span className="inline sm:hidden">👑</span>
         </Link>

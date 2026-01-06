@@ -250,11 +250,25 @@ export class SubscriptionsResolver {
         }
       }
 
-      // Final fallback: Use current subscription plan (least reliable)
+      // Final fallback: Use subscription plan at the time of payment (not current subscription!)
+      // This is important because user may have changed plans since this payment
       if (!metadataFound) {
-        planName = payment.subscription?.planRef?.name || payment.subscription?.plan || 'Unknown';
-        planSlug = payment.subscription?.planRef?.slug || payment.subscription?.plan?.toLowerCase() || 'unknown';
-        isEarlyBird = payment.subscription?.isEarlyBird || false;
+        // Use the subscription that was active when this payment was made
+        // payment.subscription contains the subscription record at payment time
+        if (payment.subscription) {
+          planName = payment.subscription.planRef?.name || 
+                     (payment.subscription.plan === 'LITE' ? 'Лайт' :
+                      payment.subscription.plan === 'FOREMAN' ? 'Прораб' :
+                      payment.subscription.plan === 'BRIGADE' ? 'Бригада' : 'Unknown');
+          planSlug = payment.subscription.planRef?.slug || 
+                     payment.subscription.plan?.toLowerCase() || 'unknown';
+          isEarlyBird = payment.subscription.isEarlyBird || false;
+        } else {
+          // Last resort: use amount-based detection
+          planName = 'Unknown';
+          planSlug = 'unknown';
+          isEarlyBird = false;
+        }
       }
 
       // Read period dates from database (stored when payment succeeded)
@@ -277,39 +291,46 @@ export class SubscriptionsResolver {
         periodEndAt.setDate(periodEndAt.getDate() + BILLING_CYCLE_DAYS);
       }
 
-      // Determine if this payment was a renewal (same plan as next payment)
-      // Payments are sorted DESC (newest first), so next payment in time has index < current
+      // Determine if this payment was a renewal (same plan as previous payment)
+      // Payments are sorted DESC (newest first), so:
+      // - Index 0 = newest payment
+      // - Index 1 = older payment (paid before index 0)
+      // - Index 2 = even older payment (paid before index 1)
+      // To find the PREVIOUS payment (paid before current), we need to look at payments with HIGHER index
+      // But we want to find the MOST RECENT previous payment, so we look for the first payment with index > current
       let isRenewal = false;
-      const nextPaymentInTime = payments.find((p, i) => i < index);
+      
+      // Find the previous payment (paid before this one, so has higher index in DESC sorted array)
+      const previousPaymentInTime = payments.find((p, i) => i > index);
 
-      if (nextPaymentInTime) {
-        // Extract plan slug from next payment
-        let nextPlanSlug = 'unknown';
+      if (previousPaymentInTime) {
+        // Extract plan slug from previous payment
+        let previousPlanSlug = 'unknown';
 
         // Try to extract from failureReason (mock payments)
-        if (nextPaymentInTime.failureReason && nextPaymentInTime.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
-          const [, targetPlan] = nextPaymentInTime.failureReason.replace('TARGET_PLAN_METADATA:', '').split('|');
-          if (targetPlan) nextPlanSlug = targetPlan.toLowerCase();
+        if (previousPaymentInTime.failureReason && previousPaymentInTime.failureReason.startsWith('TARGET_PLAN_METADATA:')) {
+          const [, targetPlan] = previousPaymentInTime.failureReason.replace('TARGET_PLAN_METADATA:', '').split('|');
+          if (targetPlan) previousPlanSlug = targetPlan.toLowerCase();
         }
         // Try to extract from description (real payments)
-        else if (nextPaymentInTime.description && nextPaymentInTime.description.includes('TARGET_PLAN:')) {
-          const targetPlanMatch = nextPaymentInTime.description.match(/TARGET_PLAN:[^|]+\|([^|]+)\|/);
-          if (targetPlanMatch) nextPlanSlug = targetPlanMatch[1].toLowerCase();
+        else if (previousPaymentInTime.description && previousPaymentInTime.description.includes('TARGET_PLAN:')) {
+          const targetPlanMatch = previousPaymentInTime.description.match(/TARGET_PLAN:[^|]+\|([^|]+)\|/);
+          if (targetPlanMatch) previousPlanSlug = targetPlanMatch[1].toLowerCase();
         }
         // Fallback: use subscription plan
-        else if (nextPaymentInTime.subscription?.planRef?.slug) {
-          nextPlanSlug = nextPaymentInTime.subscription.planRef.slug.toLowerCase();
+        else if (previousPaymentInTime.subscription?.planRef?.slug) {
+          previousPlanSlug = previousPaymentInTime.subscription.planRef.slug.toLowerCase();
         }
         // Final fallback: determine from amount
         else {
-          const amount = Number(nextPaymentInTime.amount);
-          if (amount === 290 || amount === 490) nextPlanSlug = 'lite';
-          else if (amount === 690 || amount === 990) nextPlanSlug = 'foreman';
-          else if (amount === 1490 || amount === 1990) nextPlanSlug = 'brigade';
+          const amount = Number(previousPaymentInTime.amount);
+          if (amount === 290 || amount === 490) previousPlanSlug = 'lite';
+          else if (amount === 690 || amount === 990) previousPlanSlug = 'foreman';
+          else if (amount === 1490 || amount === 1990) previousPlanSlug = 'brigade';
         }
 
-        // If next payment is same plan, this was a renewal
-        isRenewal = nextPlanSlug === planSlug;
+        // If previous payment is same plan, this was a renewal
+        isRenewal = previousPlanSlug === planSlug;
       }
 
       return {

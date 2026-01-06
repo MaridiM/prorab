@@ -1006,9 +1006,34 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 										</Badge>
 									)}
 								</div>
-								<CardDescription className="text-base mt-1">
-									{subscription.limits.price}₽/мес
-								</CardDescription>
+								<div className="text-base mt-1 text-muted-foreground">
+									{(() => {
+										// Find current plan to get full price and Early Bird price
+										const currentPlan = plans.find(p => p.id === subscription.planId)
+										const rubPrice = currentPlan?.prices?.find((p: any) => p.currency === 'RUB')
+										
+										// If user has Early Bird, show crossed out full price and Early Bird price
+										if (subscription.isEarlyBird && rubPrice && rubPrice.price && rubPrice.earlyBirdPrice) {
+											const fullPrice = Number(rubPrice.price)
+											const earlyBirdPrice = Number(rubPrice.earlyBirdPrice) // Use Early Bird price from plan
+											
+											return (
+												<div className="flex items-center gap-2">
+													<span className="line-through text-muted-foreground text-sm">
+														{fullPrice}₽/мес
+													</span>
+													<span className="font-semibold text-lg text-foreground">
+														{earlyBirdPrice}₽/мес
+													</span>
+												</div>
+											)
+										}
+										
+										// Otherwise show regular price (full price)
+										const displayPrice = rubPrice ? Number(rubPrice.price) : subscription.limits.price
+										return <span>{displayPrice}₽/мес</span>
+									})()}
+								</div>
 							</div>
 						</div>
 					</div>

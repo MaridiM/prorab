@@ -239,7 +239,11 @@ export class PaymentsService {
         providerType: provider.type, // Store which provider is used
         providerPaymentId: uniquePendingId, // Unique temporary ID to avoid conflicts
         yookassaPaymentId: null, // DEPRECATED: Will be set only for YooKassa payments
-        description: `Оплата подписки "${planName}" за месяц`, // Clean description without JSON
+        // Store metadata in description for real payments (format: "Plan Name | TARGET_PLAN:planId|plan|isEarlyBird")
+        // This ensures we can extract plan info later even if subscription changes
+        description: targetPlanIdToStore && targetPlanToStore
+          ? `Оплата подписки "${planName}" за месяц | TARGET_PLAN:${targetPlanIdToStore}|${targetPlanToStore}|${isEarlyBird}`
+          : `Оплата подписки "${planName}" за месяц`,
         failureReason: metadataForMock, // Temporarily store metadata here for mock payments
       },
     });
@@ -492,11 +496,19 @@ export class PaymentsService {
 
     // Update payment status and store target plan info in description for history
     // We'll store it in a format that can be parsed later: "TARGET_PLAN:planId|plan|isEarlyBird"
-    // Only add if not already present (to avoid duplicates)
-    let updatedDescription = payment.description;
-    if (targetPlanId && targetPlan && !payment.description?.includes('TARGET_PLAN:')) {
-      // Store target plan info in description (will be parsed in history resolver)
-      updatedDescription = `${payment.description || ''} | TARGET_PLAN:${targetPlanId}|${targetPlan}|${isEarlyBirdFromMetadata}`;
+    // Always add metadata if available (even if already present, to ensure it's up-to-date)
+    let updatedDescription = payment.description || '';
+    
+    // Extract existing TARGET_PLAN metadata if present
+    const existingTargetPlanMatch = updatedDescription.match(/TARGET_PLAN:([^|]+)\|([^|]+)\|([^|]+)/);
+    
+    if (targetPlanId && targetPlan) {
+      // Remove existing TARGET_PLAN metadata if present
+      if (existingTargetPlanMatch) {
+        updatedDescription = updatedDescription.replace(/\s*\|\s*TARGET_PLAN:[^|]+\|[^|]+\|[^|]+/, '');
+      }
+      // Add/update target plan info in description (will be parsed in history resolver)
+      updatedDescription = `${updatedDescription.trim()} | TARGET_PLAN:${targetPlanId}|${targetPlan}|${isEarlyBirdFromMetadata}`;
     }
 
     // Calculate subscription period for this payment

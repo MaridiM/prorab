@@ -64,7 +64,11 @@ import {
 	Check,
 	Menu,
 	ChevronDown,
+	Video,
+	RefreshCw,
+	Code,
 } from 'lucide-react'
+import { QuickStartView, UpdatesView, UnderDevelopmentView } from '@/packages/components/settings/HelpViews'
 import { TelegramConnection } from '@/packages/components/settings/telegram-connection'
 import { DonationDialog, DonationsHistory } from '@/packages/components/donations'
 import { useTheme } from 'next-themes'
@@ -228,6 +232,7 @@ function SettingsContent() {
 
 	// Get tab from URL, default to 'profile'
 	const tabFromUrl = searchParams.get('tab') as TabId | null
+	const sectionFromUrl = searchParams.get('section')
 	const activeTab = useMemo(() => {
 		const validTabs: TabId[] = ['profile', 'security', 'notifications', 'subscription', 'appearance', 'help', 'about']
 		if (tabFromUrl && validTabs.includes(tabFromUrl)) {
@@ -240,6 +245,7 @@ function SettingsContent() {
 	const setActiveTab = useCallback((newTab: TabId) => {
 		const params = new URLSearchParams(searchParams.toString())
 		params.set('tab', newTab)
+		params.delete('section')
 		router.push(`/settings?${params.toString()}`, { scroll: false })
 	}, [router, searchParams])
 
@@ -717,7 +723,7 @@ function SettingsContent() {
 									mobileMenuOpen && "rotate-180"
 								)} />
 							</button>
-							
+
 							<AnimatePresence>
 								{mobileMenuOpen && (
 									<motion.div
@@ -774,11 +780,11 @@ function SettingsContent() {
 											className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
 										>
 											<Form {...profileForm}>
-												<form 
+												<form
 													onSubmit={(e) => {
 														e.preventDefault()
 														profileForm.handleSubmit(onProfileSubmit)(e)
-													}} 
+													}}
 													className="divide-y divide-border/30"
 												>
 													{/* Avatar Section */}
@@ -946,10 +952,10 @@ function SettingsContent() {
 											</div>
 
 											<div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-												{/* Telegram */} 
-												<TelegramConnection 
-													isConnected={!!me?.telegramChatId} 
-													telegramUsername={me?.telegramUsername || undefined} 
+												{/* Telegram */}
+												<TelegramConnection
+													isConnected={!!me?.telegramChatId}
+													telegramUsername={me?.telegramUsername || undefined}
 													onUnlink={refetchMe}
 													onLinkSuccess={refetchMe}
 												/>
@@ -1454,69 +1460,45 @@ function SettingsContent() {
 											variants={fadeIn}
 											className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
 										>
-											<div className="p-4 sm:p-6 border-b border-border/30">
-												<div className="flex items-center gap-2 sm:gap-3">
-													<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-														<Palette className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+											<div className="p-4 sm:p-6 flex flex-col gap-4">
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-2 sm:gap-3">
+														<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+															<Palette className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+														</div>
+														<div>
+															<h2 className="font-semibold text-sm sm:text-base">Тема оформления</h2>
+															<p className="text-xs sm:text-sm text-muted-foreground">Выберите предпочитаемую тему</p>
+														</div>
 													</div>
-													<div>
-														<h2 className="font-semibold text-sm sm:text-base">Тема оформления</h2>
-														<p className="text-xs sm:text-sm text-muted-foreground">Выберите предпочитаемую тему</p>
+
+													<div className="flex items-center gap-1 sm:gap-2">
+														{[
+															{ id: 'light', label: 'Светлая', icon: Sun },
+															{ id: 'dark', label: 'Тёмная', icon: Moon },
+															{ id: 'system', label: 'Системная', icon: Monitor },
+														].map((item) => (
+															<button
+																key={item.id}
+																onClick={() => setTheme(item.id)}
+																title={item.label}
+																className={cn(
+																	"w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border",
+																	theme === item.id
+																		? "bg-primary/10 text-primary border-primary/20 ring-1 ring-primary/20"
+																		: "bg-transparent text-muted-foreground border-transparent hover:bg-secondary/50 hover:text-foreground"
+																)}
+															>
+																<item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+															</button>
+														))}
 													</div>
 												</div>
-											</div>
 
-											<div className="p-4 sm:p-6">
-												<div className="grid grid-cols-3 gap-2 sm:gap-3">
-													<button
-														onClick={() => setTheme('light')}
-														className={cn(
-															'p-2 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2',
-															theme === 'light'
-																? 'border-primary bg-primary/5'
-																: 'border-border/50 hover:border-primary/30'
-														)}
-													>
-														<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white border border-gray-200 flex items-center justify-center">
-															<Sun className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
-														</div>
-														<span className="text-xs sm:text-sm font-medium">Светлая</span>
-													</button>
-
-													<button
-														onClick={() => setTheme('dark')}
-														className={cn(
-															'p-2 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2',
-															theme === 'dark'
-																? 'border-primary bg-primary/5'
-																: 'border-border/50 hover:border-primary/30'
-														)}
-													>
-														<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gray-900 border border-gray-700 flex items-center justify-center">
-															<Moon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-														</div>
-														<span className="text-xs sm:text-sm font-medium">Тёмная</span>
-													</button>
-
-													<button
-														onClick={() => setTheme('system')}
-														className={cn(
-															'p-2 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2',
-															theme === 'system'
-																? 'border-primary bg-primary/5'
-																: 'border-border/50 hover:border-primary/30'
-														)}
-													>
-														<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-gray-900 border border-gray-400 flex items-center justify-center">
-															<Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-														</div>
-														<span className="text-xs sm:text-sm font-medium">Системная</span>
-													</button>
-												</div>
-
-												<p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4 text-center">
-													Текущая тема: {getThemeIcon()} {theme === 'system' ? 'Системная' : theme === 'dark' ? 'Тёмная' : 'Светлая'}
-													{theme === 'system' && ` (${resolvedTheme === 'dark' ? 'тёмная' : 'светлая'})`}
+												<p className="text-xs text-muted-foreground px-1">
+													{theme === 'system'
+														? `Системная тема автоматически подстраивается под настройки вашего устройства (${resolvedTheme === 'dark' ? 'сейчас тёмная' : 'сейчас светлая'}).`
+														: 'Выбранная тема будет использоваться на всех страницах приложения.'}
 												</p>
 											</div>
 										</motion.section>
@@ -1695,165 +1677,201 @@ function SettingsContent() {
 									variants={fadeIn}
 								>
 									<motion.div variants={stagger} className="space-y-4 sm:space-y-6">
-										{/* FAQ */}
-										<motion.section
-											variants={fadeIn}
-											className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
-										>
-											<div className="p-4 sm:p-6 border-b border-border/30">
-												<div className="flex items-center gap-2 sm:gap-3">
-													<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-														<HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-													</div>
-													<div>
-														<h2 className="font-semibold text-sm sm:text-base">Часто задаваемые вопросы</h2>
-														<p className="text-xs sm:text-sm text-muted-foreground">Ответы на популярные вопросы</p>
-													</div>
-												</div>
-											</div>
-
-											<div className="divide-y divide-border/30">
-												{[
-													{
-														q: 'Как создать фотоотчёт для клиента?',
-														a: 'Откройте проект → вкладка "Фотоотчёты" → нажмите "+ Новый отчёт". Загрузите фото, добавьте комментарий и отправьте ссылку клиенту.',
-													},
-													{
-														q: 'Как рассчитывается зарплата бригады?',
-														a: 'Для каждого участника можно настроить тип оплаты: % от прибыли, фикс за объект, за м², за день или почасовая. При закрытии объекта система автоматически рассчитает зарплату.',
-													},
-													{
-														q: 'Как пригласить участника в бригаду?',
-														a: 'Перейдите в настройки команды → "Пригласить участника". Отправьте сгенерированную ссылку или QR-код. Участник сможет присоединиться через Telegram или email.',
-													},
-													{
-														q: 'Как архивировать объект?',
-														a: 'Откройте объект → нажмите "В архив". Архивные объекты не учитываются в лимите активных проектов вашего тарифа.',
-													},
-													{
-														q: 'Как изменить тариф?',
-														a: 'Перейдите в Настройки → Подписка. Выберите нужный тариф и подтвердите оплату. Изменения вступят в силу сразу или с нового периода.',
-													},
-													{
-														q: 'Что видит клиент по ссылке на фотоотчёт?',
-														a: 'Клиент видит: название бригады, логотип, название объекта, прогресс выполнения, фотографии и комментарий. Может оставить реакции на фото.',
-													},
-												].map((faq, i) => (
-													<details key={i} className="group">
-														<summary className="p-3 sm:p-4 flex items-center justify-between cursor-pointer list-none hover:bg-secondary/30 transition-colors">
-															<span className="font-medium pr-2 sm:pr-4 text-sm sm:text-base">{faq.q}</span>
-															<ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground transition-transform group-open:rotate-90 flex-shrink-0" />
-														</summary>
-														<div className="px-3 sm:px-4 pb-3 sm:pb-4 text-xs sm:text-sm text-muted-foreground">
-															{faq.a}
-														</div>
-													</details>
-												))}
-											</div>
-										</motion.section>
-
-										{/* Contact Support */}
-										<motion.section
-											variants={fadeIn}
-											className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
-										>
-											<div className="p-4 sm:p-6 border-b border-border/30">
-												<div className="flex items-center gap-2 sm:gap-3">
-													<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-														<MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-													</div>
-													<div>
-														<h2 className="font-semibold text-sm sm:text-base">Связаться с поддержкой</h2>
-														<p className="text-xs sm:text-sm text-muted-foreground">Мы всегда рады помочь</p>
-													</div>
-												</div>
-											</div>
-
-											<div className="p-4 sm:p-6 grid gap-3 sm:gap-4 sm:grid-cols-2">
-												<a
-													href="https://t.me/ProRabSupportBot"
-													target="_blank"
-													rel="noopener noreferrer"
-													className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:border-[#2AABEE]/50 hover:bg-[#2AABEE]/5 transition-all flex items-center gap-2 sm:gap-4"
+										<AnimatePresence mode="wait">
+											{!sectionFromUrl ? (
+												<motion.div
+													key="help-list"
+													initial="hidden"
+													animate="visible"
+													exit="exit"
+													variants={stagger}
+													className="space-y-4 sm:space-y-6"
 												>
-													<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#2AABEE]/10 flex items-center justify-center flex-shrink-0">
-														<svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
-															<path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-														</svg>
-													</div>
-													<div className="min-w-0">
-														<p className="font-medium text-sm sm:text-base">Telegram</p>
-														<p className="text-xs sm:text-sm text-muted-foreground truncate">@ProRabSupportBot</p>
-													</div>
-													<ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground ml-auto flex-shrink-0" />
-												</a>
-
-												<a
-													href="mailto:support@prorab.space"
-													className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center gap-2 sm:gap-4"
-												>
-													<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-														<Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-													</div>
-													<div className="min-w-0">
-														<p className="font-medium text-sm sm:text-base">Email</p>
-														<p className="text-xs sm:text-sm text-muted-foreground truncate">support@prorab.space</p>
-													</div>
-													<ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground ml-auto flex-shrink-0" />
-												</a>
-											</div>
-
-											<div className="px-4 sm:px-6 pb-4 sm:pb-6">
-												<div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/20">
-													<div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-														<Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
-														<span className="text-xs sm:text-sm font-medium">Время ответа</span>
-													</div>
-													<p className="text-xs sm:text-sm text-muted-foreground">
-														Обычно отвечаем в течение 2-4 часов в рабочее время (10:00–19:00 МСК). В выходные — до 24 часов.
-													</p>
-												</div>
-											</div>
-										</motion.section>
-
-										{/* Documentation */}
-										<motion.section
-											variants={fadeIn}
-											className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
-										>
-											<div className="p-4 sm:p-6 border-b border-border/30">
-												<div className="flex items-center gap-2 sm:gap-3">
-													<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-														<FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-													</div>
-													<div>
-														<h2 className="font-semibold text-sm sm:text-base">Документация</h2>
-														<p className="text-xs sm:text-sm text-muted-foreground">Полезные материалы</p>
-													</div>
-												</div>
-											</div>
-
-											<div className="divide-y divide-border/30">
-												{[
-													{ title: 'Быстрый старт', description: 'Начните работу за 5 минут', href: '#' },
-													{ title: 'Видеоуроки', description: 'Пошаговые инструкции', href: '#' },
-													{ title: 'API документация', description: 'Для разработчиков', href: '#' },
-													{ title: 'Обновления', description: 'Что нового в ProRab', href: '#' },
-												].map((doc) => (
-													<a
-														key={doc.title}
-														href={doc.href}
-														className="p-3 sm:p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors"
+													{/* FAQ */}
+													<motion.section
+														variants={fadeIn}
+														className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
 													>
-														<div className="min-w-0">
-															<p className="font-medium text-sm sm:text-base">{doc.title}</p>
-															<p className="text-xs sm:text-sm text-muted-foreground truncate">{doc.description}</p>
+														<div className="p-4 sm:p-6 border-b border-border/30">
+															<div className="flex items-center gap-2 sm:gap-3">
+																<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+																	<HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+																</div>
+																<div>
+																	<h2 className="font-semibold text-sm sm:text-base">Часто задаваемые вопросы</h2>
+																	<p className="text-xs sm:text-sm text-muted-foreground">Ответы на популярные вопросы</p>
+																</div>
+															</div>
 														</div>
-														<ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
-													</a>
-												))}
-											</div>
-										</motion.section>
+
+														<div className="divide-y divide-border/30">
+															{[
+																{
+																	q: 'Как создать фотоотчёт для клиента?',
+																	a: 'Откройте проект → вкладка "Фотоотчёты" → нажмите "+ Новый отчёт". Загрузите фото, добавьте комментарий и отправьте ссылку клиенту.',
+																},
+																{
+																	q: 'Как рассчитывается зарплата бригады?',
+																	a: 'Для каждого участника можно настроить тип оплаты: % от прибыли, фикс за объект, за м², за день или почасовая. При закрытии объекта система автоматически рассчитает зарплату.',
+																},
+																{
+																	q: 'Как пригласить участника в бригаду?',
+																	a: 'Перейдите в настройки команды → "Пригласить участника". Отправьте сгенерированную ссылку или QR-код. Участник сможет присоединиться через Telegram или email.',
+																},
+																{
+																	q: 'Как архивировать объект?',
+																	a: 'Откройте объект → нажмите "В архив". Архивные объекты не учитываются в лимите активных проектов вашего тарифа.',
+																},
+																{
+																	q: 'Как изменить тариф?',
+																	a: 'Перейдите в Настройки → Подписка. Выберите нужный тариф и подтвердите оплату. Изменения вступят в силу сразу или с нового периода.',
+																},
+																{
+																	q: 'Что видит клиент по ссылке на фотоотчёт?',
+																	a: 'Клиент видит: название бригады, логотип, название объекта, прогресс выполнения, фотографии и комментарий. Может оставить реакции на фото.',
+																},
+															].map((faq, i) => (
+																<details key={i} className="group">
+																	<summary className="p-3 sm:p-4 flex items-center justify-between cursor-pointer list-none hover:bg-secondary/30 transition-colors">
+																		<span className="font-medium pr-2 sm:pr-4 text-sm sm:text-base">{faq.q}</span>
+																		<ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground transition-transform group-open:rotate-90 flex-shrink-0" />
+																	</summary>
+																	<div className="px-3 sm:px-4 pb-3 sm:pb-4 text-xs sm:text-sm text-muted-foreground">
+																		{faq.a}
+																	</div>
+																</details>
+															))}
+														</div>
+													</motion.section>
+
+													{/* Contact Support */}
+													<motion.section
+														variants={fadeIn}
+														className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
+													>
+														<div className="p-4 sm:p-6 border-b border-border/30">
+															<div className="flex items-center gap-2 sm:gap-3">
+																<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+																	<MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+																</div>
+																<div>
+																	<h2 className="font-semibold text-sm sm:text-base">Связаться с поддержкой</h2>
+																	<p className="text-xs sm:text-sm text-muted-foreground">Мы всегда рады помочь</p>
+																</div>
+															</div>
+														</div>
+
+														<div className="p-4 sm:p-6 grid gap-3 sm:gap-4 sm:grid-cols-2">
+															<a
+																href="https://t.me/ProRabSupportBot"
+																target="_blank"
+																rel="noopener noreferrer"
+																className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:border-[#2AABEE]/50 hover:bg-[#2AABEE]/5 transition-all flex items-center gap-2 sm:gap-4"
+															>
+																<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#2AABEE]/10 flex items-center justify-center flex-shrink-0">
+																	<svg className="w-5 h-5 sm:w-6 sm:h-6 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
+																		<path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+																	</svg>
+																</div>
+																<div className="min-w-0">
+																	<p className="font-medium text-sm sm:text-base">Telegram</p>
+																	<p className="text-xs sm:text-sm text-muted-foreground truncate">@ProRabSupportBot</p>
+																</div>
+																<ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground ml-auto flex-shrink-0" />
+															</a>
+
+															<a
+																href="mailto:support@prorab.space"
+																className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center gap-2 sm:gap-4"
+															>
+																<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+																	<Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+																</div>
+																<div className="min-w-0">
+																	<p className="font-medium text-sm sm:text-base">Email</p>
+																	<p className="text-xs sm:text-sm text-muted-foreground truncate">support@prorab.space</p>
+																</div>
+																<ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground ml-auto flex-shrink-0" />
+															</a>
+														</div>
+
+														<div className="px-4 sm:px-6 pb-4 sm:pb-6">
+															<div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/20">
+																<div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+																	<Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+																	<span className="text-xs sm:text-sm font-medium">Время ответа</span>
+																</div>
+																<p className="text-xs sm:text-sm text-muted-foreground">
+																	Обычно отвечаем в течение 2-4 часов в рабочее время (10:00–19:00 МСК). В выходные — до 24 часов.
+																</p>
+															</div>
+														</div>
+													</motion.section>
+
+													{/* Documentation */}
+													<motion.section
+														variants={fadeIn}
+														className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden"
+													>
+														<div className="p-4 sm:p-6 border-b border-border/30">
+															<div className="flex items-center gap-2 sm:gap-3">
+																<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+																	<FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+																</div>
+																<div>
+																	<h2 className="font-semibold text-sm sm:text-base">Документация</h2>
+																	<p className="text-xs sm:text-sm text-muted-foreground">Полезные материалы</p>
+																</div>
+															</div>
+														</div>
+
+														<div className="divide-y divide-border/30">
+															{[
+																{ title: 'Быстрый старт', description: 'Начните работу за 5 минут', href: '/settings?tab=help&section=quick-start', icon: Zap },
+																{ title: 'Видеоуроки', description: 'Пошаговые инструкции', href: '/settings?tab=help&section=videos', icon: Video },
+																{ title: 'Обновления', description: 'Что нового в ProRab', href: '/settings?tab=help&section=updates', icon: RefreshCw },
+																{ title: 'API (в разработке)', description: 'Для разработчиков', href: '/settings?tab=help&section=api', icon: Code },
+															].map((doc) => (
+																<Link
+																	key={doc.title}
+																	href={doc.href}
+																	className="p-3 sm:p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors group"
+																>
+																	<div className="flex items-center gap-3">
+																		<div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center group-hover:bg-background transition-colors">
+																			<doc.icon className="w-4 h-4 text-muted-foreground" />
+																		</div>
+																		<div className="min-w-0">
+																			<p className="font-medium text-sm sm:text-base">{doc.title}</p>
+																			<p className="text-xs sm:text-sm text-muted-foreground truncate">{doc.description}</p>
+																		</div>
+																	</div>
+																	<ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+																</Link>
+															))}
+														</div>
+													</motion.section>
+												</motion.div>
+											) : (
+												<motion.div
+													key="help-detail"
+													initial="hidden"
+													animate="visible"
+													exit="exit"
+													variants={fadeIn}
+												>
+													<motion.section
+														variants={fadeIn}
+														className="rounded-xl sm:rounded-2xl border border-border/50 bg-card overflow-hidden p-4 sm:p-6"
+													>
+														{sectionFromUrl === 'quick-start' && <QuickStartView />}
+														{sectionFromUrl === 'updates' && <UpdatesView />}
+														{sectionFromUrl === 'videos' && <UnderDevelopmentView title="Видеоуроки" />}
+														{sectionFromUrl === 'api' && <UnderDevelopmentView title="API Документация" />}
+													</motion.section>
+												</motion.div>
+											)}
+										</AnimatePresence>
 									</motion.div>
 								</motion.div>
 							)}

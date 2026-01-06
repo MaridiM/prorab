@@ -5,4 +5,4 @@ export { SubscriptionHistory } from './subscription-history'
 export { TwoFactorAuth } from './TwoFactorAuth'
 export { NotificationPreferences } from './NotificationPreferences'
 export { DeleteAccountDialog } from './DeleteAccountDialog'
-export { ApiTokensSettings } from './ApiTokensSettings'
+// ApiTokensSettings temporarily removed - GraphQL schema needs to be regenerated

@@ -117,7 +117,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         fetchPolicy: 'network-only'
       })
 
-      if (error || !data?.me) {
+      // Check if me is null (user not authenticated) - this happens when session is invalid
+      // GraphQL returns { data: { me: null } } instead of an error
+      if (data?.me === null) {
+        // User is not authenticated (me is null) - redirect to login
+        console.log('[AuthContext] me is null - user not authenticated, redirecting to login')
+        if (!isRedirectingRef.current && typeof document !== 'undefined') {
+          isRedirectingRef.current = true
+          clearAuthCookies();
+          setUser(null)
+          setIsLoading(false)
+          // Only redirect if not already on auth pages or public pages (like landing page)
+          const pathname = window.location.pathname
+          if (!pathname.startsWith('/auth') && pathname !== '/') {
+            router.replace('/auth/login');
+          }
+          return
+        }
+      } else if (error || !data?.me) {
         // Check if it's a network error (API server not available)
         const errorMessage = error?.message || ''
         const isNetworkError = errorMessage.includes('Failed to fetch') || 

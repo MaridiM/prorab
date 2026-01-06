@@ -32,6 +32,8 @@ export default function ProtectedLayout({
 		}
 
 		// If user is not authenticated and we're on a protected route
+		// This handles both cases: user === null and isAuthenticated === false
+		// Including when GraphQL returns { data: { me: null } }
 		if (!isAuthenticated && !user) {
 			// Prevent multiple redirects
 			if (pathname !== '/auth/login' && pathname !== '/auth/register') {

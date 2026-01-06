@@ -1,0 +1,141 @@
+[
+  {
+    "version": "v1.7.0",
+    "date": "5 января 2026 г.",
+    "title": "Система Донатов UI 🎁",
+    "description": "- Donation Dialog Component: UI диалог создания доната - Файл apps/web/src/packages/components/donations/donation-dialog.tsx - Preset кнопки с суммами: 100₽, 300₽, 500₽, 1000₽ с градиентным дизайном -",
+    "features": [
+      "GraphQL Integration",
+      "Donation Dialog Component",
+      "Donations History Component",
+      "Settings Page Updates",
+      "Donation Success Page"
+    ],
+    "icon": "Gift",
+    "color": "text-pink-500",
+    "bg": "bg-pink-500/10"
+  },
+  {
+    "version": "v1.6.22",
+    "date": "4 января 2026 г.",
+    "title": "Telegram Integration UI & Account Deletion Fixes",
+    "description": "---",
+    "features": [
+      "Telegram Unlink Functionality",
+      "Telegram Notification Testing",
+      "Telegram Link Status Check",
+      "Telegram Notification Testing",
+      "Telegram Account Unlinking"
+    ],
+    "icon": "MessageCircle",
+    "color": "text-blue-500",
+    "bg": "bg-blue-500/10"
+  },
+  {
+    "version": "v1.6.21",
+    "date": "2 января 2026 г.",
+    "title": "Seed Users Roles & Permissions Update",
+    "description": "Seed Users Roles",
+    "features": [
+      "Seed Users Roles"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
+    "version": "v1.6.20",
+    "date": "2 января 2026 г.",
+    "title": "Database Reset & Period Tracking Fix",
+    "description": "Database Reset Scripts",
+    "features": [
+      "Database Reset Scripts",
+      "Period Fields Migration"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
+    "version": "v1.6.19",
+    "date": "2 января 2026 г.",
+    "title": "Subscription Period Fixes & History Improvements",
+    "description": "Subscription Period Calculation",
+    "features": [
+      "Subscription Period Calculation",
+      "Subscription History Renewal Logic",
+      "GraphQL Codegen"
+    ],
+    "icon": "CreditCard",
+    "color": "text-green-500",
+    "bg": "bg-green-500/10"
+  },
+  {
+    "version": "v1.6.18",
+    "date": "2 января 2026 г.",
+    "title": "Subscription History UI Improvements & Landing Page Updates",
+    "description": "---",
+    "features": [
+      "Landing Page Trial Period Info",
+      "Seed Script Enhancement"
+    ],
+    "icon": "CreditCard",
+    "color": "text-green-500",
+    "bg": "bg-green-500/10"
+  },
+  {
+    "version": "v1.6.17",
+    "date": "2 января 2026 г.",
+    "title": "Subscription History & Renew Plan Fix",
+    "description": "---",
+    "features": [
+      "Subscription History Display",
+      "Payment-Based Subscription History"
+    ],
+    "icon": "CreditCard",
+    "color": "text-green-500",
+    "bg": "bg-green-500/10"
+  },
+  {
+    "version": "v1.6.15",
+    "date": "2 января 2026 г.",
+    "title": "User-Specific Early Bird Display",
+    "description": "---",
+    "features": [
+      "Early Bird Price Mismatch",
+      "User-Specific Early Bird Check"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
+    "version": "v1.6.13",
+    "date": "31 декабря 2025 г.",
+    "title": "Payment Success Page Critical Fix",
+    "description": "---",
+    "features": [
+      "Success Page Instant Redirect",
+      "Plan Not Updating After Payment"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
+    "version": "v1.6.12",
+    "date": "31 декабря 2025 г.",
+    "title": "Early Bird UI Indicators & Landing Page Integration",
+    "description": "- Social Proof Counter: Добавлен счетчик активных команд - Показывает \"Уже N команд присоединились\" - Иконка Users из lucide-react - Отображается рядом со счетчиком Early Bird слотов - Автоматически с",
+    "features": [
+      "Early Bird Stats Banner",
+      "Social Proof Counter",
+      "GraphQL Integration",
+      "Early Bird Stats API",
+      "Social Proof Integration"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  }
+]

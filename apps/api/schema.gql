@@ -1710,25 +1710,6 @@ type FileTypeStats {
   totalSize: Float!
 }
 
-input GenerateTokenInput {
-  """Token expiration in days. Leave empty for no expiration."""
-  expiresInDays: Int
-
-  """Name for the token (e.g., "Zapier Integration")"""
-  name: String!
-}
-
-type GeneratedToken {
-  createdAt: DateTime!
-  expiresAt: DateTime
-  id: ID!
-  name: String!
-
-  """The plaintext token. Store it securely - it cannot be retrieved again!"""
-  token: String!
-  tokenPrefix: String!
-}
-
 type InviteCode {
   """Уникальный код приглашения"""
   code: String!
@@ -2275,7 +2256,6 @@ type Mutation {
   enable2FA(input: Enable2FAInput!): TwoFactorEnableResponse!
   forgotPassword(email: String!): Boolean!
   generate2FASecret: TwoFactorSetup!
-  generateApiToken(input: GenerateTokenInput!): GeneratedToken!
   initTelegramAuth: TelegramAuthPayload!
 
   """Initialize default system settings (super admin only)"""
@@ -2325,7 +2305,6 @@ type Mutation {
   revokeAdminRole(roleId: String!): Boolean!
   revokeAllSessions: Boolean!
   revokeAllSessionsIncludingCurrent: Boolean!
-  revokeApiToken(tokenId: String!): Boolean!
   revokeSession(sessionId: String!): Boolean!
 
   """Отправка приглашения в команду по email"""
@@ -2668,17 +2647,6 @@ type PermissionDefinition {
 
   """Permission name"""
   name: String!
-}
-
-type PersonalAccessToken {
-  createdAt: DateTime!
-  expiresAt: DateTime
-  id: ID!
-  isExpired: Boolean!
-  lastUsedAt: DateTime
-  lastUsedIp: String
-  name: String!
-  tokenPrefix: String!
 }
 
 type PersonnelAnalytics {
@@ -3226,7 +3194,6 @@ type Query {
 
   """Get all work logs for a team member (owner or self)"""
   memberWorkLogs(memberId: ID!): [WorkLog!]!
-  myApiTokens: [PersonalAccessToken!]!
   myDonationStats: DonationStats!
   myDonations: [Donation!]!
 

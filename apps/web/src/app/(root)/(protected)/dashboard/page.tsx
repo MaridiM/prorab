@@ -123,7 +123,7 @@ const formatRelativeDate = (date: string) => {
 	const d = new Date(date)
 	const diff = now.getTime() - d.getTime()
 	const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-	
+
 	if (days === 0) return 'Сегодня'
 	if (days === 1) return 'Вчера'
 	if (days < 7) return `${days} дн. назад`
@@ -265,7 +265,7 @@ function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, value
 				'absolute inset-0 opacity-40 bg-gradient-to-br',
 				gradient
 			)} />
-			
+
 			{/* Decorative circle */}
 			<div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-gradient-to-br from-white/5 to-transparent" />
 
@@ -361,7 +361,7 @@ function ProjectCard({
 			>
 				{/* Gradient overlay on hover */}
 				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-				
+
 				{/* Shimmer effect */}
 				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
 					<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
@@ -426,8 +426,8 @@ function ProjectCard({
 							<span className="text-xs text-muted-foreground font-medium">Прогресс</span>
 							<span className={cn(
 								"text-xs font-semibold",
-								progress >= 75 ? "text-emerald-500" : 
-								progress >= 50 ? "text-amber-500" : "text-primary"
+								progress >= 75 ? "text-emerald-500" :
+									progress >= 50 ? "text-amber-500" : "text-primary"
 							)}>
 								{progress}%
 							</span>
@@ -441,8 +441,8 @@ function ProjectCard({
 							<div className="flex items-center gap-3">
 								<div className={cn(
 									"w-9 h-9 rounded-xl flex items-center justify-center shadow-sm",
-									isProfitable 
-										? "bg-emerald-500/10 text-emerald-500" 
+									isProfitable
+										? "bg-emerald-500/10 text-emerald-500"
 										: "bg-red-500/10 text-red-500"
 								)}>
 									{isProfitable ? (
@@ -582,7 +582,7 @@ function WelcomeHeader({ userName, greeting }: { userName: string; greeting: str
 					<span className="text-sm font-medium text-accent">ProRab.space</span>
 				</div>
 			</div>
-			
+
 			<h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
 				{greeting}, <span className="text-primary">{userName}</span>! 👋
 			</h1>
@@ -594,12 +594,12 @@ function WelcomeHeader({ userName, greeting }: { userName: string; greeting: str
 }
 
 // ============ Empty State Component ============
-function EmptyState({ 
-	icon: Icon, 
-	title, 
-	description, 
-	action 
-}: { 
+function EmptyState({
+	icon: Icon,
+	title,
+	description,
+	action
+}: {
 	icon: React.ElementType
 	title: string
 	description: string
@@ -704,12 +704,12 @@ function ProjectPickerModal({
 }
 
 // ============ FAB Menu Component ============
-function FabMenu({ 
-	onCreateProject, 
+function FabMenu({
+	onCreateProject,
 	activeProjects,
 	teamId,
 	onOpenProjectPicker,
-}: { 
+}: {
 	onCreateProject: () => void
 	activeProjects: any[]
 	teamId: string | null
@@ -739,7 +739,7 @@ function FabMenu({
 			showError('Сначала создайте объект')
 			return
 		}
-		
+
 		if (activeProjects.length === 1 && teamId) {
 			// Один проект — переходим сразу
 			router.push(`/teams/${teamId}/projects/${activeProjects[0].id}?tab=${tab}`)
@@ -854,7 +854,7 @@ function FabMenu({
 				>
 					{isOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
 				</motion.div>
-				
+
 				{/* Pulse effect when closed */}
 				{!isOpen && (
 					<motion.div
@@ -1116,7 +1116,7 @@ export default function DashboardPage() {
 			// First sort by status: ACTIVE first, then COMPLETED
 			if (a.status === ProjectStatus.ACTIVE && b.status === ProjectStatus.COMPLETED) return -1
 			if (a.status === ProjectStatus.COMPLETED && b.status === ProjectStatus.ACTIVE) return 1
-			
+
 			// Then apply additional sorting if specified
 			if (sortBy === 'name') {
 				return (a.name || '').localeCompare(b.name || '', 'ru')
@@ -1129,7 +1129,7 @@ export default function DashboardPage() {
 			if (sortBy === 'status') {
 				return (a.status || '').localeCompare(b.status || '', 'ru')
 			}
-			
+
 			// Default: keep original order (already sorted by status above)
 			return 0
 		})
@@ -1315,13 +1315,13 @@ export default function DashboardPage() {
 		const errorMessage = teamsError.message || '';
 		const isNetworkError = errorMessage === 'Failed to fetch' ||
 			errorMessage.includes('Failed to fetch');
-		
-		const displayMessage = isNetworkError 
+
+		const displayMessage = isNetworkError
 			? 'Не удалось подключиться к серверу. Проверьте, что API сервер запущен на порту 8080.'
 			: authError
-			? 'Сессия истекла или недействительна'
-			: errorMessage || 'Произошла ошибка при загрузке данных';
-		
+				? 'Сессия истекла или недействительна'
+				: errorMessage || 'Произошла ошибка при загрузке данных';
+
 		return (
 			<div className="min-h-screen bg-background flex items-center justify-center p-4">
 				<motion.div
@@ -1341,24 +1341,24 @@ export default function DashboardPage() {
 					)}
 					<div className="flex flex-col gap-2 mb-4">
 						{!authError && (
-							<Button 
-								onClick={() => refetchTeams()} 
+							<Button
+								onClick={() => refetchTeams()}
 								size="lg"
 							>
 								Попробовать снова
 							</Button>
 						)}
 						{authError && (
-							<Button 
-								onClick={() => handleAuthError('/auth/login')} 
+							<Button
+								onClick={() => handleAuthError('/auth/login')}
 								size="lg"
 							>
 								Войти снова
 							</Button>
 						)}
 						{isNetworkError && (
-							<Button 
-								onClick={() => window.location.reload()} 
+							<Button
+								onClick={() => window.location.reload()}
 								variant="outline"
 								size="lg"
 							>
@@ -1390,29 +1390,48 @@ export default function DashboardPage() {
 	// No teams state
 	if (teams.length === 0) {
 		const isAdmin = user?.adminRole
-		
+
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
+			<div className="min-h-screen bg-background flex flex-col items-center justify-center relative p-4">
+				{/* Back Button (Left) */}
+				<div className="absolute top-4 left-4 md:top-6 md:left-6">
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => router.push('/')}
+						className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+					>
+						<ArrowRight className="w-4 h-4 rotate-180" />
+						<span className="hidden sm:inline">На главную</span>
+					</Button>
+				</div>
+
+				{/* User Menu (Right) */}
+				<div className="absolute top-4 right-4 md:top-6 md:right-6">
+					<UserMenu />
+				</div>
+
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="text-center max-w-md px-4"
+					className="text-center max-w-md w-full"
 				>
 					<div className="relative w-24 h-24 mx-auto mb-8">
+						<div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-3xl rotate-6 opacity-20 blur-xl" />
 						<div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-3xl rotate-6" />
-						<div className="absolute inset-0 bg-card rounded-3xl flex items-center justify-center shadow-xl">
+						<div className="absolute inset-0 bg-card rounded-3xl flex items-center justify-center shadow-xl border border-border/50">
 							<Building2 className="w-12 h-12 text-primary" />
 						</div>
 					</div>
-					<h2 className="text-3xl font-bold mb-3">Добро пожаловать!</h2>
-					<p className="text-muted-foreground text-lg mb-8">
+					<h2 className="text-3xl font-bold mb-3 tracking-tight">Добро пожаловать!</h2>
+					<p className="text-muted-foreground text-lg mb-8 leading-relaxed">
 						Создайте свою первую бригаду, чтобы начать вести учёт объектов и расходов
 					</p>
-					<div className="flex flex-col sm:flex-row gap-3 justify-center">
+					<div className="flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
 						<Button
 							onClick={() => router.push('/onboarding')}
 							size="lg"
-							className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25"
+							className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-lg shadow-primary/25 w-full sm:w-auto"
 						>
 							<Plus className="w-5 h-5 mr-2" />
 							Создать бригаду
@@ -1422,7 +1441,7 @@ export default function DashboardPage() {
 								onClick={() => router.push('/admin')}
 								size="lg"
 								variant="outline"
-								className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 shadow-lg"
+								className="border-2 border-primary/20 hover:border-primary/40 hover:bg-primary/5 shadow-lg w-full sm:w-auto"
 							>
 								<Shield className="w-5 h-5 mr-2" />
 								Войти в админ панель
@@ -1715,8 +1734,8 @@ export default function DashboardPage() {
 								<Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'archived')} className="w-full">
 									<div className="flex items-center justify-between mb-4">
 										<TabsList className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
-											<TabsTrigger 
-												value="active" 
+											<TabsTrigger
+												value="active"
 												className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
 											>
 												<span className="w-2 h-2 rounded-full bg-emerald-500 mr-2" />
@@ -1728,7 +1747,7 @@ export default function DashboardPage() {
 												)}
 											</TabsTrigger>
 											{archivedProjects.length > 0 && (
-												<TabsTrigger 
+												<TabsTrigger
 													value="archived"
 													className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
 												>
@@ -1786,71 +1805,71 @@ export default function DashboardPage() {
 										</div>
 									</div>
 
-										<TabsContent value="active" className="mt-4">
-											{projectsLoading && !projectsData ? (
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-													{Array.from({ length: 4 }).map((_, i) => (
-														<div
-															key={i}
-															className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5"
-														>
-															<div className="flex gap-4 mb-4">
-																<Skeleton className="w-16 h-16 rounded-2xl" />
-																<div className="flex-1 space-y-2">
-																	<div className="flex items-start justify-between gap-2">
-																		<Skeleton className="h-5 w-32" />
-																		<Skeleton className="h-5 w-16 rounded-full" />
-																	</div>
-																	<Skeleton className="h-4 w-40" />
-																	<Skeleton className="h-4 w-36" />
+									<TabsContent value="active" className="mt-4">
+										{projectsLoading && !projectsData ? (
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												{Array.from({ length: 4 }).map((_, i) => (
+													<div
+														key={i}
+														className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl p-5"
+													>
+														<div className="flex gap-4 mb-4">
+															<Skeleton className="w-16 h-16 rounded-2xl" />
+															<div className="flex-1 space-y-2">
+																<div className="flex items-start justify-between gap-2">
+																	<Skeleton className="h-5 w-32" />
+																	<Skeleton className="h-5 w-16 rounded-full" />
 																</div>
+																<Skeleton className="h-4 w-40" />
+																<Skeleton className="h-4 w-36" />
 															</div>
-															<div className="mb-4">
-																<div className="flex items-center justify-between mb-1.5">
-																	<Skeleton className="h-3 w-16" />
-																	<Skeleton className="h-3 w-12" />
-																</div>
-																<Skeleton className="h-2 w-full rounded-full" />
+														</div>
+														<div className="mb-4">
+															<div className="flex items-center justify-between mb-1.5">
+																<Skeleton className="h-3 w-16" />
+																<Skeleton className="h-3 w-12" />
 															</div>
-															<div className="flex items-center justify-between pt-3 border-t border-border/30">
-																<div className="flex items-center gap-3">
-																	<Skeleton className="w-9 h-9 rounded-xl" />
-																	<div className="space-y-1">
-																		<Skeleton className="h-4 w-20" />
-																		<Skeleton className="h-3 w-24" />
-																	</div>
+															<Skeleton className="h-2 w-full rounded-full" />
+														</div>
+														<div className="flex items-center justify-between pt-3 border-t border-border/30">
+															<div className="flex items-center gap-3">
+																<Skeleton className="w-9 h-9 rounded-xl" />
+																<div className="space-y-1">
+																	<Skeleton className="h-4 w-20" />
+																	<Skeleton className="h-3 w-24" />
 																</div>
 															</div>
 														</div>
-													))}
-												</div>
-											) : activeProjects.length > 0 ? (
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-													{activeProjects.map(project => {
-														if (!project?.id) return null
-														return (
-															<ProjectCardWithStats
-																key={project.id}
-																project={project}
-																teamId={currentTeamId || ''}
-																isOwner={isOwner}
-																showFinancials={isOwner}
-															/>
-														)
-													})}
-												</div>
-											) : (
-												<EmptyState
-													icon={FolderKanban}
-													title={searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
-													description={searchQuery 
-														? 'Попробуйте изменить поисковый запрос'
-														: 'Создайте свой первый строительный объект и начните вести учёт'
-													}
-													action={!searchQuery ? { label: 'Создать объект', onClick: handleCreateProject } : undefined}
-												/>
-											)}
-										</TabsContent>
+													</div>
+												))}
+											</div>
+										) : activeProjects.length > 0 ? (
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												{activeProjects.map(project => {
+													if (!project?.id) return null
+													return (
+														<ProjectCardWithStats
+															key={project.id}
+															project={project}
+															teamId={currentTeamId || ''}
+															isOwner={isOwner}
+															showFinancials={isOwner}
+														/>
+													)
+												})}
+											</div>
+										) : (
+											<EmptyState
+												icon={FolderKanban}
+												title={searchQuery ? 'Объекты не найдены' : 'Пока нет объектов'}
+												description={searchQuery
+													? 'Попробуйте изменить поисковый запрос'
+													: 'Создайте свой первый строительный объект и начните вести учёт'
+												}
+												action={!searchQuery ? { label: 'Создать объект', onClick: handleCreateProject } : undefined}
+											/>
+										)}
+									</TabsContent>
 
 									{archivedProjects.length > 0 && (
 										<TabsContent value="archived" className="mt-4">
