@@ -13,7 +13,8 @@ import { LogoType } from './models/logo-type.enum';
 import { BusinessRole } from '../users/models/user.model';
 import { TeamRole } from './models/team-member.model';
 import { TeamStats } from './models/team-stats.model';
-import { ProjectStatus } from '@prisma/generated/client';
+import { ProjectStatus, SubscriptionStatus } from '@prisma/generated/client';
+import { PaymentsService } from '../../modules/payments/payments.service';
 
 /**
  * Сервис для работы с командами/бригадами
@@ -29,6 +30,7 @@ export class TeamsService extends CoreService {
     private storageService: StorageService,
     private csvExportService: CsvExportService,
     private mailService: MailService,
+    private paymentsService: PaymentsService,
   ) {
     super(prisma, redis, config);
   }
@@ -53,7 +55,53 @@ export class TeamsService extends CoreService {
     }
 
     if (user.hasCompletedOnboarding) {
-      throw new BadRequestException('Онбординг уже завершён');
+      // Idempotency: If onboarding is already completed, try to find existing resources and return them
+      // This allows users to recover if they get stuck or refresh the page
+      const existingTeam = await this.prisma.team.findFirst({
+        where: { ownerId: userId },
+      });
+
+      if (existingTeam) {
+        const existingProject = await this.prisma.project.findFirst({
+          where: { teamId: existingTeam.id },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        const existingSubscription = await this.prisma.subscription.findFirst({
+          where: { teamId: existingTeam.id },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        let paymentUrl: string | undefined;
+
+        // If subscription is pending payment, try to regenerate checkout link
+        if (existingSubscription && existingSubscription.status === SubscriptionStatus.PENDING_PAYMENT) {
+          try {
+            const payment = await this.paymentsService.initializePayment(
+              existingSubscription.id,
+              userId,
+            );
+            paymentUrl = payment.url;
+          } catch (error) {
+            this.logger.error(`Failed to regenerate payment URL for existing onboarding: ${error.message}`);
+          }
+        }
+
+        this.logger.log(`Onboarding already completed for user ${userId}, returning existing resources.`);
+
+        return {
+          success: true,
+          team: existingTeam as any,
+          project: existingProject as any,
+          message: 'Онбординг уже завершён',
+          paymentUrl,
+        };
+      }
+
+      // If user hasCompletedOnboarding=true BUT no team found (owned), 
+      // it means they might have deleted the team or are in a broken state.
+      // We allow them to proceed to create a new team.
+      this.logger.warn(`User ${userId} has completed onboarding flag but no owned team found. Allowing to create new team.`);
     }
 
     // Валидация: проверяем businessRole (WORKER не может создавать команды)
@@ -215,7 +263,7 @@ export class TeamsService extends CoreService {
             teamId: team.id,
             plan: planEnum as any,
             planId: input.planId,
-            status: trialEndsAt ? 'TRIALING' : 'ACTIVE',
+            status: trialEndsAt ? SubscriptionStatus.TRIALING : SubscriptionStatus.PENDING_PAYMENT,
             currentPeriodStart: now,
             currentPeriodEnd,
             trialEndsAt,
@@ -252,12 +300,32 @@ export class TeamsService extends CoreService {
       return { team, project, subscription };
     });
 
+    let paymentUrl: string | undefined;
+
+    // 7. If subscription is PENDING_PAYMENT, generate checkout link
+    if (result.subscription && result.subscription.status === SubscriptionStatus.PENDING_PAYMENT) {
+      try {
+        const payment = await this.paymentsService.initializePayment(
+          result.subscription.id,
+          userId,
+          undefined, // Auto-select provider
+          undefined, // IP not available here easily (optional)
+        );
+        paymentUrl = payment.url;
+        this.logger.log(`Generated payment URL for subscription ${result.subscription.id}: ${paymentUrl}`);
+      } catch (error) {
+        this.logger.error(`Failed to generate payment URL: ${error.message}`, error.stack);
+        // We don't fail onboarding, user can pay later from dashboard
+      }
+    }
+
     // Возвращаем результат
     return {
       success: true,
       team: result.team as any,
       project: result.project as any,
       message: 'Онбординг успешно завершён! Добро пожаловать в ProRab!',
+      paymentUrl,
     };
   }
 
