@@ -79,7 +79,7 @@ const SEED_USERS: SeedUser[] = [
 		role: null, // Обычный пользователь без админ роли
 		roleDescription: 'Прораб с демо проектами',
 		businessRole: 'FOREMAN', // Прораб - владелец команды
-		subscriptionPlan: 'BRIGADE', // Тариф "Бригада" для демо пользователя
+		subscriptionPlan: 'LITE', // Тариф "Лайт" для демо пользователя (с тестовым периодом)
 	},
 	// 6-8. Обычные пользователи для тестирования команд
 	{
@@ -344,27 +344,39 @@ async function main() {
 		}
 
 		const now = new Date()
-		const trialEndsAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000) // 14 дней пробного периода
+		
+		// Check if trial period is available for this plan
+		// Trial is only available for LITE plan (TRIAL_ALLOWED_ONLY_FOR_PLAN = 'lite')
+		const TRIAL_ALLOWED_ONLY_FOR_PLAN = 'lite'
+		const hasTrial = planSlug === TRIAL_ALLOWED_ONLY_FOR_PLAN && plan.trialDays && plan.trialDays > 0
+		
+		const trialEndsAt = hasTrial 
+			? new Date(now.getTime() + (plan.trialDays || 14) * 24 * 60 * 60 * 1000)
+			: null
+		
 		// For trialing subscriptions, currentPeriodEnd should equal trialEndsAt
-		const currentPeriodEnd = trialEndsAt
-
+		// For non-trial subscriptions, use regular billing cycle (30 days)
+		const currentPeriodEnd = trialEndsAt || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+		
 		const planEnum = planSlug.toUpperCase() as 'LITE' | 'FOREMAN' | 'BRIGADE'
+		const subscriptionStatus = hasTrial ? 'TRIALING' : 'ACTIVE'
 
 		await prisma.subscription.create({
 			data: {
 				teamId: team.id,
 				plan: planEnum,
 				planId: plan.id,
-				status: 'TRIALING',
+				status: subscriptionStatus,
 				currentPeriodStart: now,
-				currentPeriodEnd: currentPeriodEnd, // Set to trialEndsAt for trial period
+				currentPeriodEnd: currentPeriodEnd,
 				trialEndsAt: trialEndsAt,
 				isEarlyBird: true,
 				currency: 'RUB',
 			},
 		})
 
-		console.log(`   ✅ Subscription created for ${foremanUser.email}: ${plan.name} (TRIALING, Early Bird)`)
+		const statusText = hasTrial ? 'TRIALING' : 'ACTIVE'
+		console.log(`   ✅ Subscription created for ${foremanUser.email}: ${plan.name} (${statusText}, Early Bird${hasTrial ? `, ${plan.trialDays} days trial` : ''})`)
 	}
 
 	console.log('')

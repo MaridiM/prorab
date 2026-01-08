@@ -2419,6 +2419,9 @@ type OnboardingResult {
   """Сообщение для пользователя"""
   message: String!
 
+  """Ссылка на оплату (если требуется)"""
+  paymentUrl: String
+
   """Созданный первый проект"""
   project: Project!
 
@@ -4746,6 +4749,9 @@ type User {
 
   """Telegram Username пользователя"""
   telegramUsername: String
+
+  """ID планов, для которых пользователь уже использовал тестовый период"""
+  trialedPlanIds: [String!]!
   updatedAt: DateTime!
 }
 

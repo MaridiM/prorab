@@ -1,0 +1,74 @@
+
+> web@1.8.0 build
+> pnpm generate:updates && next build
+
+
+> web@1.8.0 generate:updates G:\Projects\prorab\v-1\apps\web
+> tsx scripts/generate-updates-json.ts
+
+ЁЯУЭ Generating updates.json from CHANGELOG files...
+тЬЕ Generated 10 updates in G:\Projects\prorab\v-1\apps\web\src\packages\data\updates.json
+   Latest version: v1.8.0
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   тЦ▓ Next.js 16.0.3 (Turbopack)
+   - Environments: .env
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx:8:39
+Parsing ecmascript source code failed
+   6 | import { Badge } from '@/packages/components/ui/badge'
+   7 | import { cn } from '@/packages/lib/utils'
+>  8 | import type { RoleHierarchyNodeFields Fragment } from '@/packages/api/graphql/__generated__/output'
+     |                                       ^^^^^^^^
+   9 |
+  10 | interface RoleHierarchyTreeProps {
+  11 |   nodes: RoleHierarchyNodeFieldsFragment[]
+
+Expected ',', got 'Fragment'
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+
+./apps/web/src/packages/components/admin/role-builder/PermissionEditor.tsx:9:1
+Module not found: Can't resolve '@/packages/lib/utils'
+   7 | import { Badge } from '@/packages/components/ui/badge'
+   8 | import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/packages/components/ui/card'
+>  9 | import { cn } from '@/packages/lib/utils'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  10 | import type { PermissionCategoryFieldsFragment } from '@/packages/api/graphql/__generated__/output'
+  11 |
+  12 | interface PermissionEditorProps {
+
+Import map: aliased to relative './src/packages/lib/utils' inside of [project]/apps/web
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/packages/components/admin/role-builder/PermissionEditor.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/packages/components/admin/role-builder/PermissionEditor.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx:8:39)
+    at <unknown> (./apps/web/src/packages/components/admin/role-builder/PermissionEditor.tsx:9:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

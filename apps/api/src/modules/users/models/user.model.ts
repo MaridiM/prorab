@@ -67,6 +67,12 @@ export class User {
 	})
 	hasDonatorBadge: boolean
 
+	@Field(() => [String], {
+		description: 'ID планов, для которых пользователь уже использовал тестовый период',
+		defaultValue: [],
+	})
+	trialedPlanIds: string[]
+
 	@Field()
 	createdAt: Date
 

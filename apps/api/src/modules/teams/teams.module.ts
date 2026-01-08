@@ -7,9 +7,10 @@ import { UsersModule } from '../users/users.module';
 import { CsvExportService } from '../../shared/services/csv-export.service';
 import { MailModule } from '../../core/mail/mail.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
-  imports: [StorageModule, AuthModule, UsersModule, MailModule, SubscriptionsModule],
+  imports: [StorageModule, AuthModule, UsersModule, MailModule, SubscriptionsModule, PaymentsModule],
   providers: [TeamsService, TeamsResolver, InviteCodeResolver, CsvExportService],
   exports: [TeamsService],
 })

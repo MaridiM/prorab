@@ -165,36 +165,17 @@ query GetAdminPlanBySlug($slug: String!) {
 }
 
 # Query available plans for public display
-query GetAvailablePlans($currency: String) {
-  availablePlans(currency: $currency) {
+# Note: availablePlans returns PlanLimits, use availablePlansDetailed for full plan details
+query GetAvailablePlans {
+  availablePlans {
     id
     name
     slug
-    description
-    isActive
     maxActiveProjects
     maxMembers
     storageGB
-    isPopular
-    sortOrder
-    isEarlyBird
-    trialDays
-    features {
-      id
-      name
-      description
-      isIncluded
-      sortOrder
-    }
-    prices {
-      id
-      currency
-      price
-      earlyBirdPrice
-      billingCycleDays
-    }
-    createdAt
-    updatedAt
+    price
+    features
   }
 }
 

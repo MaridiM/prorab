@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Shield, Users, Lock } from 'lucide-react'
 import { Button } from '@/packages/components/ui/button'
 import { Badge } from '@/packages/components/ui/badge'
-import { cn } from '@/packages/lib/utils'
-import type { RoleHierarchyNodeFields Fragment } from '@/packages/api/graphql/__generated__/output'
+import { cn } from '@/packages/utils'
+import type { RoleHierarchyNodeFieldsFragment } from '@/packages/api/graphql/__generated__/output'
 
 interface RoleHierarchyTreeProps {
   nodes: RoleHierarchyNodeFieldsFragment[]

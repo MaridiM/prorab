@@ -49,9 +49,9 @@ export default function OnboardingStep1Page() {
 		},
 	})
 
-	// Load from sessionStorage on mount
+	// Load from localStorage on mount
 	useEffect(() => {
-		const saved = sessionStorage.getItem('onboarding_step1')
+		const saved = localStorage.getItem('onboarding_step1')
 		if (saved) {
 			try {
 				const data = JSON.parse(saved)
@@ -63,8 +63,8 @@ export default function OnboardingStep1Page() {
 	}, [form])
 
 	const onSubmit = (data: CreateTeamInput) => {
-		// Save to sessionStorage
-		sessionStorage.setItem('onboarding_step1', JSON.stringify(data))
+		// Save to localStorage
+		localStorage.setItem('onboarding_step1', JSON.stringify(data))
 		// Navigate to next step
 		router.push('/onboarding/step-2')
 	}
@@ -85,7 +85,7 @@ export default function OnboardingStep1Page() {
 			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
 				{/* Decorative gradient */}
 				<div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent via-primary to-accent" />
-				
+
 				{/* Header */}
 				<motion.div
 					variants={fadeIn}

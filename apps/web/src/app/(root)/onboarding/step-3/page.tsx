@@ -34,6 +34,7 @@ export default function OnboardingStep3Page() {
 	const router = useRouter()
 	const [teamName, setTeamName] = useState('')
 	const [isValidating, setIsValidating] = useState(true)
+	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
 	const form = useForm<CreateProjectInput>({
@@ -46,13 +47,13 @@ export default function OnboardingStep3Page() {
 		},
 	})
 
-	// Load data from sessionStorage and validate previous steps
+	// Load data from localStorage and validate previous steps
 	useEffect(() => {
 		// Only run on client side
 		if (typeof window === 'undefined') return
 
 		// Validate Step 1 completion
-		const step1Data = sessionStorage.getItem('onboarding_step1')
+		const step1Data = localStorage.getItem('onboarding_step1')
 		if (!step1Data) {
 			console.warn('Step 1 not completed, redirecting...')
 			router.push('/onboarding/step-1')
@@ -60,7 +61,7 @@ export default function OnboardingStep3Page() {
 		}
 
 		// Validate Step 2 completion
-		const step2Data = sessionStorage.getItem('onboarding_step2')
+		const step2Data = localStorage.getItem('onboarding_step2')
 		if (!step2Data) {
 			console.warn('Step 2 not completed, redirecting...')
 			router.push('/onboarding/step-2')
@@ -96,7 +97,7 @@ export default function OnboardingStep3Page() {
 		}
 
 		// Load step 3 data if exists
-		const step3Data = sessionStorage.getItem('onboarding_step3')
+		const step3Data = localStorage.getItem('onboarding_step3')
 		if (step3Data) {
 			try {
 				const data = JSON.parse(step3Data)
@@ -111,15 +112,19 @@ export default function OnboardingStep3Page() {
 	}, [router, form])
 
 	const onSubmit = async (data: CreateProjectInput) => {
+		setIsSubmitting(true)
+		setError(null)
+
 		try {
-			// Save to sessionStorage
-			sessionStorage.setItem('onboarding_step3', JSON.stringify(data))
+			// Save to localStorage
+			localStorage.setItem('onboarding_step3', JSON.stringify(data))
 
 			// Navigate to step 4 for plan selection
 			router.push('/onboarding/step-4')
 		} catch (err: any) {
 			console.error('Failed to save step 3 data:', err)
 			setError(err?.message || 'Произошла ошибка при сохранении данных')
+			setIsSubmitting(false)
 		}
 	}
 
@@ -148,7 +153,7 @@ export default function OnboardingStep3Page() {
 			<Card className="w-full max-w-[420px] bg-card/80 backdrop-blur-xl border border-border/50 rounded-3xl shadow-2xl shadow-black/5 dark:shadow-black/20 p-8 relative overflow-hidden">
 				{/* Decorative gradient */}
 				<div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-accent via-primary to-accent" />
-				
+
 				{/* Header */}
 				<motion.div
 					variants={fadeIn}

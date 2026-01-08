@@ -99,6 +99,7 @@ mutation CompleteOnboarding(
       progress
       createdAt
     }
+    paymentUrl
   }
 }
 

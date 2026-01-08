@@ -5,6 +5,35 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-01-07 - Onboarding Payment Integration 💳
+
+### Added
+- **Onboarding Checkout Support**: Поддержка оплаты при завершении онбординга
+  - Поле `paymentUrl` добавлено в `OnboardingResult` модель
+  - Интеграция `PaymentsService` в `TeamsService`
+
+### Changed
+- **completeOnboarding Mutation**: Обновлена логика завершения онбординга
+  - Создание подписки со статусом `PENDING_PAYMENT` для платных планов
+  - Автоматическая инициализация платежа (`initializePayment`) при выборе платного тарифа
+  - Возврат URL для редиректа на оплату
+- **TeamsService Dependency Injection**: Добавлен `PaymentsModule` в импорты `TeamsModule`
+
+## [1.7.1] - 2026-01-06 - Улучшения Тестового Периода 🎯
+
+### Fixed
+- **Seed Script**: Исправлена логика создания подписки в seed.ts
+  - Демо пользователь теперь получает план LITE вместо BRIGADE (для тестового периода)
+  - Добавлена проверка доступности тестового периода для плана
+  - Тестовый период создается только для планов, которые его поддерживают (LITE)
+  - Статус подписки корректно устанавливается: TRIALING для планов с тестовым периодом, ACTIVE для остальных
+
+### Changed
+- **Subscription Seed Logic**: Улучшена логика создания подписок в seed.ts
+  - Проверка `TRIAL_ALLOWED_ONLY_FOR_PLAN` перед созданием тестового периода
+  - Использование `plan.trialDays` из базы данных вместо хардкода
+  - Корректное вычисление `currentPeriodEnd` для тестовых и обычных подписок
+
 ## [1.7.0] - 2026-01-05 - Система Донатов 🎁
 
 ### Added

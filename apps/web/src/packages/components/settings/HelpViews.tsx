@@ -47,7 +47,7 @@ export const QuickStartView = () => {
         // If user has a team, go to team's projects page
         // Otherwise go to dashboard where projects are displayed
         if (currentTeam?.id) {
-            router.push(`/teams/${currentTeam.id}/projects`)
+            router.push(`/teams/${currentTeam.id}`)
         } else {
             router.push('/dashboard')
         }

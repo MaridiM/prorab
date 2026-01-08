@@ -18,4 +18,7 @@ export class OnboardingResult {
 
   @Field(() => String, { description: 'Сообщение для пользователя' })
   message: string;
+
+  @Field(() => String, { nullable: true, description: 'Ссылка на оплату (если требуется)' })
+  paymentUrl?: string;
 }

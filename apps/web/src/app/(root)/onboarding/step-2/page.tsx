@@ -41,7 +41,7 @@ export default function OnboardingStep2Page() {
 	const [selectedColor, setSelectedColor] = useState('orange')
 	const [uploadedLogo, setUploadedLogo] = useState<File | string | null>(null)
 
-	// Load data from sessionStorage and generate random values after mount
+	// Load data from localStorage and generate random values after mount
 	useEffect(() => {
 		// Only run on client side
 		if (typeof window === 'undefined') return
@@ -49,7 +49,7 @@ export default function OnboardingStep2Page() {
 		setIsMounted(true)
 
 		// Validate Step 1 completion
-		const step1Data = sessionStorage.getItem('onboarding_step1')
+		const step1Data = localStorage.getItem('onboarding_step1')
 		if (!step1Data) {
 			console.warn('Step 1 not completed, redirecting...')
 			router.push('/onboarding/step-1')
@@ -72,7 +72,7 @@ export default function OnboardingStep2Page() {
 		}
 
 		// Load step 2 data if exists (to preserve icon/color selection and uploaded logo)
-		const step2Data = sessionStorage.getItem('onboarding_step2')
+		const step2Data = localStorage.getItem('onboarding_step2')
 		if (step2Data) {
 			try {
 				const data = JSON.parse(step2Data)
@@ -102,34 +102,34 @@ export default function OnboardingStep2Page() {
 
 	const handleLogoUpload = async (file: File | null) => {
 		setUploadedLogo(file)
-		
-		// Save logo to sessionStorage as base64 when file is uploaded
+
+		// Save logo to localStorage as base64 when file is uploaded
 		if (file && typeof window !== 'undefined') {
 			try {
 				const reader = new FileReader()
 				reader.onloadend = () => {
 					const base64String = reader.result as string
-					const step2Data = sessionStorage.getItem('onboarding_step2')
+					const step2Data = localStorage.getItem('onboarding_step2')
 					const data = step2Data ? JSON.parse(step2Data) : {}
 					data.logoBase64 = base64String
 					data.hasUploadedLogo = true
-					sessionStorage.setItem('onboarding_step2', JSON.stringify(data))
+					localStorage.setItem('onboarding_step2', JSON.stringify(data))
 				}
 				reader.readAsDataURL(file)
 			} catch (error) {
-				console.error('Failed to save logo to sessionStorage:', error)
+				console.error('Failed to save logo to localStorage:', error)
 			}
 		} else if (!file && typeof window !== 'undefined') {
-			// Remove logo from sessionStorage when deleted
-			const step2Data = sessionStorage.getItem('onboarding_step2')
+			// Remove logo from localStorage when deleted
+			const step2Data = localStorage.getItem('onboarding_step2')
 			if (step2Data) {
 				try {
 					const data = JSON.parse(step2Data)
 					delete data.logoBase64
 					delete data.hasUploadedLogo
-					sessionStorage.setItem('onboarding_step2', JSON.stringify(data))
+					localStorage.setItem('onboarding_step2', JSON.stringify(data))
 				} catch (error) {
-					console.error('Failed to remove logo from sessionStorage:', error)
+					console.error('Failed to remove logo from localStorage:', error)
 				}
 			}
 		}
@@ -137,8 +137,8 @@ export default function OnboardingStep2Page() {
 
 	const handleNext = () => {
 		if (typeof window === 'undefined') return
-		
-		// Save to sessionStorage (logoBase64 is already saved in handleLogoUpload)
+
+		// Save to localStorage (logoBase64 is already saved in handleLogoUpload)
 		const step2Data: {
 			iconId?: string
 			colorId?: string
@@ -148,7 +148,7 @@ export default function OnboardingStep2Page() {
 
 		if (uploadedLogo) {
 			// Get existing data to preserve logoBase64
-			const existingData = sessionStorage.getItem('onboarding_step2')
+			const existingData = localStorage.getItem('onboarding_step2')
 			if (existingData) {
 				try {
 					const existing = JSON.parse(existingData)
@@ -165,15 +165,15 @@ export default function OnboardingStep2Page() {
 			step2Data.colorId = selectedColor
 		}
 
-		sessionStorage.setItem('onboarding_step2', JSON.stringify(step2Data))
+		localStorage.setItem('onboarding_step2', JSON.stringify(step2Data))
 		router.push('/onboarding/step-3')
 	}
 
 	const handleSkip = () => {
 		if (typeof window === 'undefined') return
-		
+
 		// Clear step 2 data
-		sessionStorage.removeItem('onboarding_step2')
+		localStorage.removeItem('onboarding_step2')
 		router.push('/onboarding/step-3')
 	}
 

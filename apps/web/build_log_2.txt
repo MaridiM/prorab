@@ -1,0 +1,49 @@
+
+> web@1.8.0 build
+> pnpm generate:updates && next build
+
+
+> web@1.8.0 generate:updates G:\Projects\prorab\v-1\apps\web
+> tsx scripts/generate-updates-json.ts
+
+ЁЯУЭ Generating updates.json from CHANGELOG files...
+тЬЕ Generated 10 updates in G:\Projects\prorab\v-1\apps\web\src\packages\data\updates.json
+   Latest version: v1.8.0
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   тЦ▓ Next.js 16.0.3 (Turbopack)
+   - Environments: .env
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx:7:1
+Module not found: Can't resolve '@/packages/lib/utils'
+   5 | import { Button } from '@/packages/components/ui/button'
+   6 | import { Badge } from '@/packages/components/ui/badge'
+>  7 | import { cn } from '@/packages/lib/utils'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import type { RoleHierarchyNodeFieldsFragment } from '@/packages/api/graphql/__generated__/output'
+   9 |
+  10 | interface RoleHierarchyTreeProps {
+
+Import map: aliased to relative './src/packages/lib/utils' inside of [project]/apps/web
+
+
+Import traces:
+  Client Component Browser:
+    ./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component Browser]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Client Component SSR]
+    ./apps/web/src/app/(root)/(protected)/admin/teams/[teamId]/roles/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./apps/web/src/packages/components/admin/role-builder/RoleHierarchyTree.tsx:7:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

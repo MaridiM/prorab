@@ -166,7 +166,14 @@ query PaymentsBySubscription($subscriptionId: String!) {
 
 query AvailablePlans {
   availablePlans {
-    ...AdminPlanFields
+    id
+    name
+    slug
+    maxActiveProjects
+    maxMembers
+    storageGB
+    price
+    features
   }
 }
 

@@ -2,13 +2,15 @@
 
 import { motion, Variants, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Check, Loader2, Package, Star, Zap, Sparkles } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ArrowLeft, Check, Loader2, Package, Star, Zap, Sparkles, Crown, FolderOpen, Users, HardDrive, ChevronDown, Info, Gift } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { apolloClient } from '@/packages/libs/apollo/apollo-client.config'
-import { GetAvailablePlansDocument, CompleteOnboardingDocument, type CompleteOnboardingInput } from '@/packages/api/graphql'
+import { AvailablePlansDetailedDocument, CompleteOnboardingDocument, IsEarlyBirdAvailableForMeDocument, EarlyBirdStatsDocument, MeDocument, type CompleteOnboardingInput } from '@/packages/api/graphql'
 import { Stepper } from '@/packages/components/ui/stepper'
 import { Button, Card } from '@/packages/components'
+import { Badge } from '@/packages/components/ui/badge'
+import { Alert, AlertDescription } from '@/packages/components/ui/alert'
 import { cn } from '@/packages/utils'
 import confetti from 'canvas-confetti'
 
@@ -40,21 +42,38 @@ export default function OnboardingStep4Page() {
 	const [isValidating, setIsValidating] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
-	const { data: plansData, loading: plansLoading } = useQuery(GetAvailablePlansDocument, {
+	// Track expanded state for features accordion
+	const [expandedPlanIds, setExpandedPlanIds] = useState<Set<string>>(new Set())
+
+	const { data: plansData, loading: plansLoading } = useQuery(AvailablePlansDetailedDocument, {
 		client: apolloClient,
-		variables: { currency: 'RUB' },
+	})
+
+	const { data: earlyBirdForMeData } = useQuery(IsEarlyBirdAvailableForMeDocument, {
+		client: apolloClient,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const { data: earlyBirdStatsData } = useQuery(EarlyBirdStatsDocument, {
+		client: apolloClient,
+		fetchPolicy: 'cache-and-network',
+	})
+
+	const { data: meData } = useQuery(MeDocument, {
+		client: apolloClient,
+		fetchPolicy: 'cache-and-network',
 	})
 
 	const [completeOnboarding] = useMutation(CompleteOnboardingDocument, {
 		client: apolloClient,
 	})
 
-	// Load data from sessionStorage and validate previous steps
+	// Load data from localStorage and validate previous steps
 	useEffect(() => {
 		if (typeof window === 'undefined') return
 
 		// Validate Step 1 completion
-		const step1Data = sessionStorage.getItem('onboarding_step1')
+		const step1Data = localStorage.getItem('onboarding_step1')
 		if (!step1Data) {
 			console.warn('Step 1 not completed, redirecting...')
 			router.push('/onboarding/step-1')
@@ -62,7 +81,7 @@ export default function OnboardingStep4Page() {
 		}
 
 		// Validate Step 2 completion
-		const step2Data = sessionStorage.getItem('onboarding_step2')
+		const step2Data = localStorage.getItem('onboarding_step2')
 		if (!step2Data) {
 			console.warn('Step 2 not completed, redirecting...')
 			router.push('/onboarding/step-2')
@@ -70,7 +89,7 @@ export default function OnboardingStep4Page() {
 		}
 
 		// Validate Step 3 completion
-		const step3Data = sessionStorage.getItem('onboarding_step3')
+		const step3Data = localStorage.getItem('onboarding_step3')
 		if (!step3Data) {
 			console.warn('Step 3 not completed, redirecting...')
 			router.push('/onboarding/step-3')
@@ -92,7 +111,7 @@ export default function OnboardingStep4Page() {
 		}
 
 		// Load step 4 data if exists
-		const step4Data = sessionStorage.getItem('onboarding_step4')
+		const step4Data = localStorage.getItem('onboarding_step4')
 		if (step4Data) {
 			try {
 				const data = JSON.parse(step4Data)
@@ -105,6 +124,18 @@ export default function OnboardingStep4Page() {
 		setIsValidating(false)
 	}, [router])
 
+	const togglePlanExpansion = (planId: string) => {
+		setExpandedPlanIds(prev => {
+			const next = new Set(prev)
+			if (next.has(planId)) {
+				next.delete(planId)
+			} else {
+				next.add(planId)
+			}
+			return next
+		})
+	}
+
 	// Confetti effect function
 	const triggerConfetti = () => {
 		const duration = 3000
@@ -115,7 +146,7 @@ export default function OnboardingStep4Page() {
 			return Math.random() * (max - min) + min
 		}
 
-		const interval: NodeJS.Timeout = setInterval(function() {
+		const interval: NodeJS.Timeout = setInterval(function () {
 			const timeLeft = animationEnd - Date.now()
 
 			if (timeLeft <= 0) {
@@ -139,24 +170,22 @@ export default function OnboardingStep4Page() {
 		}, 250)
 	}
 
-	const handlePlanSelect = (planId: string) => {
+	// This function is now triggered directly by the "Select" button
+	const handleSelectAndProceed = async (planId: string) => {
+		if (isSubmitting) return
+
 		setSelectedPlanId(planId)
-	}
-
-	const handleNext = async () => {
-		if (!selectedPlanId) return
-
 		setIsSubmitting(true)
 		setError(null)
 
 		try {
-			// Save selection to sessionStorage
-			sessionStorage.setItem('onboarding_step4', JSON.stringify({ planId: selectedPlanId }))
+			// Save selection to localStorage
+			localStorage.setItem('onboarding_step4', JSON.stringify({ planId }))
 
 			// Get data from previous steps
-			const step1Data = JSON.parse(sessionStorage.getItem('onboarding_step1') || '{}')
-			const step2Data = JSON.parse(sessionStorage.getItem('onboarding_step2') || '{}')
-			const step3Data = JSON.parse(sessionStorage.getItem('onboarding_step3') || '{}')
+			const step1Data = JSON.parse(localStorage.getItem('onboarding_step1') || '{}')
+			const step2Data = JSON.parse(localStorage.getItem('onboarding_step2') || '{}')
+			const step3Data = JSON.parse(localStorage.getItem('onboarding_step3') || '{}')
 
 			// Prepare mutation input
 			const input: CompleteOnboardingInput = {
@@ -166,7 +195,8 @@ export default function OnboardingStep4Page() {
 				projectDescription: step3Data.description || null,
 				colorId: step2Data.colorId || null,
 				iconId: step2Data.iconId || null,
-				planId: selectedPlanId, // Add selected plan
+				planId: planId,
+				logoFile: null // Initialize properly
 			}
 
 			// Add logo data based on step 2
@@ -197,21 +227,26 @@ export default function OnboardingStep4Page() {
 
 			// Handle successful response
 			if (result.data?.completeOnboarding.success) {
-				// Trigger completion animation
-				setIsCompleted(true)
+				// Check for paymentUrl in response
+				const paymentUrl = (result.data.completeOnboarding as any).paymentUrl
+				if (paymentUrl) {
+					window.location.href = paymentUrl
+					return
+				}
 
-				// Trigger confetti effect
+				// If no paymentUrl (Free/Trial), show success and redirect to dashboard
+				setIsCompleted(true)
 				triggerConfetti()
 
 				// Wait for animation to complete before redirect
 				setTimeout(() => {
-					// Clear sessionStorage
-					sessionStorage.removeItem('onboarding_step1')
-					sessionStorage.removeItem('onboarding_step2')
-					sessionStorage.removeItem('onboarding_step3')
-					sessionStorage.removeItem('onboarding_step4')
+					// Clear localStorage
+					localStorage.removeItem('onboarding_step1')
+					localStorage.removeItem('onboarding_step2')
+					localStorage.removeItem('onboarding_step3')
+					localStorage.removeItem('onboarding_step4')
 
-					// Redirect to dashboard
+					// Redirect to dashboard (or special success page)
 					router.push('/dashboard')
 				}, 2000)
 			} else {
@@ -241,10 +276,21 @@ export default function OnboardingStep4Page() {
 		)
 	}
 
-	const plans = plansData?.availablePlans || []
+	const plans = plansData?.availablePlansDetailed || []
+	const isEarlyBirdAvailable = earlyBirdForMeData?.isEarlyBirdAvailableForMe ?? false
+	const userTrialedPlanIds = meData?.me?.trialedPlanIds || []
+	const hasUsedTrial = userTrialedPlanIds.length > 0
+
+	// Check which plans have trial period available for this user
+	const getPlanTrialInfo = (plan: typeof plans[0]) => {
+		const hasTrialPeriod = plan.trialDays && plan.trialDays > 0
+		const canUseTrial = hasTrialPeriod && !hasUsedTrial
+		return { hasTrialPeriod, canUseTrial }
+	}
 
 	return (
-		<div className="space-y-6 relative">
+		<div className="space-y-6 relative flex flex-col items-center">
+
 			{/* Success Animation Overlay */}
 			<AnimatePresence>
 				{isCompleted && (
@@ -288,24 +334,6 @@ export default function OnboardingStep4Page() {
 									Онбординг успешно завершён
 								</p>
 							</motion.div>
-
-							<motion.div
-								initial={{ scaleX: 0 }}
-								animate={{ scaleX: 1 }}
-								transition={{ delay: 0.6, duration: 0.5 }}
-								className="flex gap-1"
-							>
-								{[...Array(3)].map((_, i) => (
-									<motion.div
-										key={i}
-										initial={{ scale: 0 }}
-										animate={{ scale: [0, 1.5, 1] }}
-										transition={{ delay: 0.8 + i * 0.1, duration: 0.4 }}
-									>
-										<Sparkles className="h-6 w-6 text-primary" />
-									</motion.div>
-								))}
-							</motion.div>
 						</motion.div>
 					</motion.div>
 				)}
@@ -317,238 +345,339 @@ export default function OnboardingStep4Page() {
 				initial="hidden"
 				animate="visible"
 				transition={{ delay: 0.1 }}
+				className="w-full max-w-[900px] mt-8"
 			>
 				<Stepper steps={steps} currentStep={4} />
 			</motion.div>
 
-			{/* Plan Selection */}
-			<div className="w-full max-w-[900px]">
+			{/* Content Container (Unlimited Width as requested) */}
+			<div className="w-full px-4 md:px-8">
 				{/* Header */}
 				<motion.div
 					variants={fadeIn}
 					initial="hidden"
 					animate="visible"
 					transition={{ delay: 0.2 }}
-					className="text-center mb-8"
+					className="relative max-w-[1400px] mx-auto flex items-center justify-center mb-10"
 				>
-					<motion.div
-						className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-accent text-primary-foreground font-bold text-xl mb-4 shadow-lg shadow-primary/30"
-						initial={{ scale: 0.8, opacity: 0 }}
-						animate={{ scale: 1, opacity: 1 }}
-						transition={{ delay: 0.25, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-						whileHover={{ scale: 1.05, rotate: -5 }}
-					>
-						<Package className="w-7 h-7" />
-					</motion.div>
-					<h1 className="text-2xl font-bold tracking-tight">Выберите тарифный план</h1>
-					<p className="text-muted-foreground mt-2 text-sm">
-						Тариф для команды{' '}
-						<span className="font-medium text-foreground">{teamName}</span>
-					</p>
+					{/* Back Button Positioned Absolute Left */}
+					<div className="absolute left-0">
+						<Button
+							variant="ghost"
+							onClick={handleBack}
+							className="flex items-center gap-2 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent"
+						>
+							<ArrowLeft className="w-4 h-4" />
+							Назад
+						</Button>
+					</div>
+
+					<div className="text-center">
+						<h1 className="text-3xl font-bold tracking-tight mb-2">Выберите тарифный план</h1>
+						<p className="text-muted-foreground text-lg">
+							Тариф для команды{' '}
+							<span className="font-semibold text-foreground px-2 py-0.5 rounded-md bg-muted/50">
+								{teamName}
+							</span>
+						</p>
+					</div>
+				</motion.div>
+
+				{/* Information Alerts */}
+				<motion.div
+					variants={fadeIn}
+					initial="hidden"
+					animate="visible"
+					transition={{ delay: 0.25 }}
+					className="w-full max-w-[1400px] mx-auto space-y-3 mb-6"
+				>
+					{/* Early Bird Alert */}
+					{isEarlyBirdAvailable && (
+						<Alert className="border-amber-500/30 bg-amber-50 dark:bg-amber-950/20">
+							<Gift className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+							<AlertDescription className="text-amber-900 dark:text-amber-100">
+								<span className="font-semibold">🎁 Early Bird акция доступна!</span> Вы можете получить скидку до {earlyBirdStatsData?.earlyBirdStats?.remaining || 0} подписок. Early Bird цена будет применена автоматически при выборе плана.
+							</AlertDescription>
+						</Alert>
+					)}
+
+					{/* Trial Period Alert */}
+					{!hasUsedTrial && plans.some(p => p.trialDays && p.trialDays > 0) && (
+						<Alert className="border-blue-500/30 bg-blue-50 dark:bg-blue-950/20">
+							<Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+							<AlertDescription className="text-blue-900 dark:text-blue-100">
+								<span className="font-semibold">⚡ Тестовый период доступен!</span> Вы можете попробовать план "Лайт" бесплатно в течение {plans.find(p => p.slug === 'lite')?.trialDays || 14} дней. Тестовый период можно использовать только один раз.
+							</AlertDescription>
+						</Alert>
+					)}
 				</motion.div>
 
 				{/* Plans Grid */}
-				<motion.div
-					variants={fadeIn}
-					initial="hidden"
-					animate="visible"
-					transition={{ delay: 0.3 }}
-					className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"
-				>
-					{plans.map((plan, index) => {
-						const price = plan.prices?.find(p => p.currency === 'RUB')
-						const isSelected = selectedPlanId === plan.id
-						const hasTrialPeriod = plan.trialDays && plan.trialDays > 0
+				<div className="flex justify-center pb-20">
+					<motion.div
+						variants={fadeIn}
+						initial="hidden"
+						animate="visible"
+						transition={{ delay: 0.3 }}
+						className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1400px] mx-auto items-start"
+					>
+						{plans.map((plan, index) => {
+							const isSelected = selectedPlanId === plan.id
+							const rubPrice = plan.prices.find((p) => p.currency === 'RUB')
+							const { hasTrialPeriod, canUseTrial } = getPlanTrialInfo(plan)
 
-						return (
-							<motion.div
-								key={plan.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.4 + index * 0.1 }}
-							>
-								<Card
-									className={cn(
-										'relative cursor-pointer transition-all duration-300 hover:shadow-lg p-6',
-										isSelected
-											? 'border-2 border-primary shadow-lg shadow-primary/20'
-											: 'border border-border/50 hover:border-primary/50',
-										plan.isPopular && 'ring-2 ring-primary/20'
-									)}
-									onClick={() => handlePlanSelect(plan.id)}
+							// Determine display price: Early Bird if available and plan supports it, otherwise regular price
+							const shouldShowEarlyBird = isEarlyBirdAvailable && plan.isEarlyBird && rubPrice?.earlyBirdPrice
+							const displayPrice = rubPrice
+								? (shouldShowEarlyBird ? rubPrice.earlyBirdPrice : rubPrice.price)
+								: 0
+							const regularPrice = rubPrice?.price || 0
+							const earlyBirdPrice = rubPrice?.earlyBirdPrice || 0
+
+							const allFeatures = plan.features?.filter(f => f.isIncluded).sort((a, b) => a.sortOrder - b.sortOrder) || []
+							const initialFeaturesCount = 3
+							const visibleFeatures = allFeatures.slice(0, initialFeaturesCount)
+							const hiddenFeatures = allFeatures.slice(initialFeaturesCount)
+							const isExpanded = expandedPlanIds.has(plan.id)
+
+							return (
+								<motion.div
+									key={plan.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ delay: 0.4 + index * 0.1 }}
+									whileHover={undefined}
 								>
-									{/* Popular Badge */}
-									{plan.isPopular && (
-										<div className="absolute -top-3 left-1/2 -translate-x-1/2">
-											<div className="flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-												<Star className="w-3 h-3" />
-												Популярный
-											</div>
-										</div>
-									)}
-
-									{/* Selected Indicator */}
-									{isSelected && (
-										<div className="absolute top-4 right-4">
-											<div className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full">
-												<Check className="w-4 h-4" />
-											</div>
-										</div>
-									)}
-
-									{/* Plan Content */}
-									<div className="space-y-4 mt-2">
-										{/* Plan Name */}
-										<div>
-											<h3 className="text-xl font-bold">{plan.name}</h3>
-											{plan.description && (
-												<p className="text-sm text-muted-foreground mt-1">
-													{plan.description}
-												</p>
-											)}
-										</div>
-
-										{/* Trial Period Badge */}
-										{hasTrialPeriod && (
-											<div className="flex items-center gap-2 p-3 bg-accent/10 border border-accent/50 rounded-lg">
-												<Zap className="w-4 h-4 text-accent shrink-0" />
-												<div className="text-sm">
-													<span className="font-semibold text-accent">
-														{plan.trialDays} {plan.trialDays === 1 ? 'день' : plan.trialDays < 5 ? 'дня' : 'дней'}{' '}
-													</span>
-													<span className="text-muted-foreground">бесплатно</span>
-												</div>
-											</div>
+									<Card
+										className={cn(
+											'relative overflow-hidden border-2 transition-all duration-300 flex flex-col min-h-[550px] group',
+											isSelected
+												? 'border-primary bg-gradient-to-br from-primary/5 via-primary/5 to-background shadow-xl ring-2 ring-primary/20 scale-[1.02]'
+												: 'border-border/50 hover:border-primary/50 hover:shadow-xl bg-card',
+											plan.isPopular && !isSelected && 'ring-1 ring-primary/30'
+										)}
+									>
+										{/* Popular Badge Overlay */}
+										{plan.isPopular && (
+											<div className="absolute inset-x-0 top-0 h-1 bg-primary/30" />
 										)}
 
-										{/* Price */}
-										<div className="py-4 border-y">
-											{price ? (
-												<div className="flex items-baseline gap-2">
-													<span className="text-3xl font-bold">
-														{price.price.toLocaleString('ru-RU')}
-													</span>
-													<span className="text-muted-foreground">₽/месяц</span>
-												</div>
-											) : (
-												<div className="text-2xl font-bold text-muted-foreground">
-													Цена не указана
-												</div>
-											)}
-											{plan.isEarlyBird && price && (
-												<p className="text-xs text-accent mt-1">
-													Early Bird: {price.earlyBirdPrice.toLocaleString('ru-RU')} ₽
-												</p>
-											)}
-										</div>
+										<div className="p-5 flex flex-col h-full relative z-10">
+											{/* Header Section */}
+											<div className="mb-4 flex-shrink-0">
+												<div className="flex items-center justify-between mb-3">
+													{plan.isPopular ? (
+														<div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+															<Crown className="w-5 h-5 text-primary-foreground" />
+														</div>
+													) : (
+														<div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+															<Zap className="w-5 h-5 text-primary" />
+														</div>
+													)}
 
-										{/* Features */}
-										<div className="space-y-2">
-											<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-												Возможности:
-											</p>
-											<ul className="space-y-2">
-												{plan.features
-													?.filter(f => f.isIncluded)
-													?.slice(0, 5)
-													?.map((feature, idx) => (
-														<li key={idx} className="flex items-start gap-2 text-sm">
-															<Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-															<span>{feature.name}</span>
+													<div className="flex flex-col items-end gap-1.5">
+														{plan.isPopular && (
+															<Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md h-5 px-2">
+																<Star className="w-3 h-3 mr-1 fill-current" />
+																Популярный
+															</Badge>
+														)}
+														{canUseTrial && (
+															<Badge variant="secondary" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 h-5 px-2 flex items-center gap-1">
+																<Zap className="w-3 h-3" />
+																{plan.trialDays} дней бесплатно
+															</Badge>
+														)}
+														{hasTrialPeriod && !canUseTrial && (
+															<Badge variant="outline" className="bg-muted/50 text-muted-foreground border-muted h-5 px-2 text-xs">
+																Тест недоступен
+															</Badge>
+														)}
+													</div>
+												</div>
+
+												<h3 className="text-xl font-bold mb-1.5">{plan.name}</h3>
+												{plan.description && (
+													<p className="text-sm text-muted-foreground leading-snug line-clamp-2 min-h-[2.5em]">
+														{plan.description}
+													</p>
+												)}
+											</div>
+
+											{/* Price Section */}
+											<div className="mb-4 pb-4 border-b border-border/50 flex-shrink-0">
+												{rubPrice ? (
+													<div className="space-y-2">
+														{shouldShowEarlyBird && regularPrice !== earlyBirdPrice ? (
+															<>
+																<div className="flex items-baseline gap-1.5">
+																	<span className="text-4xl font-bold text-primary">
+																		{earlyBirdPrice.toLocaleString('ru-RU')}
+																		<span className="text-2xl ml-0.5">₽</span>
+																	</span>
+																	<span className="text-lg font-medium text-muted-foreground">
+																		/мес
+																	</span>
+																</div>
+																<div className="flex items-center gap-2">
+																	<span className="text-sm text-muted-foreground line-through">
+																		{regularPrice.toLocaleString('ru-RU')}₽/мес
+																	</span>
+																	<Badge variant="secondary" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs px-2 py-0.5">
+																		<Gift className="w-3 h-3 mr-1" />
+																		Early Bird
+																	</Badge>
+																	<Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30 text-xs px-2 py-0.5">
+																		Экономия {regularPrice - earlyBirdPrice}₽
+																	</Badge>
+																</div>
+															</>
+														) : (
+															<div className="flex items-baseline gap-1.5">
+																<span className="text-4xl font-bold text-primary">
+																	{regularPrice.toLocaleString('ru-RU')}
+																	<span className="text-2xl ml-0.5">₽</span>
+																</span>
+																<span className="text-lg font-medium text-muted-foreground">
+																	/мес
+																</span>
+															</div>
+														)}
+													</div>
+												) : (
+													<span className="text-2xl font-bold text-muted-foreground">Цена по запросу</span>
+												)}
+											</div>
+
+											{/* Limits Grid */}
+											<div className="grid grid-cols-1 gap-1.5 mb-4 flex-shrink-0">
+												{[
+													{
+														icon: FolderOpen,
+														text: plan.maxActiveProjects === null
+															? 'Неограниченно проектов'
+															: `${plan.maxActiveProjects} активных проектов`,
+													},
+													{
+														icon: Users,
+														text: `До ${plan.maxMembers} участников`,
+													},
+													{
+														icon: HardDrive,
+														text: `${plan.storageGB} ГБ хранилища`,
+													},
+												].map((item, idx) => (
+													<div
+														key={idx}
+														className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/30 group-hover:bg-muted/50 transition-colors"
+													>
+														<div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+															<item.icon className="w-4 h-4 text-primary" />
+														</div>
+														<span className="text-sm font-medium">{item.text}</span>
+													</div>
+												))}
+											</div>
+
+											{/* Features List (Accordion) */}
+											<div className="flex flex-col flex-1 min-h-0">
+												<p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+													Включено:
+												</p>
+												<ul className="space-y-1.5">
+													{visibleFeatures.map((feature, idx) => (
+														<li key={idx} className="flex items-start gap-2 text-xs">
+															<div className="mt-0.5 w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+																<Check className="w-2.5 h-2.5 text-primary" />
+															</div>
+															<span className="leading-snug text-muted-foreground">
+																{feature.name}
+															</span>
 														</li>
 													))}
-												{plan.maxActiveProjects && (
-													<li className="flex items-start gap-2 text-sm">
-														<Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-														<span>
-															До {plan.maxActiveProjects} активных проектов
-														</span>
-													</li>
+												</ul>
+
+												{/* Hidden Features Accordion */}
+												<AnimatePresence>
+													{isExpanded && hiddenFeatures.length > 0 && (
+														<motion.div
+															initial={{ height: 0, opacity: 0 }}
+															animate={{ height: 'auto', opacity: 1 }}
+															exit={{ height: 0, opacity: 0 }}
+															className="overflow-hidden"
+														>
+															<ul className="space-y-1.5 pt-1.5">
+																{hiddenFeatures.map((feature, idx) => (
+																	<li key={idx} className="flex items-start gap-2 text-xs">
+																		<div className="mt-0.5 w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+																			<Check className="w-2.5 h-2.5 text-primary" />
+																		</div>
+																		<span className="leading-snug text-muted-foreground">
+																			{feature.name}
+																		</span>
+																	</li>
+																))}
+															</ul>
+														</motion.div>
+													)}
+												</AnimatePresence>
+
+												{/* Expand/Collapse Button */}
+												{hiddenFeatures.length > 0 && (
+													<Button
+														variant="ghost"
+														onClick={() => togglePlanExpansion(plan.id)}
+														className="w-full mt-2 h-7 text-xs text-muted-foreground hover:text-foreground"
+													>
+														{isExpanded ? 'Свернуть' : `Показать все (${hiddenFeatures.length})`}
+														<ChevronDown className={cn("ml-1 w-3 h-3 transition-transform duration-200", isExpanded && "rotate-180")} />
+													</Button>
 												)}
-												{plan.maxMembers && (
-													<li className="flex items-start gap-2 text-sm">
-														<Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-														<span>
-															До {plan.maxMembers} участников
-														</span>
-													</li>
-												)}
-												{plan.storageGB && (
-													<li className="flex items-start gap-2 text-sm">
-														<Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-														<span>
-															{plan.storageGB} ГБ хранилища
-														</span>
-													</li>
-												)}
-											</ul>
+											</div>
+
+											{/* Action Button */}
+											<div className="mt-5 pt-4 border-t border-border/50">
+												<Button
+													variant={isSelected ? 'outline' : 'default'}  // Inverse logic slightly: default is usually "Select"
+													className={cn(
+														"w-full h-11 text-sm font-semibold rounded-xl transition-all duration-300",
+														// If submitting this specific plan, assume logic handles spinner
+													)}
+													disabled={isSubmitting}
+													onClick={() => handleSelectAndProceed(plan.id)}
+												>
+													{isSubmitting && selectedPlanId === plan.id ? (
+														<>
+															<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+															Обработка...
+														</>
+													) : (
+														'Выбрать'
+													)}
+												</Button>
+											</div>
 										</div>
-
-										{/* Select Button */}
-										<Button
-											variant={isSelected ? 'default' : 'outline'}
-											className="w-full mt-4"
-											onClick={() => handlePlanSelect(plan.id)}
-										>
-											{isSelected ? 'Выбрано' : 'Выбрать план'}
-										</Button>
-									</div>
-								</Card>
-							</motion.div>
-						)
-					})}
-				</motion.div>
-
-				{/* Error Display */}
-				{error && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="p-4 rounded-xl bg-destructive/10 border border-destructive/50 text-destructive text-sm mb-4"
-					>
-						{error}
+									</Card>
+								</motion.div>
+							)
+						})}
 					</motion.div>
-				)}
-
-				{/* Actions */}
-				<motion.div
-					variants={fadeIn}
-					initial="hidden"
-					animate="visible"
-					transition={{ delay: 0.5 }}
-					className="flex gap-3"
-				>
-					<Button
-						type="button"
-						onClick={handleBack}
-						variant="outline"
-						disabled={isSubmitting}
-						className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl"
-					>
-						<ArrowLeft className="h-4 w-4" />
-						Назад
-					</Button>
-
-					<Button
-						type="button"
-						onClick={handleNext}
-						disabled={!selectedPlanId || isSubmitting}
-						className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl"
-					>
-						{isSubmitting ? (
-							<>
-								<Loader2 className="h-4 w-4 animate-spin" />
-								Завершение...
-							</>
-						) : (
-							<>
-								<Check className="h-4 w-4" />
-								Завершить
-							</>
-						)}
-					</Button>
-				</motion.div>
+				</div>
 			</div>
+
+			{/* Error Toast/Message */}
+			{error && (
+				<div className="fixed bottom-4 right-4 z-50">
+					<div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+						<span className="font-medium">Ошибка:</span>
+						<span>{error}</span>
+						<Button variant="ghost" size="icon" onClick={() => setError(null)} className="h-6 w-6 rounded-full hover:bg-destructive-foreground/20">
+							<ChevronDown className="w-4 h-4 rotate-45" /> {/* Close icon substitution */}
+						</Button>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }

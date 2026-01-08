@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Moon, Sun } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { cn } from "@/packages/utils"
 
 export default function OnboardingLayout({
 	children,
@@ -13,6 +15,8 @@ export default function OnboardingLayout({
 }) {
 	const { theme, setTheme, resolvedTheme } = useTheme()
 	const [mounted, setMounted] = useState(false)
+	const pathname = usePathname()
+	const isWideStep = pathname?.includes('/step-4')
 
 	useEffect(() => {
 		setMounted(true)
@@ -28,7 +32,7 @@ export default function OnboardingLayout({
 		<div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center p-4 overflow-y-auto">
 			{/* Animated background */}
 			<div className="fixed inset-0 pointer-events-none overflow-hidden">
-				<motion.div 
+				<motion.div
 					className="absolute -top-1/2 -left-1/2 w-full h-full bg-primary/5 rounded-full blur-3xl"
 					animate={{
 						x: [0, 100, 0],
@@ -40,7 +44,7 @@ export default function OnboardingLayout({
 						ease: "linear"
 					}}
 				/>
-				<motion.div 
+				<motion.div
 					className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-accent/5 rounded-full blur-3xl"
 					animate={{
 						x: [0, -80, 0],
@@ -55,7 +59,7 @@ export default function OnboardingLayout({
 			</div>
 
 			{/* Theme Toggle */}
-			<motion.div 
+			<motion.div
 				className="absolute top-6 right-6 z-10"
 				initial={{ opacity: 0, y: -20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -88,13 +92,13 @@ export default function OnboardingLayout({
 			</motion.div>
 
 			{/* Back to home */}
-			<motion.div 
+			<motion.div
 				className="absolute top-6 left-6 z-10"
 				initial={{ opacity: 0, y: -20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: 0.2 }}
 			>
-				<Link 
+				<Link
 					href="/"
 					className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
 				>
@@ -110,8 +114,8 @@ export default function OnboardingLayout({
 						strokeLinejoin="round"
 						className="group-hover:-translate-x-1 transition-transform"
 					>
-						<path d="m12 19-7-7 7-7"/>
-						<path d="M19 12H5"/>
+						<path d="m12 19-7-7 7-7" />
+						<path d="M19 12H5" />
 					</motion.svg>
 					На главную
 				</Link>
@@ -124,12 +128,15 @@ export default function OnboardingLayout({
 					duration: 0.6,
 					ease: [0.22, 0.61, 0.36, 1] as const
 				}}
-				className="relative z-10 w-full flex flex-col items-center"
+				className={cn(
+					"relative z-10 w-full flex flex-col items-center",
+					isWideStep ? "max-w-full" : "max-w-[420px]"
+				)}
 			>
-				<div className="w-full max-w-[420px]">{children}</div>
-				
+				<div className={cn("w-full", !isWideStep && "max-w-[420px]")}>{children}</div>
+
 				{/* Footer Links */}
-				<motion.div 
+				<motion.div
 					className="mt-6 text-center text-xs text-muted-foreground/60 relative z-10"
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}

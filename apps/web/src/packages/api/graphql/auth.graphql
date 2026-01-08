@@ -204,6 +204,7 @@ query Me {
     telegramChatId
     telegramUsername
     hasDonatorBadge
+    trialedPlanIds
     createdAt
     notificationSettings {
       id

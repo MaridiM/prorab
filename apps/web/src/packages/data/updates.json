@@ -1,5 +1,33 @@
 [
   {
+    "version": "v1.8.0",
+    "date": "7 января 2026 г.",
+    "title": "Onboarding Redesign & Checkout 🚀",
+    "description": "Payment Checkout Integration",
+    "features": [
+      "Payment Checkout Integration",
+      "Accordion Features",
+      "Onboarding Persistence",
+      "Onboarding Checkout Support"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
+    "version": "v1.7.1",
+    "date": "6 января 2026 г.",
+    "title": "Индикация Тестового Периода 🎯",
+    "description": "- SubscriptionManagement Component: Улучшено отображение тестового периода - Бейдж \"Пробный период\" добавлен рядом со статусом подписки - Индикация тестового периода на карточках планов в списке - Виз",
+    "features": [
+      "Trial Period Indicators",
+      "Seed Script"
+    ],
+    "icon": "Sparkles",
+    "color": "text-amber-500",
+    "bg": "bg-amber-500/10"
+  },
+  {
     "version": "v1.7.0",
     "date": "5 января 2026 г.",
     "title": "Система Донатов UI 🎁",
@@ -104,35 +132,6 @@
     "features": [
       "Early Bird Price Mismatch",
       "User-Specific Early Bird Check"
-    ],
-    "icon": "Sparkles",
-    "color": "text-amber-500",
-    "bg": "bg-amber-500/10"
-  },
-  {
-    "version": "v1.6.13",
-    "date": "31 декабря 2025 г.",
-    "title": "Payment Success Page Critical Fix",
-    "description": "---",
-    "features": [
-      "Success Page Instant Redirect",
-      "Plan Not Updating After Payment"
-    ],
-    "icon": "Sparkles",
-    "color": "text-amber-500",
-    "bg": "bg-amber-500/10"
-  },
-  {
-    "version": "v1.6.12",
-    "date": "31 декабря 2025 г.",
-    "title": "Early Bird UI Indicators & Landing Page Integration",
-    "description": "- Social Proof Counter: Добавлен счетчик активных команд - Показывает \"Уже N команд присоединились\" - Иконка Users из lucide-react - Отображается рядом со счетчиком Early Bird слотов - Автоматически с",
-    "features": [
-      "Early Bird Stats Banner",
-      "Social Proof Counter",
-      "GraphQL Integration",
-      "Early Bird Stats API",
-      "Social Proof Integration"
     ],
     "icon": "Sparkles",
     "color": "text-amber-500",

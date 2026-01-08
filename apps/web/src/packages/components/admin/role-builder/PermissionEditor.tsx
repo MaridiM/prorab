@@ -6,7 +6,7 @@ import { Button } from '@/packages/components/ui/button'
 import { Checkbox } from '@/packages/components/ui/checkbox'
 import { Badge } from '@/packages/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/packages/components/ui/card'
-import { cn } from '@/packages/lib/utils'
+import { cn } from '@/packages/utils'
 import type { PermissionCategoryFieldsFragment } from '@/packages/api/graphql/__generated__/output'
 
 interface PermissionEditorProps {
