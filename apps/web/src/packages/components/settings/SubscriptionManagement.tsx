@@ -45,6 +45,7 @@ import {
 	InitializePaymentDocument,
 	EarlyBirdStatsDocument,
 	IsEarlyBirdAvailableForMeDocument,
+	UsageStatsDocument,
 	PaymentProviderType,
 } from '@/packages/api/graphql/__generated__/output'
 import {
@@ -77,6 +78,14 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 	})
 	const { data: earlyBirdForMeData } = useQuery(IsEarlyBirdAvailableForMeDocument, {
 		fetchPolicy: 'cache-and-network', // Always get fresh data for current user
+	})
+
+	const effectiveTeamIdComp = useMemo(() => teamId || subData?.mySubscription?.teamId || teamsData?.myTeams?.[0]?.id, [teamId, subData?.mySubscription?.teamId, teamsData?.myTeams]);
+
+	const { data: usageData } = useQuery(UsageStatsDocument, {
+		variables: { teamId: effectiveTeamIdComp || '' },
+		skip: !effectiveTeamIdComp,
+		fetchPolicy: 'cache-and-network',
 	})
 	const searchParams = useSearchParams()
 
@@ -1188,11 +1197,19 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							</span>
 							<div className="flex items-baseline gap-1">
 								<span className="font-semibold text-sm">
-									{subscription.limits.maxActiveProjects === null ? '∞' : subscription.limits.maxActiveProjects}
+									{usageData?.usageStats.activeProjects || 0}
 								</span>
-								<span className="text-xs text-muted-foreground">активных</span>
+								<span className="text-xs text-muted-foreground">
+									из {subscription.limits.maxActiveProjects === null ? '∞' : subscription.limits.maxActiveProjects}
+								</span>
 							</div>
-							<Progress value={subscription.limits.maxActiveProjects === null ? 100 : 40} className="h-1 bg-muted" indicatorClassName="bg-primary/60" />
+							<Progress
+								value={subscription.limits.maxActiveProjects
+									? ((usageData?.usageStats.activeProjects || 0) / subscription.limits.maxActiveProjects) * 100
+									: 0}
+								className="h-1 bg-muted"
+								indicatorClassName="bg-primary/60"
+							/>
 						</div>
 
 						{/* Members Limit */}
@@ -1203,11 +1220,19 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							</span>
 							<div className="flex items-baseline gap-1">
 								<span className="font-semibold text-sm">
-									{subscription.limits.maxMembers}
+									{usageData?.usageStats.totalMembers || 0}
 								</span>
-								<span className="text-xs text-muted-foreground">максимум</span>
+								<span className="text-xs text-muted-foreground">
+									из {subscription.limits.maxMembers}
+								</span>
 							</div>
-							<Progress value={40} className="h-1 bg-muted" indicatorClassName="bg-primary/60" />
+							<Progress
+								value={subscription.limits.maxMembers
+									? ((usageData?.usageStats.totalMembers || 0) / subscription.limits.maxMembers) * 100
+									: 0}
+								className="h-1 bg-muted"
+								indicatorClassName="bg-primary/60"
+							/>
 						</div>
 
 						{/* Storage Limit */}
@@ -1218,11 +1243,19 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 							</span>
 							<div className="flex items-baseline gap-1">
 								<span className="font-semibold text-sm">
-									{subscription.limits.storageGB} ГБ
+									{(usageData?.usageStats.storageUsedGB || 0).toFixed(2)} ГБ
 								</span>
-								<span className="text-xs text-muted-foreground">доступно</span>
+								<span className="text-xs text-muted-foreground">
+									из {subscription.limits.storageGB} ГБ
+								</span>
 							</div>
-							<Progress value={30} className="h-1 bg-muted" indicatorClassName="bg-primary/60" />
+							<Progress
+								value={subscription.limits.storageGB
+									? ((usageData?.usageStats.storageUsedGB || 0) / subscription.limits.storageGB) * 100
+									: 0}
+								className="h-1 bg-muted"
+								indicatorClassName="bg-primary/60"
+							/>
 						</div>
 					</div>
 
