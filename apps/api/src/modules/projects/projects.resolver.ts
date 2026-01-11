@@ -76,6 +76,15 @@ export class ProjectsResolver {
     return this.projectsService.archive(id, user.id);
   }
 
+  @Mutation(() => Project, { description: 'Удалить проект' })
+  @UseGuards(AuthGuard)
+  async deleteProject(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.projectsService.delete(id, user.id);
+  }
+
   @Mutation(() => Project, { description: 'Восстановить проект' })
   @UseGuards(AuthGuard)
   async restoreProject(

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,11 +17,21 @@ import {
 	Save,
 	AlertCircle,
 	Construction,
+	FolderKanban,
+	Edit3,
+	Archive,
+	RotateCcw,
+	MoreVertical,
 } from 'lucide-react'
 
 import {
 	MyTeamsDocument,
+	ProjectsByTeamDocument,
+	DeleteProjectDocument,
+	ArchiveProjectDocument,
+	RestoreProjectDocument,
 } from '@/packages/api/graphql'
+import { ProjectStatus } from '@/packages/schemas'
 import { useAuth } from '@/packages/libs/auth'
 import { useToast } from '@/packages/hooks'
 import {
@@ -36,6 +46,22 @@ import {
 	FormLabel,
 	FormMessage,
 	UserMenu,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	Tabs,
+	TabsList,
+	TabsTrigger,
+	TabsContent,
 } from '@/packages/components'
 import { TeamLogo, IconPicker } from '@/packages/components/ui'
 import { cn } from '@/packages/utils'
@@ -81,6 +107,75 @@ export default function TeamSettingsPage() {
 
 	const team = teamsData?.myTeams?.find((t: any) => t.id === teamId)
 	const isOwner = team?.ownerId === user?.id
+
+	// Query projects
+	const { data: projectsData, loading: projectsLoading, refetch: refetchProjects } = useQuery(
+		ProjectsByTeamDocument,
+		{
+			variables: { teamId, filter: null },
+		}
+	)
+
+	const allProjects = projectsData?.projectsByTeam || []
+	const activeProjects = allProjects.filter((p: any) => p?.status === ProjectStatus.ACTIVE)
+	const archivedProjects = allProjects.filter((p: any) => p?.status === ProjectStatus.ARCHIVED)
+	const completedProjects = allProjects.filter((p: any) => p?.status === ProjectStatus.COMPLETED)
+
+	// Delete project state
+	const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null)
+	const [deleteProjectName, setDeleteProjectName] = useState<string>('')
+
+	// Mutations
+	const [deleteProject] = useMutation(DeleteProjectDocument, {
+		refetchQueries: [{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } }],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект удалён' })
+			setDeleteProjectId(null)
+			setDeleteProjectName('')
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	const [archiveProject] = useMutation(ArchiveProjectDocument, {
+		refetchQueries: [{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } }],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект архивирован' })
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	const [restoreProject] = useMutation(RestoreProjectDocument, {
+		refetchQueries: [{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } }],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект восстановлен' })
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	const handleDeleteClick = (projectId: string, projectName: string) => {
+		setDeleteProjectId(projectId)
+		setDeleteProjectName(projectName)
+	}
+
+	const handleDeleteConfirm = () => {
+		if (deleteProjectId) {
+			deleteProject({ variables: { id: deleteProjectId } })
+		}
+	}
+
+	const handleArchive = (projectId: string) => {
+		archiveProject({ variables: { id: projectId } })
+	}
+
+	const handleRestore = (projectId: string) => {
+		restoreProject({ variables: { id: projectId } })
+	}
 
 	// Form
 	const form = useForm<TeamSettingsForm>({
@@ -217,7 +312,7 @@ export default function TeamSettingsPage() {
 						className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6"
 					>
 						<div className="flex items-start gap-4">
-							<div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+							<div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
 								<Construction className="w-6 h-6 text-amber-500" />
 							</div>
 							<div>
@@ -271,7 +366,7 @@ export default function TeamSettingsPage() {
 									<FormLabel>Логотип команды</FormLabel>
 									<div className="flex items-start gap-6">
 										{/* Preview */}
-										<div className="flex-shrink-0">
+										<div className="shrink-0">
 											<div className="w-20 h-20 rounded-2xl border-2 border-dashed border-border/50 flex items-center justify-center overflow-hidden bg-secondary/30">
 												{team && (
 													<TeamLogo
@@ -307,6 +402,205 @@ export default function TeamSettingsPage() {
 								</Button>
 							</form>
 						</Form>
+					</motion.section>
+
+					{/* Projects Management Section */}
+					<motion.section
+						variants={fadeIn}
+						className="rounded-2xl border border-border/50 bg-card overflow-hidden"
+					>
+						<div className="p-6 border-b border-border/30">
+							<h2 className="text-lg font-semibold flex items-center gap-2">
+								<FolderKanban className="w-5 h-5 text-primary" />
+								Управление проектами
+							</h2>
+						</div>
+
+						<div className="p-6">
+							{projectsLoading ? (
+								<div className="space-y-3">
+									<Skeleton className="h-16 rounded-xl" />
+									<Skeleton className="h-16 rounded-xl" />
+									<Skeleton className="h-16 rounded-xl" />
+								</div>
+							) : (
+								<Tabs defaultValue="active" className="w-full">
+									<TabsList className="grid w-full grid-cols-3 mb-4">
+										<TabsTrigger value="active">
+											Активные ({activeProjects.length})
+										</TabsTrigger>
+										<TabsTrigger value="archived">
+											Архив ({archivedProjects.length})
+										</TabsTrigger>
+										<TabsTrigger value="completed">
+											Завершённые ({completedProjects.length})
+										</TabsTrigger>
+									</TabsList>
+
+									<TabsContent value="active" className="space-y-3">
+										{activeProjects.length > 0 ? (
+											activeProjects.map((project: any) => (
+												<div
+													key={project.id}
+													className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+												>
+													<div className="flex-1 min-w-0">
+														<h3 className="font-medium truncate">{project.name}</h3>
+														{project.address && (
+															<p className="text-sm text-muted-foreground truncate">
+																{project.address}
+															</p>
+														)}
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+															>
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem
+																onClick={() => router.push(`/teams/${teamId}/projects/${project.id}/edit`)}
+															>
+																<Edit3 className="mr-2 h-4 w-4" />
+																Редактировать
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleArchive(project.id)}>
+																<Archive className="mr-2 h-4 w-4" />
+																В архив
+															</DropdownMenuItem>
+															<DropdownMenuItem
+																onClick={() => handleDeleteClick(project.id, project.name)}
+																className="text-destructive focus:text-destructive"
+															>
+																<Trash2 className="mr-2 h-4 w-4" />
+																Удалить
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))
+										) : (
+											<p className="text-sm text-muted-foreground text-center py-8">
+												Нет активных проектов
+											</p>
+										)}
+									</TabsContent>
+
+									<TabsContent value="archived" className="space-y-3">
+										{archivedProjects.length > 0 ? (
+											archivedProjects.map((project: any) => (
+												<div
+													key={project.id}
+													className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors group opacity-75"
+												>
+													<div className="flex-1 min-w-0">
+														<h3 className="font-medium truncate">{project.name}</h3>
+														{project.address && (
+															<p className="text-sm text-muted-foreground truncate">
+																{project.address}
+															</p>
+														)}
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+															>
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem
+																onClick={() => router.push(`/teams/${teamId}/projects/${project.id}/edit`)}
+															>
+																<Edit3 className="mr-2 h-4 w-4" />
+																Редактировать
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleRestore(project.id)}>
+																<RotateCcw className="mr-2 h-4 w-4" />
+																Восстановить
+															</DropdownMenuItem>
+															<DropdownMenuItem
+																onClick={() => handleDeleteClick(project.id, project.name)}
+																className="text-destructive focus:text-destructive"
+															>
+																<Trash2 className="mr-2 h-4 w-4" />
+																Удалить
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))
+										) : (
+											<p className="text-sm text-muted-foreground text-center py-8">
+												Нет архивных проектов
+											</p>
+										)}
+									</TabsContent>
+
+									<TabsContent value="completed" className="space-y-3">
+										{completedProjects.length > 0 ? (
+											completedProjects.map((project: any) => (
+												<div
+													key={project.id}
+													className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+												>
+													<div className="flex-1 min-w-0">
+														<h3 className="font-medium truncate">{project.name}</h3>
+														{project.address && (
+															<p className="text-sm text-muted-foreground truncate">
+																{project.address}
+															</p>
+														)}
+													</div>
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant="ghost"
+																size="icon"
+																className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+															>
+																<MoreVertical className="h-4 w-4" />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent align="end">
+															<DropdownMenuItem
+																onClick={() => router.push(`/teams/${teamId}/projects/${project.id}/edit`)}
+															>
+																<Edit3 className="mr-2 h-4 w-4" />
+																Редактировать
+															</DropdownMenuItem>
+															<DropdownMenuItem onClick={() => handleArchive(project.id)}>
+																<Archive className="mr-2 h-4 w-4" />
+																В архив
+															</DropdownMenuItem>
+															<DropdownMenuItem
+																onClick={() => handleDeleteClick(project.id, project.name)}
+																className="text-destructive focus:text-destructive"
+															>
+																<Trash2 className="mr-2 h-4 w-4" />
+																Удалить
+															</DropdownMenuItem>
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))
+										) : (
+											<p className="text-sm text-muted-foreground text-center py-8">
+												Нет завершённых проектов
+											</p>
+										)}
+									</TabsContent>
+								</Tabs>
+							)}
+						</div>
 					</motion.section>
 
 					{/* Team Members Section */}
@@ -382,6 +676,29 @@ export default function TeamSettingsPage() {
 					</motion.section>
 				</motion.div>
 			</main>
+
+			{/* Delete Project Dialog */}
+			<AlertDialog open={!!deleteProjectId} onOpenChange={(open) => !open && setDeleteProjectId(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить проект?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Это действие нельзя отменить. Проект «{deleteProjectName}» и все связанные с ним данные (сметы, задачи, отчеты) будут безвозвратно удалены.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={() => setDeleteProjectId(null)}>
+							Отмена
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleDeleteConfirm}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	)
 }

@@ -96,6 +96,12 @@ mutation ArchiveProject($id: ID!) {
   }
 }
 
+mutation DeleteProject($id: ID!) {
+  deleteProject(id: $id) {
+    id
+  }
+}
+
 mutation RestoreProject($id: ID!) {
   restoreProject(id: $id) {
     id

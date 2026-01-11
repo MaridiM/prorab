@@ -9,6 +9,7 @@ import {
 	ProjectDocument,
 	ArchiveProjectDocument,
 	RestoreProjectDocument,
+	DeleteProjectDocument,
 	ProjectsByTeamDocument,
 	ExpensesByProjectDocument,
 	ProjectStatsDocument,
@@ -18,11 +19,11 @@ import {
 	ProjectPhotoReportsDocument,
 	CreatePhotoReportDocument,
 	UpdatePhotoReportDocument,
-    DeletePhotoReportDocument,
-    UploadPhotoToReportDocument,
-    DeletePhotoFromReportDocument,
-    ReorderReportPhotosDocument,
-    MyTeamsDocument,
+	DeletePhotoReportDocument,
+	UploadPhotoToReportDocument,
+	DeletePhotoFromReportDocument,
+	ReorderReportPhotosDocument,
+	MyTeamsDocument,
 	PayoutSummaryDocument,
 } from '@/packages/api/graphql'
 import { ProjectStatus } from '@/packages/schemas'
@@ -36,6 +37,14 @@ import {
 	ProgressBar,
 	Skeleton,
 	UserMenu,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
 } from '@/packages/components/ui'
 import { ExpenseList, ExpenseForm } from '@/packages/components/expenses'
 import { FinancialDashboard } from '@/packages/components/financial'
@@ -51,6 +60,7 @@ import {
 	Edit,
 	Archive,
 	ArchiveRestore,
+	Trash2,
 	MapPin,
 	Calendar,
 	Phone,
@@ -61,7 +71,7 @@ import {
 	CheckSquare,
 	TrendingUp,
 	TrendingDown,
-    Calculator, // NEW
+	Calculator, // NEW
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -128,6 +138,7 @@ export default function ProjectDetailsPage() {
 	const [showReportForm, setShowReportForm] = useState(false)
 	const [editingReport, setEditingReport] = useState<any>(null)
 	const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
 	// Загрузка команды для проверки владельца
 	const { data: teamsData } = useQuery(MyTeamsDocument)
@@ -187,24 +198,24 @@ export default function ProjectDetailsPage() {
 			router.push(`/teams/${teamId}/projects/${projectId}/tasks`)
 			return
 		}
-		
+
 		setActiveTab(tab)
 		const newParams = new URLSearchParams(searchParams.toString())
 		newParams.set('tab', tab)
 		router.replace(`/teams/${teamId}/projects/${projectId}?${newParams.toString()}`, { scroll: false })
 	}
 
-    const { data: payoutData, loading: payoutLoading } = useQuery(PayoutSummaryDocument, {
-        variables: { projectId },
-        skip: activeTab !== 'payouts'
-    })
+	const { data: payoutData, loading: payoutLoading } = useQuery(PayoutSummaryDocument, {
+		variables: { projectId },
+		skip: activeTab !== 'payouts'
+	})
 
-    const [closeProject] = useMutation(CLOSE_PROJECT_MUTATION, {
-        refetchQueries: [
-            { query: ProjectDocument, variables: { id: projectId } },
-            { query: ProjectsByTeamDocument, variables: { teamId } }
-        ]
-    })
+	const [closeProject] = useMutation(CLOSE_PROJECT_MUTATION, {
+		refetchQueries: [
+			{ query: ProjectDocument, variables: { id: projectId } },
+			{ query: ProjectsByTeamDocument, variables: { teamId } }
+		]
+	})
 
 	const [archiveProject, { loading: archiving }] = useMutation(
 		ArchiveProjectDocument,
@@ -225,6 +236,19 @@ export default function ProjectDetailsPage() {
 			],
 		}
 	)
+
+	const [deleteProject] = useMutation(DeleteProjectDocument, {
+		refetchQueries: [
+			{ query: ProjectsByTeamDocument, variables: { teamId } },
+		],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект удалён' })
+			router.push(`/teams/${teamId}`)
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
 
 	const [createExpense, { loading: creating }] = useMutation(
 		CreateExpenseDocument,
@@ -331,6 +355,10 @@ export default function ProjectDetailsPage() {
 				message: error.message || 'Не удалось восстановить проект',
 			})
 		}
+	}
+
+	const handleDeleteConfirm = () => {
+		deleteProject({ variables: { id: projectId } })
 	}
 
 	const handleCreateExpense = async (data: any) => {
@@ -484,7 +512,7 @@ export default function ProjectDetailsPage() {
 					},
 				},
 			})
-			
+
 			if (result.error) {
 				throw new Error(result.error.message)
 			}
@@ -495,7 +523,7 @@ export default function ProjectDetailsPage() {
 					...prev,
 					photos: [...(prev?.photos || []), newPhoto],
 				}))
-				
+
 				showToast({
 					type: 'success',
 					message: 'Фото успешно загружено',
@@ -518,7 +546,7 @@ export default function ProjectDetailsPage() {
 			await deletePhotoFromReport({
 				variables: { photoId },
 			})
-			
+
 			setEditingReport((prev: any) => ({
 				...prev,
 				photos: (prev?.photos || []).filter((p: any) => p.id !== photoId),
@@ -584,16 +612,16 @@ export default function ProjectDetailsPage() {
 		})
 	}
 
-    const handleCloseProject = async () => {
-        try {
-            await closeProject({ variables: { projectId } })
-            showToast({ type: 'success', message: 'Проект закрыт и выплаты зафиксированы' })
-            router.push(`/teams/${teamId}`)
-        } catch (error: any) {
-            showToast({ type: 'error', message: error.message || 'Ошибка закрытия проекта' })
-            throw error
-        }
-    }
+	const handleCloseProject = async () => {
+		try {
+			await closeProject({ variables: { projectId } })
+			showToast({ type: 'success', message: 'Проект закрыт и выплаты зафиксированы' })
+			router.push(`/teams/${teamId}`)
+		} catch (error: any) {
+			showToast({ type: 'error', message: error.message || 'Ошибка закрытия проекта' })
+			throw error
+		}
+	}
 
 	const formatDate = (date: string | null | undefined) => {
 		if (!date) return '—'
@@ -665,7 +693,7 @@ export default function ProjectDetailsPage() {
 		{ id: 'info' as const, label: 'Информация', icon: FileText, disabled: false },
 		{ id: 'expenses' as const, label: 'Расходы', icon: Wallet, disabled: false },
 		{ id: 'reports' as const, label: 'Фотоотчёты', icon: Camera, disabled: false },
-        ...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator, disabled: false }] : []),
+		...(isOwner ? [{ id: 'payouts' as const, label: 'Выплаты', icon: Calculator, disabled: false }] : []),
 		{ id: 'tasks' as const, label: 'Задачи', icon: CheckSquare, disabled: false },
 	]
 
@@ -733,6 +761,15 @@ export default function ProjectDetailsPage() {
 									<span className="hidden sm:inline">В архив</span>
 								</Button>
 							)}
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setIsDeleteDialogOpen(true)}
+								className="text-destructive hover:text-destructive hover:bg-destructive/10"
+							>
+								<Trash2 className="h-4 w-4 mr-2" />
+								<span className="hidden sm:inline">Удалить</span>
+							</Button>
 							<UserMenu avatarSize="sm" />
 						</div>
 					</div>
@@ -753,11 +790,10 @@ export default function ProjectDetailsPage() {
 								key={tab.id}
 								onClick={() => !tab.disabled && handleTabChange(tab.id)}
 								disabled={tab.disabled}
-								className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
-									activeTab === tab.id
-										? 'border-primary text-primary'
-										: 'border-transparent text-muted-foreground hover:text-foreground'
-								} ${tab.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+								className={`px-4 py-3 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id
+									? 'border-primary text-primary'
+									: 'border-transparent text-muted-foreground hover:text-foreground'
+									} ${tab.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 							>
 								<tab.icon className="w-4 h-4" />
 								{tab.label}
@@ -829,11 +865,10 @@ export default function ProjectDetailsPage() {
 												</span>
 											</div>
 											<p
-												className={`text-xl font-bold ${
-													isProfitable
-														? 'text-emerald-600 dark:text-emerald-400'
-														: 'text-red-600 dark:text-red-400'
-												}`}
+												className={`text-xl font-bold ${isProfitable
+													? 'text-emerald-600 dark:text-emerald-400'
+													: 'text-red-600 dark:text-red-400'
+													}`}
 											>
 												{formatCurrency(Math.abs(profit))}
 											</p>
@@ -1129,31 +1164,31 @@ export default function ProjectDetailsPage() {
 						</motion.div>
 					)}
 
-                    {/* Payouts Tab */}
-                    {activeTab === 'payouts' && (
-                        <motion.div
-                            key="payouts"
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            variants={fadeIn}
-                        >
-                            {payoutLoading ? (
-                                <Skeleton className="h-[600px] w-full rounded-2xl" />
-                            ) : payoutData?.payoutSummary ? (
-                                <PayoutCalculator 
-                                    summary={payoutData.payoutSummary as any}
-                                    onClose={handleCloseProject}
-                                />
-                            ) : (
-                                <Card>
-                                    <CardContent className="py-12 text-center text-muted-foreground">
-                                        Ошибка загрузки данных
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </motion.div>
-                    )}
+					{/* Payouts Tab */}
+					{activeTab === 'payouts' && (
+						<motion.div
+							key="payouts"
+							initial="hidden"
+							animate="visible"
+							exit="hidden"
+							variants={fadeIn}
+						>
+							{payoutLoading ? (
+								<Skeleton className="h-[600px] w-full rounded-2xl" />
+							) : payoutData?.payoutSummary ? (
+								<PayoutCalculator
+									summary={payoutData.payoutSummary as any}
+									onClose={handleCloseProject}
+								/>
+							) : (
+								<Card>
+									<CardContent className="py-12 text-center text-muted-foreground">
+										Ошибка загрузки данных
+									</CardContent>
+								</Card>
+							)}
+						</motion.div>
+					)}
 				</AnimatePresence>
 			</main>
 
@@ -1170,6 +1205,31 @@ export default function ProjectDetailsPage() {
 					<Plus className="h-6 w-6" />
 				</motion.button>
 			)}
+
+			<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить проект?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Это действие нельзя отменить. Проект «{project.name}» и все связанные с ним данные (сметы, задачи, отчеты) будут безвозвратно удалены.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={(e) => {
+							e.stopPropagation()
+						}}>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={(e) => {
+								e.stopPropagation()
+								handleDeleteConfirm()
+							}}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	)
 }

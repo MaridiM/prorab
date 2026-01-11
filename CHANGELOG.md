@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.1] - 2026-01-11
+
+### Fixed
+- **Subscriptions**: Fixed subscription limit calculation to be global across all user teams.
+- **Subscriptions**: Membership limits now scale dynamically with active projects (e.g. 2 projects = 6 member slots).
+- **Subscriptions**: Owner is no longer counted as a plan participant (free seat).
+
+### Changed
+- **UI**: "About App" footer text updated to be region-neutral.
+
 ## [1.7.1] - 2026-01-08
 
 ### Fixed

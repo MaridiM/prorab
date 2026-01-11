@@ -145,6 +145,17 @@ export class ProjectsService {
   }
 
   /**
+   * Удалить проект
+   */
+  async delete(id: string, userId: string) {
+    await this.validateProjectAccess(id, userId);
+
+    return this.prisma.project.delete({
+      where: { id },
+    });
+  }
+
+  /**
    * Архивировать проект
    */
   async archive(id: string, userId: string) {

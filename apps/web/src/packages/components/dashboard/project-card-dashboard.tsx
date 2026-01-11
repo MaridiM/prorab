@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -9,12 +10,41 @@ import {
 	TrendingDown,
 	MessageCircle,
 	Calendar,
-	ArrowRight
+	ArrowRight,
+	MoreVertical,
+	Edit3,
+	Archive,
+	Trash2,
+	RotateCcw,
 } from 'lucide-react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useMutation } from '@apollo/client/react'
 import { cn } from '@/packages/utils'
 import { ProgressBar, Badge } from '@/packages/components/ui'
 import { ProjectStatus, type ProjectStatusType } from '@/packages/schemas'
+import {
+	ArchiveProjectDocument,
+	DeleteProjectDocument,
+	ProjectDocument,
+	ProjectsByTeamDocument,
+	RestoreProjectDocument,
+} from '@/packages/api/graphql'
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	Button,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/packages/components/ui'
+import { useToast } from '@/packages/hooks'
 
 interface ProjectCardDashboardProps {
 	id: string
@@ -61,8 +91,81 @@ export function ProjectCardDashboard({
 	showFinancials = false,
 	className,
 }: ProjectCardDashboardProps) {
+	const router = useRouter()
+	const { showToast } = useToast()
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
 	const statusInfo = statusConfig[status]
 	const isProfitable = (profit ?? 0) >= 0
+
+	// Mutations
+	const [archiveProject] = useMutation(ArchiveProjectDocument, {
+		refetchQueries: [
+			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectDocument, variables: { id } },
+		],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект архивирован' })
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	const [restoreProject] = useMutation(RestoreProjectDocument, {
+		refetchQueries: [
+			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectDocument, variables: { id } },
+		],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект восстановлен' })
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	const [deleteProject] = useMutation(DeleteProjectDocument, {
+		refetchQueries: [
+			{ query: ProjectsByTeamDocument, variables: { teamId } },
+		],
+		onCompleted: () => {
+			showToast({ type: 'success', message: 'Проект удалён' })
+			setIsDeleteDialogOpen(false)
+		},
+		onError: (error) => {
+			showToast({ type: 'error', message: error.message })
+		},
+	})
+
+	// Handlers
+	const handleEdit = (e: React.MouseEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		router.push(`/teams/${teamId}/projects/${id}/edit`)
+	}
+
+	const handleArchive = (e: React.MouseEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		archiveProject({ variables: { id } })
+	}
+
+	const handleRestore = (e: React.MouseEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		restoreProject({ variables: { id } })
+	}
+
+	const handleDeleteClick = (e: React.MouseEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		setIsDeleteDialogOpen(true)
+	}
+
+	const handleDeleteConfirm = () => {
+		deleteProject({ variables: { id } })
+	}
 
 	const formatCurrency = (amount: number) => {
 		if (Math.abs(amount) >= 1_000_000) {
@@ -84,9 +187,10 @@ export function ProjectCardDashboard({
 	}
 
 	return (
-		<Link href={`/teams/${teamId}/projects/${id}`} className="block">
+		<>
 			<motion.div
 				whileHover={{ y: -4, transition: { duration: 0.2 } }}
+				onClick={() => router.push(`/teams/${teamId}/projects/${id}`)}
 				className={cn(
 					'relative rounded-2xl border border-border/30 bg-card overflow-hidden',
 					'hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5',
@@ -97,6 +201,51 @@ export function ProjectCardDashboard({
 			>
 				{/* Градиентный hover эффект */}
 				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/5 to-transparent" />
+
+				{/* Actions Menu */}
+				<div className="absolute top-3 right-3 z-20">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="secondary"
+								size="icon"
+								className="h-8 w-8 bg-background/80 backdrop-blur-sm border shadow-sm"
+								onClick={(e) => {
+									e.preventDefault()
+									e.stopPropagation()
+								}}
+							>
+								<MoreVertical className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end" className="w-48">
+							<DropdownMenuItem onClick={handleEdit}>
+								<Edit3 className="mr-2 h-4 w-4" />
+								Редактировать
+							</DropdownMenuItem>
+
+							{status === ProjectStatus.ARCHIVED ? (
+								<DropdownMenuItem onClick={handleRestore}>
+									<RotateCcw className="mr-2 h-4 w-4" />
+									Восстановить
+								</DropdownMenuItem>
+							) : (
+								<DropdownMenuItem onClick={handleArchive}>
+									<Archive className="mr-2 h-4 w-4" />
+									В архив
+								</DropdownMenuItem>
+							)}
+
+							<DropdownMenuItem
+								onClick={handleDeleteClick}
+								className="text-destructive focus:text-destructive"
+							>
+								<Trash2 className="mr-2 h-4 w-4" />
+								Удалить
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 
 				<div className="relative z-10 p-5">
 					{/* Верхняя часть: фото + основная инфо */}
@@ -120,7 +269,7 @@ export function ProjectCardDashboard({
 						</div>
 
 						{/* Название и статус */}
-						<div className="flex-1 min-w-0">
+						<div className="flex-1 min-w-0 pr-8">
 							<div className="flex items-start justify-between gap-2 mb-1">
 								<h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
 									{name}
@@ -195,7 +344,32 @@ export function ProjectCardDashboard({
 					</div>
 				</div>
 			</motion.div>
-		</Link>
+
+			<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить проект?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Это действие нельзя отменить. Проект «{name}» и все связанные с ним данные (сметы, задачи, отчеты) будут безвозвратно удалены.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={(e) => {
+							e.stopPropagation()
+						}}>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={(e) => {
+								e.stopPropagation()
+								handleDeleteConfirm()
+							}}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		</>
 	)
 }
 

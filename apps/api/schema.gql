@@ -2241,6 +2241,9 @@ type Mutation {
   """Удалить фотоотчёт"""
   deletePhotoReport(id: String!): Boolean!
 
+  """Удалить проект"""
+  deleteProject(id: ID!): Project!
+
   """Delete a system setting (super admin only)"""
   deleteSystemSetting(key: String!): Boolean!
 

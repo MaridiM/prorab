@@ -2005,7 +2005,7 @@ function SettingsContent() {
 												<div className="flex items-center justify-center gap-1.5 sm:gap-2 text-muted-foreground text-sm sm:text-base">
 													<span>Сделано с</span>
 													<Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500" />
-													<span>для прорабов России</span>
+													<span>для прорабов</span>
 												</div>
 												<p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">© 2025 ProRab. Все права защищены.</p>
 											</div>
