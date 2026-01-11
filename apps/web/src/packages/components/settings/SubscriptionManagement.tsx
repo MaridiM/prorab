@@ -1218,17 +1218,20 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 								<Users className="w-3 h-3" />
 								Участники
 							</span>
-							<div className="flex items-baseline gap-1">
+							<div className="flex items-baseline gap-1 flex-wrap">
 								<span className="font-semibold text-sm">
 									{usageData?.usageStats.totalMembers || 0}
 								</span>
 								<span className="text-xs text-muted-foreground">
-									из {subscription.limits.maxMembers}
+									из {usageData?.usageStats.limits.maxMembers || subscription.limits.maxMembers}
+								</span>
+								<span className="text-[10px] text-muted-foreground">
+									(по {subscription.limits.maxMembers} чел. на активный проект)
 								</span>
 							</div>
 							<Progress
-								value={subscription.limits.maxMembers
-									? ((usageData?.usageStats.totalMembers || 0) / subscription.limits.maxMembers) * 100
+								value={(usageData?.usageStats.limits.maxMembers || subscription.limits.maxMembers)
+									? ((usageData?.usageStats.totalMembers || 0) / (usageData?.usageStats.limits.maxMembers || subscription.limits.maxMembers)) * 100
 									: 0}
 								className="h-1 bg-muted"
 								indicatorClassName="bg-primary/60"

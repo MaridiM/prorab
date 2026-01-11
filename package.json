@@ -21,7 +21,7 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "concurrently": "^9.2.1",
     "tsx": "^4.21.0",
-    "turbo": "^2.6.3"
+    "turbo": "^2.7.3"
   },
   "dependencies": {
     "otpauth": "^9.4.1",

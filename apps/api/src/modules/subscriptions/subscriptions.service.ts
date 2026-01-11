@@ -526,15 +526,28 @@ export class SubscriptionsService {
   }
 
   async checkProjectLimit(teamId: string): Promise<boolean> {
-    const limits = await this.getEffectivePlanLimits(teamId);
+    const team = await this.prisma.team.findUnique({ where: { id: teamId } });
+    if (!team) return false;
+
+    // Determine limits based on owner's subscription
+    const activeSubscription = await this.findByUserId(team.ownerId);
+    const limitSourceTeamId = activeSubscription?.teamId || teamId;
+    const limits = await this.getEffectivePlanLimits(limitSourceTeamId);
 
     if (limits.maxActiveProjects === null || limits.maxActiveProjects === undefined) {
       return true; // Unlimited
     }
 
+    // Global Active Count
+    const ownedTeams = await this.prisma.team.findMany({
+        where: { ownerId: team.ownerId },
+        select: { id: true }
+    });
+    const ownedTeamIds = ownedTeams.map(t => t.id);
+
     const activeCount = await this.prisma.project.count({
       where: {
-        teamId,
+        teamId: { in: ownedTeamIds },
         status: ProjectStatus.ACTIVE,
       },
     });
@@ -543,13 +556,44 @@ export class SubscriptionsService {
   }
 
   async checkMemberLimit(teamId: string): Promise<boolean> {
-    const limits = await this.getEffectivePlanLimits(teamId);
+    const team = await this.prisma.team.findUnique({ where: { id: teamId } });
+    if (!team) return false;
 
-    const memberCount = await this.prisma.teamMember.count({
-      where: { teamId },
+    // Determine limits based on owner's subscription
+    const activeSubscription = await this.findByUserId(team.ownerId);
+    const limitSourceTeamId = activeSubscription?.teamId || teamId;
+    const limits = await this.getEffectivePlanLimits(limitSourceTeamId);
+
+    // Global Member Count
+    const ownedTeams = await this.prisma.team.findMany({
+        where: { ownerId: team.ownerId },
+        select: { id: true }
+    });
+    const ownedTeamIds = ownedTeams.map(t => t.id);
+
+    const nonOwnerMembersCount = await this.prisma.teamMember.count({
+      where: { 
+        teamId: { in: ownedTeamIds },
+        userId: { not: team.ownerId } 
+      },
+    });
+    
+    const totalMembers = nonOwnerMembersCount;
+
+    // Scale limit by active projects
+    // Global active projects count for owner
+    const activeProjects = await this.prisma.project.count({
+      where: {
+        teamId: { in: ownedTeamIds },
+        status: ProjectStatus.ACTIVE,
+      },
     });
 
-    return memberCount < limits.maxMembers;
+    const baseMaxMembers = limits.maxMembers;
+    // Limit = activeProjects * baseLimit. At least 1 unit if 0 projects.
+    const effectiveMaxMembers = baseMaxMembers * Math.max(1, activeProjects);
+
+    return totalMembers < effectiveMaxMembers;
   }
 
   async getCurrentLimits(teamId: string, userId: string): Promise<PlanLimitsModel> {
@@ -562,33 +606,67 @@ export class SubscriptionsService {
   }
 
   async getUsageStats(teamId: string, userId: string): Promise<UsageStatsModel> {
-    const team = await this.prisma.team.findUnique({
-      where: { id: teamId },
+    // Determine the user's active subscription limits independently of the passed teamId
+    // Logic: Find active subscription for the user to get the correct plan limits
+    const activeSubscription = await this.findByUserId(userId);
+    
+    // If an active subscription exists, use its teamId to get limits. 
+    // Otherwise fallback to the requested teamId (which leads to Free/Lite limits usually)
+    const limitSourceTeamId = activeSubscription?.teamId || teamId;
+    const limits = await this.getEffectivePlanLimits(limitSourceTeamId);
+
+    // Get all teams owned by this user to calculate global usage
+    const ownedTeams = await this.prisma.team.findMany({
+      where: { ownerId: userId },
+      select: { 
+        id: true,
+        storageUsedBytes: true 
+      }
     });
 
-    if (!team || team.ownerId !== userId) {
-      throw new ForbiddenException('Access denied');
-    }
+    const ownedTeamIds = ownedTeams.map(t => t.id);
 
+    // 1. Calculate Active Projects across ALL owned teams
     const activeProjects = await this.prisma.project.count({
       where: {
-        teamId,
+        teamId: { in: ownedTeamIds },
         status: ProjectStatus.ACTIVE,
       },
     });
 
-    const totalMembers = await this.prisma.teamMember.count({
-      where: { teamId },
+    // 2. Calculate Total Members across ALL owned teams
+    // Logic: Count all members in owned teams EXCEPT the owner
+    // Owner does not count towards the limit (free seat)
+    const nonOwnerMembersCount = await this.prisma.teamMember.count({
+      where: { 
+        teamId: { in: ownedTeamIds },
+        userId: { not: userId } // Exclude owner
+      },
     });
+    
+    const totalMembers = nonOwnerMembersCount;
 
-    const storageUsedGB = Number(team.storageUsedBytes) / (1024 * 1024 * 1024);
-    const limits = await this.getEffectivePlanLimits(teamId);
+    // 3. Calculate Total Storage across ALL owned teams
+    const totalStorageBytes = ownedTeams.reduce((sum, team) => sum + Number(team.storageUsedBytes), 0);
+    const storageUsedGB = totalStorageBytes / (1024 * 1024 * 1024);
+
+    // Calcluate dynamic member limit based on active projects
+    // Logic: Limit scales with number of active projects (e.g. 3 members per project)
+    // We use Math.max(1, activeProjects) to ensure at least one base limit is available
+    const baseMaxMembers = limits.maxMembers;
+    const effectiveMaxMembers = baseMaxMembers * Math.max(1, activeProjects);
+
+    // Update limits object to reflect the dynamic limit
+    const dynamicLimits = {
+      ...limits,
+      maxMembers: effectiveMaxMembers,
+    };
 
     return {
       activeProjects,
       totalMembers,
       storageUsedGB,
-      limits,
+      limits: dynamicLimits,
     };
   }
 
