@@ -42,6 +42,7 @@ import {
 	ProjectPhotoReportsDocument,
 	MySubscriptionDocument,
 } from '@/packages/api/graphql'
+import { ProjectCardDashboard } from '@/packages/components'
 import { useAuth } from '@/packages/libs/auth'
 import { Button, Skeleton, Badge, ProgressBar, UserMenu, TrialStatusWidget } from '@/packages/components'
 import { PageLoader, Spinner } from '@/packages/components/ui/spinner'
@@ -304,194 +305,7 @@ function StatsCard({ icon: Icon, label, value, subValue, gradient, iconBg, value
 	)
 }
 
-// ============ Project Card Component ============
-interface ProjectCardProps {
-	id: string
-	teamId: string
-	name: string
-	address?: string | null
-	photoUrl?: string | null
-	budget?: number | null
-	progress: number
-	status: string
-	startDate?: string | null
-	endDate?: string | null
-	showFinancials?: boolean
-	totalExpenses?: number
-	profit?: number
-}
 
-function ProjectCard({
-	id,
-	teamId,
-	name,
-	address,
-	photoUrl,
-	budget,
-	progress,
-	status,
-	startDate,
-	endDate,
-	showFinancials = false,
-	totalExpenses = 0,
-	profit = 0,
-}: ProjectCardProps) {
-	const isProfitable = profit >= 0
-	const isArchived = status === ProjectStatus.ARCHIVED
-	const isCompleted = status === ProjectStatus.COMPLETED
-
-	const statusConfig: Record<string, { label: string; variant: 'success' | 'secondary' | 'warning'; icon: React.ElementType }> = {
-		[ProjectStatus.ACTIVE]: { label: 'Активный', variant: 'success', icon: CheckCircle2 },
-		[ProjectStatus.ARCHIVED]: { label: 'Архив', variant: 'secondary', icon: FolderKanban },
-		[ProjectStatus.COMPLETED]: { label: 'Завершён', variant: 'warning', icon: Check },
-	}
-
-	const statusInfo = statusConfig[status] || { label: status, variant: 'secondary', icon: FolderKanban }
-
-	return (
-		<Link href={`/teams/${teamId}/projects/${id}`}>
-			<motion.div
-				whileHover={{ y: -4, transition: { duration: 0.2 } }}
-				className={cn(
-					'relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-xl overflow-hidden',
-					'hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10',
-					'transition-all duration-300 group cursor-pointer',
-					isArchived && 'opacity-60'
-				)}
-			>
-				{/* Gradient overlay on hover */}
-				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-
-				{/* Shimmer effect */}
-				<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-					<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
-				</div>
-
-				<div className="relative z-10 p-5">
-					{/* Header: Photo + Info */}
-					<div className="flex gap-4 mb-4">
-						{/* Project Photo */}
-						<div className={cn(
-							'w-16 h-16 rounded-2xl overflow-hidden shrink-0',
-							'bg-gradient-to-br from-secondary to-muted',
-							'ring-2 ring-border/30 shadow-lg'
-						)}>
-							{photoUrl ? (
-								<img
-									src={photoUrl}
-									alt={name}
-									className="w-full h-full object-cover"
-								/>
-							) : (
-								<div className="w-full h-full flex items-center justify-center text-2xl bg-gradient-to-br from-primary/10 to-primary/5">
-									🏗️
-								</div>
-							)}
-						</div>
-
-						{/* Name and Status */}
-						<div className="flex-1 min-w-0">
-							<div className="flex items-start justify-between gap-2 mb-1">
-								<h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
-									{name}
-								</h3>
-								<Badge variant={statusInfo.variant} className="shrink-0 text-xs">
-									{statusInfo.label}
-								</Badge>
-							</div>
-
-							{/* Address */}
-							{address && (
-								<div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-									<MapPin className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-									<span className="line-clamp-1">{address}</span>
-								</div>
-							)}
-
-							{/* Dates */}
-							{(startDate || endDate) && (
-								<div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
-									<Calendar className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-									<span>
-										{formatDate(startDate) || '—'} — {formatDate(endDate) || '—'}
-									</span>
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* Progress Bar */}
-					<div className="mb-4">
-						<div className="flex items-center justify-between mb-1.5">
-							<span className="text-xs text-muted-foreground font-medium">Прогресс</span>
-							<span className={cn(
-								"text-xs font-semibold",
-								progress >= 75 ? "text-emerald-500" :
-									progress >= 50 ? "text-amber-500" : "text-primary"
-							)}>
-								{progress}%
-							</span>
-						</div>
-						<ProgressBar value={progress} size="sm" />
-					</div>
-
-					{/* Footer: Financials */}
-					<div className="flex items-center justify-between pt-3 border-t border-border/30">
-						{showFinancials && budget ? (
-							<div className="flex items-center gap-3">
-								<div className={cn(
-									"w-9 h-9 rounded-xl flex items-center justify-center shadow-sm",
-									isProfitable
-										? "bg-emerald-500/10 text-emerald-500"
-										: "bg-red-500/10 text-red-500"
-								)}>
-									{isProfitable ? (
-										<TrendingUp className="w-4 h-4" />
-									) : (
-										<TrendingDown className="w-4 h-4" />
-									)}
-								</div>
-								<div>
-									<span
-										className={cn(
-											'font-bold text-sm',
-											isProfitable
-												? 'text-emerald-600 dark:text-emerald-400'
-												: 'text-red-600 dark:text-red-400'
-										)}
-									>
-										{isProfitable ? '+' : ''}
-										{formatCurrency(profit)}
-									</span>
-									<p className="text-[10px] text-muted-foreground">
-										{isCompleted ? 'итоговая прибыль' : 'текущая прибыль'}
-									</p>
-								</div>
-							</div>
-						) : budget ? (
-							<div className="flex items-center gap-3">
-								<div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary shadow-sm">
-									<Wallet className="w-4 h-4" />
-								</div>
-								<div>
-									<span className="font-semibold text-sm">{formatCurrency(budget)}</span>
-									<p className="text-[10px] text-muted-foreground">бюджет</p>
-								</div>
-							</div>
-						) : (
-							<div />
-						)}
-
-						{/* Arrow */}
-						<div className="w-9 h-9 rounded-full flex items-center justify-center bg-secondary/50 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
-							<ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-						</div>
-					</div>
-				</div>
-			</motion.div>
-		</Link>
-	)
-}
 
 // ============ Recent Expense Card ============
 function RecentExpenseCard({ expense, projectName }: { expense: Expense; projectName: string }) {
@@ -889,7 +703,7 @@ function ProjectCardWithStats({
 	const stats = statsData?.projectStats
 
 	return (
-		<ProjectCard
+		<ProjectCardDashboard
 			id={project.id}
 			teamId={teamId}
 			name={project.name}
@@ -901,8 +715,8 @@ function ProjectCardWithStats({
 			startDate={project.startDate}
 			endDate={project.endDate}
 			showFinancials={showFinancials && isOwner}
-			totalExpenses={stats?.totalExpenses || 0}
 			profit={stats?.profit || (project.budget ? project.budget * 0.35 : 0)}
+			className="h-full"
 		/>
 	)
 }

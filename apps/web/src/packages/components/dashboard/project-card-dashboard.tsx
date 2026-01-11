@@ -205,19 +205,20 @@ export function ProjectCardDashboard({
 				{/* Actions Menu */}
 				<div className="absolute top-3 right-3 z-20">
 					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="secondary"
-								size="icon"
-								className="h-8 w-8 bg-background/80 backdrop-blur-sm border shadow-sm"
-								onClick={(e) => {
-									e.preventDefault()
-									e.stopPropagation()
-								}}
-							>
-								<MoreVertical className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
+						<div onClick={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+						}}>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="secondary"
+									size="icon"
+									className="h-8 w-8 bg-background/80 backdrop-blur-sm border shadow-sm"
+								>
+									<MoreVertical className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+						</div>
 						<DropdownMenuContent align="end" className="w-48">
 							<DropdownMenuItem onClick={handleEdit}>
 								<Edit3 className="mr-2 h-4 w-4" />
