@@ -12,6 +12,17 @@
 
 ### Общий прогресс: **100% MVP + Stages 13-17 (100%)** 🎉✅
 
+**✅ ЗАВЕРШЕНО: Onboarding Layout & UX Polish - v1.8.3** 🎨
+- 🏗️ **Layout Refactoring**
+  - ✅ Переход на Flexbox layout для `onboarding/layout.tsx` (Fixed Header + Scrollable Content)
+  - ✅ Устранено перекрытие контента элементами навигации
+- 📏 **Stepper & Component Alignment**
+  - ✅ Унифицирована ширина Stepper на всех шагах (420px)
+  - ✅ Центрирование контента на шаге "Детали проекта" (Step 4)
+- 📅 **UX Improvements**
+  - ✅ Открытие календаря при клике на поле ввода даты (Step 4)
+- 📊 **Прогресс:** 100% (Completed) ✅
+
 **✅ ЗАВЕРШЕНО: Payment & Onboarding Polish - v1.7.1** ✨
 - 🐛 **Onboarding Fixes**
   - ✅ Исправлена ошибка "Onboarding already completed" (Recovery flow)

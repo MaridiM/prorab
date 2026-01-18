@@ -5,6 +5,24 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-01-18 - Onboarding Layout & UX Polish 🎨
+
+### Changed
+- **Onboarding Layout Architecture**: Полный рефакторинг `layout.tsx`
+  - Заменено абсолютное позиционирование хедера на Flexbox структуру (`header` + `main`)
+  - Элементы навигации (Back button, Theme toggle) теперь имеют зарезервированное место и не перекрывают контент
+  - Контент скроллится в отдельном контейнере `flex-1`
+- **Stepper Consistency**:
+  - Ширина Stepper на Step 5 (Tariff) ограничена `420px` для соответствия остальным шагам
+  - Stepper больше не растягивается на всю ширину экрана
+- **Step 4 Layout**:
+  - Применен центрированный layout (`max-w-[420px]`) для шага "Детали проекта"
+  - Соответствует визуальному стилю Steps 1-3
+
+### Improved
+- **Date Input UX**:
+  - Поля ввода даты на Step 4 теперь открывают нативный календарь при клике на любую область инпута (а не только на иконку)
+
 ## [1.8.2] - 2026-01-11 - Project Management Actions 🛠️
 
 ### Added

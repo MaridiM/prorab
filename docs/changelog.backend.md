@@ -5,6 +5,11 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 и этот проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-01-18 - Maintenance 🔧
+
+### Changed
+- **Version Bump**: Синхронизация версии с frontend (v1.8.3)
+
 ## [1.8.2] - 2026-01-11 - Project Deletion Support 🗑️
 
 ### Added
