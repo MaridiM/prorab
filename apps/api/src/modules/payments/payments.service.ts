@@ -37,6 +37,7 @@ export class PaymentsService {
     userIP?: string,
     targetPlanId?: string,
     targetPlan?: string,
+    cancelUrl?: string,
   ) {
     // Verify subscription ownership
     const subscription = await this.prisma.subscription.findUnique({
@@ -266,6 +267,7 @@ export class PaymentsService {
         targetPlan: targetPlan || (planToUse?.slug?.toUpperCase() || subscription.plan),
       },
       customerEmail: subscription.team.owner.email,
+      cancelUrl, 
     });
 
     // Update payment with provider payment ID
@@ -747,6 +749,18 @@ export class PaymentsService {
       payment.currency,
       planName,
     );
+
+    // Update user onboarding status if not already completed
+    if (!owner.hasCompletedOnboarding) {
+       await this.prisma.user.update({
+          where: { id: owner.id },
+          data: { 
+             hasCompletedOnboarding: true,
+             onboardingCompletedAt: new Date()
+          }
+       });
+       this.logger.log(`Marked user ${owner.id} as having completed onboarding after successful payment.`);
+    }
   }
 
   /**

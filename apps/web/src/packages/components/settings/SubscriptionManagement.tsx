@@ -371,6 +371,7 @@ export function SubscriptionManagement({ teamId, onUpgrade }: SubscriptionManage
 						providerType: null, // null means backend will auto-select by IP
 						targetPlanId: planId, // Desired plan ID - will be applied after payment
 						targetPlan: selectedPlan?.slug?.toUpperCase() || null, // Desired plan enum - will be applied after payment
+						cancelUrl: window.location.href, // Redirect back to this page on cancel
 					},
 				})
 			}

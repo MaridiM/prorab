@@ -1054,6 +1054,9 @@ input CloneTeamInput {
 }
 
 input CompleteOnboardingInput {
+  """URL для перенаправления при отмене оплаты (кнопка назад)"""
+  cancelUrl: String
+
   """ID выбранного цвета (orange, blue, etc)"""
   colorId: String
 
@@ -2276,7 +2279,7 @@ type Mutation {
   """
   Инициализировать платёж с автоматическим выбором провайдера по геолокации
   """
-  initializePayment(providerType: String, subscriptionId: String!, targetPlan: String, targetPlanId: String): PaymentUrl!
+  initializePayment(cancelUrl: String, providerType: String, subscriptionId: String!, targetPlan: String, targetPlanId: String): PaymentUrl!
 
   """Инициировать изменение email адреса (требуется 2FA, если включена)"""
   initiateEmailChange(input: ChangeEmailInput!): ChangeEmailResult!
@@ -2436,6 +2439,9 @@ type OnboardingResult {
 
   """Созданный первый проект"""
   project: Project!
+
+  """Созданная подписка"""
+  subscription: Subscription
 
   """Успешность операции"""
   success: Boolean!

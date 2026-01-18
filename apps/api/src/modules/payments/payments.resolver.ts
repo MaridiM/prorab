@@ -70,6 +70,7 @@ export class PaymentsResolver {
     @Args('providerType', { nullable: true }) providerType?: PaymentProviderType,
     @Args('targetPlanId', { nullable: true }) targetPlanId?: string,
     @Args('targetPlan', { nullable: true }) targetPlan?: string,
+    @Args('cancelUrl', { nullable: true }) cancelUrl?: string,
     @Context() context?: any,
   ): Promise<PaymentUrlModel> {
     // Get user's real IP from request
@@ -82,6 +83,7 @@ export class PaymentsResolver {
       userIP,
       targetPlanId,
       targetPlan,
+      cancelUrl,
     );
   }
 

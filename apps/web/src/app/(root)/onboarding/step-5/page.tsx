@@ -216,6 +216,7 @@ export default function OnboardingStep5Page() {
                 colorId: step2Data.colorId || null,
                 iconId: step2Data.iconId || null,
                 planId: planId,
+                cancelUrl: window.location.href, // Redirect back to this step on cancel
                 logoFile: null // Initialize properly
             }
 

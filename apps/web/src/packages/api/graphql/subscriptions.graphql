@@ -243,8 +243,8 @@ query AvailablePaymentProviders {
   }
 }
 
-mutation InitializePayment($subscriptionId: String!, $providerType: String, $targetPlanId: String, $targetPlan: String) {
-  initializePayment(subscriptionId: $subscriptionId, providerType: $providerType, targetPlanId: $targetPlanId, targetPlan: $targetPlan) {
+mutation InitializePayment($subscriptionId: String!, $providerType: String, $targetPlanId: String, $targetPlan: String, $cancelUrl: String) {
+  initializePayment(subscriptionId: $subscriptionId, providerType: $providerType, targetPlanId: $targetPlanId, targetPlan: $targetPlan, cancelUrl: $cancelUrl) {
     url
     paymentId
   }

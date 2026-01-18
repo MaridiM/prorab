@@ -9,11 +9,11 @@ import { UpdateTeamInput } from './dto/update-team.input';
 import { OnboardingResult } from './models/onboarding-result.model';
 import { StorageService } from '../../core/storage/storage.service';
 import { MailService } from '../../core/mail/mail.service';
-import { LogoType } from './models/logo-type.enum';
+// import { LogoType } from './models/logo-type.enum'; // Replaced by prisma enum
 import { BusinessRole } from '../users/models/user.model';
 import { TeamRole } from './models/team-member.model';
 import { TeamStats } from './models/team-stats.model';
-import { ProjectStatus, SubscriptionStatus } from '@prisma/generated/client';
+import { ProjectStatus, SubscriptionStatus, LogoType } from '@prisma/generated/client';
 import { PaymentsService } from '../../modules/payments/payments.service';
 
 /**
@@ -80,6 +80,11 @@ export class TeamsService extends CoreService {
             const payment = await this.paymentsService.initializePayment(
               existingSubscription.id,
               userId,
+              undefined, 
+              undefined,
+              undefined,
+              undefined,
+              input.cancelUrl
             );
             paymentUrl = payment.url;
           } catch (error) {
@@ -133,9 +138,47 @@ export class TeamsService extends CoreService {
     // Валидация: проверяем что у пользователя нет команды как владелец
     const existingTeam = await this.prisma.team.findFirst({
       where: { ownerId: userId },
+      include: { subscription: true }
     });
 
     if (existingTeam) {
+       // If subscription is PENDING_PAYMENT, allow them to proceed (effectively retry)
+       
+       const latestSub = existingTeam.subscription;
+       
+       if (latestSub && latestSub.status === SubscriptionStatus.PENDING_PAYMENT) {
+          // Regenerate payment link and return success
+          try {
+             // We need to re-fetch project to return full OnboardingResult
+             const existingProject = await this.prisma.project.findFirst({
+                where: { teamId: existingTeam.id },
+                orderBy: { createdAt: 'asc' }
+             });
+             
+             const payment = await this.paymentsService.initializePayment(
+               latestSub.id,
+               userId,
+               undefined,
+               undefined,
+               undefined,
+               undefined,
+               input.cancelUrl
+             );
+             
+             this.logger.log(`Resuming onboarding for user ${userId}, returning existing resources.`);
+             return {
+               success: true,
+               team: existingTeam as any,
+               project: existingProject as any,
+               subscription: latestSub as any,
+               paymentUrl: payment.url,
+               message: 'Онбординг возобновлен. Пожалуйста, оплатите подписку.'
+             };
+          } catch (e) {
+             this.logger.error(`Failed to resume onboarding: ${e.message}`);
+          }
+       }
+       
       throw new BadRequestException(
         'Вы уже являетесь владельцем команды. Один пользователь может владеть только одной командой.',
       );
@@ -189,12 +232,58 @@ export class TeamsService extends CoreService {
 
       this.logger.log(`Created project ${project.id} for team ${team.id}`);
 
-      // 5. Обновляем пользователя: отмечаем онбординг завершённым + assign FOREMAN role
+      // 5. Calculate trial info and payment status BEFORE updating user
+      let isTrialing = false;
+      let subscriptionStatus: SubscriptionStatus = SubscriptionStatus.PENDING_PAYMENT;
+      let planEnum: any = 'LITE';
+
+      if (input.planId) {
+        // Load plan
+        const plan = await tx.plan.findUnique({
+           where: { id: input.planId } 
+        });
+        
+        if (plan) {
+           const now = new Date();
+           let trialDays = plan.trialDays ?? 0;
+           
+           // Check if user has used trial
+           if (trialDays > 0) {
+             const user = await tx.user.findUnique({ where: { id: userId }, select: { trialedPlanIds: true } });
+             if ((user?.trialedPlanIds?.length || 0) > 0) {
+                trialDays = 0;
+             }
+           }
+           
+           isTrialing = trialDays > 0;
+           subscriptionStatus = isTrialing ? SubscriptionStatus.TRIALING : SubscriptionStatus.PENDING_PAYMENT;
+           
+           // Map plan slug
+           const planEnumMap: Record<string, string> = {
+              'lite': 'LITE',
+              'foreman': 'FOREMAN',
+              'pro': 'PRO',
+              'premium': 'PREMIUM'
+           };
+           planEnum = planEnumMap[plan.slug] || 'LITE';
+        }
+      } else {
+         // No plan selected (Free?) - assuming LITE or similar if allowed, or if planId is mandatory (it is optional in input).
+         // If planId optional, what is default?
+         // Input validation says planId is optional. If not provided, no subscription created?
+         // Existing code only creates subscription if input.planId is truthy.
+         // If no plan, is onboarding complete? Yes (Free tier).
+         subscriptionStatus = SubscriptionStatus.ACTIVE; 
+      }
+
+      const hasCompletedOnboarding = subscriptionStatus !== SubscriptionStatus.PENDING_PAYMENT;
+
+      // 5. Обновляем пользователя
       await tx.user.update({
         where: { id: userId },
         data: {
-          hasCompletedOnboarding: true,
-          onboardingCompletedAt: new Date(),
+          hasCompletedOnboarding, // Only true if not pending payment
+          onboardingCompletedAt: hasCompletedOnboarding ? new Date() : null,
           currentTeamId: team.id,
           businessRole: BusinessRole.FOREMAN,
           businessRoleAssignedAt: new Date(),
@@ -313,6 +402,9 @@ export class TeamsService extends CoreService {
           userId,
           undefined, // Auto-select provider
           undefined, // IP not available here easily (optional)
+          undefined,
+          undefined,
+          input.cancelUrl,
         );
         paymentUrl = payment.url;
         this.logger.log(`Generated payment URL for subscription ${result.subscription.id}: ${paymentUrl}`);

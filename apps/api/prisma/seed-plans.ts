@@ -41,6 +41,7 @@ interface PlanData {
   storageGB: number
   isPopular: boolean
   sortOrder: number
+  trialDays?: number
   prices: {
     currency: string
     price: number
@@ -64,6 +65,7 @@ const PLANS_DATA: PlanData[] = [
     storageGB: 0.5, // 500 MB
     isPopular: false,
     sortOrder: 1,
+    trialDays: 14,
     prices: [
       { currency: 'RUB', price: 490, earlyBirdPrice: 290 },
       { currency: 'USD', price: 8, earlyBirdPrice: 5 },
@@ -184,6 +186,7 @@ async function seedPlans() {
           isPopular: planData.isPopular,
           sortOrder: planData.sortOrder,
           isEarlyBird: true,
+          trialDays: planData.trialDays || 0,
         },
       })
 
@@ -250,6 +253,7 @@ async function seedPlans() {
         sortOrder: planData.sortOrder,
         isActive: true,
         isEarlyBird: true, // Enable early bird pricing by default
+        trialDays: planData.trialDays || 0,
         prices: {
           create: planData.prices.map(price => ({
             currency: price.currency,

@@ -191,7 +191,8 @@ export class StripeProvider implements IPaymentProvider {
     // returnUrl format: http://localhost:3000/payment/success?success=true&paymentId=...
     // We want to redirect to: http://localhost:3000/settings?tab=subscription
     const baseUrl = params.returnUrl.split('/payment')[0]
-    const cancelUrl = `${baseUrl}/settings?tab=subscription`
+    const defaultCancelUrl = `${baseUrl}/settings?tab=subscription`
+    const cancelUrl = params.cancelUrl || defaultCancelUrl
 
     // Create Checkout Session
     const session = await this.stripe.checkout.sessions.create({
@@ -386,7 +387,8 @@ export class StripeProvider implements IPaymentProvider {
 
     // Extract base URL from returnUrl for cancel redirect
     const baseUrl = params.returnUrl.split('/payment')[0]
-    const cancelUrl = `${baseUrl}/settings?tab=subscription`
+    const defaultCancelUrl = `${baseUrl}/settings?tab=subscription`
+    const cancelUrl = params.cancelUrl || defaultCancelUrl
 
     // Create Checkout Session for subscription
     const session = await this.stripe.checkout.sessions.create({

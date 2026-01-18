@@ -109,6 +109,9 @@ export interface CreatePaymentParams {
   /** Return URL after payment */
   returnUrl: string
 
+  /** Cancel URL (Back button) */
+  cancelUrl?: string
+
   /** Metadata to attach to payment */
   metadata: {
     subscriptionId: string
@@ -209,6 +212,9 @@ export interface CreateSubscriptionParams {
   /** Return URL */
   returnUrl: string
 
+  /** Cancel URL (Back button) */
+  cancelUrl?: string
+
   /** Metadata */
   metadata: {
     teamId: string
@@ -289,6 +295,9 @@ export interface CreateDonationParams {
 
   /** Return URL after payment */
   returnUrl: string
+
+  /** Cancel URL (Back button) */
+  cancelUrl?: string
 
   /** Donor message (optional) */
   message?: string

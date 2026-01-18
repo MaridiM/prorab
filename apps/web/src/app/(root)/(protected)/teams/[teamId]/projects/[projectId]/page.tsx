@@ -152,16 +152,7 @@ export default function ProjectDetailsPage() {
 	const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
 
 	// Check if project needs completion (budget or startDate missing)
-	useEffect(() => {
-		if (isFromOnboarding && data?.project) {
-			const project = data.project
-			const needsBudget = !project.budget || project.budget === 0
-			const needsStartDate = !project.startDate
-			if (needsBudget || needsStartDate) {
-				setShowOnboardingBanner(true)
-			}
-		}
-	}, [isFromOnboarding, data])
+
 
 
 	// Загрузка команды для проверки владельца
@@ -172,6 +163,18 @@ export default function ProjectDetailsPage() {
 	const { data, loading, error } = useQuery(ProjectDocument, {
 		variables: { id: projectId },
 	})
+
+	// Check if project needs completion (budget or startDate missing)
+	useEffect(() => {
+		if (isFromOnboarding && data?.project) {
+			const project = data.project
+			const needsBudget = !project.budget || project.budget === 0
+			const needsStartDate = !project.startDate
+			if (needsBudget || needsStartDate) {
+				setShowOnboardingBanner(true)
+			}
+		}
+	}, [isFromOnboarding, data])
 
 	const { data: expensesData, loading: expensesLoading } = useQuery(
 		ExpensesByProjectDocument,

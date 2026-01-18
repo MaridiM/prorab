@@ -89,7 +89,6 @@ export class CompleteOnboardingInput {
   @IsString()
   projectEndDate?: string;
 
-  // ===== Step 4: Plan Selection =====
   @Field(() => String, {
     nullable: true,
     description: 'ID выбранного тарифного плана из таблицы Plan',
@@ -97,4 +96,12 @@ export class CompleteOnboardingInput {
   @IsOptional()
   @IsString()
   planId?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'URL для перенаправления при отмене оплаты (кнопка назад)',
+  })
+  @IsOptional()
+  @IsString()
+  cancelUrl?: string;
 }
