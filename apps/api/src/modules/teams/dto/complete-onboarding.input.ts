@@ -66,6 +66,29 @@ export class CompleteOnboardingInput {
   @MaxLength(2000)
   projectDescription?: string;
 
+  @Field(() => Number, {
+    nullable: true,
+    description: 'Бюджет проекта (обязательно)',
+  })
+  @IsNotEmpty({ message: 'Бюджет проекта обязателен' })
+  projectBudget: number;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Дата начала (обязательно)',
+  })
+  @IsNotEmpty({ message: 'Дата начала обязательна' })
+  @IsString()
+  projectStartDate: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Дата окончания (необязательно)',
+  })
+  @IsOptional()
+  @IsString()
+  projectEndDate?: string;
+
   // ===== Step 4: Plan Selection =====
   @Field(() => String, {
     nullable: true,

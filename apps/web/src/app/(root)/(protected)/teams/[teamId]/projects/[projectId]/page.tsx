@@ -72,6 +72,8 @@ import {
 	TrendingUp,
 	TrendingDown,
 	Calculator, // NEW
+	AlertCircle,
+	X,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale/ru'
@@ -138,7 +140,29 @@ export default function ProjectDetailsPage() {
 	const [showReportForm, setShowReportForm] = useState(false)
 	const [editingReport, setEditingReport] = useState<any>(null)
 	const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
+
+	// Dialog states
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+	const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false)
+	const [expenseToDeleteId, setExpenseToDeleteId] = useState<string | null>(null)
+	const [reportToDeleteId, setReportToDeleteId] = useState<string | null>(null)
+
+	// Onboarding banner state
+	const isFromOnboarding = searchParams.get('from') === 'onboarding'
+	const [showOnboardingBanner, setShowOnboardingBanner] = useState(false)
+
+	// Check if project needs completion (budget or startDate missing)
+	useEffect(() => {
+		if (isFromOnboarding && data?.project) {
+			const project = data.project
+			const needsBudget = !project.budget || project.budget === 0
+			const needsStartDate = !project.startDate
+			if (needsBudget || needsStartDate) {
+				setShowOnboardingBanner(true)
+			}
+		}
+	}, [isFromOnboarding, data])
+
 
 	// Загрузка команды для проверки владельца
 	const { data: teamsData } = useQuery(MyTeamsDocument)
@@ -222,7 +246,7 @@ export default function ProjectDetailsPage() {
 		{
 			refetchQueries: [
 				{ query: ProjectDocument, variables: { id: projectId } },
-				{ query: ProjectsByTeamDocument, variables: { teamId } },
+				{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 			],
 		}
 	)
@@ -232,14 +256,14 @@ export default function ProjectDetailsPage() {
 		{
 			refetchQueries: [
 				{ query: ProjectDocument, variables: { id: projectId } },
-				{ query: ProjectsByTeamDocument, variables: { teamId } },
+				{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 			],
 		}
 	)
 
 	const [deleteProject] = useMutation(DeleteProjectDocument, {
 		refetchQueries: [
-			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 		],
 		onCompleted: () => {
 			showToast({ type: 'success', message: 'Проект удалён' })
@@ -326,14 +350,17 @@ export default function ProjectDetailsPage() {
 	}
 
 	const handleArchive = async () => {
-		if (!confirm('Вы уверены, что хотите архивировать этот проект?')) return
+		setIsArchiveDialogOpen(true)
+	}
 
+	const confirmArchive = async () => {
 		try {
 			await archiveProject({ variables: { id: projectId } })
 			showToast({
 				type: 'success',
 				message: 'Проект успешно архивирован',
 			})
+			setIsArchiveDialogOpen(false)
 		} catch (error: any) {
 			showToast({
 				type: 'error',
@@ -409,15 +436,20 @@ export default function ProjectDetailsPage() {
 		}
 	}
 
-	const handleDeleteExpense = async (id: string) => {
-		if (!confirm('Вы уверены, что хотите удалить этот расход?')) return
+	const handleDeleteExpense = (id: string) => {
+		setExpenseToDeleteId(id)
+	}
+
+	const confirmDeleteExpense = async () => {
+		if (!expenseToDeleteId) return
 
 		try {
-			await deleteExpense({ variables: { id } })
+			await deleteExpense({ variables: { id: expenseToDeleteId } })
 			showToast({
 				type: 'success',
 				message: 'Расход успешно удалён',
 			})
+			setExpenseToDeleteId(null)
 		} catch (error: any) {
 			showToast({
 				type: 'error',
@@ -478,18 +510,23 @@ export default function ProjectDetailsPage() {
 		}
 	}
 
-	const handleDeleteReport = async (id: string) => {
-		if (!confirm('Вы уверены, что хотите удалить этот фотоотчёт?')) return
+	const handleDeleteReport = (id: string) => {
+		setReportToDeleteId(id)
+	}
+
+	const confirmDeleteReport = async () => {
+		if (!reportToDeleteId) return
 
 		try {
-			await deletePhotoReport({ variables: { id } })
+			await deletePhotoReport({ variables: { id: reportToDeleteId } })
 			showToast({
 				type: 'success',
 				message: 'Фотоотчёт успешно удалён',
 			})
-			if (selectedReportId === id) {
+			if (selectedReportId === reportToDeleteId) {
 				setSelectedReportId(null)
 			}
+			setReportToDeleteId(null)
 		} catch (error: any) {
 			showToast({
 				type: 'error',
@@ -640,7 +677,7 @@ export default function ProjectDetailsPage() {
 	// Loading state
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-background">
+			<div className="min-h-screen bg-background pb-24">
 				<div className="border-b border-border/30 bg-card/80">
 					<div className="w-full max-w-[1920px] mx-auto px-4 py-4">
 						<Skeleton className="h-8 w-48 mb-2" />
@@ -660,17 +697,48 @@ export default function ProjectDetailsPage() {
 	// Error state
 	if (error || !project) {
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
-				<div className="text-center">
-					<h3 className="text-lg font-semibold text-destructive mb-2">
-						{error ? 'Ошибка загрузки проекта' : 'Проект не найден'}
-					</h3>
-					<p className="text-muted-foreground mb-4">
-						{error?.message || 'Проект с таким ID не существует'}
-					</p>
-					<Button onClick={() => router.push(`/teams/${teamId}`)}>
-						Вернуться к проектам
+			<div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative">
+				{/* Back Button (Left) */}
+				<div className="absolute top-4 left-4 md:top-6 md:left-6">
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => router.push(`/teams/${teamId}`)}
+						className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+					>
+						<ArrowLeft className="w-4 h-4" />
+						<span className="hidden sm:inline">К списку проектов</span>
 					</Button>
+				</div>
+
+				<div className="text-center max-w-md w-full">
+					<div className="relative w-24 h-24 mx-auto mb-6">
+						<div className="absolute inset-0 bg-destructive/20 rounded-full blur-xl animate-pulse" />
+						<div className="relative bg-card border border-border/50 rounded-2xl w-full h-full flex items-center justify-center shadow-xl">
+							<div className="text-4xl">📂</div>
+							<div className="absolute -bottom-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 border-2 border-background">
+								<Trash2 className="w-4 h-4" />
+							</div>
+						</div>
+					</div>
+
+					<h3 className="text-2xl font-bold tracking-tight mb-2">
+						{error ? 'Ошибка загрузки' : 'Проект не найден'}
+					</h3>
+
+					<p className="text-muted-foreground mb-8 leading-relaxed">
+						{error?.message || 'Возможно, ссылка устарела или проект был удалён владельцем.'}
+					</p>
+
+					<div className="flex flex-col sm:flex-row gap-3 justify-center">
+						<Button
+							onClick={() => router.push(`/teams/${teamId}`)}
+							size="lg"
+							className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+						>
+							Вернуться к проектам
+						</Button>
+					</div>
 				</div>
 			</div>
 		)
@@ -810,6 +878,56 @@ export default function ProjectDetailsPage() {
 
 			{/* Main Content */}
 			<main className="w-full max-w-[1920px] mx-auto px-4 py-6">
+				{/* Onboarding Completion Banner */}
+				<AnimatePresence>
+					{showOnboardingBanner && (
+						<motion.div
+							initial={{ opacity: 0, y: -20 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -20 }}
+							className="mb-6"
+						>
+							<div className="rounded-2xl border-2 border-amber-500/30 bg-linear-to-r from-amber-500/10 via-amber-500/5 to-background p-4 md:p-6">
+								<div className="flex items-start gap-4">
+									<div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+										<AlertCircle className="w-6 h-6 text-amber-500" />
+									</div>
+									<div className="flex-1 min-w-0">
+										<h3 className="font-semibold text-lg mb-1">
+											🎉 Отлично! Онбординг завершён
+										</h3>
+										<p className="text-muted-foreground text-sm mb-4">
+											Чтобы система могла правильно рассчитывать финансы и выплаты, рекомендуем указать бюджет проекта и даты выполнения работ.
+										</p>
+										<div className="flex flex-wrap gap-3">
+											<Button
+												onClick={handleEdit}
+												className="bg-amber-500 hover:bg-amber-600 text-white"
+											>
+												<Edit className="w-4 h-4 mr-2" />
+												Заполнить данные проекта
+											</Button>
+											<Button
+												variant="ghost"
+												onClick={() => setShowOnboardingBanner(false)}
+												className="text-muted-foreground hover:text-foreground"
+											>
+												Позже
+											</Button>
+										</div>
+									</div>
+									<button
+										onClick={() => setShowOnboardingBanner(false)}
+										className="p-1 rounded-lg hover:bg-secondary/50 transition-colors shrink-0"
+									>
+										<X className="w-5 h-5 text-muted-foreground" />
+									</button>
+								</div>
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>
+
 				<AnimatePresence mode="wait">
 					{/* Info Tab */}
 					{activeTab === 'info' && (
@@ -1223,6 +1341,87 @@ export default function ProjectDetailsPage() {
 								e.stopPropagation()
 								handleDeleteConfirm()
 							}}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+			{/* Dialogs */}
+
+			<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить проект?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Это действие нельзя отменить. Проект «{project.name}» и все связанные с ним данные (сметы, задачи, отчеты) будут безвозвратно удалены.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={(e) => e.stopPropagation()}>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={(e) => {
+								e.stopPropagation()
+								handleDeleteConfirm()
+							}}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Архивировать проект?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Проект будет перемещен в архив. Вы сможете восстановить его в любой момент.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Отмена</AlertDialogCancel>
+						<AlertDialogAction onClick={confirmArchive}>
+							В архив
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={!!expenseToDeleteId} onOpenChange={(open) => !open && setExpenseToDeleteId(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить расход?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Вы уверены, что хотите удалить этот расход? Это действие нельзя отменить.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmDeleteExpense}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							Удалить
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<AlertDialog open={!!reportToDeleteId} onOpenChange={(open) => !open && setReportToDeleteId(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Удалить фотоотчёт?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Вы уверены, что хотите удалить этот фотоотчёт? Все фотографии внутри отчёта также будут удалены.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>Отмена</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmDeleteReport}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
 							Удалить

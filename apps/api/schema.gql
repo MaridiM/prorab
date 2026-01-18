@@ -1069,11 +1069,20 @@ input CompleteOnboardingInput {
   """Адрес проекта (необязательно)"""
   projectAddress: String
 
+  """Бюджет проекта (обязательно)"""
+  projectBudget: Float
+
   """Описание проекта (необязательно)"""
   projectDescription: String
 
+  """Дата окончания (необязательно)"""
+  projectEndDate: String
+
   """Название первого проекта"""
   projectName: String!
+
+  """Дата начала (обязательно)"""
+  projectStartDate: String
 
   """Название бригады"""
   teamName: String!

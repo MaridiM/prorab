@@ -24,6 +24,8 @@ const steps = [
 	{ id: 1, label: 'Название' },
 	{ id: 2, label: 'Логотип' },
 	{ id: 3, label: 'Объект' },
+	{ id: 4, label: 'Детали' },
+	{ id: 5, label: 'Тариф' },
 ]
 
 // Available icons and colors (8 icons, 8 colors)

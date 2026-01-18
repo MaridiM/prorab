@@ -101,7 +101,7 @@ export function ProjectCardDashboard({
 	// Mutations
 	const [archiveProject] = useMutation(ArchiveProjectDocument, {
 		refetchQueries: [
-			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 			{ query: ProjectDocument, variables: { id } },
 		],
 		onCompleted: () => {
@@ -114,7 +114,7 @@ export function ProjectCardDashboard({
 
 	const [restoreProject] = useMutation(RestoreProjectDocument, {
 		refetchQueries: [
-			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 			{ query: ProjectDocument, variables: { id } },
 		],
 		onCompleted: () => {
@@ -127,7 +127,7 @@ export function ProjectCardDashboard({
 
 	const [deleteProject] = useMutation(DeleteProjectDocument, {
 		refetchQueries: [
-			{ query: ProjectsByTeamDocument, variables: { teamId } },
+			{ query: ProjectsByTeamDocument, variables: { teamId, filter: null } },
 		],
 		onCompleted: () => {
 			showToast({ type: 'success', message: 'Проект удалён' })

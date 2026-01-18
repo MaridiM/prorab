@@ -181,6 +181,9 @@ export class TeamsService extends CoreService {
           createdById: userId,
           status: 'ACTIVE', // Используем status вместо isActive
           progress: 0,
+          budget: input.projectBudget,
+          startDate: input.projectStartDate ? new Date(input.projectStartDate) : undefined,
+          endDate: input.projectEndDate ? new Date(input.projectEndDate) : undefined,
         },
       });
 
@@ -439,6 +442,15 @@ export class TeamsService extends CoreService {
       throw new BadRequestException(
         'Описание проекта не должно превышать 2000 символов',
       );
+    }
+
+    // Проверка Step 4: Бюджет и Даты
+    if (input.projectBudget === undefined || input.projectBudget === null || input.projectBudget < 0) {
+      throw new BadRequestException('Бюджет проекта должен быть указан и быть неотрицательным');
+    }
+
+    if (!input.projectStartDate) {
+      throw new BadRequestException('Дата начала проекта обязательна');
     }
   }
 

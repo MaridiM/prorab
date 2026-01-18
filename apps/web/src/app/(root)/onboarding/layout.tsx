@@ -16,7 +16,7 @@ export default function OnboardingLayout({
 	const { theme, setTheme, resolvedTheme } = useTheme()
 	const [mounted, setMounted] = useState(false)
 	const pathname = usePathname()
-	const isWideStep = pathname?.includes('/step-4')
+	const isWideStep = pathname?.includes('/step-5')
 
 	useEffect(() => {
 		setMounted(true)

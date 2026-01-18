@@ -27,7 +27,8 @@ const steps = [
 	{ id: 1, label: 'Название' },
 	{ id: 2, label: 'Логотип' },
 	{ id: 3, label: 'Объект' },
-	{ id: 4, label: 'Тариф' },
+	{ id: 4, label: 'Детали' },
+	{ id: 5, label: 'Тариф' },
 ]
 
 export default function OnboardingStep3Page() {

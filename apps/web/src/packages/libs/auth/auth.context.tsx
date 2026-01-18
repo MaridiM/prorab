@@ -85,7 +85,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [logoutMutation] = useMutation(LogoutDocument)
   const [fetchMe] = useLazyQuery(MeDocument, {
     fetchPolicy: 'network-only',
-    notifyOnNetworkStatusChange: false
+    notifyOnNetworkStatusChange: false,
+    errorPolicy: 'all'
   })
 
   // Check if session token exists (quick check before loading user)
@@ -113,9 +114,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isRefreshingRef.current = true
 
     try {
-      const { data, error } = await fetchMe({
-        fetchPolicy: 'network-only'
-      })
+      // Call fetchMe - AbortError will be handled in catch block or inner catch
+      // Apollo Client rejects the promise with AbortError when component unmounts
+      // or when a new query is started before the previous one completes
+      let result
+      try {
+        result = await fetchMe({
+          fetchPolicy: 'network-only'
+        })
+      } catch (err: any) {
+        // Explicitly catch AbortError here to prevent it from reaching Next.js overlay
+        if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+          // Silently return - this is expected behavior
+          return
+        }
+        // Re-throw other errors to be handled below
+        throw err
+      }
+
+      const { data, error } = result || {}
 
       // Check if me is null (user not authenticated) - this happens when session is invalid
       // GraphQL returns { data: { me: null } } instead of an error
@@ -135,13 +152,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return
         }
       } else if (error || !data?.me) {
+        // Ignore AbortError - it's normal when request is cancelled
+        if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
+          // Silent return for expected aborts
+          return
+        }
+
         // Check if it's a network error (API server not available)
         const errorMessage = error?.message || ''
-        const isNetworkError = errorMessage.includes('Failed to fetch') || 
-                               errorMessage.includes('NetworkError') ||
-                               errorMessage.includes('fetch') ||
-                               (error && !checkAuthError(error))
-        
+        const isNetworkError = errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('NetworkError') ||
+          errorMessage.includes('fetch') ||
+          (error && !checkAuthError(error))
+
         // Check if it's an authentication error (session not found, expired, or deleted)
         if (error && checkAuthError(error)) {
           // Prevent multiple redirects
@@ -190,12 +213,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       }
     } catch (err: any) {
+      // Ignore AbortError - it's normal when request is cancelled (e.g., component unmounts or navigation)
+      if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+        console.log('[AuthContext] Request aborted (normal behavior)')
+        return
+      }
+
       // Check if it's a network error
       const errorMessage = err?.message || ''
-      const isNetworkError = errorMessage.includes('Failed to fetch') || 
-                            errorMessage.includes('NetworkError') ||
-                            errorMessage.includes('fetch')
-      
+      const isNetworkError = errorMessage.includes('Failed to fetch') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('fetch')
+
       // Check if it's an authentication error (session not found, expired, or deleted)
       if (checkAuthError(err) && typeof document !== 'undefined' && !isRedirectingRef.current) {
         isRedirectingRef.current = true
@@ -284,14 +313,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } else {
       // If user is not authenticated and on protected pages - redirect to login
       // But don't redirect if already on auth pages or public pages
-      const isProtectedRoute = 
-        pathname.startsWith('/dashboard') || 
-        pathname.startsWith('/teams') || 
+      const isProtectedRoute =
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/teams') ||
         pathname.startsWith('/onboarding') ||
         pathname.startsWith('/settings') ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/payment')
-      
+
       if (
         !pathname.startsWith('/auth') &&
         !pathname.startsWith('/api') &&
